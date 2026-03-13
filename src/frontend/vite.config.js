@@ -15,6 +15,88 @@ try {
   // Git not available (e.g., CI without git, or shallow clone)
 }
 
+const getPackageName = (id) => {
+  const match = id.match(/node_modules\/((?:@[^/]+\/)?[^/]+)/);
+  return match ? match[1] : null;
+};
+
+const betaLocalAIEnabled =
+  String(process.env.VITE_BETA_LOCAL_AI_ENABLED).toLowerCase() === 'true';
+const betaThreeDGamesEnabled =
+  String(process.env.VITE_BETA_3D_GAMES_ENABLED).toLowerCase() === 'true';
+
+const getAppChunk = (id) => {
+  if (id.includes('/src/services/ai/')) {
+    return 'app-ai';
+  }
+  if (id.includes('/src/workers/')) {
+    return 'app-workers';
+  }
+  if (
+    betaThreeDGamesEnabled &&
+    (
+      id.includes('/src/components/game/three/') ||
+      id.includes('/src/hooks/use3DGameAudio.ts') ||
+      id.includes('/src/hooks/usePerformanceMonitor.ts')
+    )
+  ) {
+    return 'app-3d';
+  }
+  if (
+    id.includes('/src/components/ui/') ||
+    id.includes('/src/components/routing/') ||
+    id.includes('/src/store/')
+  ) {
+    return 'app-shell';
+  }
+  return undefined;
+};
+
+const vendorChunkByPackage = {
+  '@huggingface/transformers': 'transformers-runtime',
+  'onnxruntime-web': 'onnx-runtime',
+  'onnxruntime-common': 'onnx-runtime',
+  'kokoro-js': 'kokoro-runtime',
+  '@mediapipe/tasks-vision': 'vision-runtime',
+  '@tensorflow/tfjs': 'tfjs-runtime',
+  'framer-motion': 'motion-runtime',
+  'react-router-dom': 'router-runtime',
+  'chart.js': 'charts-runtime',
+  'react-chartjs-2': 'charts-runtime',
+  'react': 'react-core',
+  'react-dom': 'react-core',
+  'scheduler': 'react-core',
+  'zustand': 'state-runtime',
+  '@tanstack/react-query': 'query-runtime',
+  'axios': 'network-runtime',
+  'lucide-react': 'icons-runtime',
+  'i18next': 'i18n-runtime',
+  'react-i18next': 'i18n-runtime',
+  'i18next-browser-languagedetector': 'i18n-runtime',
+  'i18next-http-backend': 'i18n-runtime',
+};
+
+if (betaThreeDGamesEnabled) {
+  Object.assign(vendorChunkByPackage, {
+    'three': 'three-core',
+    'three-stdlib': 'three-stdlib-runtime',
+    'camera-controls': 'three-stdlib-runtime',
+    'maath': 'three-helpers-runtime',
+    'meshline': 'three-helpers-runtime',
+    'troika-three-text': 'three-text-runtime',
+    'troika-three-utils': 'three-text-runtime',
+    'troika-worker-utils': 'three-text-runtime',
+    'stats.js': 'three-helpers-runtime',
+    '@react-three/fiber': 'r3f-runtime',
+    '@react-three/drei': 'drei-runtime',
+    '@react-three/cannon': 'react-cannon-runtime',
+    '@pmndrs/cannon-worker-api': 'cannon-runtime',
+    'cannon-es': 'cannon-runtime',
+    'cannon-es-debugger': 'cannon-runtime',
+    '@react-spring/three': 'spring-3d-runtime',
+  });
+}
+
 export default defineConfig({
   cacheDir: '.vite_cache_new',
   plugins: [
@@ -24,10 +106,26 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(packageJson.version),
     __GIT_SHA__: JSON.stringify(gitSha),
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __BETA_LOCAL_AI_ENABLED__: JSON.stringify(
+      String(process.env.VITE_BETA_LOCAL_AI_ENABLED).toLowerCase() === 'true',
+    ),
+    __BETA_3D_GAMES_ENABLED__: JSON.stringify(betaThreeDGamesEnabled),
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      ...(!betaLocalAIEnabled
+        ? {
+            '@huggingface/transformers': path.resolve(
+              __dirname,
+              './src/services/ai/beta-stubs/transformers.ts',
+            ),
+            'kokoro-js': path.resolve(
+              __dirname,
+              './src/services/ai/beta-stubs/kokoro.ts',
+            ),
+          }
+        : {}),
     },
   },
   worker: {
@@ -35,6 +133,23 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['kokoro-js'],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            const packageName = getPackageName(id);
+            const vendorChunk = packageName ? vendorChunkByPackage[packageName] : null;
+            if (vendorChunk) {
+              return vendorChunk;
+            }
+          }
+
+          return getAppChunk(id);
+        },
+      },
+    },
   },
   server: {
     port: 6173,

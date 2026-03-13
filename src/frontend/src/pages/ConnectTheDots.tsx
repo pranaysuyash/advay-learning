@@ -18,6 +18,7 @@ import { Mascot } from '../components/Mascot';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { OptionChips } from '../components/game/OptionChips';
 import { GameCursor } from '../components/game/GameCursor';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
@@ -94,7 +95,8 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
   // Sound effects
   const { playFanfare: playCelebration, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('connect-the-dots');
+  const { completeGame } = useGameCompletion('connect-the-dots');
+  const { triggerEasterEgg } = useGameDrops('connect-the-dots');
 
   const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(true);
   const [isPinching, setIsPinching] = useState(false);
@@ -374,8 +376,10 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
       levelTimeoutRef.current = setTimeout(() => {
         setShowCelebration(false);
         if (level >= 5) {
-          onGameComplete();
-          triggerEasterEgg('egg-star-connector');
+          (async () => {
+            await completeGame({ score, completed: true, level });
+            triggerEasterEgg('egg-star-connector');
+          })();
           setGameCompleted(true);
         } else {
           setLevel((prev) => prev + 1);
@@ -384,7 +388,7 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
         levelTimeoutRef.current = null;
       }, 2500); // Match CelebrationOverlay timing
     }
-  }, [dots, timeLeft, level, playCelebration]);
+  }, [dots, timeLeft, level, playCelebration, completeGame, triggerEasterEgg, score]);
 
   const startGame = () => {
     setGameStarted(true);

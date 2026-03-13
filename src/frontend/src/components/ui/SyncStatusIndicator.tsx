@@ -13,6 +13,7 @@
 import { memo, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnlineStatus, useSyncStatus } from '../../hooks/useOnlineStatus';
+import apiClient from '../../services/api';
 import { progressQueue } from '../../services/progressQueue';
 import { UIIcon } from './Icon';
 
@@ -73,7 +74,6 @@ export const SyncStatusIndicator = memo(function SyncStatusIndicator({
 
     try {
       const { syncAll } = progressQueue;
-      const apiClient = (await import('../../services/api')).default;
       const result = await syncAll(apiClient);
 
       setSyncState((prev) => ({

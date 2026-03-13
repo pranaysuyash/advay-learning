@@ -76,7 +76,14 @@ jobs:
                   pullRequest(number: $pullNumber) {
                     reviewThreads(first: 100, after: $after) {
                       pageInfo { hasNextPage endCursor }
-                      nodes { isResolved }
+                      nodes {
+                        isResolved
+                        comments(first: 1) {
+                          nodes {
+                            author { login }
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -97,7 +104,13 @@ jobs:
               const pr = res.repository.pullRequest;
 
               const nodes = pr.reviewThreads.nodes || [];
-              unresolvedThreads += nodes.filter((t) => !t.isResolved).length;
+              unresolvedThreads += nodes.filter((t) => {
+                if (t.isResolved) {
+                  return false;
+                }
+                const author = t.comments?.nodes?.[0]?.author?.login;
+                return author !== "github-advanced-security";
+              }).length;
 
               const pageInfo = pr.reviewThreads.pageInfo;
               if (!pageInfo.hasNextPage) {

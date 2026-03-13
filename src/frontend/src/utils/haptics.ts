@@ -25,7 +25,7 @@
 /**
  * Supported haptic feedback types.
  */
-export type HapticType = 'success' | 'error' | 'celebration';
+export type HapticType = 'success' | 'error' | 'celebration' | 'selection' | 'light';
 
 /**
  * Typed haptic type constants for type-safe usage.
@@ -58,6 +58,8 @@ const DEFAULT_PATTERNS: Record<HapticType, number[]> = {
   success: [50, 30, 50],
   error: [100, 50, 100],
   celebration: [100, 50, 100, 50, 200],
+  selection: [20],
+  light: [15],
 };
 
 /**

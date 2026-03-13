@@ -607,6 +607,16 @@ function ConnectivityIndicator() {
 }
 ```
 
+> **App UX Note:** Aside from connectivity icons, we surface offline progress
+> state globally using badges rendered by `GameShell` (see
+> `src/frontend/src/components/GameShell.tsx`) and on the parent dashboard
+> header.  A **Pending** badge shows the count of queued progress items; a
+> **Failed** badge indicates dead letters.  Both badges navigate users to the
+> Progress dashboard and emit analytics events (`pending_badge_clicked`/
+> `failed_badge_clicked`) for field telemetry.
+> Events now include `profileId`, the pending/failed `count`, and the current
+> `gameId` so analysis can correlate queue activity with specific games.
+
 ---
 
 ## 8. AI Model Management Offline

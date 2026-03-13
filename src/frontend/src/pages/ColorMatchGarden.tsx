@@ -16,7 +16,7 @@ import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -124,7 +124,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
 
   const { playPop, playError, playFanfare: playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('color-match-garden');
+  const { completeGame } = useGameCompletion('color-match-garden');
 
   useEffect(() => {
     let mounted = true;
@@ -225,7 +225,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          onGameComplete();
+          completeGame({ score });
           setIsPlaying(false);
           return 0;
         }
@@ -234,7 +234,7 @@ const ColorMatchGardenGame = memo(function ColorMatchGardenComponent() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isPlaying]);
+  }, [isPlaying, score]);
 
   const startRound = useCallback(() => {
     const round = buildRoundTargets();

@@ -1,12 +1,15 @@
 import asyncio
+import json
 import os
 from typing import AsyncGenerator, Generator
 
 import pytest
+import pytest_asyncio
 
 # Load test environment before any app imports
 from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
@@ -29,6 +32,7 @@ test_engine = create_async_engine(
     poolclass=NullPool,
 )
 test_async_session = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
+TEST_ENUM_TYPES = ("verificationmethod", "consentstatus")
 
 # Monkey-patch the session module
 db_session_module.engine = test_engine
@@ -48,10 +52,13 @@ def event_loop() -> Generator:
     loop.close()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_database():
     """Create database tables once for the test session and seed initial data."""
     async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        for enum_name in TEST_ENUM_TYPES:
+            await conn.execute(text(f'DROP TYPE IF EXISTS "{enum_name}" CASCADE'))
         await conn.run_sync(Base.metadata.create_all)
 
     # Populate initial games so that endpoints return data during tests
@@ -60,17 +67,22 @@ async def setup_database():
 
     async with test_async_session() as session:
         for game in INITIAL_GAMES:
-            # use **game since the dict already contains all required fields
-            session.add(Game(**game))
+            game_data = dict(game)
+            if isinstance(game_data.get("config_json"), dict):
+                game_data["config_json"] = json.dumps(game_data["config_json"])
+            # Use merge to handle existing records (upsert)
+            await session.merge(Game(**game_data))
         await session.commit()
 
     yield
     # Cleanup
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+        for enum_name in TEST_ENUM_TYPES:
+            await conn.execute(text(f'DROP TYPE IF EXISTS "{enum_name}" CASCADE'))
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create a fresh database session for each test."""
     async with test_async_session() as session:
@@ -79,14 +91,14 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
         await session.close()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client."""
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as test_client:
         yield test_client
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_user(db_session: AsyncSession) -> dict:
     """Create a test user directly in the database."""
     from app.core.security import get_password_hash
@@ -119,7 +131,7 @@ async def test_user(db_session: AsyncSession) -> dict:
     return user_data
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def auth_token(client: AsyncClient, test_user: dict) -> str:
     """Get authentication token for test user via cookie-based login."""
     response = await client.post(
@@ -142,7 +154,7 @@ async def auth_token(client: AsyncClient, test_user: dict) -> str:
     return access_token
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def admin_token(client: AsyncClient, db_session: AsyncSession) -> str:
     """Create an admin user and return authentication token."""
     from uuid import uuid4

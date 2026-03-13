@@ -24,6 +24,7 @@ export interface RecommendedGame {
   tagline: string;
   path: string;
   icon: string;
+  previewImage?: string;
   ageRange: string;
   vibe: GameVibe;
   isNew?: boolean;
@@ -148,6 +149,7 @@ export function createRecommendedGame(
     tagline: game.tagline,
     path: game.path,
     icon: typeof game.icon === 'string' ? game.icon : 'gamepad',
+    previewImage: game.previewImage,
     ageRange: game.ageRange,
     vibe: game.vibe,
     isNew: game.isNew,

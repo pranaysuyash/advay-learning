@@ -1,10 +1,11 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { Modal } from '../ui/Modal';
 import { LANGUAGES } from '../../data/languages';
 import type { Profile } from '../../store';
 import type { AvatarConfig } from '../avatar';
 import { KenneyAvatar } from '../avatar';
 import { useAudio } from '../../utils/hooks/useAudio';
-import { useEffect, useRef } from 'react';
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -49,16 +50,16 @@ export function EditProfileModal({
 
   if (!isOpen || !profile) return null;
 
-  // Use editing avatar config if available, otherwise fall back to profile's current avatar
   const avatarConfig = editAvatarConfig || (profile.settings?.avatar_config as AvatarConfig) || null;
 
   return (
-    <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className='bg-bg-secondary rounded-2xl p-6 w-full max-w-md shadow-soft-lg border border-border'
-      >
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      ariaLabel={`Edit ${profile.name}'s Profile`}
+    >
+      <div className='bg-bg-secondary rounded-2xl p-6 border border-border'>
         <h3 className='text-xl font-semibold mb-1'>Edit Profile</h3>
         <p className='text-advay-slate text-sm mb-6'>
           Update {profile.name}'s information
@@ -158,7 +159,7 @@ export function EditProfileModal({
             {isSubmitting ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </Modal>
   );
 }

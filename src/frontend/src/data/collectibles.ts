@@ -41,16 +41,16 @@ export const RARITY_CONFIG: Record<Rarity, { label: string; color: string; bg: s
 // ─── ELEMENTS (from Chemistry Lab + crafting) ───────────────────────────
 
 const ELEMENTS: CollectibleItem[] = [
-  { id: 'element-h',  name: 'Hydrogen',  emoji: '⚗️', category: 'element', rarity: 'common',   description: 'The lightest element!',          funFact: 'Hydrogen makes up 75% of all matter in the universe.' },
-  { id: 'element-o',  name: 'Oxygen',    emoji: '💨', category: 'element', rarity: 'common',   description: 'We breathe this to live!',       funFact: 'Oxygen makes up about 21% of Earth\'s atmosphere.' },
-  { id: 'element-c',  name: 'Carbon',    emoji: '⬛', category: 'element', rarity: 'common',   description: 'The building block of life.',     funFact: 'Diamonds are made of pure carbon!' },
-  { id: 'element-n',  name: 'Nitrogen',  emoji: '🌫️', category: 'element', rarity: 'common',   description: 'Most of the air is nitrogen!',   funFact: '78% of the air you breathe is nitrogen.' },
-  { id: 'element-na', name: 'Sodium',    emoji: '🧂', category: 'element', rarity: 'uncommon', description: 'Half of table salt!',             funFact: 'Sodium explodes when it touches water!' },
-  { id: 'element-cl', name: 'Chlorine',  emoji: '🟢', icon: '/assets/kenney/platformer/tiles/switch_green.png', category: 'element', rarity: 'uncommon', description: 'The other half of salt!',         funFact: 'Chlorine is used to keep swimming pools clean.' },
-  { id: 'element-fe', name: 'Iron',      emoji: '🔩', category: 'element', rarity: 'uncommon', description: 'Strong metal for building!',      funFact: 'Earth\'s core is mostly made of iron.' },
-  { id: 'element-au', name: 'Gold',      emoji: '🥇', icon: '/assets/kenney/platformer/collectibles/coin_gold.png', category: 'element', rarity: 'rare',     description: 'The precious golden metal!',      funFact: 'All the gold ever mined would fit in 3.5 Olympic pools.' },
-  { id: 'element-he', name: 'Helium',    emoji: '🎈', category: 'element', rarity: 'uncommon', description: 'Makes balloons float!',           funFact: 'Helium makes your voice squeaky because sound travels faster through it.' },
-  { id: 'element-s',  name: 'Sulfur',    emoji: '🟡', icon: '/assets/kenney/platformer/tiles/switch_yellow.png', category: 'element', rarity: 'common',   description: 'Smells like rotten eggs!',        funFact: 'Volcanoes release sulfur, giving them their smell.' },
+  { id: 'element-h',  name: 'Hydrogen',  emoji: '⚗️', icon: '/assets/items/elements/hydrogen.png', category: 'element', rarity: 'common',   description: 'The lightest element!',          funFact: 'Hydrogen makes up 75% of all matter in the universe.' },
+  { id: 'element-o',  name: 'Oxygen',    emoji: '💨', icon: '/assets/items/elements/oxygen.png', category: 'element', rarity: 'common',   description: 'We breathe this to live!',       funFact: 'Oxygen makes up about 21% of Earth\'s atmosphere.' },
+  { id: 'element-c',  name: 'Carbon',    emoji: '⬛', icon: '/assets/items/elements/carbon.png', category: 'element', rarity: 'common',   description: 'The building block of life.',     funFact: 'Diamonds are made of pure carbon!' },
+  { id: 'element-n',  name: 'Nitrogen',  emoji: '🌫️', icon: '/assets/items/elements/nitrogen.png', category: 'element', rarity: 'common',   description: 'Most of the air is nitrogen!',   funFact: '78% of the air you breathe is nitrogen.' },
+  { id: 'element-na', name: 'Sodium',    emoji: '🧂', icon: '/assets/items/elements/sodium.png', category: 'element', rarity: 'uncommon', description: 'Half of table salt!',             funFact: 'Sodium explodes when it touches water!' },
+  { id: 'element-cl', name: 'Chlorine',  emoji: '🟢', icon: '/assets/items/elements/chlorine.png', category: 'element', rarity: 'uncommon', description: 'The other half of salt!',         funFact: 'Chlorine is used to keep swimming pools clean.' },
+  { id: 'element-fe', name: 'Iron',      emoji: '🔩', icon: '/assets/items/elements/iron.png', category: 'element', rarity: 'uncommon', description: 'Strong metal for building!',      funFact: 'Earth\'s core is mostly made of iron.' },
+  { id: 'element-au', name: 'Gold',      emoji: '🥇', icon: '/assets/items/elements/gold.png', category: 'element', rarity: 'rare',     description: 'The precious golden metal!',      funFact: 'All the gold ever mined would fit in 3.5 Olympic pools.' },
+  { id: 'element-he', name: 'Helium',    emoji: '🎈', icon: '/assets/items/elements/helium.png', category: 'element', rarity: 'uncommon', description: 'Makes balloons float!',           funFact: 'Helium makes your voice squeaky because sound travels faster through it.' },
+  { id: 'element-s',  name: 'Sulfur',    emoji: '🟡', icon: '/assets/items/elements/sulfur.png', category: 'element', rarity: 'common',   description: 'Smells like rotten eggs!',        funFact: 'Volcanoes release sulfur, giving them their smell.' },
 ];
 
 // ─── COLORS (from Color Match Garden + Air Canvas) ──────────────────────
@@ -83,13 +83,13 @@ const SHAPES: CollectibleItem[] = [
 // ─── CREATURES (from Yoga Animals + Word Builder) ───────────────────────
 
 const CREATURES: CollectibleItem[] = [
-  { id: 'creature-cat',      name: 'Cat Spirit',      emoji: '🐱', category: 'creature', rarity: 'common',   description: 'Flexible and curious!',       funFact: 'Cats spend 70% of their lives sleeping.' },
-  { id: 'creature-dog',      name: 'Dog Spirit',      emoji: '🐶', category: 'creature', rarity: 'common',   description: 'Loyal and playful!',          funFact: 'Dogs can understand about 250 words and gestures.' },
-  { id: 'creature-lion',     name: 'Lion Spirit',     emoji: '🦁', category: 'creature', rarity: 'uncommon', description: 'Brave and mighty!',           funFact: 'A lion\'s roar can be heard from 5 miles away.' },
-  { id: 'creature-butterfly', name: 'Butterfly Spirit', emoji: '🦋', category: 'creature', rarity: 'uncommon', description: 'Beautiful transformation!', funFact: 'Butterflies taste with their feet!' },
-  { id: 'creature-owl',      name: 'Owl Spirit',      emoji: '🦉', category: 'creature', rarity: 'rare',     description: 'Wise and watchful!',          funFact: 'Owls can rotate their heads 270 degrees.' },
-  { id: 'creature-dragon',   name: 'Dragon Spirit',   emoji: '🐉', category: 'creature', rarity: 'epic',     description: 'Legendary and powerful!',     funFact: 'Dragons appear in myths from every continent.' },
-  { id: 'creature-unicorn',  name: 'Unicorn Spirit',  emoji: '🦄', category: 'creature', rarity: 'legendary', description: 'Magical and rare!',          funFact: 'Scotland\'s national animal is the unicorn!' },
+  { id: 'creature-cat',      name: 'Cat Spirit',      emoji: '🐱', icon: '/assets/items/creatures/cat.png', category: 'creature', rarity: 'common',   description: 'Flexible and curious!',       funFact: 'Cats spend 70% of their lives sleeping.' },
+  { id: 'creature-dog',      name: 'Dog Spirit',      emoji: '🐶', icon: '/assets/items/creatures/dog.png', category: 'creature', rarity: 'common',   description: 'Loyal and playful!',          funFact: 'Dogs can understand about 250 words and gestures.' },
+  { id: 'creature-lion',     name: 'Lion Spirit',     emoji: '🦁', icon: '/assets/items/creatures/lion.png', category: 'creature', rarity: 'uncommon', description: 'Brave and mighty!',           funFact: 'A lion\'s roar can be heard from 5 miles away.' },
+  { id: 'creature-butterfly', name: 'Butterfly Spirit', emoji: '🦋', icon: '/assets/items/creatures/butterfly.png', category: 'creature', rarity: 'uncommon', description: 'Beautiful transformation!', funFact: 'Butterflies taste with their feet!' },
+  { id: 'creature-owl',      name: 'Owl Spirit',      emoji: '🦉', icon: '/assets/items/creatures/owl.png', category: 'creature', rarity: 'rare',     description: 'Wise and watchful!',          funFact: 'Owls can rotate their heads 270 degrees.' },
+  { id: 'creature-dragon',   name: 'Dragon Spirit',   emoji: '🐉', icon: '/assets/items/creatures/dragon.png', category: 'creature', rarity: 'epic',     description: 'Legendary and powerful!',     funFact: 'Dragons appear in myths from every continent.' },
+  { id: 'creature-unicorn',  name: 'Unicorn Spirit',  emoji: '🦄', icon: '/assets/items/creatures/unicorn.png', category: 'creature', rarity: 'legendary', description: 'Magical and rare!',          funFact: 'Scotland\'s national animal is the unicorn!' },
 ];
 
 // ─── MUSICAL NOTES (from Music Pinch Beat + Bubble Pop Symphony) ────────
@@ -107,13 +107,14 @@ const NOTES: CollectibleItem[] = [
 // ─── EMOTIONS (from Emoji Match) ────────────────────────────────────────
 
 const EMOTIONS: CollectibleItem[] = [
-  { id: 'emotion-happy',     name: 'Joy Crystal',       emoji: '😊', category: 'emotion', rarity: 'common',   description: 'Pure happiness!',                funFact: 'Smiling actually makes you feel happier — it\'s not just the other way around!' },
-  { id: 'emotion-sad',       name: 'Tear Drop',         emoji: '😢', category: 'emotion', rarity: 'common',   description: 'It\'s okay to feel sad.',        funFact: 'Crying releases stress hormones and actually helps you feel better.' },
-  { id: 'emotion-angry',     name: 'Fire Ember',        emoji: '😠', category: 'emotion', rarity: 'common',   description: 'Anger is natural — breathe!',    funFact: 'Taking 3 deep breaths can calm anger in just 90 seconds.' },
-  { id: 'emotion-surprised', name: 'Spark of Wonder',   emoji: '😲', category: 'emotion', rarity: 'uncommon', description: 'Wow, that\'s amazing!',           funFact: 'Surprise is the shortest emotion — it lasts only a moment.' },
-  { id: 'emotion-scared',    name: 'Courage Seed',      emoji: '😨', category: 'emotion', rarity: 'uncommon', description: 'Bravery grows from facing fear.',  funFact: 'Being brave doesn\'t mean not being scared — it means acting despite fear.' },
-  { id: 'emotion-love',      name: 'Heart Gem',         emoji: '🥰', category: 'emotion', rarity: 'rare',     description: 'The warmest feeling of all!',     funFact: 'Hugging someone for 20 seconds releases oxytocin, the "love hormone."' },
-  { id: 'emotion-calm',      name: 'Peace Crystal',     emoji: '😌', category: 'emotion', rarity: 'rare',     description: 'Still and serene.',               funFact: 'Just 5 minutes of deep breathing can lower your heart rate.' },
+  { id: 'emotion-happy',     name: 'Happy',     emoji: '😊', icon: '/assets/items/emotions/happy.png', category: 'emotion', rarity: 'common',   description: 'A big, bright smile!',           funFact: 'Smiling can actually make you feel happier by releasing feel-good chemicals.' },
+  { id: 'emotion-sad',       name: 'Sad',       emoji: '😢', icon: '/assets/items/emotions/sad.png', category: 'emotion', rarity: 'common',   description: 'It\'s okay to feel blue.',         funFact: 'Crying can help soothe the body and release emotional stress.' },
+  { id: 'emotion-angry',     name: 'Angry',     emoji: '😠', icon: '/assets/items/emotions/angry.png', category: 'emotion', rarity: 'uncommon', description: 'Feeling like a volcano!',        funFact: 'Anger alert our body to things that feel unfair or wrong.' },
+  { id: 'emotion-surprised', name: 'Surprised', emoji: '😲', icon: '/assets/items/emotions/surprised.png', category: 'emotion', rarity: 'uncommon', description: 'Wow! Something new!',           funFact: 'Surprise is the shortest-lived emotion, meant to focus your attention.' },
+  { id: 'emotion-scared',    name: 'Scared',    emoji: '😨', icon: '/assets/items/emotions/scared.png', category: 'emotion', rarity: 'uncommon', description: 'Ready to run!',                  funFact: 'Feeling scared helps our body prepare to keep us safe from danger.' },
+  { id: 'emotion-silly',     name: 'Silly',     emoji: '😜', icon: '/assets/items/emotions/silly.png', category: 'emotion', rarity: 'rare',     description: 'Wacky and fun!',                 funFact: 'Being silly and laughing with friends is great for your mental health!' },
+  { id: 'emotion-sleepy',    name: 'Sleepy',    emoji: '😴', icon: '/assets/items/emotions/sleepy.png', category: 'emotion', rarity: 'common',   description: 'Time for a rest...',              funFact: 'Children need about 9-12 hours of sleep a night to help their brains grow.' },
+  { id: 'emotion-love',      name: 'Love',      emoji: '🥰', icon: '/assets/items/emotions/love.png', category: 'emotion', rarity: 'rare',     description: 'A warm heart!',                  funFact: 'Hugging someone you love releases oxytocin, the "cuddle hormone".' },
 ];
 
 // ─── MATERIALS (crafted/discovered via recipes) ─────────────────────────

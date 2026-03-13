@@ -23,6 +23,11 @@ import {
 } from '../games/virtualBubblesLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { TrackedHandFrame } from '../types/tracking';
+import { CameraThumbnail } from '../components/game/CameraThumbnail';
+import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
+import Webcam from 'react-webcam';
 
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 400;
@@ -57,6 +62,43 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
 
   const { playClick, playPop, playCelebration } = useAudio();
   const levelConfig = LEVELS[currentLevel - 1];
+
+  // Hand tracking state
+  const webcamRef = useRef<Webcam>(null);
+  const [isHandDetected, setIsHandDetected] = useState(false);
+  const lastHandStateRef = useRef(false);
+
+  const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
+    if (gameState !== 'playing') return;
+    const tip = frame.indexTip;
+
+    if (tip) {
+      setHandPosition({ x: tip.x, y: tip.y });
+
+      if (!lastHandStateRef.current) {
+        setIsHandDetected(true);
+        lastHandStateRef.current = true;
+      }
+    } else {
+      if (lastHandStateRef.current) {
+        setIsHandDetected(false);
+        lastHandStateRef.current = false;
+      }
+    }
+  }, [gameState]);
+
+  const { isReady, isLoading, startTracking } = useGameHandTracking({
+    gameName: 'VirtualBubbles',
+    webcamRef,
+    onFrame: handleHandFrame,
+    isRunning: gameState === 'playing',
+  });
+
+  useEffect(() => {
+    if (gameState === 'playing' && !isReady && !isLoading) {
+      void startTracking();
+    }
+  }, [gameState, isReady, isLoading, startTracking]);
 
   // Show loading while checking subscription
   if (subLoading) {
@@ -186,52 +228,86 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
     return () => clearInterval(interval);
   }, [gameState, bubbles.length, levelConfig.maxBubbles]);
 
-  // Game loop
+  // Refs for rAF-based game loop (avoids setInterval driving React state 20x/sec)
+  const bubblesRef = useRef<Bubble[]>(bubbles);
+  bubblesRef.current = bubbles;
+  const handPosRef = useRef(handPosition);
+  handPosRef.current = handPosition;
+  const streakRef = useRef(streak);
+  streakRef.current = streak;
+  const poppedCountRef = useRef(poppedCount);
+  poppedCountRef.current = poppedCount;
+
+  // Combined game loop + canvas render using rAF
   useEffect(() => {
     if (gameState !== 'playing') return;
+    let rafId: number;
 
-    try {
-      const gameLoop = setInterval(() => {
-        setBubbles((prev) => updateBubbles(prev, CANVAS_WIDTH, CANVAS_HEIGHT));
+    const loop = () => {
+      // Physics update via ref (no React re-render per frame)
+      let updated = updateBubbles(bubblesRef.current, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        // Check for popped bubbles
-        setBubbles((prev) => {
-          const result = checkBubblePop(
-            prev,
-            handPosition.x,
-            handPosition.y,
-            CANVAS_WIDTH,
-            CANVAS_HEIGHT,
-          );
-          if (result.popped) {
-            // Streak and scoring
-            const newStreak = streak + 1;
-            setStreak(newStreak);
-            const basePoints = 10;
-            const streakBonus = Math.min(newStreak * 2, 15);
-            
-            setPoppedCount((p) => p + 1);
-            setScore((s) => s + basePoints + streakBonus);
-            playPop();
-            triggerHaptic('success');
+      // Pop detection
+      const result = checkBubblePop(
+        updated,
+        handPosRef.current.x,
+        handPosRef.current.y,
+        CANVAS_WIDTH,
+        CANVAS_HEIGHT,
+      );
+      if (result.popped) {
+        const newStreak = streakRef.current + 1;
+        setStreak(newStreak);
+        streakRef.current = newStreak;
+        const basePoints = 10;
+        const streakBonus = Math.min(newStreak * 2, 15);
 
-            // Milestone every 5
-            if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-              setShowStreakMilestone(true);
-              triggerHaptic('celebration');
-              setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
-            }
-          }
-          return result.remaining;
-        });
-      }, 50);
+        setPoppedCount((p) => p + 1);
+        setScore((s) => s + basePoints + streakBonus);
+        playPop();
+        triggerHaptic('success');
 
-      return () => clearInterval(gameLoop);
-    } catch (err) {
-      console.error('Game loop failed:', err);
-      setError(err as Error);
-    }
-  }, [gameState, handPosition, playPop]);
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+        }
+      }
+      updated = result.remaining;
+
+      // Only push React state when array length changed (bubble expired/popped)
+      if (updated.length !== bubblesRef.current.length) {
+        setBubbles(updated);
+      }
+      bubblesRef.current = updated;
+
+      // Canvas render directly
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          ctx.fillStyle = '#87CEEB';
+          ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+          updated.forEach((bubble) => {
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.fill();
+            ctx.stroke();
+          });
+        }
+      }
+
+      rafId = requestAnimationFrame(loop);
+    };
+
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
+  }, [gameState, playPop]);
 
   // Check for level complete
   useEffect(() => {
@@ -248,33 +324,6 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
     handleGameComplete,
     score,
   ]);
-
-  // Canvas rendering
-  useEffect(() => {
-    try {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      ctx.fillStyle = '#87CEEB';
-      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-      bubbles.forEach((bubble) => {
-        ctx.beginPath();
-        ctx.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.lineWidth = 2;
-        ctx.fill();
-        ctx.stroke();
-      });
-    } catch (err) {
-      console.error('Canvas rendering failed:', err);
-      setError(err as Error);
-    }
-  }, [bubbles]);
 
   const handleStart = useCallback(() => {
     try {
@@ -485,6 +534,9 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
                 🌬️ Blowing!
               </div>
             )}
+
+            <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameState === 'playing'} />
+            {gameState === 'playing' && <HandTrackingStatus isHandDetected={isHandDetected} pauseOnHandLost={false} voicePrompt={true} showMascot={true} compact={true} />}
           </div>
 
           <div className='p-4 bg-white border-t flex justify-between items-center relative gap-4'>

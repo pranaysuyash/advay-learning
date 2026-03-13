@@ -11,8 +11,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateCountingScene, calculateScore, type CountingScene } from '../games/countingObjectsLogic';
@@ -44,8 +43,7 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
   const [feedback, setFeedback] = useState('How many do you see?');
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('counting-objects');
-  const { saveProgress } = useGameProgress('counting-objects');
+  const { completeGame } = useGameCompletion('counting-objects');
 
   useGameSessionProgress({
     gameName: 'Counting Objects',
@@ -108,10 +106,9 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
   const handleFinish = useCallback(async () => {
     playClick();
     const finalScore = Math.round(score / 20);
-    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
-    await onGameComplete(finalScore);
+    await completeGame({ score: finalScore, completed: true, level: currentLevel });
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [score, navigate, playClick, completeGame, currentLevel]);
 
   const answerOptions = scene
     ? [...new Set([scene.answer, scene.answer + 1, scene.answer - 1, scene.answer + 2])]

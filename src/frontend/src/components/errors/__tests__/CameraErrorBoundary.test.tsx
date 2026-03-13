@@ -20,7 +20,7 @@ describe('CameraErrorBoundary', () => {
     );
 
     expect(screen.getByText(/Camera Issue in Test Game/i)).toBeInTheDocument();
-    expect(screen.getByText(/permission was blocked/i)).toBeInTheDocument();
+    expect(screen.getByText(/camera access is blocked/i)).toBeInTheDocument();
   });
 
   it('invokes retry callback from fallback action', () => {

@@ -12,6 +12,11 @@ from app.services.subscription_service import PLAN_PRICES
 
 logger = logging.getLogger(__name__)
 
+
+def _sanitize_log_value(value: object) -> str:
+    text = str(value).replace("\n", " ").replace("\r", " ")
+    return text[:200]
+
 # Environment configuration
 DODO_ENV = os.getenv("DODO_ENV", "test").lower()
 DODO_BASE_URLS = {
@@ -43,18 +48,25 @@ class DodoPaymentService:
     """Service for handling Dodo Payments integration."""
 
     def __init__(self):
-        self.api_key = os.getenv("DODO_API_KEY", "")
-        self.webhook_secret = os.getenv("DODO_WEBHOOK_SECRET", "")
+        self.api_token = os.getenv("DODO_API_KEY", "")
+        self.webhook_secret = (
+            os.getenv("DODO_PAYMENTS_WEBHOOK_KEY", "")
+            or os.getenv("DODO_WEBHOOK_SECRET", "")
+        )
         env = os.getenv("DODO_ENV", DODO_ENV).lower()
 
-        if not self.api_key:
+        if not self.api_token:
             raise ValueError("DODO_API_KEY is required to initialize DodoPayments")
 
         base_url = DODO_BASE_URLS.get(env, DODO_BASE_URLS["test"])
-        logger.info(f"Initialized DodoPayments with environment: {env}, base_url: {base_url}")
+        logger.info(
+            "Initialized DodoPayments with environment: %s, base_url: %s",
+            _sanitize_log_value(env),
+            _sanitize_log_value(base_url),
+        )
 
         self.client = DodoPayments(
-            bearer_token=self.api_key,
+            bearer_token=self.api_token,
             base_url=base_url,
         )
 
@@ -71,7 +83,10 @@ class DodoPaymentService:
 
         if not product_id:
             if ALLOW_PLACEHOLDER:
-                logger.warning(f"Using placeholder checkout for plan {plan_type.value} - products must be configured in Dodo dashboard")
+                logger.warning(
+                    "Using placeholder checkout for plan %s - products must be configured in Dodo dashboard",
+                    _sanitize_log_value(plan_type.value),
+                )
                 return {
                     "checkout_url": f"https://checkout.dodopayments.com/test?plan={plan_type.value}&user={user_id}",
                     "session_id": f"pending_{user_id}_{plan_type.value}",
@@ -130,21 +145,11 @@ class DodoPaymentService:
     def verify_webhook_signature(
         self, payload: bytes, webhook_id: str, webhook_timestamp: str, webhook_signature: str
     ) -> bool:
-        """Verify webhook signature from Dodo using their 3-header scheme.
+        """Verify webhook signature using Dodo's Standard Webhooks format.
 
-        CRITICAL: Signature scheme must match Dodo's exact specification.
-
-        Current implementation (NEEDS VERIFICATION):
+        Official Dodo docs specify signing the raw payload with:
         "{webhook_id}.{webhook_timestamp}.{raw_payload}"
-
-        Dodo docs reference:
-        - https://dodopayments.com/docs/webhooks (How do I verify webhooks?)
-        - May specify webhook_id + timestamp + payload OR just timestamp + payload
-
-        ACTION REQUIRED: Confirm exact "string to sign" format from official Dodo docs.
-        If Dodo uses "{timestamp}.{payload}" instead, update line below accordingly.
-
-        When DODO_VERIFY_DIAGNOSTIC=true (test env), will test multiple schemes and log results.
+        using the webhook secret key and HMAC SHA256.
         """
         if not self.webhook_secret:
             logger.error("DODO_WEBHOOK_SECRET not configured - webhook verification disabled")
@@ -208,10 +213,10 @@ class DodoPaymentService:
         }
 
         logger.critical("=== DODO SIGNATURE DIAGNOSTIC MODE ===")
-        logger.critical(f"webhook_id: {webhook_id}")
-        logger.critical(f"webhook_timestamp: {webhook_timestamp}")
-        logger.critical(f"payload_hash: {hash_lib.sha256(payload).hexdigest()}")
-        logger.critical(f"received_signature: {webhook_signature}")
+        logger.critical("webhook_id: %s", _sanitize_log_value(webhook_id))
+        logger.critical("webhook_timestamp: %s", _sanitize_log_value(webhook_timestamp))
+        logger.critical("payload_hash: %s", hash_lib.sha256(payload).hexdigest())
+        logger.critical("received_signature_present: %s", bool(webhook_signature))
         logger.critical("Testing signature schemes:")
 
         matching_schemes = []
@@ -226,15 +231,21 @@ class DodoPaymentService:
             matches = hmac.compare_digest(computed_sig, webhook_signature)
             status = "✓ MATCH" if matches else "✗ NO MATCH"
 
-            logger.critical(f"  {scheme_name}: {status}")
-            logger.critical(f"    computed: {computed_sig}")
+            logger.critical(
+                "Diagnostic scheme %s result: %s",
+                _sanitize_log_value(scheme_name),
+                status,
+            )
 
             if matches:
                 matching_schemes.append(scheme_name)
 
-        logger.critical(f"=== RESULTS: {len(matching_schemes)} matching scheme(s) ===")
+        logger.critical("=== RESULTS: %s matching scheme(s) ===", len(matching_schemes))
         if matching_schemes:
-            logger.critical(f"WINNING SCHEME(S): {', '.join(matching_schemes)}")
+            logger.critical(
+                "WINNING SCHEME COUNT: %s",
+                len(matching_schemes),
+            )
             logger.critical("ACTION: Update verify_webhook_signature to use the winning scheme")
         else:
             logger.critical("NO MATCHING SCHEMES - Check secret or header extraction")
@@ -255,7 +266,10 @@ class DodoPaymentService:
         """Validate that payment amount matches expected plan price."""
         expected_amount = PLAN_PRICES.get(expected_plan_type)
         if not expected_amount:
-            logger.error(f"No price configured for plan: {expected_plan_type}")
+            logger.error(
+                "No price configured for plan: %s",
+                _sanitize_log_value(expected_plan_type),
+            )
             return False
 
         # Extract amount from payment data (format varies by payment provider)
@@ -263,8 +277,10 @@ class DodoPaymentService:
 
         if paid_amount != expected_amount:
             logger.error(
-                f"Payment amount mismatch for {expected_plan_type}: "
-                f"expected {expected_amount}, got {paid_amount}"
+                "Payment amount mismatch for %s: expected %s, got %s",
+                _sanitize_log_value(expected_plan_type),
+                _sanitize_log_value(expected_amount),
+                _sanitize_log_value(paid_amount),
             )
             return False
 

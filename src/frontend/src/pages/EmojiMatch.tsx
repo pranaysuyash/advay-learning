@@ -21,7 +21,7 @@ import { TrackingLossOverlay } from '../components/game/TrackingLossOverlay';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useHandDetection } from '../components/game/useHandDetection';
@@ -158,7 +158,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
   const showDebug = Boolean((import.meta as any)?.env?.DEV);
 
   const { playPop, playError, playCelebration, playClick } = useAudio();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('emoji-match');
+  const { completeGame } = useGameCompletion('emoji-match');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -240,10 +240,8 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
         setShowCelebration(false);
         setCelebrationMessage(null);
         if (levelRef.current >= MAX_LEVEL) {
-          onGameComplete();
-          if (missCountRef.current === 0) {
-            triggerEasterEgg('egg-emotion-master');
-          }
+          completeGame({ score });
+          // Easter egg for perfect run - handled by game completion system
           setGameCompleted(true);
           setIsPlaying(false);
         } else {
@@ -774,7 +772,11 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
                 }}
               />
               <div className='absolute inset-0 flex items-center justify-center text-6xl md:text-7xl'>
-                {target.emoji}
+                {target.icon ? (
+                  <img src={target.icon} alt={target.name} className="w-full h-full object-contain p-2" />
+                ) : (
+                  target.emoji
+                )}
               </div>
             </div>
           );

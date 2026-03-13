@@ -1,5 +1,6 @@
 """Authentication endpoints."""
 
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -26,6 +27,7 @@ from app.services.token_service import TokenService
 from app.services.user_service import UserService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Cookie settings
 COOKIE_DOMAIN = None  # Use default (current domain)
@@ -190,7 +192,7 @@ async def logout(request: Request, response: Response, db: AsyncSession = Depend
                     expires = datetime.fromtimestamp(exp, timezone.utc)
                     await TokenService.revoke_access_token(db, jti, expires)
             except JWTError:
-                pass  # token invalid; nothing to revoke
+                return {"message": "Logout successful"}  # token invalid; nothing to revoke
 
     clear_auth_cookies(response)
     return {"message": "Logout successful"}
@@ -316,7 +318,9 @@ async def refresh_token(
                     expires = datetime.fromtimestamp(exp, timezone.utc)
                     await TokenService.revoke_access_token(db, jti, expires)
             except JWTError:
-                pass
+                logger.info(
+                    "Skipping access token revocation during refresh because the cookie is invalid"
+                )
 
     # Create new tokens
     new_access_token = create_access_token(data={"sub": user.id})

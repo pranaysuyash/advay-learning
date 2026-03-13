@@ -299,3 +299,35 @@ src/pages/
 
 *Phase 1: 16 hours of work completed*
 *Remaining: 8 hours for full audio coverage*
+
+---
+
+## 🆕 Phase 2: High-Fidelity Visual Migration (2026-03-12)
+
+### Overview
+Updated visual assets across the platform to replace emoji placeholders with high-quality, themed icons and SVG components.
+
+### 1. Collectibles System Updates
+Updated `src/frontend/src/data/collectibles.ts` with new `icon` paths for the following categories:
+- **Creatures**: Cat, Dog, Lion, Butterfly, Owl, Dragon, Unicorn.
+- **Elements**: Hydrogen, Oxygen, Carbon, Nitrogen, Sodium, Chlorine, Iron, Gold, Helium, Sulfur.
+
+### 2. Game-Specific Enhancements
+
+#### Math Monsters (`MathMonsters.tsx`)
+- Replaced emoji UI elements (`🖐️`, `☝️`, `⭐`, `🔥`) with consistent `UIIcon` components.
+- Integrated `star` and `flame` icons for scoring and streaks.
+
+#### Emoji Match (`EmojiMatch.tsx` & `emojiMatchLogic.ts`)
+- Added `icon` support for emotion targets.
+- Created directory structure for emotion-specific high-fidelity icons.
+- Updated rendering logic to prioritize icons over emoji placeholders.
+
+#### Yoga Animals (`YogaAnimals.tsx`)
+- Replaced generic Lucide icons with high-fidelity creature icons.
+- Updated streak and milestone overlays with `UIIcon` components for visual consistency.
+
+### 3. Implementation Prompts (Nano Banana)
+- **Creatures**: `A cute cartoon [ANIMAL] face, vibrant colors, game item style, transparent background, pixel-art style`
+- **Elements**: `A stylized periodic table icon for [ELEMENT NAME], pixel-art style, scientific but child-friendly`
+- **Emotions**: `A cute cartoon [EMOTION] face icon, expressive theme, modern style, for kids`

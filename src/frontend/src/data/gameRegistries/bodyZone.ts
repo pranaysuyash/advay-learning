@@ -280,4 +280,33 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
       },
     ],
   },
+  {
+    id: 'virtual-archery',
+    name: 'Virtual Archery',
+    tagline: 'Pull back the bowstring and hit the bullseye! 🏹🎯',
+    path: '/games/virtual-archery',
+    icon: 'sparkles',
+    worldId: 'body-zone',
+    vibe: 'focus',
+    ageRange: '6-12',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'material-star', chance: 0.3 },
+      { itemId: 'trophy-bronze', chance: 0.15 },
+      { itemId: 'trophy-silver', chance: 0.05, minScore: 50 },
+    ],
+    easterEggs: [
+      {
+        id: 'egg-bullseye-master',
+        name: 'Bullseye Master',
+        description: 'Hit the bullseye 3 times in a row!',
+        trigger: 'bullseye-streak-3',
+        reward: { itemId: 'trophy-gold', quantity: 1 },
+        hint: 'Steady your hand and aim true...',
+        difficulty: 'hard',
+      },
+    ],
+  },
 ];

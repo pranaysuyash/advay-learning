@@ -14,7 +14,6 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src/backend'))
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # Import after setting path
 from app.db.session import async_session  # noqa: E402

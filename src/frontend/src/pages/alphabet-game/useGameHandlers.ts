@@ -27,7 +27,7 @@ import {
 } from './sessionPersistence';
 
 interface UseGameHandlersProps {
-  onGameComplete: () => void;
+  onGameComplete: (options?: { score?: number; level?: number }) => void | Promise<void>;
   requestCameraPermission: () => Promise<boolean>;
   cameraPermissionError: Error | string | null;
   isHandTrackingReady: boolean;

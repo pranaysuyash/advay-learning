@@ -42,6 +42,7 @@ interface ProfileState {
   createProfile: (data: { name: string; age?: number; preferred_language?: string }) => Promise<void>;
   updateProfile: (profileId: string, data: Partial<{ name: string; age?: number; preferred_language?: string; settings?: Record<string, unknown> }>) => Promise<void>;
   updateCollectiblesSettings: (settings: CollectiblesProfileSettings) => Promise<void>;
+  deleteProfile: (profileId: string, data: { password: string; reason?: string }) => Promise<void>;
   setCurrentProfile: (profile: Profile | null) => void;
   clearError: () => void;
 }
@@ -123,10 +124,10 @@ export const useProfileStore = create<ProfileState>()((set) => ({
     await state.updateProfile(currentProfile.id, { settings: mergedSettings });
   },
 
-  deleteProfile: async (profileId: string) => {
+  deleteProfile: async (profileId: string, data: { password: string; reason?: string }) => {
     set({ isLoading: true, error: null });
     try {
-      await profileApi.deleteProfile(profileId);
+      await profileApi.deleteProfile(profileId, data);
       set((state) => ({
         profiles: state.profiles.filter(p => p.id !== profileId),
         currentProfile: state.currentProfile?.id === profileId 

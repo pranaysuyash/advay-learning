@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { BETA_END_DATE, BETA_FREE_ACCESS } from '../config/launch';
 import { subscriptionApi, SubscriptionStatus } from '../services/api';
 import { getPlanLabel, getPlanRenewalMessage, isFullAccessPlan, isQuarterlyPack } from '../services/subscriptionPlan';
 
@@ -105,6 +107,25 @@ export function GameSelection() {
   }
 
   if (!subscription?.has_active || !subscription.subscription) {
+    if (BETA_FREE_ACCESS) {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white py-12 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Game packs are paused during beta</h1>
+            <p className="text-gray-600 mb-8">
+              Every shipped game is free during beta through {BETA_END_DATE}. You do not need to select a pack right now.
+            </p>
+            <Link
+              to="/games"
+              className="inline-block bg-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-600"
+            >
+              Browse all games
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4">
         <div className="max-w-4xl mx-auto text-center">

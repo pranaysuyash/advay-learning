@@ -145,4 +145,23 @@ export const CREATIVE_CORNER_GAMES: GameManifest[] = [
     ],
     easterEggs: [],
   },
+  // ── Finger Painting Madness ─────────────────────────────────────────
+  {
+    id: 'finger-painting-madness',
+    name: 'Finger Painting Madness',
+    tagline: 'No rules, pure messy finger painting! 🎨🖌️',
+    path: '/games/finger-painting-madness',
+    icon: 'sparkles',
+    worldId: 'creative-corner',
+    vibe: 'creative',
+    ageRange: '2-6',
+    isNew: true,
+    cv: ['hand'],
+    listed: true,
+    drops: [
+      { itemId: 'color-rainbow', chance: 0.15 },
+      { itemId: 'tool-paintbrush', chance: 0.2 },
+    ],
+    easterEggs: [],
+  },
 ];

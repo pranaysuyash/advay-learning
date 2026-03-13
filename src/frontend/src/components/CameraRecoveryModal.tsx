@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { UIIcon } from './ui/Icon';
 import { Mascot } from './Mascot';
+import { Modal } from './ui/Modal';
 import confetti from 'canvas-confetti';
 
 interface CameraRecoveryModalProps {
@@ -20,8 +20,6 @@ export function CameraRecoveryModal({
   errorMessage = 'Camera connection lost',
 }: CameraRecoveryModalProps) {
   const [isRetrying, setIsRetrying] = useState(false);
-  const reducedMotion = useReducedMotion();
-  const dialogRef = useRef<HTMLDivElement>(null);
   const primaryButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -30,44 +28,13 @@ export function CameraRecoveryModal({
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab' || !dialogRef.current) return;
-
-      const focusableElements = dialogRef.current.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-      const firstElement = focusableElements[0] as HTMLElement | undefined;
-      const lastElement = focusableElements[
-        focusableElements.length - 1
-      ] as HTMLElement | undefined;
-
-      if (!firstElement || !lastElement) return;
-
-      if (e.shiftKey && document.activeElement === firstElement) {
-        e.preventDefault();
-        lastElement.focus();
-      } else if (!e.shiftKey && document.activeElement === lastElement) {
-        e.preventDefault();
-        firstElement.focus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
-
   const handleRetryCamera = useCallback(async () => {
     setIsRetrying(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       stream.getTracks().forEach((track) => track.stop());
-      // Success! Let the parent handle the state update
       onRetryCamera();
     } catch {
-      // Still failed, stay in modal
       setIsRetrying(false);
     }
   }, [onRetryCamera]);
@@ -82,107 +49,93 @@ export function CameraRecoveryModal({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={reducedMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4'
-        >
-          <motion.div
-            initial={reducedMotion ? false : { scale: 0.9, opacity: 0 }}
-            animate={reducedMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
-            exit={reducedMotion ? { opacity: 0 } : { scale: 0.9, opacity: 0 }}
-            className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl'
-            role='dialog'
-            aria-modal='true'
-            aria-labelledby='camera-recovery-title'
-            aria-describedby='camera-recovery-desc'
-            ref={dialogRef}
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {}}
+      size="md"
+      closeOnBackdrop={false}
+      closeOnEscape={false}
+      ariaLabel="Camera Needs Help"
+      ariaDescribedBy="camera-recovery-desc"
+    >
+      <div className="bg-white rounded-3xl p-8 shadow-2xl">
+        {/* Mascot with concerned state */}
+        <div className="flex justify-center mb-6">
+          <Mascot
+            state="thinking"
+            message="Uh oh! The camera stopped working."
+          />
+        </div>
+
+        {/* Error message */}
+        <div className="text-center mb-6">
+          <h2 id="camera-recovery-title" className="text-2xl font-bold text-advay-slate mb-2">
+            Camera Needs Help
+          </h2>
+          <p id="camera-recovery-desc" className="text-text-secondary">
+            {errorMessage}. Don't worry — you can still play! Choose an option below:
+          </p>
+        </div>
+
+        {/* Recovery Options */}
+        <div className="space-y-4">
+          <button
+            type="button"
+            onClick={handleRetryCamera}
+            disabled={isRetrying}
+            ref={primaryButtonRef}
+            className="w-full px-6 py-4 bg-pip-orange text-white rounded-2xl font-bold text-lg shadow-soft hover:bg-pip-rust transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-3"
           >
-            {/* Mascot with concerned state */}
-            <div className='flex justify-center mb-6'>
-              <Mascot
-                state='thinking'
-                message="Uh oh! The camera stopped working."
-              />
-            </div>
+            {isRetrying ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Checking camera...
+              </>
+            ) : (
+              <>
+                <UIIcon name="camera" size={24} />
+                Try Camera Again
+              </>
+            )}
+          </button>
 
-            {/* Error message */}
-            <div className='text-center mb-6'>
-              <h2 id='camera-recovery-title' className='text-2xl font-bold text-advay-slate mb-2'>
-                Camera Needs Help
-              </h2>
-              <p id='camera-recovery-desc' className='text-text-secondary'>
-                {errorMessage}. Don't worry — you can still play! Choose an option below:
-              </p>
-            </div>
+          <button
+            type="button"
+            onClick={() => {
+              triggerCelebration();
+              onContinueWithMouse();
+            }}
+            className="w-full px-6 py-4 bg-success text-white rounded-2xl font-bold text-lg shadow-soft hover:bg-success-hover transition-all hover:scale-[1.02] flex items-center justify-center gap-3"
+          >
+            <UIIcon name="hand" size={24} />
+            Continue with Touch/Mouse
+          </button>
 
-            {/* Recovery Options */}
-            <div className='space-y-4'>
-              {/* Option 1: Retry Camera */}
-              <button
-                type="button"
-                onClick={handleRetryCamera}
-                disabled={isRetrying}
-                ref={primaryButtonRef}
-                className='w-full px-6 py-4 bg-pip-orange text-white rounded-2xl font-bold text-lg shadow-soft hover:bg-pip-rust transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-3'
-              >
-                {isRetrying ? (
-                  <>
-                    <div className='w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin' />
-                    Checking camera...
-                  </>
-                ) : (
-                  <>
-                    <UIIcon name='camera' size={24} />
-                    Try Camera Again
-                  </>
-                )}
-              </button>
+          <button
+            type="button"
+            onClick={onSaveAndExit}
+            className="w-full px-6 py-4 bg-white text-text-primary border-2 border-border rounded-2xl font-bold text-lg hover:bg-bg-tertiary transition-all flex items-center justify-center gap-3"
+          >
+            <UIIcon name="home" size={24} />
+            Save Progress & Go Home
+          </button>
+        </div>
 
-              {/* Option 2: Continue with Mouse/Touch */}
-              <button
-                type="button"
-                onClick={() => {
-                  triggerCelebration();
-                  onContinueWithMouse();
-                }}
-                className='w-full px-6 py-4 bg-success text-white rounded-2xl font-bold text-lg shadow-soft hover:bg-success-hover transition-all hover:scale-[1.02] flex items-center justify-center gap-3'
-              >
-                <UIIcon name='hand' size={24} />
-                Continue with Touch/Mouse
-              </button>
-
-              {/* Option 3: Save and Exit */}
-              <button
-                type="button"
-                onClick={onSaveAndExit}
-                className='w-full px-6 py-4 bg-white text-text-primary border-2 border-border rounded-2xl font-bold text-lg hover:bg-bg-tertiary transition-all flex items-center justify-center gap-3'
-              >
-                <UIIcon name='home' size={24} />
-                Save Progress & Go Home
-              </button>
-            </div>
-
-            {/* Help text */}
-            <p className='text-center text-text-muted text-sm mt-6'>
-              Need help with camera permissions?{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  window.open('https://support.google.com/chrome/answer/2693767', '_blank');
-                }}
-                className='text-pip-orange hover:underline font-medium'
-              >
-                Learn more
-              </button>
-            </p>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        {/* Help text */}
+        <p className="text-center text-text-muted text-sm mt-6">
+          Need help with camera permissions?{' '}
+          <button
+            type="button"
+            onClick={() => {
+              window.open('https://support.google.com/chrome/answer/2693767', '_blank');
+            }}
+            className="text-pip-orange hover:underline font-medium"
+          >
+            Learn more
+          </button>
+        </p>
+      </div>
+    </Modal>
   );
 }
 

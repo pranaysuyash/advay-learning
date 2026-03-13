@@ -24,8 +24,7 @@ import { GameBackground } from '../components/game/GameBackground';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -83,8 +82,7 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
   const [feedback, setFeedback] = useState<{ message: string; emoji: string; x: number; y: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { onGameComplete } = useGameDrops('counting-collectathon');
-  const { saveProgress } = useGameProgress('counting-collectathon');
+  const { completeGame } = useGameCompletion('counting-collectathon');
   const { playSuccess, playError, playCelebration, play } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -293,8 +291,7 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
           setShowCelebration(true);
           playCelebration();
           (async () => {
-            await saveProgress({ score: finalScore, completed: true, level: 1 });
-            onGameComplete(finalScore);
+            await completeGame({ score: finalScore, completed: true, level: 1 });
           })();
         }
 
@@ -304,7 +301,7 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
 
     render();
     gameLoopRef.current = requestAnimationFrame(gameLoop);
-  }, [render, play, playError, playSuccess, playCelebration, onGameComplete, saveProgress]);
+  }, [render, play, playError, playSuccess, playCelebration, completeGame]);
 
   useEffect(() => {
     gameLoopRef.current = requestAnimationFrame(gameLoop);

@@ -19,6 +19,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -54,6 +55,7 @@ export const PinchPracticeContent = memo(function PinchPracticeGame() {
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
   
   const { onGameComplete } = useGameDrops('pinch-practice');
+  const { saveProgress } = useGameProgress('pinch-practice');
   const { playSuccess, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   
@@ -108,12 +110,15 @@ export const PinchPracticeContent = memo(function PinchPracticeGame() {
               setShowCelebration(true);
               playCelebration();
               const finalScore = calculateFinalScore(completed);
-              onGameComplete(finalScore.total);
+              (async () => {
+                await saveProgress({ score: finalScore.total, completed: true, level: 1 });
+                onGameComplete(finalScore.total);
+              })();
             }
             return completed;
           });
           setFeedback(null);
-          
+
           // Move to next exercise after celebration
           setTimeout(() => {
             setGameState((prev) => nextExercise(prev));
@@ -121,7 +126,7 @@ export const PinchPracticeContent = memo(function PinchPracticeGame() {
         }, 500);
       }
     }
-  }, [playSuccess, playCelebration, speak, ttsEnabled, onGameComplete]);
+  }, [playSuccess, playCelebration, speak, ttsEnabled, onGameComplete, saveProgress]);
   
   const { handVisible, pinch } = useGameHandTracking({
     gameName: 'PinchPractice',
@@ -275,11 +280,12 @@ export const PinchPracticeContent = memo(function PinchPracticeGame() {
     }
   }, [difficulty, speak, ttsEnabled]);
   
-  const handleGameComplete = useCallback(() => {
+  const handleGameComplete = useCallback(async () => {
     const finalScore = calculateFinalScore(gameState);
+    await saveProgress({ score: finalScore.total, completed: true, level: 1 });
     onGameComplete(finalScore.total);
     navigate('/games');
-  }, [gameState, onGameComplete, navigate]);
+  }, [gameState, onGameComplete, navigate, saveProgress]);
   
   // Mouse fallback handlers
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -341,18 +347,21 @@ export const PinchPracticeContent = memo(function PinchPracticeGame() {
             setShowCelebration(true);
             playCelebration();
             const finalScore = calculateFinalScore(completed);
-            onGameComplete(finalScore.total);
+            (async () => {
+              await saveProgress({ score: finalScore.total, completed: true, level: 1 });
+              onGameComplete(finalScore.total);
+            })();
           }
           return completed;
         });
         setFeedback(null);
-        
+
         setTimeout(() => {
           setGameState((prev) => nextExercise(prev));
         }, 1500);
       }, 500);
     }
-  }, [gameState, cursorPos, playSuccess, playCelebration, onGameComplete]);
+  }, [gameState, cursorPos, playSuccess, playCelebration, onGameComplete, saveProgress]);
   
   return (
     <GameContainer

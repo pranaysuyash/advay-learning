@@ -86,16 +86,6 @@ function hasProgressTracking(content) {
   return content.includes('progressQueue.add');
 }
 
-// Pattern to detect if file already has error handling
-function hasErrorHandling(content) {
-  return content.includes('setError') && content.includes('useState<Error>');
-}
-
-// Pattern to detect if file already has wellness timer
-function hasWellnessTimer(content) {
-  return content.includes('WellnessTimer');
-}
-
 function upgradeGame(filePath) {
   let content = fs.readFileSync(filePath, 'utf-8');
   const originalContent = content;

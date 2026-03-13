@@ -6,8 +6,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { GameBackground } from '../components/game/GameBackground';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   COLOR_BY_NUMBER_TEMPLATES,
@@ -36,13 +35,12 @@ const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
 
 // Inner game component
 interface ColorByNumberGameProps {
-  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
+  completeGame: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
 }
 
-const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgress }: ColorByNumberGameProps) {
+const ColorByNumberGame = memo(function ColorByNumberGameComponent({ completeGame }: ColorByNumberGameProps) {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('color-by-number');
   const [view, setView] = useState<'menu' | 'play'>('menu');
   const [assetsLoaded, setAssetsLoaded] = useState(false);
 
@@ -105,8 +103,7 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
           playCelebration();
           triggerHaptic('celebration');
           (async () => {
-            await saveProgress({ score: outcome.state.score, completed: true, level: templateIndex + 1 });
-            onGameComplete(outcome.state.score);
+            await completeGame({ score: outcome.state.score, completed: true, level: templateIndex + 1 });
           })();
         } else {
           playSuccess();
@@ -415,7 +412,7 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ saveProgres
 
 // Main export wrapped with GameShell
 export const ColorByNumber = memo(function ColorByNumberComponent() {
-  const { saveProgress } = useGameProgress('color-by-number');
+  const { completeGame } = useGameCompletion('color-by-number');
 
   return (
     <GameShell
@@ -424,7 +421,7 @@ export const ColorByNumber = memo(function ColorByNumberComponent() {
       showWellnessTimer={true}
       enableErrorBoundary={true}
     >
-      <ColorByNumberGame saveProgress={saveProgress} />
+      <ColorByNumberGame completeGame={completeGame} />
     </GameShell>
   );
 });

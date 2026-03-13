@@ -9,7 +9,6 @@ const fs = require('fs');
 const path = require('path');
 
 const BASE_URL = 'http://localhost:6173';
-const API_URL = 'http://localhost:8001';
 
 // Credentials
 const CREDENTIALS = {

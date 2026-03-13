@@ -22,9 +22,8 @@ import {
 } from '../data/collectibles';
 import { RECIPES, findPartialRecipes, type Recipe } from '../data/recipes';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { triggerHaptic } from '../utils/haptics';
-import { progressQueue } from '../services/progressQueue';
 
 // Inner game component
 const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
@@ -33,7 +32,7 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('discovery-lab');
   const { currentProfile } = useProgressStore();
-  const { onGameComplete } = useGameDrops('discovery-lab');
+  const { completeGame, savePartialProgress } = useGameCompletion('discovery-lab');
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const currentProfileId = useProgressStore(
@@ -114,7 +113,7 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
 
   // Save progress on craft
   const handleCraft = useCallback(
-    (recipe: Recipe) => {
+    async (recipe: Recipe) => {
       try {
         playClick();
         const wasNewDiscovery = !discoveredRecipes.includes(recipe.id);
@@ -122,11 +121,10 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
 
         if (result.success && currentProfileId) {
           // Track progress for crafting activity
-          void progressQueue.add({
-            profileId: currentProfileId,
-            gameId: 'discovery-lab',
+          await savePartialProgress({
             score: 100,
             completed: false,
+            level: 1,
             metadata: {
               recipe_id: recipe.id,
               recipe_output_id: recipe.outputId,
@@ -150,7 +148,7 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
 
           // Track game completion when discovering new recipe
           if (wasNewDiscovery && currentProfile) {
-            void onGameComplete(100);
+            await completeGame({ score: 100 });
           }
         } else {
           playError();
@@ -167,7 +165,8 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
       craft,
       currentProfileId,
       currentProfile,
-      onGameComplete,
+      completeGame,
+      savePartialProgress,
       playClick,
       playSuccess,
       playError,

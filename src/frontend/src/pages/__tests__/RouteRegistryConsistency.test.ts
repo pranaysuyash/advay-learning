@@ -11,7 +11,7 @@ const APP_SOURCE = fs.readFileSync(
 );
 
 function extractGameRoutePaths(source: string): string[] {
-  const matches = source.matchAll(/path='(\/games\/[^']+)'/g);
+  const matches = source.matchAll(/path:\s*['"](\/games\/[^'"]+)['"]/g);
   return Array.from(matches, (match) => match[1]);
 }
 

@@ -1,6 +1,26 @@
-import { lazy } from 'react';
+import { lazy, type ComponentType } from 'react';
+declare const __BETA_3D_GAMES_ENABLED__: boolean;
+
+const loadThreeDPage = (
+  enabledLoader: () => Promise<{ default: ComponentType<any> }>,
+) =>
+  __BETA_3D_GAMES_ENABLED__
+    ? enabledLoader()
+    : import('../pages/BetaThreeDHoldback').then((module) => ({
+        default: module.default,
+      }));
 
 // Lazy load pages for code splitting
+
+function lazyNamed<T extends Record<string, any>>(
+  importer: () => Promise<T>,
+  name: keyof T
+) {
+  return lazy(() =>
+    importer().then((module) => ({ default: module[name] as React.ComponentType<any> }))
+  );
+}
+
 export const Home = lazy(() =>
   import('../pages/Home').then((module) => ({ default: module.Home })),
 );
@@ -10,615 +30,189 @@ export const Login = lazy(() =>
 export const Register = lazy(() =>
   import('../pages/Register').then((module) => ({ default: module.Register })),
 );
-export const ForgotPassword = lazy(() =>
-  import('../pages/ForgotPassword').then((module) => ({
-    default: module.ForgotPassword,
-  })),
-);
-export const ResetPassword = lazy(() =>
-  import('../pages/ResetPassword').then((module) => ({
-    default: module.ResetPassword,
-  })),
-);
-export const VerifyEmail = lazy(() =>
-  import('../pages/VerifyEmail').then((module) => ({
-    default: module.VerifyEmail,
-  })),
-);
+export const ForgotPassword = lazyNamed(() => import('../pages/ForgotPassword'), 'ForgotPassword');
+export const ResetPassword = lazyNamed(() => import('../pages/ResetPassword'), 'ResetPassword');
+export const VerifyEmail = lazyNamed(() => import('../pages/VerifyEmail'), 'VerifyEmail');
 export const Pricing = lazy(() =>
   import('../pages/Pricing').then((module) => ({ default: module.Pricing })),
 );
-export const GameSelection = lazy(() =>
-  import('../pages/GameSelection').then((module) => ({
-    default: module.GameSelection,
-  })),
+export const PrivacyPolicy = lazyNamed(() => import('../pages/PrivacyPolicy'), 'PrivacyPolicy');
+export const TermsOfPlay = lazyNamed(() => import('../pages/TermsOfPlay'), 'TermsOfPlay');
+export const Support = lazy(() =>
+  import('../pages/Support').then((module) => ({ default: module.Support })),
 );
+export const GameSelection = lazyNamed(() => import('../pages/GameSelection'), 'GameSelection');
 export const Dashboard = lazy(() =>
   import('../pages/Dashboard').then((module) => ({ default: module.Dashboard })),
 );
-export const AlphabetGame = lazy(() =>
-  import('../pages/AlphabetGame').then((module) => ({
-    default: module.default,
-  })),
-);
+export const AlphabetGame = lazyNamed(() => import('../pages/AlphabetGame'), 'default');
 export const Games = lazy(() =>
   import('../pages/Games').then((module) => ({ default: module.Games })),
 );
-export const ConnectTheDots = lazy(() =>
-  import('../pages/ConnectTheDots').then((module) => ({
-    default: module.ConnectTheDots,
-  })),
-);
-export const LetterHunt = lazy(() =>
-  import('../pages/LetterHunt').then((module) => ({
-    default: module.LetterHunt,
-  })),
-);
-export const MusicPinchBeat = lazy(() =>
-  import('../pages/MusicPinchBeat').then((module) => ({
-    default: module.MusicPinchBeat,
-  })),
-);
-export const SteadyHandLab = lazy(() =>
-  import('../pages/SteadyHandLab').then((module) => ({
-    default: module.SteadyHandLab,
-  })),
-);
+export const ConnectTheDots = lazyNamed(() => import('../pages/ConnectTheDots'), 'ConnectTheDots');
+export const LetterHunt = lazyNamed(() => import('../pages/LetterHunt'), 'LetterHunt');
+export const MusicPinchBeat = lazyNamed(() => import('../pages/MusicPinchBeat'), 'MusicPinchBeat');
+export const SteadyHandLab = lazyNamed(() => import('../pages/SteadyHandLab'), 'SteadyHandLab');
 export const ShapePop = lazy(() =>
   import('../pages/ShapePop').then((module) => ({ default: module.ShapePop })),
 );
-export const ColorMatchGarden = lazy(() =>
-  import('../pages/ColorMatchGarden').then((module) => ({
-    default: module.ColorMatchGarden,
-  })),
-);
-export const ColorByNumber = lazy(() =>
-  import('../pages/ColorByNumber').then((module) => ({
-    default: module.ColorByNumber,
-  })),
-);
-export const ColorPotions = lazy(() =>
-  import('../pages/ColorPotions').then((module) => ({
-    default: module.ColorPotions,
-  })),
-);
-export const MemoryMatch = lazy(() =>
-  import('../pages/MemoryMatch').then((module) => ({
-    default: module.MemoryMatch,
-  })),
-);
-export const NumberTracing = lazy(() =>
-  import('../pages/NumberTracing').then((module) => ({
-    default: module.NumberTracing,
-  })),
-);
-export const NumberTapTrail = lazy(() =>
-  import('../pages/NumberTapTrail').then((module) => ({
-    default: module.NumberTapTrail,
-  })),
-);
-export const NumberSequence = lazy(() =>
-  import('../pages/NumberSequence').then((module) => ({
-    default: module.NumberSequence,
-  })),
-);
-export const ShapeSequence = lazy(() =>
-  import('../pages/ShapeSequence').then((module) => ({
-    default: module.ShapeSequence,
-  })),
-);
-export const YogaAnimals = lazy(() =>
-  import('../pages/YogaAnimals').then((module) => ({
-    default: module.YogaAnimals,
-  })),
-);
-export const BalloonPopFitness = lazy(() =>
-  import('../pages/BalloonPopFitness').then((module) => ({
-    default: module.BalloonPopFitness,
-  })),
-);
-export const ObstacleCourse = lazy(() =>
-  import('../pages/ObstacleCourse').then((module) => ({
-    default: module.ObstacleCourse,
-  })),
-);
-export const FollowTheLeader = lazy(() =>
-  import('../pages/FollowTheLeader').then((module) => ({
-    default: module.FollowTheLeader,
-  })),
-);
-export const MusicalStatues = lazy(() =>
-  import('../pages/MusicalStatues').then((module) => ({
-    default: module.MusicalStatues,
-  })),
-);
+export const ColorMatchGarden = lazyNamed(() => import('../pages/ColorMatchGarden'), 'ColorMatchGarden');
+export const ColorByNumber = lazyNamed(() => import('../pages/ColorByNumber'), 'ColorByNumber');
+export const ColorPotions = lazyNamed(() => import('../pages/ColorPotions'), 'ColorPotions');
+export const MemoryMatch = lazyNamed(() => import('../pages/MemoryMatch'), 'MemoryMatch');
+export const NumberTracing = lazyNamed(() => import('../pages/NumberTracing'), 'NumberTracing');
+export const NumberTapTrail = lazyNamed(() => import('../pages/NumberTapTrail'), 'NumberTapTrail');
+export const NumberSequence = lazyNamed(() => import('../pages/NumberSequence'), 'NumberSequence');
+export const ShapeSequence = lazyNamed(() => import('../pages/ShapeSequence'), 'ShapeSequence');
+export const YogaAnimals = lazyNamed(() => import('../pages/YogaAnimals'), 'YogaAnimals');
+export const BalloonPopFitness = lazyNamed(() => import('../pages/BalloonPopFitness'), 'BalloonPopFitness');
+export const ObstacleCourse = lazyNamed(() => import('../pages/ObstacleCourse'), 'ObstacleCourse');
+export const FollowTheLeader = lazyNamed(() => import('../pages/FollowTheLeader'), 'FollowTheLeader');
+export const MusicalStatues = lazyNamed(() => import('../pages/MusicalStatues'), 'MusicalStatues');
 export const BalanceBeam = lazy(() =>
   import('../pages/BalanceBeam').then((module) => ({ default: module.default })),
 );
-export const FreezeDance = lazy(() =>
-  import('../pages/FreezeDance').then((module) => ({
-    default: module.FreezeDance,
-  })),
-);
-export const SimonSays = lazy(() =>
-  import('../pages/SimonSays').then((module) => ({
-    default: module.SimonSays,
-  })),
-);
+export const FreezeDance = lazyNamed(() => import('../pages/FreezeDance'), 'FreezeDance');
+export const SimonSays = lazyNamed(() => import('../pages/SimonSays'), 'SimonSays');
 export const Progress = lazy(() =>
   import('../pages/Progress').then((module) => ({ default: module.Progress })),
 );
 export const Settings = lazy(() =>
   import('../pages/Settings').then((module) => ({ default: module.Settings })),
 );
-export const StyleTest = lazy(() =>
-  import('../components/StyleTest').then((module) => ({
-    default: module.StyleTest,
-  })),
-);
-export const FingerNumberShow = lazy(() =>
-  import('../games/FingerNumberShow').then((module) => ({
-    default: module.FingerNumberShow,
-  })),
-);
-export const VirtualChemistryLab = lazy(() =>
-  import('../pages/VirtualChemistryLab').then((module) => ({
-    default: module.VirtualChemistryLab,
-  })),
-);
-export const WordBuilder = lazy(() =>
-  import('../pages/WordBuilder').then((module) => ({
-    default: module.WordBuilder,
-  })),
-);
-export const EmojiMatch = lazy(() =>
-  import('../pages/EmojiMatch').then((module) => ({
-    default: module.EmojiMatch,
-  })),
-);
-export const MediaPipeTest = lazy(() =>
-  import('../pages/MediaPipeTest').then((module) => ({
-    default: module.MediaPipeTest,
-  })),
-);
-export const AirCanvas = lazy(() =>
-  import('../pages/AirCanvas').then((module) => ({
-    default: module.AirCanvas,
-  })),
-);
-export const MirrorDraw = lazy(() =>
-  import('../pages/MirrorDraw').then((module) => ({
-    default: module.MirrorDraw,
-  })),
-);
-export const PhonicsSounds = lazy(() =>
-  import('../pages/PhonicsSounds').then((module) => ({
-    default: module.PhonicsSounds,
-  })),
-);
-export const PhonicsTracing = lazy(() =>
-  import('../pages/PhonicsTracing').then((module) => ({
-    default: module.PhonicsTracing,
-  })),
-);
-export const BeginningSounds = lazy(() =>
-  import('../pages/BeginningSounds').then((module) => ({
-    default: module.BeginningSounds,
-  })),
-);
-export const EndingSounds = lazy(() =>
-  import('../pages/EndingSounds').then((module) => ({
-    default: module.EndingSounds,
-  })),
-);
-export const OddOneOut = lazy(() =>
-  import('../pages/OddOneOut').then((module) => ({
-    default: module.OddOneOut,
-  })),
-);
-export const SameAndDifferent = lazy(() =>
-  import('../pages/SameAndDifferent').then((module) => ({
-    default: module.SameAndDifferent,
-  })),
-);
-export const ShadowMatch = lazy(() =>
-  import('../pages/ShadowMatch').then((module) => ({
-    default: module.ShadowMatch,
-  })),
-);
-export const ShadowPuppetTheater = lazy(() =>
-  import('../pages/ShadowPuppetTheater').then((module) => ({
-    default: module.ShadowPuppetTheater,
-  })),
-);
-export const VirtualBubbles = lazy(() =>
-  import('../pages/VirtualBubbles').then((module) => ({
-    default: module.VirtualBubbles,
-  })),
-);
-export const KaleidoscopeHands = lazy(() =>
-  import('../pages/KaleidoscopeHands').then((module) => ({
-    default: module.KaleidoscopeHands,
-  })),
-);
-export const ShadowPortal = lazy(() =>
-  import('../pages/ShadowPortal').then((module) => ({
-    default: module.default,
-  })),
-);
-export const AirGuitarHero = lazy(() =>
-  import('../pages/AirGuitarHero').then((module) => ({
-    default: module.AirGuitarHero,
-  })),
-);
-export const FruitNinjaAir = lazy(() =>
-  import('../pages/FruitNinjaAir').then((module) => ({
-    default: module.FruitNinjaAir,
-  })),
-);
-export const CountingObjects = lazy(() =>
-  import('../pages/CountingObjects').then((module) => ({
-    default: module.CountingObjects,
-  })),
-);
-export const MoreOrLess = lazy(() =>
-  import('../pages/MoreOrLess').then((module) => ({
-    default: module.MoreOrLess,
-  })),
-);
-export const BlendBuilder = lazy(() =>
-  import('../pages/BlendBuilder').then((module) => ({
-    default: module.BlendBuilder,
-  })),
-);
-export const SyllableClap = lazy(() =>
-  import('../pages/SyllableClap').then((module) => ({
-    default: module.SyllableClap,
-  })),
-);
-export const SightWordFlash = lazy(() =>
-  import('../pages/SightWordFlash').then((module) => ({
-    default: module.SightWordFlash,
-  })),
-);
-export const MazeRunner = lazy(() =>
-  import('../pages/MazeRunner').then((module) => ({
-    default: module.MazeRunner,
-  })),
-);
-export const PathFollowing = lazy(() =>
-  import('../pages/PathFollowing').then((module) => ({
-    default: module.PathFollowing,
-  })),
-);
-export const RhythmTap = lazy(() =>
-  import('../pages/RhythmTap').then((module) => ({
-    default: module.RhythmTap,
-  })),
-);
-export const AnimalSounds = lazy(() =>
-  import('../pages/AnimalSounds').then((module) => ({
-    default: module.AnimalSounds,
-  })),
-);
-export const BodyParts = lazy(() =>
-  import('../pages/BodyParts').then((module) => ({
-    default: module.BodyParts,
-  })),
-);
-export const VoiceStories = lazy(() =>
-  import('../pages/VoiceStories').then((module) => ({
-    default: module.VoiceStories,
-  })),
-);
-export const ReadingAlong = lazy(() =>
-  import('../pages/ReadingAlong').then((module) => ({
-    default: module.ReadingAlong,
-  })),
-);
-export const WordSearch = lazy(() =>
-  import('../pages/WordSearch').then((module) => ({
-    default: module.WordSearch,
-  })),
-);
-export const LetterSoundMatch = lazy(() =>
-  import('../pages/LetterSoundMatch').then((module) => ({
-    default: module.LetterSoundMatch,
-  })),
-);
-export const StoryBuilder = lazy(() =>
-  import('../pages/StoryBuilder').then((module) => ({
-    default: module.StoryBuilder,
-  })),
-);
-export const MathSmash = lazy(() =>
-  import('../pages/MathSmash').then((module) => ({
-    default: module.MathSmash,
-  })),
-);
-export const ColorSortGame = lazy(() =>
-  import('../pages/ColorSortGame').then((module) => ({
-    default: module.ColorSortGame,
-  })),
-);
-export const LetterCatcher = lazy(() =>
-  import('../pages/LetterCatcher').then((module) => ({
-    default: module.LetterCatcher,
-  })),
-);
-export const SpellPainter = lazy(() =>
-  import('../pages/SpellPainter').then((module) => ({
-    default: module.SpellPainter,
-  })),
-);
-export const MusicConductor = lazy(() =>
-  import('../pages/MusicConductor').then((module) => ({
-    default: module.MusicConductor,
-  })),
-);
-export const BubbleBiology = lazy(() =>
-  import('../pages/BubbleBiology').then((module) => ({
-    default: module.BubbleBiology,
-  })),
-);
-export const MirrorMaze = lazy(() =>
-  import('../pages/MirrorMaze').then((module) => ({
-    default: module.MirrorMaze,
-  })),
-);
-export const CircuitBuilder = lazy(() =>
-  import('../pages/CircuitBuilder').then((module) => ({
-    default: module.default,
-  })),
-);
-export const WeatherLab = lazy(() =>
-  import('../pages/WeatherLab').then((module) => ({
-    default: module.default,
-  })),
-);
-export const MirrorDuel = lazy(() =>
-  import('../pages/MirrorDuel').then((module) => ({
-    default: module.default,
-  })),
-);
-export const PopTheNumber = lazy(() =>
-  import('../pages/PopTheNumber').then((module) => ({
-    default: module.PopTheNumber,
-  })),
-);
-export const ColorSplash = lazy(() =>
-  import('../pages/ColorSplash').then((module) => ({
-    default: module.ColorSplash,
-  })),
-);
-export const ColorMixing = lazy(() =>
-  import('../pages/ColorMixing').then((module) => ({
-    default: module.ColorMixing,
-  })),
-);
-export const RainbowBridge = lazy(() =>
-  import('../pages/RainbowBridge').then((module) => ({
-    default: module.RainbowBridge,
-  })),
-);
-export const BeatBounce = lazy(() =>
-  import('../pages/BeatBounce').then((module) => ({
-    default: module.BeatBounce,
-  })),
-);
-export const BubbleCount = lazy(() =>
-  import('../pages/BubbleCount').then((module) => ({
-    default: module.BubbleCount,
-  })),
-);
-export const FeedTheMonster = lazy(() =>
-  import('../pages/FeedTheMonster').then((module) => ({
-    default: module.FeedTheMonster,
-  })),
-);
-export const ShapeStacker = lazy(() =>
-  import('../pages/ShapeStacker').then((module) => ({
-    default: module.ShapeStacker,
-  })),
-);
-export const SizeSorting = lazy(() =>
-  import('../pages/SizeSorting').then((module) => ({
-    default: module.SizeSorting,
-  })),
-);
-export const NumberBubblePop = lazy(() =>
-  import('../pages/NumberBubblePop').then((module) => ({
-    default: module.NumberBubblePop,
-  })),
-);
-export const DigitalJenga = lazy(() =>
-  import('../pages/DigitalJenga').then((module) => ({
-    default: module.DigitalJenga,
-  })),
-);
-export const WeatherMatch = lazy(() =>
-  import('../pages/WeatherMatch').then((module) => ({
-    default: module.WeatherMatch,
-  })),
-);
-export const FractionPizza = lazy(() =>
-  import('../pages/FractionPizza').then((module) => ({
-    default: module.FractionPizza,
-  })),
-);
-export const TimeTell = lazy(() =>
-  import('../pages/TimeTell').then((module) => ({
-    default: module.TimeTell,
-  })),
-);
-export const MoneyMatch = lazy(() =>
-  import('../pages/MoneyMatch').then((module) => ({
-    default: module.MoneyMatch,
-  })),
-);
-export const PatternPlay = lazy(() =>
-  import('../pages/PatternPlay').then((module) => ({
-    default: module.PatternPlay,
-  })),
-);
-export const BubblePopSymphony = lazy(() =>
-  import('../pages/BubblePopSymphony').then((module) => ({
-    default: module.default,
-  })),
-);
-export const DressForWeather = lazy(() =>
-  import('../pages/DressForWeather').then((module) => ({
-    default: module.default,
-  })),
-);
-export const StorySequence = lazy(() =>
-  import('../pages/StorySequence').then((module) => ({
-    default: module.default,
-  })),
-);
-export const ShapeSafari = lazy(() =>
-  import('../pages/ShapeSafari').then((module) => ({
-    default: module.default,
-  })),
-);
-export const FreeDraw = lazy(() =>
-  import('../pages/FreeDraw').then((module) => ({
-    default: module.FreeDraw,
-  })),
-);
-export const MathMonsters = lazy(() =>
-  import('../pages/MathMonsters').then((module) => ({
-    default: module.default,
-  })),
-);
-export const BubblePop = lazy(() =>
-  import('../pages/BubblePop').then((module) => ({
-    default: module.BubblePop,
-  })),
-);
-export const RhymeTime = lazy(() =>
-  import('../pages/RhymeTime').then((module) => ({
-    default: module.default,
-  })),
-);
-export const PhysicsPlayground = lazy(() =>
-  import('../pages/PhysicsPlayground').then((module) => ({
-    default: module.default,
-  })),
-);
-export const InventoryPage = lazy(() =>
-  import('../pages/Inventory').then((module) => ({
-    default: module.Inventory,
-  })),
-);
-export const DiscoveryLab = lazy(() =>
-  import('../pages/DiscoveryLab').then((module) => ({
-    default: module.DiscoveryLab,
-  })),
-);
-export const PlatformerRunner = lazy(() =>
-  import('../pages/PlatformerRunner').then((module) => ({
-    default: module.PlatformerRunner,
-  })),
-);
-export const CountingCollectathon = lazy(() =>
-  import('../pages/CountingCollectathon').then((module) => ({
-    default: module.CountingCollectathon,
-  })),
-);
-export const MathJumpers = lazy(() =>
-  import('../pages/MathJumpers').then((module) => ({
-    default: module.MathJumpers,
-  })),
-);
-export const SimpleAddition = lazy(() =>
-  import('../pages/SimpleAddition').then((module) => ({
-    default: module.SimpleAddition,
-  })),
-);
-export const TargetPractice = lazy(() =>
-  import('../pages/TargetPractice').then((module) => ({
-    default: module.default,
-  })),
-);
-export const CuttingPractice = lazy(() =>
-  import('../pages/CuttingPractice').then((module) => ({
-    default: module.default,
-  })),
-);
-export const PinchPractice = lazy(() =>
-  import('../pages/PinchPractice').then((module) => ({
-    default: module.PinchPractice,
-  })),
-);
-export const CircleDrawing = lazy(() =>
-  import('../pages/CircleDrawing').then((module) => ({
-    default: module.default,
-  })),
-);
-export const SpellingRun = lazy(() =>
-  import('../pages/SpellingRun').then((module) => ({
-    default: module.default,
-  })),
-);
-export const WashHandsDance = lazy(() =>
-  import('../pages/WashHandsDance').then((module) => ({
-    default: module.default,
-  })),
-);
-export const PackLunchbox = lazy(() =>
-  import('../pages/PackLunchbox').then((module) => ({
-    default: module.default,
-  })),
-);
-export const SetTheTable = lazy(() =>
-  import('../pages/SetTheTable').then((module) => ({
-    default: module.default,
-  })),
-);
-export const TemperatureSort = lazy(() =>
-  import('../pages/TemperatureSort').then((module) => ({
-    default: module.default,
-  })),
-);
-export const PlantGarden = lazy(() =>
-  import('../pages/PlantGarden').then((module) => ({
-    default: module.default,
-  })),
-);
-export const SoundGarden = lazy(() =>
-  import('../pages/SoundGarden').then((module) => ({
-    default: module.default,
-  })),
-);
-export const TasteMatch = lazy(() =>
-  import('../pages/TasteMatch').then((module) => ({
-    default: module.default,
-  })),
-);
+export const StyleTest = lazyNamed(() => import('../components/StyleTest'), 'StyleTest');
+export const FingerNumberShow = lazyNamed(() => import('../games/FingerNumberShow'), 'FingerNumberShow');
+export const VirtualChemistryLab = lazyNamed(() => import('../pages/VirtualChemistryLab'), 'VirtualChemistryLab');
+export const WordBuilder = lazyNamed(() => import('../pages/WordBuilder'), 'WordBuilder');
+export const EmojiMatch = lazyNamed(() => import('../pages/EmojiMatch'), 'EmojiMatch');
+export const MediaPipeTest = lazyNamed(() => import('../pages/MediaPipeTest'), 'MediaPipeTest');
+export const AirCanvas = lazyNamed(() => import('../pages/AirCanvas'), 'AirCanvas');
+export const MirrorDraw = lazyNamed(() => import('../pages/MirrorDraw'), 'MirrorDraw');
+export const PhonicsSounds = lazyNamed(() => import('../pages/PhonicsSounds'), 'PhonicsSounds');
+export const PhonicsTracing = lazyNamed(() => import('../pages/PhonicsTracing'), 'PhonicsTracing');
+export const BeginningSounds = lazyNamed(() => import('../pages/BeginningSounds'), 'BeginningSounds');
+export const EndingSounds = lazyNamed(() => import('../pages/EndingSounds'), 'EndingSounds');
+export const OddOneOut = lazyNamed(() => import('../pages/OddOneOut'), 'OddOneOut');
+export const SameAndDifferent = lazyNamed(() => import('../pages/SameAndDifferent'), 'SameAndDifferent');
+export const ShadowMatch = lazyNamed(() => import('../pages/ShadowMatch'), 'ShadowMatch');
+export const ShadowPuppetTheater = lazyNamed(() => import('../pages/ShadowPuppetTheater'), 'ShadowPuppetTheater');
+export const VirtualBubbles = lazyNamed(() => import('../pages/VirtualBubbles'), 'VirtualBubbles');
+export const KaleidoscopeHands = lazyNamed(() => import('../pages/KaleidoscopeHands'), 'KaleidoscopeHands');
+export const ShadowPortal = lazyNamed(() => import('../pages/ShadowPortal'), 'default');
+export const AirGuitarHero = lazyNamed(() => import('../pages/AirGuitarHero'), 'AirGuitarHero');
+export const FruitNinjaAir = lazyNamed(() => import('../pages/FruitNinjaAir'), 'FruitNinjaAir');
+export const CountingObjects = lazyNamed(() => import('../pages/CountingObjects'), 'CountingObjects');
+export const MoreOrLess = lazyNamed(() => import('../pages/MoreOrLess'), 'MoreOrLess');
+export const BlendBuilder = lazyNamed(() => import('../pages/BlendBuilder'), 'BlendBuilder');
+export const SyllableClap = lazyNamed(() => import('../pages/SyllableClap'), 'SyllableClap');
+export const SightWordFlash = lazyNamed(() => import('../pages/SightWordFlash'), 'SightWordFlash');
+export const MazeRunner = lazyNamed(() => import('../pages/MazeRunner'), 'MazeRunner');
+export const PathFollowing = lazyNamed(() => import('../pages/PathFollowing'), 'PathFollowing');
+export const RhythmTap = lazyNamed(() => import('../pages/RhythmTap'), 'RhythmTap');
+export const AnimalSounds = lazyNamed(() => import('../pages/AnimalSounds'), 'AnimalSounds');
+export const BodyParts = lazyNamed(() => import('../pages/BodyParts'), 'BodyParts');
+export const VoiceStories = lazyNamed(() => import('../pages/VoiceStories'), 'VoiceStories');
+export const ReadingAlong = lazyNamed(() => import('../pages/ReadingAlong'), 'ReadingAlong');
+export const WordSearch = lazyNamed(() => import('../pages/WordSearch'), 'WordSearch');
+export const LetterSoundMatch = lazyNamed(() => import('../pages/LetterSoundMatch'), 'LetterSoundMatch');
+export const StoryBuilder = lazyNamed(() => import('../pages/StoryBuilder'), 'StoryBuilder');
+export const MathSmash = lazyNamed(() => import('../pages/MathSmash'), 'MathSmash');
+export const ColorSortGame = lazyNamed(() => import('../pages/ColorSortGame'), 'ColorSortGame');
+export const LetterCatcher = lazyNamed(() => import('../pages/LetterCatcher'), 'LetterCatcher');
+export const LanguagePuppet = lazyNamed(() => import('../pages/LanguagePuppet'), 'LanguagePuppet');
+export const SpellPainter = lazyNamed(() => import('../pages/SpellPainter'), 'SpellPainter');
+export const MusicConductor = lazyNamed(() => import('../pages/MusicConductor'), 'MusicConductor');
+export const BubbleBiology = lazyNamed(() => import('../pages/BubbleBiology'), 'BubbleBiology');
+export const MirrorMaze = lazyNamed(() => import('../pages/MirrorMaze'), 'MirrorMaze');
+export const CircuitBuilder = lazyNamed(() => import('../pages/CircuitBuilder'), 'default');
+export const NasaSkyHunt = lazyNamed(() => import('../pages/NasaSkyHunt'), 'default');
+export const PlanetSandbox = lazyNamed(() => import('../pages/PlanetSandbox'), 'default');
+export const ISSDocking = lazyNamed(() => import('../pages/ISSDocking'), 'default');
+export const BridgeBuilder = lazyNamed(() => import('../pages/BridgeBuilder'), 'default');
+export const LogicBoxPush = lazyNamed(() => import('../pages/LogicBoxPush'), 'default');
+export const CatchSort = lazyNamed(() => import('../pages/CatchSort'), 'default');
+export const WeatherLab = lazyNamed(() => import('../pages/WeatherLab'), 'default');
+export const MirrorDuel = lazyNamed(() => import('../pages/MirrorDuel'), 'default');
+export const PopTheNumber = lazyNamed(() => import('../pages/PopTheNumber'), 'PopTheNumber');
+export const ColorSplash = lazyNamed(() => import('../pages/ColorSplash'), 'ColorSplash');
+export const ColorMixing = lazyNamed(() => import('../pages/ColorMixing'), 'ColorMixing');
+export const RainbowBridge = lazyNamed(() => import('../pages/RainbowBridge'), 'RainbowBridge');
+export const BeatBounce = lazyNamed(() => import('../pages/BeatBounce'), 'BeatBounce');
+export const BubbleCount = lazyNamed(() => import('../pages/BubbleCount'), 'BubbleCount');
+export const FeedTheMonster = lazyNamed(() => import('../pages/FeedTheMonster'), 'FeedTheMonster');
+export const ShapeStacker = lazyNamed(() => import('../pages/ShapeStacker'), 'ShapeStacker');
+export const SizeSorting = lazyNamed(() => import('../pages/SizeSorting'), 'SizeSorting');
+export const NumberBubblePop = lazyNamed(() => import('../pages/NumberBubblePop'), 'NumberBubblePop');
+export const DigitalJenga = lazyNamed(() => import('../pages/DigitalJenga'), 'DigitalJenga');
+export const WeatherMatch = lazyNamed(() => import('../pages/WeatherMatch'), 'WeatherMatch');
+export const FractionPizza = lazyNamed(() => import('../pages/FractionPizza'), 'FractionPizza');
+export const TimeTell = lazyNamed(() => import('../pages/TimeTell'), 'TimeTell');
+export const MoneyMatch = lazyNamed(() => import('../pages/MoneyMatch'), 'MoneyMatch');
+export const PatternPlay = lazyNamed(() => import('../pages/PatternPlay'), 'PatternPlay');
+export const BubblePopSymphony = lazyNamed(() => import('../pages/BubblePopSymphony'), 'default');
+export const DressForWeather = lazyNamed(() => import('../pages/DressForWeather'), 'default');
+export const StorySequence = lazyNamed(() => import('../pages/StorySequence'), 'default');
+export const ShapeSafari = lazyNamed(() => import('../pages/ShapeSafari'), 'default');
+export const FreeDraw = lazyNamed(() => import('../pages/FreeDraw'), 'FreeDraw');
+export const MathMonsters = lazyNamed(() => import('../pages/MathMonsters'), 'default');
+export const BubblePop = lazyNamed(() => import('../pages/BubblePop'), 'BubblePop');
+export const RhymeTime = lazyNamed(() => import('../pages/RhymeTime'), 'default');
+export const PhysicsPlayground = lazyNamed(() => import('../pages/PhysicsPlayground'), 'default');
+export const InventoryPage = lazyNamed(() => import('../pages/Inventory'), 'Inventory');
+export const DiscoveryLab = lazyNamed(() => import('../pages/DiscoveryLab'), 'DiscoveryLab');
+export const PlatformerRunner = lazyNamed(() => import('../pages/PlatformerRunner'), 'PlatformerRunner');
+export const CountingCollectathon = lazyNamed(() => import('../pages/CountingCollectathon'), 'CountingCollectathon');
+export const MathJumpers = lazyNamed(() => import('../pages/MathJumpers'), 'MathJumpers');
+export const SimpleAddition = lazyNamed(() => import('../pages/SimpleAddition'), 'SimpleAddition');
+export const TargetPractice = lazyNamed(() => import('../pages/TargetPractice'), 'default');
+export const CuttingPractice = lazyNamed(() => import('../pages/CuttingPractice'), 'default');
+export const PinchPractice = lazyNamed(() => import('../pages/PinchPractice'), 'PinchPractice');
+export const CircleDrawing = lazyNamed(() => import('../pages/CircleDrawing'), 'default');
+export const SpellingRun = lazyNamed(() => import('../pages/SpellingRun'), 'default');
+export const WashHandsDance = lazyNamed(() => import('../pages/WashHandsDance'), 'default');
+export const PackLunchbox = lazyNamed(() => import('../pages/PackLunchbox'), 'default');
+export const SetTheTable = lazyNamed(() => import('../pages/SetTheTable'), 'default');
+export const TemperatureSort = lazyNamed(() => import('../pages/TemperatureSort'), 'default');
+export const PlantGarden = lazyNamed(() => import('../pages/PlantGarden'), 'default');
+export const SoundGarden = lazyNamed(() => import('../pages/SoundGarden'), 'default');
+export const TasteMatch = lazyNamed(() => import('../pages/TasteMatch'), 'default');
 export const FarmFriends = lazy(() =>
   import('../pages/FarmFriends').then((module) => ({ default: module.default })),
 );
 export const VowelValley = lazy(() =>
   import('../pages/VowelValley').then((module) => ({ default: module.default })),
 );
-export const TextureExplorer = lazy(() =>
-  import('../pages/TextureExplorer').then((module) => ({
+export const TextureExplorer = lazyNamed(() => import('../pages/TextureExplorer'), 'default');
+export const DinosaurDig = lazyNamed(() => import('../pages/DinosaurDig'), 'default');
+export const LightPainter = lazyNamed(() => import('../pages/LightPainter'), 'default');
+export const EarthTimeMachine = lazyNamed(() => import('../pages/EarthTimeMachine'), 'EarthTimeMachine');
+export const TidyUpTime = lazyNamed(() => import('../pages/TidyUpTime'), 'default');
+export const VirtualArchery = lazyNamed(() => import('../pages/VirtualArchery'), 'default');
+export const FingerPaintingMadness = lazyNamed(() => import('../pages/FingerPaintingMadness'), 'default');
+
+// 3D Games (Three.js)
+export const DigitalJenga3D = lazy(() =>
+  loadThreeDPage(() => import('../pages/three/DigitalJenga3D').then((module) => ({
     default: module.default,
-  })),
+  }))),
 );
-export const DinosaurDig = lazy(() =>
-  import('../pages/DinosaurDig').then((module) => ({
+export const DressForWeather3D = lazy(() =>
+  loadThreeDPage(() => import('../pages/three/DressForWeather3D').then((module) => ({
     default: module.default,
-  })),
+  }))),
 );
-export const LightPainter = lazy(() =>
-  import('../pages/LightPainter').then((module) => ({
+export const ObstacleCourse3D = lazy(() =>
+  loadThreeDPage(() => import('../pages/three/ObstacleCourse3D').then((module) => ({
     default: module.default,
-  })),
+  }))),
 );
-export const TidyUpTime = lazy(() =>
-  import('../pages/TidyUpTime').then((module) => ({
+export const FeedTheMonster3D = lazy(() =>
+  loadThreeDPage(() => import('../pages/three/FeedTheMonster3D').then((module) => ({
     default: module.default,
-  })),
+  }))),
+);
+export const VirtualBubbles3D = lazy(() =>
+  loadThreeDPage(() => import('../pages/three/VirtualBubbles3D').then((module) => ({
+    default: module.default,
+  }))),
 );

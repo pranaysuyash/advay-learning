@@ -145,11 +145,37 @@ jobs:
     environment: production
 
     steps:
-      - name: Deploy to server
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Prepare SSH key
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
-          echo "Deploying to production..."
-          # Add your deployment commands here
-          # Examples:
-          # - SSH to server and run docker-compose pull
-          # - Use kubectl to update deployments
-          # - Use a deployment tool like Capistrano, Deployer, etc.
+          test -n "$DEPLOY_SSH_KEY"
+          install -m 600 /dev/null ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+
+      - name: Prepare known_hosts
+        env:
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          test -n "$DEPLOY_KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          install -m 600 /dev/null ~/.ssh/known_hosts
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_KEY_PATH: ~/.ssh/deploy_key
+          SSH_KNOWN_HOSTS_PATH: ~/.ssh/known_hosts
+          APP_URL: ${{ secrets.UPTIME_URL }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          REMOTE_BACKUP_DIR: ${{ secrets.REMOTE_BACKUP_DIR }}
+        run: |
+          ./scripts/deploy-remote.sh

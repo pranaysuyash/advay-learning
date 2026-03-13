@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    __BETA_LOCAL_AI_ENABLED__: false,
+  },
   test: {
     environment: 'jsdom',
     globals: true,

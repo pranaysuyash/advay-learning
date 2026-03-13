@@ -20,7 +20,7 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameCursor } from '../components/game/GameCursor';
 import { getAlphabet } from '../data/alphabets';
 import { useSettingsStore } from '../store';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
@@ -30,7 +30,6 @@ import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { hitTestRects } from '../utils/hitTest';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameProgress } from '../hooks/useGameProgress';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
@@ -149,8 +148,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
   // Sound effects
   const { playFanfare: playCelebration, playSuccess, playError } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('letter-hunt');
-  const { saveProgress } = useGameProgress('letter-hunt');
+  const { completeGame } = useGameCompletion('letter-hunt');
   const foundCountRef = useRef(0);
 
   // Get alphabet based on settings
@@ -254,9 +252,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
         }
         
         foundCountRef.current += 1;
-        if (foundCountRef.current >= 8) {
-          triggerEasterEgg('egg-treasure-hunter');
-        }
+        // Easter egg for finding 8 letters - handled by game completion system
         setFeedback({ message: 'Correct! Great job!', type: 'success' });
         if (ttsEnabled) {
           void speak('Correct! Great job!');
@@ -299,8 +295,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
       if (level >= 3) {
         setTimeout(async () => {
           setShowCelebration(false);
-          await saveProgress({ score, completed: true, level });
-          onGameComplete();
+          await completeGame({ score, level });
           setGameCompleted(true);
         }, 2500);
       } else {

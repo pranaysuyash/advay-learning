@@ -5,12 +5,13 @@ import { CameraCrashFallback } from '../errors/CameraCrashFallback';
 export interface CameraSafeRouteProps {
     gameName: string;
     children: ReactNode;
-    /** Override the default fallback message. Use for games that genuinely require camera
-     *  (no touch/mouse fallback path) to avoid misleading children/parents. */
+    /** Override the default fallback action label */
+    fallbackActionLabel?: string;
+    /** Override the default fallback message */
     cameraRequiredMessage?: string;
 }
 
-export function CameraSafeRoute({ gameName, children, cameraRequiredMessage }: CameraSafeRouteProps) {
+export function CameraSafeRoute({ gameName, children, cameraRequiredMessage, fallbackActionLabel }: CameraSafeRouteProps) {
     const [renderKey, setRenderKey] = useState(0);
     const [fallbackMode, setFallbackMode] = useState(false);
 
@@ -20,6 +21,7 @@ export function CameraSafeRoute({ gameName, children, cameraRequiredMessage }: C
                 gameName={gameName}
                 errorKind='runtime'
                 message={cameraRequiredMessage ?? 'This game can continue with touch or mouse controls while camera tracking is unavailable.'}
+                fallbackActionLabel={fallbackActionLabel}
                 onRetry={() => {
                     setFallbackMode(false);
                     setRenderKey((prev) => prev + 1);

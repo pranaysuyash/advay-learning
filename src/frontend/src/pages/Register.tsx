@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { trackLaunchEvent } from '../analytics/launch';
 import { useAuthStore } from '../store';
 import { Mascot } from '../components/Mascot';
 import { LANGUAGES } from '../data/languages';
@@ -30,6 +31,7 @@ export function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    trackLaunchEvent('register_started', { source: 'register_form' });
     clearError();
     setLocalError('');
 
@@ -72,6 +74,10 @@ export function Register() {
 
     try {
       await register(email, password);
+      trackLaunchEvent('register_completed', {
+        source: 'register_form',
+        createdProfileDraft: showChildFields && Boolean(childName.trim()),
+      });
 
       if (showChildFields && childName.trim()) {
         savePendingLearnerProfile({
@@ -87,6 +93,7 @@ export function Register() {
       setTimeout(() => navigate('/login?registered=true'), 50);
     } catch (error) {
       playError();
+      trackLaunchEvent('register_failed', { source: 'register_form' });
       // Error is handled in store
     }
   };

@@ -132,6 +132,111 @@ Use this section as a living checklist; when an idea graduates, remove it or mar
 
 ### Kimi Stack Ideas Continued (2026‑03‑10)
 
+---
+
+## Kimi Corpus Callosum Ideas (2026-03-12) <!-- priority: P1 -->
+
+**The Split-Window Universe**
+
+### Dissonant Harmony Mode <!-- priority: P1 -->
+Left window: Tetris (logical, sequential, left-weighted). Right window: Watercolor simulation (fluid, spatial, right-weighted). The catch: The Tetris piece *is* the brush. Every rotation of the block rotates the canvas. You must clear lines while painting a sunset. The game ends when the aesthetics of the art satisfy the logic of the puzzle—finding beauty in structure.
+
+### Asymmetric Timeflows <!-- priority: P1 -->
+Left screen runs at 2x speed (rapid calculations). Right screen runs at 0.5x (slow pattern recognition). You exist in both. Catch the fast-moving math answer with your right hand (left brain control) while sculpting a slowly morphing cloud with your left hand (right brain spatial). The windows meet in the middle—a "synchronization event" where your crossed arms (detected by MediaPipe) merge the timelines.
+
+### The Interpreter Conflict <!-- priority: P1 -->
+Kokoro speaks different personalities into each ear (spatial audio):
+- **Left channel**: "Calculate the trajectory. Velocity equals distance over time."
+- **Right channel**: "Feel the arc. The ball wants to dance with the moon."
+
+The game displays the same physics puzzle in both windows, but left shows vector graphs while right shows aurora trails. You must catch the ball using *both* instructions simultaneously—analytical prediction + intuitive timing.
+
+**The Parallel Playground**
+
+### Ghost Limbs <!-- priority: P1 -->
+Your right hand controls the right window (creative sandbox). Your left hand controls the left window (logic puzzle). But here's the twist: The windows show *each other*. Right window displays a live feed of your left hand's logic actions, distorted through an artistic filter. Left window displays your right hand's creative mess as clean geometric data. You're painting with spreadsheets and calculating with poetry.
+
+### The Corpus Callosum Bridge <!-- priority: P1 -->
+A physical space between the split screens. Objects (or gestures) must cross from left to right, translating their nature:
+- Left side: "3 apples + 2 apples = 5 apples" (symbolic)
+- Crosses the bridge (you physically move a toy from left side of desk to right)
+- Right side: Becomes a still life painting of 5 apples (iconic)
+
+The game is learning *translation* between symbolic and iconic thinking—the actual cognitive flexibility that matters.
+
+### Dual Narrative Possession <!-- priority: P1 -->
+Left screen follows a Kenny NL robot who speaks only in syntax trees (Subject → Verb → Object). Right screen follows a ghost who speaks only in metaphors. They occupy the same space but perceive different realities. You control both simultaneously—MediaPipe tracks both hands:
+- Right hand moves the robot (avoiding obstacles you can't see in the right-brain view)
+- Left hand moves the ghost (feeling emotions the robot can't process)
+
+When they occupy the same coordinates, you achieve "integration"—the screens merge into 3D, revealing the true story.
+
+**The Cross-Lateral Gymnasium**
+
+### Contradictory Drawing <!-- priority: P2 -->
+Left hand (right brain) draws a circle. Right hand (left brain) draws a square. Simultaneously. On the split screen. The game rewards the *neural conflict*—the more different the shapes, the higher the score, training interhemispheric inhibition and coordination. Kokoro chants: *"Separate to integrate."*
+
+### The Stroop Insurrection <!-- priority: P2 -->
+Left window displays the word "RED" in blue text (classic Stroop effect—cognitive conflict). Right window displays a color palette. You must select blue with your left hand (logical override) while saying "red" into the mic (Kokoro detects the contradiction). The split forces you to hold contradictory truths, training cognitive flexibility.
+
+### Hemisphere Handoff <!-- priority: P1 -->
+A rhythm game where left side requires counting beats (analytical), right side requires feeling the groove (holistic). Every 8 bars, the controls switch—your left hand now controls the right window, crossing the midline. Physical crossing of the body's midline forces the hemispheres to communicate, literally thickening the corpus callosum with each play session.
+
+**The Integration Events**
+
+### The Synthesis Crisis <!-- priority: P1 -->
+Every 3 minutes, the split windows slam together (animation of collision). The resulting single screen shows a problem that requires *both* previous modes:
+- Left accumulated data points (scatter plot)
+- Right accumulated patterns (constellation shapes)
+Combined task: Connect the dots to reveal the constellation. The game pauses if you favor one hemisphere too long—detected by which hand you've been using more (MediaPipe hand dominance tracking).
+
+### The Ambiguous Figure <!-- priority: P2 -->
+A single object rendered differently in each window:
+- Left: Wireframe technical drawing (how it's built)
+- Right: Impressionist painting (how it feels)
+You must rotate a physical toy to match both perspectives simultaneously. The "correct" angle exists only in the integration of both views—the Gestalt whole.
+
+### The Bicameral Breakdown <!-- priority: P2 -->
+The game intentionally desynchronizes. Left window speeds up; right slows down. You must use the "toy controller" (from previous idea) to "weigh down" the fast side while using body movement to "speed up" the slow side—restoring balance between hemispheres through physical intervention.
+
+**The Dark Neuroplasticity**
+
+### The Split Brain Patient Simulator <!-- priority: P2 -->
+Educational but unsettling: One window shows instructions ("Pick up the red ball"). The other window shows the environment—but the ball is labeled green (right brain sees color, left sees language). You must resolve the conflict by ignoring the label and trusting the color, or vice versa, teaching how the brain handles contradictory input.
+
+### The Alien Hand <!-- priority: P2 -->
+The right window (controlled by left brain) behaves rationally. The left window (right brain) develops "agency"—it starts doing things without your input, based on emotional logic. You must negotiate with your own subconscious, represented as the left window making choices while you control the right.
+
+### The Wada Test Gameplay <!-- priority: P3 -->
+Temporary "anesthesia" of one hemisphere. The right window goes black (left brain offline). You must solve a puzzle using only spatial reasoning (right brain). Then it switches—left window active only for language tasks while right sleeps. Experiencing the isolation of hemispheric dominance.
+
+**The Kenny NL Duality**
+
+### The Janus Characters <!-- priority: P2 -->
+Kenny NL sprites split down the middle:
+- Left half: Pixelated, grid-snapping, mathematical
+- Right half: Fluid, particle-based, emotional
+They only function when joined. You control two separate half-characters in the split windows, but when they meet at the center seam, they merge into a whole being capable of solving the final puzzle.
+
+### The Interpreter vs The Experiencer <!-- priority: P2 -->
+Kokoro splits voices:
+- **Left Kokoro**: Narrates what happened ("You moved 3 pixels right")
+- **Right Kokoro**: Narrates what it felt like ("A shiver of hesitation")
+
+Both describe the same gameplay moment, creating a bicameral auditory experience. You can mute one, but the game becomes impossible—you need the "what" and the "why."
+
+**The Physical Manifestation**
+
+### The Midline Violator <!-- priority: P1 -->
+Place a real object on the exact center line between left and right camera views. The CV can't decide which hemisphere owns it. The object flickers between windows, existing in superposition. You must move it to declare allegiance, teaching the brain's lateralization boundaries.
+
+### Cross-Eyed Learning <!-- priority: P3 -->
+Old-school 3D technique: Left window feeds left eye, right window feeds right eye (using simple cardboard VR or just close-range focusing). The "parallax" between logical and creative views creates a holographic depth—a third space where integration literally pops out of the screen in 3D.
+
+---
+
+**The dangerous idea**: What if the split isn't left/right, but *Present Self* vs *Future Self*? One window shows current actions, the other shows the consequence 10 seconds later. You play both simultaneously, the past controlling the future controlling the past—a cognitive Ouroboros that trains temporal lobe integration.
+
 #### Object-as-Controller (Your Seed, Extended)
 - **The Hot Wheels Hypnosis:** physical car history grants digital loop momentum; drive in real world to climb walls digitally; Kokoro narrates the car's dreams.
 - **The Wobbly Controller:** CV loss triggers "quantum drift" allowing strategic cheating; teaches CV failure states as mechanic.

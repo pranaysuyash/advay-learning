@@ -28,13 +28,13 @@ test.describe('Offline Progress Sync', () => {
     // Realistically simulating game interaction in E2E without real camera is tough, 
     // so we trigger the progressQueue via the exposed window interface which 
     // represents the game finishing offline.
-    await page.evaluate(() => {
-      // @ts-expect-error - testing infrastructure: window type extension for progressQueue
+    const testProfileId = 'e2e-offline-test';
+    await page.evaluate((profileId) => {
+      // @ts-expect-error
       if ((window as any).progressQueue) {
-        const testProfileId = 'e2e-offline-test';
         (window as any).progressQueue.enqueue({
           idempotency_key: 'test-offline-sync-1',
-          profile_id: testProfileId,
+          profile_id: profileId,
           activity_type: 'letter_tracing',
           content_id: 'A',
           score: 100,
@@ -42,14 +42,81 @@ test.describe('Offline Progress Sync', () => {
           completed: true
         });
       }
+    }, testProfileId);
+
+    // verify UI badge appears while still offline
+    const pendingBadge = await page.waitForSelector('text=Pending (1)');
+    expect(pendingBadge).toBeTruthy();
+
+    // click badge and assert navigation & analytics
+    await pendingBadge.click();
+    await page.waitForURL('**/progress');
+    const events = await page.evaluate(() => {
+      return JSON.parse(window.localStorage.getItem('advay.launch.analytics.v1') || '[]');
     });
+    expect(events.some((e: any) => e.name === 'pending_badge_clicked' && e.metadata.profileId === testProfileId)).toBeTruthy();
+    // metadata should include gameId (string)
+    expect(events.some((e: any) => e.name === 'pending_badge_clicked' && typeof e.metadata.gameId === 'string')).toBeTruthy();
+
+    // navigate back to game for remainder of test
+    await page.click('text="Alphabet Tracing"');
 
     // 5. Come back online
     await page.context().setOffline(false);
 
+    // also add a failed/dead-letter item and verify those badge/analytics
+    await page.evaluate((profileId) => {
+      // @ts-expect-error
+      if ((window as any).progressQueue) {
+        (window as any).progressQueue.moveToDeadLetter('nonexistent', 'for test');
+        // manually increment dead letters count
+        (window as any).progressQueue.enqueue({
+          idempotency_key: 'test-offline-sync-2',
+          profile_id: profileId,
+          activity_type: 'letter_tracing',
+          content_id: 'B',
+          score: 90,
+          timestamp: new Date().toISOString(),
+          completed: true,
+        });
+      }
+    }, testProfileId);
+    // after going back online
+    await page.evaluate(async () => {
+      // @ts-expect-error
+      if ((window as any).progressQueue && (window as any).apiClient) {
+        await (window as any).progressQueue.syncAll((window as any).apiClient);
+      }
+    });
+
+    // verify failed-badge appears (count may vary depending on implementation)
+    const failedBadge = await page.waitForSelector('text=Failed (1)', { timeout: 5000 }).catch(() => null);
+    if (failedBadge) {
+      await failedBadge.click();
+      await page.waitForURL('**/progress');
+      const events2 = await page.evaluate(() => {
+        return JSON.parse(window.localStorage.getItem('advay.launch.analytics.v1') || '[]');
+      });
+      expect(events2.some((e: any) => e.name === 'failed_badge_clicked')).toBeTruthy();
+      expect(events2.some((e: any) => e.name === 'failed_badge_clicked' && typeof e.metadata.gameId === 'string')).toBeTruthy();
+      // return to game
+      await page.click('text="Alphabet Tracing"');
+    }
+
     // 6. Navigate back to dashboard (should trigger sync on mount/visibility)
     await page.click('text="Home"');
     await page.waitForURL('**/dashboard');
+
+    // dashboard should render at least one offline-badge (pending or failed)
+    const dashBadge = await page.waitForSelector('text=Pending', { timeout: 2000 }).catch(() => null) ||
+      await page.waitForSelector('text=Failed', { timeout: 2000 }).catch(() => null);
+    expect(dashBadge).toBeTruthy();
+
+    // analytics should include sync result event
+    const syncEvents = await page.evaluate(() => {
+      return JSON.parse(window.localStorage.getItem('advay.launch.analytics.v1') || '[]');
+    });
+    expect(syncEvents.some((e: any) => e.name === 'progress_sync_result')).toBeTruthy();
 
     // 7. Force/await the sync mechanism 
     await page.evaluate(async () => {

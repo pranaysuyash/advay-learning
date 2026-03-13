@@ -46,6 +46,7 @@ describe('SettingsStore', () => {
     delete p.demoMode;
     delete p.setDemoMode;
     delete p.setHydrated;
+    delete p.hydrated;
     return p;
   }
 

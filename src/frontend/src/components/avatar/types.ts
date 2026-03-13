@@ -35,7 +35,6 @@ export const AVATAR_CATEGORIES = [
   { id: 'platformer', label: 'Kids', icon: '👦' },
   { id: 'animal', label: 'Pets', icon: '🐸' },
   { id: 'creature', label: 'Magic', icon: '✨' },
-  { id: 'photo', label: 'Photo', icon: '📷' },
 ] as const;
 
 // Platformer character options

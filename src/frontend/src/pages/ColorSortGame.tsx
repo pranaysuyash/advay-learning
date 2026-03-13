@@ -10,8 +10,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateItems, calculateScore, type ColorItem } from '../games/colorSortGameLogic';
@@ -44,8 +43,7 @@ const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
 
   const { playClick, playSuccess, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('color-sort');
-  const { saveProgress } = useGameProgress('color-sort');
+  const { completeGame } = useGameCompletion('color-sort');
 
   useGameSessionProgress({ gameName: 'Color Sort', score, level: currentLevel, isPlaying: true, metaData: { correct } });
 
@@ -106,7 +104,7 @@ const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
   };
 
   const handleStart = () => { playClick(); startGame(); };
-  const handleFinish = useCallback(async () => { playClick(); await saveProgress({ score: correct, completed: true, level: currentLevel }); await onGameComplete(correct); navigate('/games'); }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  const handleFinish = useCallback(async () => { playClick(); await completeGame({ score: correct, completed: true, level: currentLevel }); navigate('/games'); }, [correct, navigate, playClick, completeGame, currentLevel]);
 
   if (!assetsLoaded) {
     return (

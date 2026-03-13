@@ -11,6 +11,7 @@ import { useAudio } from './utils/hooks/useAudio';
 import { GlobalErrorBoundary } from './components/errors/GlobalErrorBoundary';
 import { useProgressSync } from './hooks/useProgressSync';
 import { CalmModeProvider } from './components/CalmModeProvider';
+import { trackPageView } from './analytics/launch';
 
 import * as lazyPages from './routes/lazyPages';
 import { VerifyEmail } from './routes/lazyPages';
@@ -22,6 +23,9 @@ const {
   ForgotPassword,
   ResetPassword,
   Pricing,
+  PrivacyPolicy,
+  TermsOfPlay,
+  Support,
   GameSelection,
   Dashboard,
   AlphabetGame,
@@ -93,7 +97,15 @@ const {
   BubbleBiology,
   MirrorMaze,
   CircuitBuilder,
+  NasaSkyHunt,
+  PlanetSandbox,
+  EarthTimeMachine,
+  ISSDocking,
+  BridgeBuilder,
+  LogicBoxPush,
+  CatchSort,
   WeatherLab,
+  LanguagePuppet,
   MirrorDuel,
   PopTheNumber,
   ColorSplash,
@@ -144,6 +156,13 @@ const {
   DinosaurDig,
   LightPainter,
   TidyUpTime,
+  VirtualArchery,
+  DigitalJenga3D,
+  DressForWeather3D,
+  ObstacleCourse3D,
+  FeedTheMonster3D,
+  VirtualBubbles3D,
+  FingerPaintingMadness,
 } = lazyPages;
 
 // Loading component for suspense boundaries
@@ -153,15 +172,1006 @@ const PageLoader = () => (
   </div>
 );
 
+export type AppRoute = {
+  path: string;
+  element: React.ReactNode;
+  protected?: boolean;
+  layout?: boolean;
+  cameraSafe?: boolean;
+  gameName?: string;
+  cameraRequiredMessage?: string;
+  devOnly?: boolean;
+  redirectTo?: string;
+};
+
+function wrapRoute(route: AppRoute) {
+  let element = route.element;
+
+  if (route.cameraSafe) {
+    element = (
+      <CameraSafeRoute
+        gameName={route.gameName ?? 'Game'}
+        cameraRequiredMessage={route.cameraRequiredMessage}
+      >
+        {element}
+      </CameraSafeRoute>
+    );
+  }
+
+  if (route.layout) {
+    element = <Layout>{element}</Layout>;
+  }
+
+  if (route.protected) {
+    element = <ProtectedRoute>{element}</ProtectedRoute>;
+  }
+
+  return element;
+}
+
+const appRoutes: AppRoute[] = [
+  { path: '/login', element: <Login /> },
+  { path: '/register', element: <Register /> },
+  { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/reset-password', element: <ResetPassword /> },
+  { path: '/verify-email', element: <VerifyEmail /> },
+  { path: '/pricing', element: <Pricing />, layout: true },
+  { path: '/privacy', element: <PrivacyPolicy />, layout: true },
+  { path: '/terms', element: <TermsOfPlay />, layout: true },
+  { path: '/support', element: <Support />, layout: true },
+  {
+    path: '/game-selection',
+    element: <GameSelection />,
+    protected: true,
+    layout: true,
+  },
+  { path: '/', element: <Home />, layout: true },
+  { path: '/dashboard', element: <Dashboard />, protected: true, layout: true },
+  {
+    path: '/games/alphabet-tracing',
+    element: <AlphabetGame />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Alphabet Tracing',
+  },
+  { path: '/game', element: null, redirectTo: '/games/alphabet-tracing' },
+  {
+    path: '/games/target-practice',
+    element: <TargetPractice />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Target Practice',
+  },
+  { path: '/games', element: <Games />, protected: true, layout: true },
+  {
+    path: '/games/finger-number-show',
+    element: <FingerNumberShow />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Finger Number Show',
+  },
+  {
+    path: '/games/connect-the-dots',
+    element: <ConnectTheDots />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Connect The Dots',
+  },
+  {
+    path: '/games/letter-hunt',
+    element: <LetterHunt />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Letter Hunt',
+  },
+  {
+    path: '/games/music-pinch-beat',
+    element: <MusicPinchBeat />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Music Pinch Beat',
+  },
+  {
+    path: '/games/steady-hand-lab',
+    element: <SteadyHandLab />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Steady Hand Lab',
+  },
+  {
+    path: '/games/shape-pop',
+    element: <ShapePop />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Shape Pop',
+  },
+  {
+    path: '/games/color-match-garden',
+    element: <ColorMatchGarden />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Color Match Garden',
+  },
+  {
+    path: '/games/color-by-number',
+    element: <ColorByNumber />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Color By Number',
+  },
+  {
+    path: '/games/color-potions',
+    element: <ColorPotions />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Color Potions',
+  },
+  {
+    path: '/games/memory-match',
+    element: <MemoryMatch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Memory Match',
+  },
+  {
+    path: '/games/number-tracing',
+    element: <NumberTracing />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Number Tracing',
+  },
+  {
+    path: '/games/number-tap-trail',
+    element: <NumberTapTrail />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Number Tap Trail',
+  },
+  {
+    path: '/games/number-sequence',
+    element: <NumberSequence />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Number Sequence',
+  },
+  {
+    path: '/games/shape-sequence',
+    element: <ShapeSequence />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Shape Sequence',
+  },
+  {
+    path: '/games/yoga-animals',
+    element: <YogaAnimals />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Yoga Animals',
+  },
+  {
+    path: '/games/balloon-pop-fitness',
+    element: <BalloonPopFitness />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Balloon Pop Fitness',
+  },
+  {
+    path: '/games/obstacle-course',
+    element: <ObstacleCourse />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Obstacle Course',
+  },
+  {
+    path: '/games/follow-the-leader',
+    element: <FollowTheLeader />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Follow the Leader',
+  },
+  {
+    path: '/games/musical-statues',
+    element: <MusicalStatues />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Musical Statues',
+  },
+  {
+    path: '/games/balance-beam',
+    element: <BalanceBeam />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Balance Beam',
+  },
+  {
+    path: '/games/virtual-archery',
+    element: <VirtualArchery />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Virtual Archery',
+  },
+  {
+    path: '/games/freeze-dance',
+    element: <FreezeDance />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Freeze Dance',
+  },
+  {
+    path: '/games/simon-says',
+    element: <SimonSays />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Simon Says',
+  },
+  {
+    path: '/games/chemistry-lab',
+    element: <VirtualChemistryLab />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Virtual Chemistry Lab',
+  },
+  {
+    path: '/games/word-builder',
+    element: <WordBuilder />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Word Builder',
+  },
+  {
+    path: '/games/emoji-match',
+    element: <EmojiMatch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Emoji Match',
+  },
+  {
+    path: '/games/air-canvas',
+    element: <AirCanvas />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Air Canvas',
+  },
+  {
+    path: '/games/mirror-draw',
+    element: <MirrorDraw />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Mirror Draw',
+  },
+  {
+    path: '/games/phonics-sounds',
+    element: <PhonicsSounds />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Phonics Sounds',
+  },
+  {
+    path: '/games/phonics-tracing',
+    element: <PhonicsTracing />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Phonics Tracing',
+  },
+  {
+    path: '/games/beginning-sounds',
+    element: <BeginningSounds />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Beginning Sounds',
+  },
+  {
+    path: '/games/ending-sounds',
+    element: <EndingSounds />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Ending Sounds',
+  },
+  {
+    path: '/games/odd-one-out',
+    element: <OddOneOut />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Odd One Out',
+  },
+  {
+    path: '/games/same-and-different',
+    element: <SameAndDifferent />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Same And Different',
+  },
+  {
+    path: '/games/shadow-match',
+    element: <ShadowMatch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Shadow Match',
+  },
+  {
+    path: '/games/shadow-puppet-theater',
+    element: <ShadowPuppetTheater />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Shadow Puppet Theater',
+  },
+  {
+    path: '/games/virtual-bubbles',
+    element: <VirtualBubbles />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Virtual Bubbles',
+  },
+  {
+    path: '/games/kaleidoscope-hands',
+    element: <KaleidoscopeHands />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Kaleidoscope Hands',
+  },
+  {
+    path: '/games/shadow-portal',
+    element: <ShadowPortal />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Shadow Portal',
+  },
+  {
+    path: '/games/air-guitar-hero',
+    element: <AirGuitarHero />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Air Guitar Hero',
+  },
+  {
+    path: '/games/fruit-ninja-air',
+    element: <FruitNinjaAir />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Fruit Ninja Air',
+  },
+  {
+    path: '/games/counting-objects',
+    element: <CountingObjects />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Counting Objects',
+  },
+  {
+    path: '/games/more-or-less',
+    element: <MoreOrLess />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'More Or Less',
+  },
+  {
+    path: '/games/blend-builder',
+    element: <BlendBuilder />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Blend Builder',
+  },
+  {
+    path: '/games/syllable-clap',
+    element: <SyllableClap />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Syllable Clap',
+  },
+  {
+    path: '/games/sight-word-flash',
+    element: <SightWordFlash />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Sight Word Flash',
+  },
+  {
+    path: '/games/path-following',
+    element: <PathFollowing />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Path Following',
+  },
+  {
+    path: '/games/rhythm-tap',
+    element: <RhythmTap />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Rhythm Tap',
+  },
+  {
+    path: '/games/animal-sounds',
+    element: <AnimalSounds />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Animal Sounds',
+  },
+  {
+    path: '/games/body-parts',
+    element: <BodyParts />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Body Parts',
+  },
+  {
+    path: '/games/voice-stories',
+    element: <VoiceStories />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Voice Stories',
+  },
+  {
+    path: '/games/reading-along',
+    element: <ReadingAlong />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Reading Along',
+  },
+  {
+    path: '/games/math-smash',
+    element: <MathSmash />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Math Smash',
+  },
+  {
+    path: '/games/color-sort',
+    element: <ColorSortGame />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Color Sort',
+  },
+  {
+    path: '/games/letter-catcher',
+    element: <LetterCatcher />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Letter Catcher',
+  },
+  {
+    path: '/games/number-bubble-pop',
+    element: <NumberBubblePop />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Number Bubble Pop',
+  },
+  {
+    path: '/games/weather-lab',
+    element: <WeatherLab />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Weather Lab',
+  },
+  {
+    path: '/games/nasa-sky-hunt',
+    element: <NasaSkyHunt />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'NASA Sky Hunt',
+  },
+  {
+    path: '/games/mirror-duel',
+    element: <MirrorDuel />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Mirror Duel',
+  },
+  {
+    path: '/games/language-puppet',
+    element: <LanguagePuppet />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Language Puppet',
+  },
+  {
+    path: '/games/planet-sandbox',
+    element: <PlanetSandbox />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Planet Sandbox',
+  },
+  {
+    path: '/games/earth-time-machine',
+    element: <EarthTimeMachine />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Earth Time Machine',
+  },
+  {
+    path: '/games/iss-docking',
+    element: <ISSDocking />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'ISS Docking',
+  },
+  {
+    path: '/games/bridge-builder',
+    element: <BridgeBuilder />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Bridge Builder',
+  },
+  {
+    path: '/games/logic-box-push',
+    element: <LogicBoxPush />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Logic Box Push',
+  },
+  {
+    path: '/games/catch-sort',
+    element: <CatchSort />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Catch Sort',
+  },
+  {
+    path: '/games/pop-the-number',
+    element: <PopTheNumber />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Pop The Number',
+  },
+  {
+    path: '/games/color-splash',
+    element: <ColorSplash />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Color Splash',
+  },
+  {
+    path: '/games/color-mixing',
+    element: <ColorMixing />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Color Mixing',
+  },
+  {
+    path: '/games/rainbow-bridge',
+    element: <RainbowBridge />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Rainbow Bridge',
+  },
+  {
+    path: '/games/beat-bounce',
+    element: <BeatBounce />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Beat Bounce',
+  },
+  {
+    path: '/games/bubble-count',
+    element: <BubbleCount />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Bubble Count',
+  },
+  {
+    path: '/games/feed-the-monster',
+    element: <FeedTheMonster />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Feed The Monster',
+  },
+  {
+    path: '/games/shape-stacker',
+    element: <ShapeStacker />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Shape Stacker',
+  },
+  {
+    path: '/games/size-sorting',
+    element: <SizeSorting />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Size Sorting',
+  },
+  {
+    path: '/games/digital-jenga',
+    element: <DigitalJenga />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Digital Jenga',
+  },
+  {
+    path: '/games/weather-match',
+    element: <WeatherMatch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Weather Match',
+  },
+  {
+    path: '/games/fraction-pizza',
+    element: <FractionPizza />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Fraction Pizza',
+  },
+  {
+    path: '/games/time-tell',
+    element: <TimeTell />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Time Tell',
+  },
+  {
+    path: '/games/money-match',
+    element: <MoneyMatch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Money Match',
+  },
+  {
+    path: '/games/pattern-play',
+    element: <PatternPlay />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Pattern Play',
+  },
+  {
+    path: '/games/word-search',
+    element: <WordSearch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Word Search',
+  },
+  {
+    path: '/games/letter-sound-match',
+    element: <LetterSoundMatch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Letter Sound Match',
+  },
+  {
+    path: '/games/story-builder',
+    element: <StoryBuilder />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Story Builder',
+  },
+  {
+    path: '/games/bubble-pop-symphony',
+    element: <BubblePopSymphony />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Bubble Pop Symphony',
+  },
+  {
+    path: '/games/dress-for-weather',
+    element: <DressForWeather />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Dress For Weather',
+  },
+  {
+    path: '/games/story-sequence',
+    element: <StorySequence />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Story Sequence',
+  },
+  {
+    path: '/games/shape-safari',
+    element: <ShapeSafari />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Shape Safari',
+  },
+  {
+    path: '/games/free-draw',
+    element: <FreeDraw />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Free Draw',
+  },
+  {
+    path: '/games/math-monsters',
+    element: <MathMonsters />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Math Monsters',
+  },
+  {
+    path: '/games/platformer-runner',
+    element: <PlatformerRunner />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Platform Runner',
+  },
+  {
+    path: '/games/counting-collectathon',
+    element: <CountingCollectathon />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Counting Collect-a-thon',
+  },
+  {
+    path: '/games/math-jumpers',
+    element: <MathJumpers />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Math Jumpers',
+  },
+  {
+    path: '/games/simple-addition',
+    element: <SimpleAddition />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Simple Addition',
+  },
+  {
+    path: '/games/maze-runner',
+    element: <MazeRunner />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Maze Runner',
+  },
+  {
+    path: '/games/bubble-pop',
+    element: <BubblePop />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Bubble Pop',
+  },
+  {
+    path: '/games/rhyme-time',
+    element: <RhymeTime />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Rhyme Time',
+  },
+  {
+    path: '/games/physics-playground',
+    element: <PhysicsPlayground />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Physics Playground',
+  },
+  {
+    path: '/games/physics-demo',
+    element: <PhysicsPlayground />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Physics Demo',
+  },
+  {
+    path: '/games/circuit-builder',
+    element: <CircuitBuilder />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Circuit Builder',
+  },
+  {
+    path: '/games/cutting-practice',
+    element: <CuttingPractice />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Cutting Practice',
+  },
+  {
+    path: '/games/pinch-practice',
+    element: <PinchPractice />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Pinch Practice',
+  },
+  {
+    path: '/games/circle-drawing',
+    element: <CircleDrawing />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Circle Drawing',
+  },
+  {
+    path: '/games/spelling-run',
+    element: <SpellingRun />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Spelling Run',
+  },
+  {
+    path: '/games/vowel-valley',
+    element: <VowelValley />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Vowel Valley',
+  },
+  {
+    path: '/games/wash-hands-dance',
+    element: <WashHandsDance />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Wash Hands Dance',
+    cameraRequiredMessage:
+      'This game needs your camera to track your hand movements for washing hands!',
+  },
+  {
+    path: '/games/pack-lunchbox',
+    element: <PackLunchbox />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Pack Lunchbox',
+  },
+  {
+    path: '/games/set-the-table',
+    element: <SetTheTable />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Set The Table',
+  },
+  {
+    path: '/games/temperature-sort',
+    element: <TemperatureSort />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Temperature Sort',
+  },
+  {
+    path: '/games/plant-garden',
+    element: <PlantGarden />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Plant Garden',
+  },
+  {
+    path: '/games/sound-garden',
+    element: <SoundGarden />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Sound Garden',
+  },
+  {
+    path: '/games/taste-match',
+    element: <TasteMatch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Taste Match',
+  },
+  {
+    path: '/games/farm-friends',
+    element: <FarmFriends />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Farm Friends',
+  },
+  {
+    path: '/games/texture-explorer',
+    element: <TextureExplorer />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Texture Explorer',
+  },
+  {
+    path: '/games/dinosaur-dig',
+    element: <DinosaurDig />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Dinosaur Dig',
+  },
+  {
+    path: '/games/light-painter',
+    element: <LightPainter />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Light Painter',
+  },
+  {
+    path: '/games/tidy-up-time',
+    element: <TidyUpTime />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Tidy Up Time',
+  },
+  {
+    path: '/games/digital-jenga-3d',
+    element: <DigitalJenga3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Digital Jenga 3D',
+  },
+  {
+    path: '/games/dress-for-weather-3d',
+    element: <DressForWeather3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Dress For Weather 3D',
+  },
+  {
+    path: '/games/obstacle-course-3d',
+    element: <ObstacleCourse3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Obstacle Course 3D',
+  },
+  {
+    path: '/games/feed-the-monster-3d',
+    element: <FeedTheMonster3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Feed The Monster 3D',
+  },
+  {
+    path: '/games/virtual-bubbles-3d',
+    element: <VirtualBubbles3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Virtual Bubbles 3D',
+  },
+  { path: '/progress', element: <Progress />, protected: true, layout: true },
+  { path: '/settings', element: <Settings />, protected: true, layout: true },
+  { path: '/style-test', element: <StyleTest />, layout: true, devOnly: true },
+  {
+    path: '/test/mediapipe',
+    element: <MediaPipeTest />,
+    layout: true,
+    devOnly: true,
+  },
+  {
+    path: '/inventory',
+    element: <InventoryPage />,
+    protected: true,
+    layout: true,
+  },
+  {
+    path: '/discovery-lab',
+    element: <DiscoveryLab />,
+    protected: true,
+    layout: true,
+  },
+  {
+    path: '/games/spell-painter',
+    element: <SpellPainter />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Spell Painter',
+  },
+  {
+    path: '/games/music-conductor',
+    element: <MusicConductor />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Music Conductor',
+  },
+  {
+    path: '/games/bubble-biology',
+    element: <BubbleBiology />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Bubble Biology',
+  },
+  {
+    path: '/games/mirror-maze',
+    element: <MirrorMaze />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Mirror Maze',
+  },
+  {
+    path: '/games/finger-painting-madness',
+    element: <FingerPaintingMadness />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Finger Painting Madness',
+  },
+];
+
 function App() {
   useProgressSync();
   const location = useLocation();
   const { playFlip } = useAudio();
   const prevPathName = useRef(location.pathname);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      prevPathName.current = location.pathname;
+      return;
+    }
     if (location.pathname !== prevPathName.current) {
-      // Don't play flip sound on initial render
+      trackPageView(location.pathname);
       playFlip();
       prevPathName.current = location.pathname;
     }
@@ -174,1141 +1184,23 @@ function App() {
           <GlobalErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                {/* Auth pages - no Layout wrapper (minimal UI for trust) */}
-                <Route path='/login' element={<Login />} />
-                <Route path='/register' element={<Register />} />
-                <Route path='/forgot-password' element={<ForgotPassword />} />
-                <Route path='/reset-password' element={<ResetPassword />} />
-                <Route path='/verify-email' element={<VerifyEmail />} />
-
-                {/* All other pages use Layout */}
-                <Route
-                  path='/pricing'
-                  element={
-                    <Layout>
-                      <Pricing />
-                    </Layout>
-                  }
-                />
-                <Route
-                  path='/game-selection'
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <GameSelection />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/'
-                  element={
-                    <Layout>
-                      <Home />
-                    </Layout>
-                  }
-                />
-                <Route
-                  path='/dashboard'
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Dashboard />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/alphabet-tracing'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Alphabet Tracing'>
-                        <AlphabetGame />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                {/* Redirect from old route to new route for backward compatibility */}
-                <Route
-                  path='/game'
-                  element={<Navigate to='/games/alphabet-tracing' replace />}
-                />
-                <Route
-                  path='/games/target-practice'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Target Practice'>
-                        <TargetPractice />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games'
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Games />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/finger-number-show'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Finger Number Show'>
-                        <FingerNumberShow />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/connect-the-dots'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Connect The Dots'>
-                        <ConnectTheDots />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/letter-hunt'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Letter Hunt'>
-                        <LetterHunt />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/music-pinch-beat'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Music Pinch Beat'>
-                        <MusicPinchBeat />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/steady-hand-lab'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Steady Hand Lab'>
-                        <SteadyHandLab />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/shape-pop'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Shape Pop'>
-                        <ShapePop />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/color-match-garden'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Color Match Garden'>
-                        <ColorMatchGarden />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/color-by-number'
-                  element={
-                    <ProtectedRoute>
-                      <ColorByNumber />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/color-potions'
-                  element={
-                    <ProtectedRoute>
-                      <ColorPotions />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/memory-match'
-                  element={
-                    <ProtectedRoute>
-                      <MemoryMatch />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/number-tracing'
-                  element={
-                    <ProtectedRoute>
-                      <NumberTracing />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/number-tap-trail'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Number Tap Trail'>
-                        <NumberTapTrail />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/number-sequence'
-                  element={
-                    <ProtectedRoute>
-                      <NumberSequence />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/shape-sequence'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Shape Sequence'>
-                        <ShapeSequence />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/yoga-animals'
-                  element={
-                    <ProtectedRoute>
-                      <YogaAnimals />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/balloon-pop-fitness'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Balloon Pop Fitness'>
-                        <BalloonPopFitness />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/obstacle-course'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Obstacle Course'>
-                        <ObstacleCourse />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/follow-the-leader'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Follow the Leader'>
-                        <FollowTheLeader />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/musical-statues'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Musical Statues'>
-                        <MusicalStatues />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/balance-beam'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Balance Beam'>
-                        <BalanceBeam />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/freeze-dance'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Freeze Dance'>
-                        <FreezeDance />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/simon-says'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Simon Says'>
-                        <SimonSays />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/chemistry-lab'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Virtual Chemistry Lab'>
-                        <VirtualChemistryLab />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/word-builder'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Word Builder'>
-                        <WordBuilder />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/emoji-match'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Emoji Match'>
-                        <EmojiMatch />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/air-canvas'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Air Canvas'>
-                        <AirCanvas />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/mirror-draw'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Mirror Draw'>
-                        <MirrorDraw />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/phonics-sounds'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Phonics Sounds'>
-                        <PhonicsSounds />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/phonics-tracing'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Phonics Tracing'>
-                        <PhonicsTracing />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/beginning-sounds'
-                  element={
-                    <ProtectedRoute>
-                      <BeginningSounds />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/ending-sounds'
-                  element={
-                    <ProtectedRoute>
-                      <EndingSounds />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/odd-one-out'
-                  element={
-                    <ProtectedRoute>
-                      <OddOneOut />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/same-and-different'
-                  element={
-                    <ProtectedRoute>
-                      <SameAndDifferent />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/shadow-match'
-                  element={
-                    <ProtectedRoute>
-                      <ShadowMatch />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/shadow-puppet-theater'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Shadow Puppet Theater'>
-                        <ShadowPuppetTheater />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/virtual-bubbles'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Virtual Bubbles'>
-                        <VirtualBubbles />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/kaleidoscope-hands'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Kaleidoscope Hands'>
-                        <KaleidoscopeHands />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/shadow-portal'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Shadow Portal'>
-                        <ShadowPortal />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/air-guitar-hero'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Air Guitar Hero'>
-                        <AirGuitarHero />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/fruit-ninja-air'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Fruit Ninja Air'>
-                        <FruitNinjaAir />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/counting-objects'
-                  element={
-                    <ProtectedRoute>
-                      <CountingObjects />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/more-or-less'
-                  element={
-                    <ProtectedRoute>
-                      <MoreOrLess />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/blend-builder'
-                  element={
-                    <ProtectedRoute>
-                      <BlendBuilder />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/syllable-clap'
-                  element={
-                    <ProtectedRoute>
-                      <SyllableClap />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/sight-word-flash'
-                  element={
-                    <ProtectedRoute>
-                      <SightWordFlash />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/path-following'
-                  element={
-                    <ProtectedRoute>
-                      <PathFollowing />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/rhythm-tap'
-                  element={
-                    <ProtectedRoute>
-                      <RhythmTap />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/animal-sounds'
-                  element={
-                    <ProtectedRoute>
-                      <AnimalSounds />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/body-parts'
-                  element={
-                    <ProtectedRoute>
-                      <BodyParts />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/voice-stories'
-                  element={
-                    <ProtectedRoute>
-                      <VoiceStories />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/reading-along'
-                  element={
-                    <ProtectedRoute>
-                      <ReadingAlong />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/math-smash'
-                  element={
-                    <ProtectedRoute>
-                      <MathSmash />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/color-sort'
-                  element={
-                    <ProtectedRoute>
-                      <ColorSortGame />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/letter-catcher'
-                  element={
-                    <ProtectedRoute>
-                      <LetterCatcher />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/number-bubble-pop'
-                  element={
-                    <ProtectedRoute>
-                      <NumberBubblePop />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/weather-lab'
-                  element={
-                    <ProtectedRoute>
-                      <WeatherLab />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/mirror-duel'
-                  element={
-                    <ProtectedRoute>
-                      <MirrorDuel />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/pop-the-number'
-                  element={
-                    <ProtectedRoute>
-                      <PopTheNumber />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/color-splash'
-                  element={
-                    <ProtectedRoute>
-                      <ColorSplash />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/color-mixing'
-                  element={
-                    <ProtectedRoute>
-                      <ColorMixing />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/rainbow-bridge'
-                  element={
-                    <ProtectedRoute>
-                      <RainbowBridge />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/beat-bounce'
-                  element={
-                    <ProtectedRoute>
-                      <BeatBounce />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/bubble-count'
-                  element={
-                    <ProtectedRoute>
-                      <BubbleCount />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/feed-the-monster'
-                  element={
-                    <ProtectedRoute>
-                      <FeedTheMonster />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/shape-stacker'
-                  element={
-                    <ProtectedRoute>
-                      <ShapeStacker />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/size-sorting'
-                  element={
-                    <ProtectedRoute>
-                      <SizeSorting />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/digital-jenga'
-                  element={
-                    <ProtectedRoute>
-                      <DigitalJenga />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/weather-match'
-                  element={
-                    <ProtectedRoute>
-                      <WeatherMatch />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/fraction-pizza'
-                  element={
-                    <ProtectedRoute>
-                      <FractionPizza />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/time-tell'
-                  element={
-                    <ProtectedRoute>
-                      <TimeTell />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/money-match'
-                  element={
-                    <ProtectedRoute>
-                      <MoneyMatch />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/pattern-play'
-                  element={
-                    <ProtectedRoute>
-                      <PatternPlay />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/word-search'
-                  element={
-                    <ProtectedRoute>
-                      <WordSearch />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/letter-sound-match'
-                  element={
-                    <ProtectedRoute>
-                      <LetterSoundMatch />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/story-builder'
-                  element={
-                    <ProtectedRoute>
-                      <StoryBuilder />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/bubble-pop-symphony'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Bubble Pop Symphony'>
-                        <BubblePopSymphony />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/dress-for-weather'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Dress For Weather'>
-                        <DressForWeather />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/story-sequence'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Story Sequence'>
-                        <StorySequence />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/shape-safari'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Shape Safari'>
-                        <ShapeSafari />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/free-draw'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Free Draw'>
-                        <FreeDraw />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/math-monsters'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Math Monsters'>
-                        <MathMonsters />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/platformer-runner'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Platform Runner'>
-                        <PlatformerRunner />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/counting-collectathon'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Counting Collect-a-thon'>
-                        <CountingCollectathon />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/math-jumpers'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Math Jumpers'>
-                        <MathJumpers />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/simple-addition'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Simple Addition'>
-                        <SimpleAddition />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/maze-runner'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Maze Runner'>
-                        <MazeRunner />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/bubble-pop'
-                  element={
-                    <ProtectedRoute>
-                      <BubblePop />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/rhyme-time'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Rhyme Time'>
-                        <RhymeTime />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/physics-playground'
-                  element={
-                    <ProtectedRoute>
-                      <PhysicsPlayground />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/physics-demo'
-                  element={
-                    <ProtectedRoute>
-                      <PhysicsPlayground />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/circuit-builder'
-                  element={
-                    <ProtectedRoute>
-                      <CircuitBuilder />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/cutting-practice'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Cutting Practice'>
-                        <CuttingPractice />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/pinch-practice'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Pinch Practice'>
-                        <PinchPractice />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/circle-drawing'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Circle Drawing'>
-                        <CircleDrawing />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/spelling-run'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Spelling Run'>
-                        <SpellingRun />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/vowel-valley'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Vowel Valley'>
-                        <VowelValley />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/wash-hands-dance'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute
-                        gameName='Wash Hands Dance'
-                        cameraRequiredMessage='Wash Hands Dance uses your camera to detect hand movements. Please allow camera access to play this game.'
-                      >
-                        <WashHandsDance />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/pack-lunchbox'
-                  element={
-                    <ProtectedRoute>
-                      <PackLunchbox />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/set-the-table'
-                  element={
-                    <ProtectedRoute>
-                      <SetTheTable />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/temperature-sort'
-                  element={
-                    <ProtectedRoute>
-                      <TemperatureSort />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/plant-garden'
-                  element={
-                    <ProtectedRoute>
-                      <PlantGarden />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/sound-garden'
-                  element={
-                    <ProtectedRoute>
-                      <SoundGarden />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/taste-match'
-                  element={
-                    <ProtectedRoute>
-                      <TasteMatch />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/farm-friends'
-                  element={
-                    <ProtectedRoute>
-                      <FarmFriends />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/texture-explorer'
-                  element={
-                    <ProtectedRoute>
-                      <TextureExplorer />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/dinosaur-dig'
-                  element={
-                    <ProtectedRoute>
-                      <DinosaurDig />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/light-painter'
-                  element={
-                    <ProtectedRoute>
-                      <LightPainter />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/tidy-up-time'
-                  element={
-                    <ProtectedRoute>
-                      <TidyUpTime />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/progress'
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Progress />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/settings'
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Settings />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                {import.meta.env.DEV && (
-                  <>
+                {appRoutes
+                  .filter((route) => !route.devOnly || import.meta.env.DEV)
+                  .map((route) => (
                     <Route
-                      path='/style-test'
+                      key={route.path}
+                      path={route.path}
                       element={
-                        <Layout>
-                          <StyleTest />
-                        </Layout>
+                        route.redirectTo ? (
+                          <Navigate to={route.redirectTo} replace />
+                        ) : (
+                          wrapRoute(route)
+                        )
                       }
                     />
-                    <Route
-                      path='/test/mediapipe'
-                      element={
-                        <Layout>
-                          <MediaPipeTest />
-                        </Layout>
-                      }
-                    />
-                  </>
-                )}
-                <Route
-                  path='/inventory'
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <InventoryPage />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/discovery-lab'
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <DiscoveryLab />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/spell-painter'
-                  element={
-                    <ProtectedRoute>
-                      <CameraSafeRoute gameName='Spell Painter'>
-                        <SpellPainter />
-                      </CameraSafeRoute>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/music-conductor'
-                  element={
-                    <ProtectedRoute>
-                      <MusicConductor />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/bubble-biology'
-                  element={
-                    <ProtectedRoute>
-                      <BubbleBiology />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path='/games/mirror-maze'
-                  element={
-                    <ProtectedRoute>
-                      <MirrorMaze />
-                    </ProtectedRoute>
-                  }
-                />
+                  ))}
               </Routes>
+
               <BackpackButton />
               <ItemDropToast />
             </Suspense>

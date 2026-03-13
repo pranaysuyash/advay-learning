@@ -18,6 +18,7 @@ import {
   validateProgressItem,
   type ValidationResult,
 } from './progressValidation';
+import { trackLaunchEvent } from '../analytics/launch';
 import {
   MAX_QUEUE_SIZE,
   MAX_RETRIES,
@@ -500,6 +501,18 @@ export function createProgressQueue(repo: ProgressRepository) {
       _notify();
 
       console.log('[ProgressQueue] Sync complete:', result);
+
+      // Analytics: record aggregate sync result
+      try {
+        trackLaunchEvent('progress_sync_result', {
+          synced: result.synced,
+          failed: result.failed,
+          deadLettered: result.deadLettered,
+        });
+      } catch (e) {
+        console.warn('[ProgressQueue] analytics error', e);
+      }
+
       return result;
     },
 

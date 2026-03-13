@@ -94,6 +94,9 @@ describe('STTService', () => {
   });
 
   it('auto provider option queries runtimeUtils helper', async () => {
+    const prevFlag = (globalThis as any).__BETA_LOCAL_AI_ENABLED__;
+    (globalThis as any).__BETA_LOCAL_AI_ENABLED__ = true;
+
     // spy on the shared utility to ensure STTService delegates
     const runtime = await import('../../../utils/runtimeUtils');
     const spy = vi
@@ -107,6 +110,8 @@ describe('STTService', () => {
     await service.init({ provider: 'auto' });
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();
+
+    (globalThis as any).__BETA_LOCAL_AI_ENABLED__ = prevFlag;
   });
 
   it('cloud provider without consent stays unavailable', async () => {

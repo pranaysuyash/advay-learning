@@ -6,6 +6,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -64,6 +65,7 @@ export function MusicConductorContent() {
 
   const { playClick, playSuccess, playPop } = useAudio();
   const { onGameComplete } = useGameDrops('music-conductor');
+  const { saveProgress } = useGameProgress('music-conductor');
   const level = LEVELS[currentLevelIndex];
 
   useGameSessionProgress({
@@ -242,13 +244,14 @@ export function MusicConductorContent() {
     speak("Let's make some music! Move your hands to the bottom when the notes fall!");
   }, [playClick, speak]);
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     setGameState('complete');
+    await saveProgress({ score, completed: true, level: level.level });
     onGameComplete(score);
     playSuccess();
     setShowCelebration(true);
     speak("Incredible! You are a master conductor!");
-  }, [score, onGameComplete, playSuccess, speak]);
+  }, [score, onGameComplete, playSuccess, speak, saveProgress, level.level]);
 
   const handleBack = useCallback(() => {
     navigate('/games');

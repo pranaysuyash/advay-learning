@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { subscriptionApi, SubscriptionPlanType, SubscriptionStatus } from '../services/api';
+import { trackLaunchEvent } from '../analytics/launch';
+import { BETA_END_DATE, BETA_FREE_ACCESS, BETA_LABEL, SUPPORT_MAILTO } from '../config/launch';
 import { getPlanLabel, isFullAccessPlan } from '../services/subscriptionPlan';
 import { getErrorMessage } from '../utils/errorUtils';
 
@@ -63,6 +65,7 @@ export function Pricing() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    trackLaunchEvent('beta_pricing_viewed', { betaFreeAccess: BETA_FREE_ACCESS });
     // Check current subscription status
     subscriptionApi.getCurrent()
       .then((res) => setCurrentSubscription(res.data))
@@ -86,6 +89,14 @@ export function Pricing() {
   const upgradeCredit = getUpgradeCredit();
 
   const handlePurchase = async (planId: SubscriptionPlanType) => {
+    if (BETA_FREE_ACCESS) {
+      trackLaunchEvent('pricing_interest_clicked', {
+        planId,
+        currentPlan: currentPlan || 'none',
+      });
+      return;
+    }
+
     setLoading(planId);
     setError(null);
 
@@ -121,13 +132,33 @@ export function Pricing() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Plan
+            {BETA_FREE_ACCESS ? `${BETA_LABEL} Access` : 'Choose Your Plan'}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Start your child's learning journey with our interactive games.
-            Choose the plan that works best for you.
+            {BETA_FREE_ACCESS
+              ? `Every family can use Advay free during beta through ${BETA_END_DATE}. Review future plans below and tell us which one you want once beta ends.`
+              : 'Start your child\'s learning journey with our interactive games. Choose the plan that works best for you.'}
           </p>
         </div>
+
+        {BETA_FREE_ACCESS && (
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-8 text-center">
+            <p className="text-blue-900 font-semibold">
+              Beta access is free right now. Payments stay off until beta ends.
+            </p>
+            <a
+              href={SUPPORT_MAILTO}
+              onClick={() =>
+                trackLaunchEvent('support_contact_clicked', {
+                  source: 'pricing_beta_banner',
+                })
+              }
+              className="inline-flex mt-4 px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold"
+            >
+              Ask about launch pricing
+            </a>
+          </div>
+        )}
 
         {/* Current Status Banner */}
         {hasActiveSubscription && (
@@ -215,6 +246,8 @@ export function Pricing() {
                       ? 'Processing...'
                       : isCurrentPlan
                       ? 'Current Plan'
+                      : BETA_FREE_ACCESS
+                      ? 'I want this after beta'
                       : plan.popular
                       ? 'Get Started'
                       : 'Select Plan'}
@@ -236,7 +269,7 @@ export function Pricing() {
                 Can I change games during my subscription?
               </h3>
               <p className="text-gray-600">
-                The 5-game monthly pack stays fixed for the month. The 10-game
+                During beta, every game is available without payment. After beta, the 5-game monthly pack stays fixed for the month. The 10-game
                 quarterly pack gets one refresh window at each monthly checkpoint.
                 Full annual subscribers always have all games unlocked.
               </p>

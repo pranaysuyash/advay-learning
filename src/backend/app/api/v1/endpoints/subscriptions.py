@@ -30,6 +30,11 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+def _sanitize_log_value(value: object) -> str:
+    text = str(value).replace("\n", " ").replace("\r", " ")
+    return text[:200]
+
+
 @router.get("/games/catalog")
 async def get_games_catalog(
     db: AsyncSession = Depends(get_db),
@@ -238,7 +243,10 @@ async def handle_webhook(
             else:
                 # Received but not processed - retry processing
                 # Business logic is idempotent on payment_reference, so this is safe
-                logger.warning(f"Retrying webhook {webhook_id} that was received but not processed")
+                logger.warning(
+                    "Retrying webhook %s that was received but not processed",
+                    _sanitize_log_value(webhook_id),
+                )
                 # Increment attempt counter
                 existing.attempts += 1
 
@@ -290,8 +298,9 @@ async def handle_webhook(
     # Log if we normalized a non-standard event type
     if canonical_event_type != event_type:
         logger.warning(
-            f"Received non-standard Dodo event '{event_type}', normalized to '{canonical_event_type}'. "
-            f"Update webhook configuration to use official '{canonical_event_type}' event."
+            "Received non-standard Dodo event %s, normalized to %s. Update webhook configuration to the official event.",
+            _sanitize_log_value(event_type),
+            _sanitize_log_value(canonical_event_type),
         )
 
     # Update event_type to canonical form for routing
@@ -422,7 +431,10 @@ async def handle_webhook(
         except Exception:
             # System errors - rollback and return 500 so Dodo retries
             await db.rollback()
-            logger.exception(f"Webhook processing failed for event {event_type}")
+            logger.exception(
+                "Webhook processing failed for event %s",
+                _sanitize_log_value(event_type),
+            )
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Webhook processing failed - please retry"
@@ -435,7 +447,10 @@ async def handle_webhook(
         webhook_event.processed_at = datetime.now(timezone.utc)
         await db.commit()
 
-        logger.info(f"Received unhandled webhook event type: {event_type}")
+        logger.info(
+            "Received unhandled webhook event type: %s",
+            _sanitize_log_value(event_type),
+        )
         return {
             "received": True,
             "status": "ignored",

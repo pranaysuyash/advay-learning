@@ -2,7 +2,6 @@
 // New code should prefer: import { Icon, UIIcon } from '../components/ui/Icon'
 // The base implementation lives in ../Icon.tsx (do not delete it).
 export { Icon } from '../Icon';
-export type { } from '../Icon'; // Side-effect: ensures types are bundled
 import React from 'react';
 import { Icon as AssetIcon } from '../Icon';
 import {
@@ -11,7 +10,7 @@ import {
   Camera, Trophy, Coffee, Droplets, Eye, EyeOff, ArrowLeft, X,
   Play, Search, RotateCcw, MousePointer2, ChevronDown, Volume2, VolumeX,
   Shield, Video, ArrowRight, Mail, AlertCircle, CheckCircle, Loader2,
-  Settings, HelpCircle, UserRound
+  Settings, HelpCircle, UserRound, Box, Shirt, Gamepad2, Utensils
 } from 'lucide-react';
 
 export type IconName =
@@ -55,7 +54,11 @@ export type IconName =
   | 'alert-circle'
   | 'check-circle'
   | 'loader'
-  | 'settings';
+  | 'settings'
+  | 'box'
+  | 'shirt'
+  | 'gamepad'
+  | 'utensils';
 
 type UIIconNamedProps = {
   name: IconName | string; // loosen to string due to 'as any' coercions
@@ -117,6 +120,10 @@ const LucideMap: Record<string, React.ElementType> = {
   'check-circle': CheckCircle,
   loader: Loader2,
   settings: Settings,
+  box: Box,
+  shirt: Shirt,
+  gamepad: Gamepad2,
+  utensils: Utensils,
 };
 
 export function UIIcon(props: UIIconProps) {
@@ -141,14 +148,18 @@ export function UIIcon(props: UIIconProps) {
     style,
   } = props;
 
-  const IconComponent = LucideMap[name as string] || HelpCircle;
+  const IconComponent = (LucideMap[name as string] || HelpCircle) as React.ComponentType<{
+    size?: number;
+    className?: string;
+    color?: string;
+    style?: React.CSSProperties;
+  }>;
 
-  return (
-    <IconComponent
-      size={size}
-      className={`inline-block ${className}`}
-      color={color !== 'currentColor' ? color : undefined}
-      style={style}
-    />
-  );
+  // Use React.createElement to avoid TypeScript issues with dynamic components
+  return React.createElement(IconComponent, {
+    size,
+    className: `inline-block ${className}`,
+    color: color !== 'currentColor' ? color : undefined,
+    style,
+  });
 }

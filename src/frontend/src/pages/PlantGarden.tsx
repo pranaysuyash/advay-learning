@@ -6,12 +6,12 @@
  * @ticket TCK-20260310-013
  */
 
-import { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -40,7 +40,7 @@ function PlantGardenGame() {
 
   const { playSuccess, playCelebration, playClick, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('plant-garden');
+  const { onGameComplete } = useGameCompletion('plant-garden');
 
   useGameSessionProgress({
     gameName: 'Plant a Garden',
@@ -95,13 +95,13 @@ function PlantGardenGame() {
         setCompletedPlants(c => c + 1);
         setShowGrowth(true);
         
-        setTimeout(() => {
+        setTimeout(async () => {
           if (completedPlants + 1 >= 3) {
             const finalScore = score + plantScore;
             setScore(finalScore);
             setGameState('complete');
             playCelebration();
-            onGameComplete(calculateStars(finalScore));
+            await onGameComplete(finalScore);
             speakText('You grew a beautiful garden!');
           } else {
             setCurrentPlant(getRandomPlant());
@@ -135,7 +135,7 @@ function PlantGardenGame() {
         });
       }, 50);
     }
-  }, [gameState, currentPlant, currentStep, holdProgress, completedPlants, score, playPop, playSuccess, playCelebration, onGameComplete, speakText]);
+  }, [gameState, currentPlant, currentStep, holdProgress, completedPlants, score, playPop, playSuccess, playCelebration, speakText]);
 
   const handleActionStop = useCallback(() => {
     if (holdProgress > 0 && holdProgress < 100) {
@@ -430,8 +430,6 @@ function PlantGardenGame() {
     </div>
   );
 }
-
-import React from 'react';
 
 export const PlantGarden = memo(function PlantGardenComponent() {
   return (

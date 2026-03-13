@@ -15,7 +15,7 @@ INITIAL_GAMES = [
         "game_path": "/games/alphabet-tracing",
         "is_published": True,
         "is_featured": True,
-        "config_json": "{}",
+        "config_json": {},
     },
     {
         "id": "finger-number-show",
@@ -31,7 +31,7 @@ INITIAL_GAMES = [
         "game_path": "/games/finger-number-show",
         "is_published": True,
         "is_featured": True,
-        "config_json": "{}",
+        "config_json": {},
     },
     {
         "id": "connect-the-dots",
@@ -47,7 +47,7 @@ INITIAL_GAMES = [
         "game_path": "/games/connect-the-dots",
         "is_published": True,
         "is_featured": True,
-        "config_json": "{}",
+        "config_json": {},
     },
     {
         "id": "letter-hunt",
@@ -63,6 +63,6 @@ INITIAL_GAMES = [
         "game_path": "/games/letter-hunt",
         "is_published": True,
         "is_featured": False,
-        "config_json": "{}",
+        "config_json": {},
     },
 ]

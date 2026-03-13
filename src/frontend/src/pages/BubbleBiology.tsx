@@ -22,7 +22,8 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -42,7 +43,11 @@ import {
   type GameState,
 } from '../games/bubbleBiologyLogic';
 
-const BubbleBiologyContent = memo(function BubbleBiologyContent() {
+interface BubbleBiologyGameProps {
+  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
+}
+
+const BubbleBiologyContent = memo(function BubbleBiologyContent({ saveProgress }: BubbleBiologyGameProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
   const lastTimeRef = useRef<number>(0);
@@ -62,7 +67,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   // Hooks
   const { playPop, playSuccess, playError, playCelebration: playCelebrationSound } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('bubble-biology');
+  const { completeGame } = useGameCompletion('bubble-biology');
   
   // isPlayingRef is kept in sync synchronously in handleStart / stopGame
   // (useEffect would be asynchronous and could miss the first animation frame)
@@ -308,8 +313,9 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   const handleFinish = useCallback(async () => {
     playPop();
     stopGame();
-    await onGameComplete(gameState.cellsSorted);
-  }, [playPop, stopGame, onGameComplete, gameState.cellsSorted]);
+    await saveProgress({ score: gameState.cellsSorted, completed: true, level: gameState.level });
+    await completeGame({ score: gameState.cellsSorted, level: gameState.level });
+  }, [playPop, stopGame, completeGame, saveProgress, gameState.cellsSorted, gameState.level]);
   
   // Cleanup on unmount
   useEffect(() => {
@@ -513,9 +519,11 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
 });
 
 export default function BubbleBiology() {
+  const { saveProgress } = useGameProgress('bubble-biology');
+
   return (
     <GameShell gameName="Bubble Biology" gameId="bubble-biology">
-      <BubbleBiologyContent />
+      <BubbleBiologyContent saveProgress={saveProgress} />
     </GameShell>
   );
 }

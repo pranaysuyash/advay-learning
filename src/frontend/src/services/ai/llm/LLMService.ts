@@ -12,10 +12,11 @@ import {
 } from '../../../data/pipResponses';
 import type { LLMProviderAdapter } from './LLMProvider';
 import { MockLLMProvider } from './providers/MockLLMProvider';
-import { TransformersJsLLMProvider } from './providers/TransformersJsLLMProvider';
-import { WebLLMLLMProvider } from './providers/WebLLMLLMProvider';
-import { OllamaLLMProvider } from './providers/OllamaLLMProvider';
-import { HFInferenceLLMProvider } from './providers/HFInferenceLLMProvider';
+
+// compile-time flag injected by Vite; may be undefined in test environments
+// `declare` ensures TypeScript understands its existence, but the runtime access
+// must guard for undefined to avoid ReferenceError.
+declare const __BETA_LOCAL_AI_ENABLED__: boolean | undefined;
 
 // runtime utility functions (avoids duplication of environment logic)
 import { selectLLMRuntimePlan } from '../../../utils/runtimeUtils';
@@ -154,7 +155,10 @@ function buildDefaultRuntimeConfigFromEnv(
 
   return {
     // feature flag takes precedence and acts as an OR with explicit setting
-    enabled: llmFlag || explicitEnabled,
+    // guard against undefined (e.g. test envs lacking the define)
+    enabled:
+      (typeof __BETA_LOCAL_AI_ENABLED__ !== 'undefined' && __BETA_LOCAL_AI_ENABLED__ === true) &&
+      (llmFlag || explicitEnabled),
     provider: parseProvider(env.VITE_AI_LLM_PROVIDER, 'mock'),
     model: parseModel(env.VITE_AI_LLM_MODEL, 'qwen3.5-1.5b-instruct'),
     fallbackModel: parseModel(
@@ -247,25 +251,32 @@ export class LLMService {
     return `${provider}:${model}`;
   }
 
-  private buildProvider(
+  private async buildProvider(
     provider: LLMProvider,
     model: LLMModel,
-  ): LLMProviderAdapter {
+  ): Promise<LLMProviderAdapter> {
     switch (provider) {
-      case 'transformers-js':
-        return new TransformersJsLLMProvider(model);
-      case 'web-llm':
-        return new WebLLMLLMProvider(model);
+      case 'transformers-js': {
+        const module = await import('./providers/TransformersJsLLMProvider');
+        return new module.TransformersJsLLMProvider(model);
+      }
+      case 'web-llm': {
+        const module = await import('./providers/WebLLMLLMProvider');
+        return new module.WebLLMLLMProvider(model);
+      }
       case 'ollama': {
         // allow overriding the Ollama local server URL via env var
         const ollamaUrl = (import.meta as any).env?.VITE_OLLAMA_BASE_URL;
-        return new OllamaLLMProvider(model, ollamaUrl);
+        const module = await import('./providers/OllamaLLMProvider');
+        return new module.OllamaLLMProvider(model, ollamaUrl);
       }
-      case 'hf-inference':
-        return new HFInferenceLLMProvider(
+      case 'hf-inference': {
+        const module = await import('./providers/HFInferenceLLMProvider');
+        return new module.HFInferenceLLMProvider(
           model,
           (import.meta as any).env?.VITE_HF_API_KEY,
         );
+      }
       case 'mock':
       default:
         return new MockLLMProvider();
@@ -282,7 +293,7 @@ export class LLMService {
       return existing;
     }
 
-    const adapter = this.buildProvider(provider, model);
+    const adapter = await this.buildProvider(provider, model);
     this.providers.set(key, adapter);
     await adapter.init();
     return adapter;

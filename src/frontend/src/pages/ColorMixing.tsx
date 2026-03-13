@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { AssetPreloader } from '../components/AssetPreloader';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -28,8 +27,7 @@ function ColorMixingGame() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('color-mixing');
-  const { saveProgress } = useGameProgress('color-mixing');
+  const { completeGame } = useGameCompletion('color-mixing');
 
   const [roundIndex, setRoundIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -106,8 +104,7 @@ function ColorMixingGame() {
     const isFinalRound = roundIndex >= roundsPerSession;
     if (isFinalRound) {
       playCelebration();
-      await saveProgress({ score: score + (ok ? 20 : 0), completed: true, level: 1 });
-      await onGameComplete(score + (ok ? 20 : 0));
+      await completeGame({ score: score + (ok ? 20 : 0), completed: true, level: 1 });
       setTimeout(() => {
         setActiveRound(null);
       }, 1400);
@@ -121,8 +118,7 @@ function ColorMixingGame() {
 
   const handleFinish = async () => {
     playClick();
-    await saveProgress({ score, completed: true, level: 1 });
-    await onGameComplete(score);
+    await completeGame({ score, completed: true, level: 1 });
     navigate('/games');
   };
 

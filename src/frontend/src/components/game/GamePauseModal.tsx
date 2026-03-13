@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { Modal } from '../ui/Modal';
 import { Mascot } from '../Mascot';
 import { UIIcon } from '../ui/Icon';
 import { useAudio } from '../../utils/hooks/useAudio';
@@ -31,18 +31,17 @@ export const GamePauseModal: React.FC<GamePauseModalProps> = React.memo(
         if (!isVisible) return null;
 
         return (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-[#FFF8F0]/80 backdrop-blur-sm p-4"
+            <Modal
+                isOpen={isVisible}
+                onClose={onResume}
+                size="sm"
+                showBackdrop={true}
+                closeOnBackdrop={false}
+                closeOnEscape={false}
+                preventClose={true}
+                ariaLabel="Game Paused"
             >
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className="bg-white rounded-[2.5rem] p-8 md:p-10 max-w-md w-full shadow-[0_12px_40px_rgba(0,0,0,0.1),_0_6px_0_#E5B86E] border-4 border-[#F2CC8F]"
-                >
+                <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.1),_0_6px_0_#E5B86E] border-4 border-[#F2CC8F]">
                     <div className="flex justify-center mb-8 bg-blue-50 py-6 rounded-3xl border-3 border-blue-100">
                         <Mascot state="waiting" message={mascotMessage ?? "Paused! Take a breather."} />
                     </div>
@@ -97,8 +96,8 @@ export const GamePauseModal: React.FC<GamePauseModalProps> = React.memo(
                             Exit to Home
                         </button>
                     </div>
-                </motion.div>
-            </motion.div>
+                </div>
+            </Modal>
         );
     }
 );

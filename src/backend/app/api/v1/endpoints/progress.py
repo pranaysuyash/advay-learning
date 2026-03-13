@@ -140,7 +140,13 @@ async def save_progress_batch(
                 )
             else:
                 # Other errors reported as error for that item
-                results.append({"idempotency_key": key, "status": "error", "error": str(e)})
+                results.append(
+                    {
+                        "idempotency_key": key,
+                        "status": "error",
+                        "error": "Failed to save progress item",
+                    }
+                )
 
     return {"results": results}
 

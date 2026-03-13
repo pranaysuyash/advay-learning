@@ -11,6 +11,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useSubscription } from '../hooks/useSubscription';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -28,6 +29,7 @@ function TidyUpTimeGameContent() {
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('tidy-up-time');
   const { onGameComplete: _onGameComplete } = useGameDrops('tidy-up-time');
+  const { saveProgress } = useGameProgress('tidy-up-time');
 
   const { playClick, playSuccess, playCelebration, playError } = useAudio();
   const [gameState, setGameState] = useState<GameState>(createInitialState());
@@ -57,12 +59,15 @@ function TidyUpTimeGameContent() {
       playCelebration();
       triggerHaptic('celebration');
       setShowCelebration(true);
+      (async () => {
+        await saveProgress({ score: gameState.score, completed: true, level: 1 });
+      })();
     }
     if (gameState.isGameOver) {
       playError();
       triggerHaptic('error');
     }
-  }, [gameState.isComplete, gameState.isGameOver, showCelebration, playCelebration, playError]);
+  }, [gameState.isComplete, gameState.isGameOver, showCelebration, playCelebration, playError, gameState.score, saveProgress]);
 
   // Start game
   const startGame = useCallback(() => {

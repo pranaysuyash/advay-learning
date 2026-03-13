@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { trackLaunchEvent } from '../analytics/launch';
 import { authApi } from '../services/api';
 import { UIIcon } from '../components/ui/Icon';
 import { Mascot } from '../components/Mascot';
@@ -30,8 +31,14 @@ export function VerifyEmail() {
     try {
       await authApi.verifyEmail(token);
       setStatus('success');
+      trackLaunchEvent('email_verification_completed', {
+        source: 'verify_email_route',
+      });
     } catch (err: unknown) {
       setStatus('error');
+      trackLaunchEvent('email_verification_failed', {
+        source: 'verify_email_route',
+      });
       setError('This verification link is invalid or has expired. Please request a new verification email.');
     }
   };

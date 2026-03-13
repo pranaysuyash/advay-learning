@@ -174,10 +174,7 @@ class AccountLockoutService:
             return True
 
         # Lockout expired - remove it (best effort, ignore errors)
-        try:
-            cls._account_lockouts.pop(email, None)
-        except Exception:
-            pass
+        cls._account_lockouts.pop(email, None)
 
         return False
 
@@ -222,10 +219,7 @@ class AccountLockoutService:
             return int(remaining.total_seconds())
 
         # Lockout expired - remove it (best effort)
-        try:
-            cls._account_lockouts.pop(email, None)
-        except Exception:
-            pass
+        cls._account_lockouts.pop(email, None)
 
         return None
 

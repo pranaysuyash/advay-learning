@@ -12,6 +12,8 @@ You are an engineer implementing a single remediation scope. Produce a patch (or
 
 - Add client queue service: `src/frontend/src/services/progressQueue.ts` (IndexedDB preferred; fallback to localStorage)
 - Add UI: persistent "Saving... (Pending)" indicator and per-activity `status` in `Game` screen and `Progress` pages
+  - Badges should be clickable, navigating to the Progress page (profile ID passed in state)
+  - Include failed/dead-letter badge next to pending when items cannot be delivered
 - Add sync/retry logic: on reconnect, send queued events via a new idempotent backend endpoint
 - Add backend batch endpoint: `POST /api/v1/progress/batch` accepting array of items with `idempotency_key`; server dedupes and returns per-item results
 - Tests:

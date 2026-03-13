@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Camera } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Modal } from '../ui/Modal';
+import { X } from 'lucide-react';
 import type { AvatarConfig, AvatarType, AvatarOption } from './types';
 import { 
   AVATAR_CATEGORIES, 
@@ -16,7 +17,6 @@ interface AvatarPickerModalProps {
   onClose: () => void;
   currentConfig?: AvatarConfig | null;
   onSelect: (config: AvatarConfig) => void;
-  onSelectPhoto?: () => void;
 }
 
 /**
@@ -30,7 +30,6 @@ export function AvatarPickerModal({
   onClose,
   currentConfig,
   onSelect,
-  onSelectPhoto,
 }: AvatarPickerModalProps) {
   const [activeCategory, setActiveCategory] = useState<AvatarType>('platformer');
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarOption | null>(null);
@@ -97,24 +96,15 @@ export function AvatarPickerModal({
   } : currentConfig || undefined;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="lg"
+      ariaLabel="Choose Your Character"
+    >
+      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <div>
                 <h2 className="text-2xl font-bold text-slate-800">
                   Choose Your Character
@@ -204,64 +194,44 @@ export function AvatarPickerModal({
                   ))}
                 </div>
 
-                {/* Avatar Grid or Photo Option */}
-                {activeCategory === 'photo' ? (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                      <Camera className="w-10 h-10 text-slate-400" />
-                    </div>
-                    <p className="text-slate-600 text-center mb-4">
-                      Take a photo to use as your avatar
-                    </p>
-                    <button
-                      onClick={() => {
-                        playClick();
-                        onSelectPhoto?.();
-                      }}
-                      className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-orange-500/30 transition"
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 mb-4">
+                  Character avatars stay in the app. Stored child profile photos are disabled during the public beta.
+                </div>
+                <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto p-1">
+                  {avatars.map((avatar) => (
+                    <motion.button
+                      key={avatar.id}
+                      onClick={() => handleSelectAvatar(avatar)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`relative aspect-square rounded-xl p-2 transition ${
+                        selectedAvatar?.id === avatar.id
+                          ? 'bg-orange-100 ring-2 ring-orange-500'
+                          : 'bg-slate-50 hover:bg-slate-100'
+                      }`}
                     >
-                      📸 Open Camera
-                    </button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto p-1">
-                    {avatars.map((avatar) => (
-                      <motion.button
-                        key={avatar.id}
-                        onClick={() => handleSelectAvatar(avatar)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`relative aspect-square rounded-xl p-2 transition ${
-                          selectedAvatar?.id === avatar.id
-                            ? 'bg-orange-100 ring-2 ring-orange-500'
-                            : 'bg-slate-50 hover:bg-slate-100'
-                        }`}
-                      >
-                        <img
-                          src={avatar.previewImage}
-                          alt={avatar.name}
-                          className="w-full h-full object-contain"
-                        />
-                        
-                        {/* Selection indicator */}
-                        {selectedAvatar?.id === avatar.id && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center"
-                          >
-                            <span className="text-white text-xs">✓</span>
-                          </motion.div>
-                        )}
-                        
-                        {/* Name label */}
-                        <span className="absolute bottom-1 left-1 right-1 text-[10px] font-medium text-slate-600 truncate">
-                          {avatar.name}
-                        </span>
-                      </motion.button>
-                    ))}
-                  </div>
-                )}
+                      <img
+                        src={avatar.previewImage}
+                        alt={avatar.name}
+                        className="w-full h-full object-contain"
+                      />
+                      
+                      {selectedAvatar?.id === avatar.id && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center"
+                        >
+                          <span className="text-white text-xs">✓</span>
+                        </motion.div>
+                      )}
+                      
+                      <span className="absolute bottom-1 left-1 right-1 text-[10px] font-medium text-slate-600 truncate">
+                        {avatar.name}
+                      </span>
+                    </motion.button>
+                  ))}
+                </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 mt-6">
@@ -278,13 +248,11 @@ export function AvatarPickerModal({
                   >
                     Save Character
                   </button>
-                </div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
+      </Modal>
   );
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { Modal } from '../ui/Modal';
 
 import { ParentGate } from '../ui/ParentGate';
 import { issueReportsApi } from '../../services/api';
@@ -238,20 +238,17 @@ export function IssueReportFlowModal({
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className='fixed inset-0 z-[70] bg-[#FFF8F0]/80 backdrop-blur-sm p-4 md:p-8 flex items-center justify-center'
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
-        <motion.div
-          initial={{ y: 24, opacity: 0, scale: 0.97 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: 24, opacity: 0, scale: 0.97 }}
-          className='w-full max-w-3xl bg-white border-3 border-[#F2CC8F] rounded-[2rem] shadow-[0_8px_0_#E5B86E] p-6 md:p-8'
-        >
-          <IssueReportCompositor
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="xl"
+      showBackdrop={true}
+      closeOnBackdrop={false}
+      closeOnEscape={false}
+      ariaLabel="Report an Issue"
+    >
+      <div className='w-full max-w-3xl bg-white border-3 border-[#F2CC8F] rounded-[2rem] shadow-[0_8px_0_#E5B86E] p-6 md:p-8'>
+        <IssueReportCompositor
             sourceCanvas={sourceCanvas}
             width={sourceCanvas?.width || 1280}
             height={sourceCanvas?.height || 720}
@@ -451,9 +448,8 @@ export function IssueReportFlowModal({
               message='Hold to confirm sending this issue report.'
             />
           )}
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      </Modal>
   );
 }
 

@@ -21,7 +21,6 @@ import {
   useProfileStore,
 } from '../store';
 import type { Profile } from '../store';
-import { progressQueue } from '../services/progressQueue';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { AccessDenied } from '../components/ui/AccessDenied';
@@ -37,7 +36,7 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { HandTutorialOverlay } from '../components/game/AnimatedHand';
 import { GamePauseModal } from '../components/game/GamePauseModal';
 import useInactivityDetector from '../hooks/useInactivityDetector';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useTTS } from '../hooks/useTTS';
 import { usePhonics } from '../hooks/usePhonics';
 import { useCameraPermission } from '../hooks/useCameraPermission';
@@ -111,12 +110,17 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
     playError,
     playClick,
   } = useAudio();
-  const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('alphabet-tracing');
-  const { speakWordExample } = usePhonics();
-
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
+  
+  const { speak, isEnabled: ttsEnabled } = useTTS();
+  const { completeGame } = useGameCompletion('alphabet-tracing');
+  const { speakWordExample } = usePhonics();
+  
+  // Wrap completeGame to match useGameHandlers expected signature
+  const handleGameComplete = useCallback(() => {
+    void completeGame({ score, level: 1 });
+  }, [completeGame, score]);
   const [streak, setStreak] = useState<number>(0);
   const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
@@ -447,7 +451,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
     handleSkipCameraTutorial,
     handleHandTutorialComplete,
   } = useGameHandlers({
-    onGameComplete,
+    onGameComplete: handleGameComplete,
     requestCameraPermission,
     cameraPermissionError,
     isHandTrackingReady,
@@ -549,11 +553,11 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   }, [isPlaying]);
 
   useEffect(() => {
-    const update = () =>
-      setPendingCount(progressQueue.getPending(resolvedProfileId || '').length);
+    const update = () => {
+      // Pending count tracking removed - progress saved directly via useGameProgress
+      setPendingCount(0);
+    };
     update();
-    const unsubscribe = progressQueue.subscribe(update);
-    return unsubscribe;
   }, [resolvedProfileId]);
 
   // Drawing loop (RAF-based hand tracking + pinch)

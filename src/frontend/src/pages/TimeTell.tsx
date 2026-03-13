@@ -10,6 +10,7 @@ import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, generateTime, formatTime, type TimeQuestion } from '../games/timeTellLogic';
@@ -60,6 +61,7 @@ function renderClock(hour: number, minute: number, size: number = 240) {
 
 function TimeTellGameComponent() {
   const { onGameComplete } = useGameDrops('time-tell');
+  const { saveProgress } = useGameProgress('time-tell');
   const { playClick, playSuccess, playError, playPop } = useAudio();
   const webcamRef = useRef<Webcam>(null);
 
@@ -172,8 +174,9 @@ function TimeTellGameComponent() {
     setGameStarted(false);
     playSuccess();
     speak(`Great job! You told the time ${correct} times perfectly!`);
+    await saveProgress({ score: correct, completed: true, level: currentLevel });
     await onGameComplete(correct);
-  }, [correct, playSuccess, speak, onGameComplete]);
+  }, [correct, playSuccess, speak, onGameComplete, currentLevel, saveProgress]);
 
   const handleTargetHit = useCallback(async (target: Target) => {
     if (showSuccess || !question) return;

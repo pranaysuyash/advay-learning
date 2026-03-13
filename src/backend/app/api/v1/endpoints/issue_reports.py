@@ -38,6 +38,17 @@ def get_session_cache_key(report_id: str) -> str:
     return f"issue_report_session:{report_id}"
 
 
+def resolve_issue_report_path(extension: str) -> Path:
+    uploads_dir = os.path.realpath(os.path.join(str(ISSUE_REPORT_STORAGE_DIR), "uploads"))
+    file_name = f"{uuid4().hex}.{extension}"
+    file_path = os.path.realpath(os.path.join(uploads_dir, file_name))
+
+    if os.path.commonpath([uploads_dir, file_path]) != uploads_dir:
+        raise HTTPException(status_code=400, detail="Invalid report file path")
+
+    return Path(file_path)
+
+
 @router.post("/sessions", response_model=IssueReportSession)
 async def create_issue_report_session(
     payload: IssueReportSessionCreate,
@@ -115,12 +126,11 @@ async def upload_issue_report_clip(
                 )
         file_path = Path(f"in-memory://{report_id}")
     else:
-        user_dir = ISSUE_REPORT_STORAGE_DIR / str(current_user.id)
-        user_dir.mkdir(parents=True, exist_ok=True)
+        uploads_dir = ISSUE_REPORT_STORAGE_DIR / "uploads"
+        uploads_dir.mkdir(parents=True, exist_ok=True)
 
         extension = "webm" if "webm" in detected_mime else "mp4"
-        file_name = f"{report_id}_{datetime.now(UTC).strftime('%Y%m%d%H%M%S%f')}.{extension}"
-        file_path = user_dir / file_name
+        file_path = resolve_issue_report_path(extension)
 
         try:
             with open(file_path, "wb") as output:

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
@@ -33,7 +33,7 @@ function ColorSplashContent() {
   const timerRef = useRef<number | null>(null);
 
   const { playClick, playSuccess, playError, playPop } = useAudio();
-  const { onGameComplete } = useGameDrops('color-splash');
+  const { completeGame } = useGameCompletion('color-splash');
   useGameSessionProgress({ gameName: 'Color Splash', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const level = LEVELS.find(l => l.id === currentLevel) || LEVELS[0];
@@ -70,7 +70,7 @@ function ColorSplashContent() {
 
       if (result.allSplashed) {
         setGameState('complete');
-        onGameComplete(score + 50 + streakBonus);
+        completeGame({ score: score + 50 + streakBonus });
         playSuccess();
       }
     } else {
@@ -79,7 +79,7 @@ function ColorSplashContent() {
       resetStreak();
       setScore(s => Math.max(s + result.scoreDelta, 0));
     }
-  }, [gameState, objects, targetColor, score, onGameComplete, playPop, playError, playSuccess]);
+  }, [gameState, objects, targetColor, score, completeGame, playPop, playError, playSuccess]);
 
   const handleBack = useCallback(() => {
     navigate('/games');
@@ -91,7 +91,7 @@ function ColorSplashContent() {
         setTimeLeft(t => {
           if (t <= 1) {
             setGameState('complete');
-            onGameComplete(score);
+            completeGame({ score });
             playSuccess();
             return 0;
           }
@@ -99,13 +99,13 @@ function ColorSplashContent() {
         });
       }, 1000);
     }
-    
+
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
-  }, [gameState, score, onGameComplete, playSuccess]);
+  }, [gameState, score, completeGame, playSuccess]);
 
   return (
     <GameContainer title="Color Splash" onHome={handleBack} reportSession={false}>

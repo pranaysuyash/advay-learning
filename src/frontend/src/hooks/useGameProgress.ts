@@ -9,6 +9,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { trackLaunchEvent } from '../analytics/launch';
 import { progressQueue } from '../services/progressQueue';
 import { useProgressStore } from '../store/progressStore';
 
@@ -72,7 +73,7 @@ export function useGameProgress(gameId: string): UseGameProgressReturn {
     }
     
     try {
-      progressQueue.add({
+      const enqueueResult = progressQueue.add({
         profileId: currentProfile.id,
         gameId,
         score: data.score,
@@ -83,8 +84,27 @@ export function useGameProgress(gameId: string): UseGameProgressReturn {
         },
         timestamp: new Date().toISOString(),
       });
+      if (enqueueResult.success) {
+        trackLaunchEvent('progress_queued', {
+          gameId,
+          profileId: currentProfile.id,
+          score: data.score,
+          completed: data.completed,
+        });
+      } else {
+        trackLaunchEvent('progress_queue_failed', {
+          gameId,
+          profileId: currentProfile.id,
+          reason: enqueueResult.error ?? 'unknown',
+        });
+      }
     } catch (error) {
       console.error(`[useGameProgress] Failed to save progress:`, error);
+      trackLaunchEvent('progress_queue_failed', {
+        gameId,
+        profileId: currentProfile.id,
+        reason: error instanceof Error ? error.message : 'unknown',
+      });
       // Don't throw - progress queue handles retry
     }
   }, [currentProfile, gameId]);

@@ -79,6 +79,8 @@ This folder contains the reusable prompts that govern how agents work on this re
 - Generalized code review + audit (report-only): `prompts/review/generalized-code-review-audit-v1.0.md`
 - Local pre-commit review (mandatory before code-changing commits): `prompts/review/local-pre-commit-review-v1.0.md`
 - **Code review** (intent-first, single-file or multi-file, signal-only findings): `prompts/review/code-review-v1.0.md`
+- **Simulated PR review** (branch-vs-main, signal-only reviewer findings): `prompts/review/simulated-pr-review-v1.0.md`
+- **QA branch PR review execution** (subagent wrapper for full branch-vs-main review): `prompts/review/qa-branch-pr-review-execution-v1.0.md`
 - **Pre-push staged review** (final gate before branch push — full staged diff, hygiene checks, verdict): `prompts/review/pre-push-staged-review-v1.0.md`
 - PR review: `prompts/review/pr-review-v1.6.1.md`
 - Verify remediation: `prompts/verification/verification-v1.2.md`

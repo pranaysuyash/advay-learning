@@ -36,7 +36,7 @@ class GlobalErrorBoundaryInner extends Component<Props & { navigate: ReturnType<
                     <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center border-4 border-red-100">
                         <div className="bg-red-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                             <span className="text-4xl" role="img" aria-label="error">
-                                Oops
+                                💥
                             </span>
                         </div>
 
@@ -54,12 +54,20 @@ class GlobalErrorBoundaryInner extends Component<Props & { navigate: ReturnType<
                             </pre>
                         )}
 
-                        <button
-                            onClick={this.handleReset}
-                            className="bg-primary text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all w-full"
-                        >
-                            Back to Home
-                        </button>
+                        <div className="flex flex-col gap-3 w-full">
+                            <button
+                                onClick={this.handleReset}
+                                className="bg-primary text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all w-full"
+                            >
+                                Back to Home
+                            </button>
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="bg-slate-200 text-slate-800 font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all w-full"
+                            >
+                                Reload App
+                            </button>
+                        </div>
                     </div>
                 </div>
             );
