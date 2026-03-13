@@ -97,7 +97,15 @@ class CacheService:
                 _sanitize_log_value(e),
             )
         # if we reached here it means redis failed; store in fallback
-        serialized = json.dumps(value)
+        try:
+            serialized = json.dumps(value)
+        except TypeError as e:
+            logger.warning(
+                "Fallback cache serialization error for key %s: %s",
+                _sanitize_log_value(key),
+                _sanitize_log_value(e),
+            )
+            return False
         self._fallback[key] = serialized
         return True
 

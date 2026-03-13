@@ -3,13 +3,19 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from sqlalchemy import JSON, DateTime, Float, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
+
+if TYPE_CHECKING:
+    from app.db.models.achievement import Achievement
+    from app.db.models.consent import ParentalConsent
+    from app.db.models.progress import Progress
+    from app.db.models.user import User
 
 
 class Profile(Base):
@@ -35,14 +41,14 @@ class Profile(Base):
     )
 
     # Relationships
-    parent: Mapped[Any] = relationship("User", back_populates="profiles")
-    progress: Mapped[list[Any]] = relationship(
+    parent: Mapped[User] = relationship("User", back_populates="profiles")
+    progress: Mapped[list[Progress]] = relationship(
         "Progress",
         back_populates="profile",
         lazy="selectin",
         cascade="all, delete-orphan",
     )
-    achievements: Mapped[list[Any]] = relationship(
+    achievements: Mapped[list[Achievement]] = relationship(
         "Achievement",
         back_populates="profile",
         lazy="selectin",
@@ -50,7 +56,7 @@ class Profile(Base):
     )
 
     # Parental consent for this child (DPDPA compliance)
-    consent: Mapped[Any] = relationship(
+    consent: Mapped[ParentalConsent] = relationship(
         "ParentalConsent",
         back_populates="child",
         lazy="selectin",

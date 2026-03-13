@@ -138,3 +138,24 @@ Verification:
 - `cd src/backend && ../backend/.venv/bin/ruff check app tests` → pass
 - `cd src/backend && ../backend/.venv/bin/pytest tests/test_profile_photos.py -q` → `18 passed`
 - `cd src/backend && ../backend/.venv/bin/pytest tests/test_issue_reports.py -q` → `2 passed`
+
+## 2026-03-13 18:15 UTC — Review-thread remediation (batch 4)
+
+- Fixed additional unresolved PR findings that were still blocking `review-policy`:
+  - `src/backend/app/api/v1/endpoints/auth.py` now clears cookies on logout even when the access token is already invalid, and refresh-token rotation no longer fails just because the old access token cookie cannot be decoded
+  - `src/backend/app/services/cache_service.py` now handles fallback JSON serialization failures without raising
+  - `src/backend/app/main.py` now limits the env-specific startup wrapper to `get_settings()` so non-env startup/security failures keep their real error context
+  - `src/backend/app/db/models/{user,profile,progress,achievement}.py` restored concrete relationship typing via postponed annotations and `TYPE_CHECKING` imports
+  - `src/frontend/src/pages/three/ShapePop3D.tsx` explicitly sets light button text on the dark start/game-over actions
+  - `docs/WORKLOG_ADDENDUM_v2.md` restored the canonical audit filename and the original multi-line "Top Medium Issues" formatting
+
+Verification:
+
+- `cd src/backend && ../backend/.venv/bin/ruff check app tests` → pass
+- `cd src/backend && ../backend/.venv/bin/pytest tests/test_auth.py tests/test_cache_service.py tests/test_profile_photos.py tests/test_issue_reports.py -q` → `68 passed`
+- `cd src/frontend && npm run type-check` → pass
+
+## 2026-03-13 18:28 UTC — Historical worklog correction handling
+
+- Attempted to directly normalize `docs/WORKLOG_ADDENDUM_v2.md` for two unresolved PR comments, but the repo worklog guard correctly blocked the commit because the file is append-only outside ticket fields.
+- Kept the historical entry intact and deferred that exact historical correction to an append-only follow-up approach so the merge fix itself does not violate repo policy.

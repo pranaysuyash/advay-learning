@@ -77,7 +77,6 @@ async def validate_database_schema() -> None:
 # Validate settings before creating app to catch issues early
 try:
     settings = get_settings()
-    validate_cors_configuration(settings)
 except Exception as e:
     raise RuntimeError(
         "Configuration Error: "
@@ -85,6 +84,8 @@ except Exception as e:
         "Required: SECRET_KEY, DATABASE_URL. "
         "Optional: APP_ENV, DEBUG, ALLOWED_ORIGINS, etc."
     ) from e
+
+validate_cors_configuration(settings)
 
 app = FastAPI(
     title="Advay Vision Learning API",

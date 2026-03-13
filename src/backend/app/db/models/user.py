@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, String
@@ -11,6 +11,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
 from app.schemas.user import UserRole
+
+if TYPE_CHECKING:
+    from app.db.models.subscription import Subscription
+
+    from app.db.models.consent import ParentalConsent
+    from app.db.models.profile import Profile
 
 
 class User(Base):
@@ -40,7 +46,7 @@ class User(Base):
     )
 
     # Relationships - cascade deletes to profiles (and their progress/achievements)
-    profiles: Mapped[list[Any]] = relationship(
+    profiles: Mapped[list[Profile]] = relationship(
         "Profile",
         back_populates="parent",
         lazy="selectin",
@@ -48,7 +54,7 @@ class User(Base):
     )
 
     # Subscriptions
-    subscriptions: Mapped[list[Any]] = relationship(
+    subscriptions: Mapped[list[Subscription]] = relationship(
         "Subscription",
         back_populates="parent",
         lazy="selectin",
@@ -56,7 +62,7 @@ class User(Base):
     )
 
     # Parental consents (DPDPA compliance)
-    consents: Mapped[list[Any]] = relationship(
+    consents: Mapped[list[ParentalConsent]] = relationship(
         "ParentalConsent",
         back_populates="parent",
         lazy="selectin",

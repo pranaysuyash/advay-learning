@@ -396,7 +396,7 @@ export default function ShapePop3D() {
                 </p>
                 <button
                   onClick={startGame}
-                  className="px-8 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-xl font-bold transition-all transform hover:scale-105"
+                  className="px-8 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-bold transition-all transform hover:scale-105"
                 >
                   Start Game
                 </button>
@@ -415,13 +415,13 @@ export default function ShapePop3D() {
                 <div className="flex gap-3 justify-center">
                   <button
                     onClick={startGame}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-xl font-bold transition-all"
+                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-bold transition-all"
                   >
                     Play Again
                   </button>
                   <button
                     onClick={resetGame}
-                    className="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-medium transition-colors"
+                    className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-medium transition-colors"
                   >
                     Menu
                   </button>

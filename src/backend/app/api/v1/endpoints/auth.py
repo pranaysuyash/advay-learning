@@ -316,8 +316,7 @@ async def refresh_token(
                     expires = datetime.fromtimestamp(exp, timezone.utc)
                     await TokenService.revoke_access_token(db, jti, expires)
             except JWTError:
-                clear_auth_cookies(response)
-                raise TokenInvalidError("Invalid or revoked access token")
+                pass
 
     # Create new tokens
     new_access_token = create_access_token(data={"sub": user.id})
