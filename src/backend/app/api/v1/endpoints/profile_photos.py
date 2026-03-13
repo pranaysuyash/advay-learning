@@ -9,7 +9,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from uuid import UUID
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
@@ -56,14 +56,6 @@ def build_photo_url(profile_id: str, filename: str) -> str:
     return f"/api/v1/users/me/profiles/{profile_id}/photo/file/{filename}"
 
 
-def normalize_storage_owner_id(current_user_id: str) -> str:
-    """Normalize a storage owner id to a UUID string."""
-    try:
-        return str(UUID(current_user_id))
-    except (TypeError, ValueError) as exc:
-        raise HTTPException(status_code=400, detail="Invalid storage owner") from exc
-
-
 def normalize_storage_filename(filename: str) -> str:
     """Normalize an uploaded filename to a safe basename."""
     if not filename or "\x00" in filename:
@@ -80,27 +72,18 @@ def normalize_storage_filename(filename: str) -> str:
     return safe_filename
 
 
-def normalize_storage_profile_id(profile_id: str) -> str:
-    """Normalize a profile id for use in generated storage filenames."""
-    try:
-        return str(UUID(profile_id))
-    except (TypeError, ValueError) as exc:
-        raise HTTPException(status_code=400, detail="Invalid profile id") from exc
-
-
-def resolve_storage_path(current_user_id: str, filename: str) -> Path:
+def resolve_storage_path(filename: str) -> Path:
     """Resolve the filesystem path for a stored profile photo.
 
     This function prevents path traversal by treating `filename` as a basename. Any
     path separators or absolute paths provided by a client will be sanitized.
     """
-    safe_owner_id = normalize_storage_owner_id(current_user_id)
     safe_filename = normalize_storage_filename(filename)
 
-    profile_dir = os.path.realpath(os.path.join(str(LOCAL_STORAGE_DIR), safe_owner_id))
-    file_path = os.path.realpath(os.path.join(profile_dir, safe_filename))
+    storage_dir = os.path.realpath(str(LOCAL_STORAGE_DIR))
+    file_path = os.path.realpath(os.path.join(storage_dir, safe_filename))
 
-    if os.path.commonpath([profile_dir, file_path]) != profile_dir:
+    if os.path.commonpath([storage_dir, file_path]) != storage_dir:
         raise HTTPException(status_code=400, detail="Invalid file name")
 
     return Path(file_path)
@@ -175,20 +158,14 @@ async def upload_profile_photo(
 
     # Generate filename
     extension = "jpg" if content_type == "image/jpeg" else "png"
-    safe_profile_id = normalize_storage_profile_id(profile_id)
-    filename = f"{safe_profile_id}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.{extension}"
+    filename = f"{uuid4().hex}.{extension}"
 
     # Create local storage directory
-    profile_dir = Path(
-        os.path.realpath(
-            os.path.join(str(LOCAL_STORAGE_DIR), normalize_storage_owner_id(current_user.id))
-        )
-    )
-    profile_dir.mkdir(parents=True, exist_ok=True)
+    LOCAL_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
     # Save file to local storage (MVP approach)
     safe_filename = normalize_storage_filename(filename)
-    file_path = resolve_storage_path(current_user.id, safe_filename)
+    file_path = resolve_storage_path(safe_filename)
     file_path.write_bytes(contents)
 
     # Generate public URL for frontend.
@@ -242,7 +219,13 @@ async def get_profile_photo_file(
     if profile.avatar_url != build_photo_url(profile_id, safe_filename):
         raise HTTPException(status_code=404, detail="Profile photo not found")
 
-    file_path = resolve_storage_path(current_user.id, safe_filename)
+    stored_filename = Path(profile.avatar_url).name if profile.avatar_url else ""
+    stored_filename = normalize_storage_filename(stored_filename)
+
+    if stored_filename != safe_filename:
+        raise HTTPException(status_code=404, detail="Profile photo not found")
+
+    file_path = resolve_storage_path(stored_filename)
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Profile photo file missing")
 
@@ -267,7 +250,7 @@ async def delete_profile_photo(
     # Get file path from database
     if profile.avatar_url:
         filename = Path(profile.avatar_url).name
-        resolve_storage_path(current_user.id, filename).unlink(missing_ok=True)
+        resolve_storage_path(filename).unlink(missing_ok=True)
 
     profile.avatar_url = None
 

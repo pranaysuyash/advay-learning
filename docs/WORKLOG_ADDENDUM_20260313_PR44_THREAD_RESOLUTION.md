@@ -124,3 +124,17 @@ Verification:
 
 - `cd src/backend && ../backend/.venv/bin/ruff check app tests` → pass
 - `cd src/backend && ../backend/.venv/bin/pytest tests/test_games.py tests/test_profile_photos.py tests/test_data_export.py tests/test_progress.py tests/test_subscription_service.py tests/test_subscriptions.py -q` → `103 passed`
+
+## 2026-03-13 17:45 UTC — Code scanning remediation (batch 3)
+
+- Reworked physical storage paths to eliminate remaining user-influenced filesystem components:
+  - `src/backend/app/api/v1/endpoints/profile_photos.py` now stores uploaded files under a fixed storage root with UUID-generated filenames and resolves read/delete paths from the persisted URL filename
+  - `src/backend/app/api/v1/endpoints/issue_reports.py` now stores uploaded clips under `storage/issue_reports/uploads/` with UUID-generated filenames instead of report/user-derived path segments
+- Added `__all__` to `src/backend/alembic/versions/20260313_noop_model_type_hardening.py` so Alembic revision globals are treated consistently and do not trigger unused-global alerts
+- Resolved the last hidden unresolved PR review thread for `profile_photos.py` after paginating all 168 review threads
+
+Verification:
+
+- `cd src/backend && ../backend/.venv/bin/ruff check app tests` → pass
+- `cd src/backend && ../backend/.venv/bin/pytest tests/test_profile_photos.py -q` → `18 passed`
+- `cd src/backend && ../backend/.venv/bin/pytest tests/test_issue_reports.py -q` → `2 passed`

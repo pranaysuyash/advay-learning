@@ -1,7 +1,6 @@
 """Issue reporting endpoints (contract-first foundation)."""
 
 import os
-import re
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -26,7 +25,6 @@ CHUNK_SIZE = 1024 * 1024  # 1MB
 ALLOWED_VIDEO_MIME_TYPES = {"video/webm", "video/mp4"}
 ISSUE_REPORT_STORAGE_DIR = Path("storage/issue_reports")
 SESSION_TTL_SECONDS = 86400  # 24 hours
-SAFE_PATH_SEGMENT_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 
 
 def normalize_video_mime_type(value: str | None) -> str:
@@ -40,29 +38,12 @@ def get_session_cache_key(report_id: str) -> str:
     return f"issue_report_session:{report_id}"
 
 
-def normalize_storage_segment(value: str, detail: str) -> str:
-    if not value or "\x00" in value:
-        raise HTTPException(status_code=400, detail=detail)
+def resolve_issue_report_path(extension: str) -> Path:
+    uploads_dir = os.path.realpath(os.path.join(str(ISSUE_REPORT_STORAGE_DIR), "uploads"))
+    file_name = f"{uuid4().hex}.{extension}"
+    file_path = os.path.realpath(os.path.join(uploads_dir, file_name))
 
-    safe_value = Path(value).name
-    if not safe_value or safe_value in {".", ".."} or not SAFE_PATH_SEGMENT_RE.fullmatch(safe_value):
-        raise HTTPException(status_code=400, detail=detail)
-
-    return safe_value
-
-
-def resolve_issue_report_path(owner_id: str, report_id: str, extension: str) -> Path:
-    safe_owner_id = normalize_storage_segment(owner_id, "Invalid storage owner")
-    safe_report_id = normalize_storage_segment(report_id, "Invalid report id")
-    safe_extension = normalize_storage_segment(extension, "Invalid file extension")
-
-    owner_dir = os.path.realpath(os.path.join(str(ISSUE_REPORT_STORAGE_DIR), safe_owner_id))
-    file_name = (
-        f"{safe_report_id}_{datetime.now(UTC).strftime('%Y%m%d%H%M%S%f')}.{safe_extension}"
-    )
-    file_path = os.path.realpath(os.path.join(owner_dir, file_name))
-
-    if os.path.commonpath([owner_dir, file_path]) != owner_dir:
+    if os.path.commonpath([uploads_dir, file_path]) != uploads_dir:
         raise HTTPException(status_code=400, detail="Invalid report file path")
 
     return Path(file_path)
@@ -145,18 +126,11 @@ async def upload_issue_report_clip(
                 )
         file_path = Path(f"in-memory://{report_id}")
     else:
-        user_dir = Path(
-            os.path.realpath(
-                os.path.join(
-                    str(ISSUE_REPORT_STORAGE_DIR),
-                    normalize_storage_segment(str(current_user.id), "Invalid storage owner"),
-                )
-            )
-        )
-        user_dir.mkdir(parents=True, exist_ok=True)
+        uploads_dir = ISSUE_REPORT_STORAGE_DIR / "uploads"
+        uploads_dir.mkdir(parents=True, exist_ok=True)
 
         extension = "webm" if "webm" in detected_mime else "mp4"
-        file_path = resolve_issue_report_path(str(current_user.id), report_id, extension)
+        file_path = resolve_issue_report_path(extension)
 
         try:
             with open(file_path, "wb") as output:

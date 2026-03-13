@@ -15,6 +15,7 @@ revision: str = "20260313_noop_model_type_hardening"
 down_revision: Union[str, None] = "20260307_add_parental_consent"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+__all__ = ("revision", "down_revision", "branch_labels", "depends_on")
 
 
 def upgrade() -> None:

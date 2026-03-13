@@ -11132,8 +11132,15 @@ Execution log:
 - 2026-03-13 IST: Regenerated project context (`src/.agent/STEP1_ENV.sh`) and verified `MEMSEARCH_MODEL=BAAI/bge-m3`.
 - 2026-03-13 IST: Started fresh full reindex with explicit env:
   - `MEMSEARCH_PROVIDER=local MEMSEARCH_MODEL=BAAI/bge-m3 ./projects-memory index`
+- 2026-03-13 IST: Stopped stalled duplicate shared index process tree and switched to deterministic project-local reindex for immediate validation:
+  - `env -u MEMSEARCH_MODEL /Users/pranay/Projects/agent-start --project learning_for_kids/src --provider local --model BAAI/bge-m3`
+- 2026-03-13 IST: Project-local indexing completed successfully and regenerated `.agent` pack.
+- 2026-03-13 IST: Verified project collection stats:
+  - `memsearch stats -c projects_proj_learning_for_kids_src` => `Total indexed chunks: 777`
+- 2026-03-13 IST: Verified retrieval works:
+  - `memsearch search -c projects_proj_learning_for_kids_src -p local -m BAAI/bge-m3 "Profile Photo Routes Not Registered"` returned relevant top matches from `API_AUDIT_REPORT.md`.
 
 Status updates:
 
 - 2026-03-13 **IN_PROGRESS** — indexing currently running with `BAAI/bge-m3`.
-
+- 2026-03-13 **IN_PROGRESS** — project-local `learning_for_kids/src` reindex is complete and validated; shared all-project reindex can be run separately in managed background mode when required.
