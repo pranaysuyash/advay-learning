@@ -41,3 +41,16 @@ Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 - Added `# lgtm[py/path-injection]` suppression comments to profile_photos.py
 - CodeQL does not recognize Path(filename).name as sanitization
 - Suppressions added at 4 locations: resolve_storage_path (2x), upload, get file
+
+## 2026-03-13 15:15 UTC — Code quality improvements (part 2)
+
+- Added webhook logging for ignored/edge-case events in consent.py
+  - Log unsupported event types with event_type and webhook_id
+  - Log malformed UUIDs in consent_id metadata
+  - Log unknown consent records with consent_id, payment_id, webhook_id
+  - Log withdrawn consent cases to prevent duplicate processing
+  - Log already-verified consent cases
+- Updated profile_photos.py to use Path.is_relative_to() for path validation
+  - Cleaner, more Pythonic code (Python 3.9+)
+  - Better cross-platform compatibility
+  - Removed unused `import os`

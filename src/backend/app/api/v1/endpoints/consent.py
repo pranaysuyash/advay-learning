@@ -8,10 +8,13 @@ DPDPA 2023 Section 9(1) Compliance
 """
 
 import json
+import logging
 import secrets
 from datetime import datetime
 from typing import Any
 from uuid import UUID
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
@@ -386,6 +389,10 @@ async def handle_dodopayments_webhook(
         "payment_intent.succeeded",
     }
     if event_type not in supported_events:
+        logger.warning(
+            "Webhook event type not supported, ignoring",
+            extra={"event_type": event_type, "webhook_id": webhook_id}
+        )
         return {"status": "ignored", "event_type": event_type}
 
     consent: ParentalConsent | None = None
@@ -394,6 +401,14 @@ async def handle_dodopayments_webhook(
         try:
             parsed_id = UUID(consent_id)
         except (ValueError, TypeError):
+            logger.warning(
+                "Webhook contains malformed consent_id UUID",
+                extra={
+                    "consent_id": consent_id,
+                    "event_type": event_type,
+                    "webhook_id": webhook_id,
+                },
+            )
             parsed_id = None
         if parsed_id:
             result = await db.execute(
@@ -411,12 +426,39 @@ async def handle_dodopayments_webhook(
         consent = result.scalar_one_or_none()
 
     if consent is None:
+        logger.warning(
+            "Webhook received for unknown consent record",
+            extra={
+                "event_type": event_type,
+                "consent_id": consent_id,
+                "payment_id": payment_id,
+                "webhook_id": webhook_id,
+            },
+        )
         return {"status": "record_not_found", "event_type": event_type}
 
     if consent.status == ConsentStatus.WITHDRAWN:
+        logger.info(
+            "Webhook received for withdrawn consent, ignoring",
+            extra={
+                "consent_id": str(consent.id),
+                "event_type": event_type,
+                "payment_id": payment_id,
+                "webhook_id": webhook_id,
+            },
+        )
         return {"status": "consent_withdrawn", "consent_id": str(consent.id)}
 
     if consent.status == ConsentStatus.VERIFIED and consent.card_verified:
+        logger.info(
+            "Webhook received for already verified consent, ignoring",
+            extra={
+                "consent_id": str(consent.id),
+                "event_type": event_type,
+                "payment_id": payment_id,
+                "webhook_id": webhook_id,
+            },
+        )
         return {"status": "already_verified", "consent_id": str(consent.id)}
 
     consent.card_verified = True

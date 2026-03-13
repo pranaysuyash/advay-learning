@@ -5,7 +5,6 @@ Uploads photo files, validates size, stores to local filesystem (MVP approach)
 S3 integration planned for Phase 3.
 """
 
-import os
 from datetime import datetime
 from pathlib import Path
 
@@ -75,7 +74,8 @@ def resolve_storage_path(current_user_id: str, filename: str) -> Path:
     # lgtm[py/path-injection] safe_filename is basename-only, validated below
     file_path = (profile_dir / safe_filename).resolve()
 
-    if not str(file_path).startswith(str(profile_dir) + os.sep) and file_path != profile_dir:
+    # Verify file_path is within profile_dir (is_relative_to available in Python 3.9+)
+    if not file_path.is_relative_to(profile_dir):
         raise HTTPException(status_code=400, detail="Invalid file name")
 
     return file_path
