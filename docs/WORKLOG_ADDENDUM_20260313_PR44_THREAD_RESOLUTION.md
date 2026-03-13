@@ -29,8 +29,9 @@ Execution log:
 - 2026-03-13 07:53 UTC | Fixed P1: restore-db.sh now uses --single-transaction for atomic restores
 - 2026-03-13 07:53 UTC | Fixed P1: deploy-remote.sh expands tilde in SSH_KNOWN_HOSTS_PATH and auto-creates parent dir
 - 2026-03-13 07:55 UTC | Resolved all 41 unresolved review threads via GraphQL API
+- 2026-03-13 13:30 UTC | Fixed Settings model: added extra='ignore' to prevent pre-push failures from unrecognized local env vars (e.g. HF_TOKEN)
 
 Status updates:
-- 2026-03-13 07:55 UTC **IN_PROGRESS** — All threads resolved, P1 code fixes applied, awaiting commit
+- 2026-03-13 13:30 UTC **IN_PROGRESS** — Settings model fix applied, pre-push check now passes
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
