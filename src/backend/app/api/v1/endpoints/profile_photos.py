@@ -5,6 +5,7 @@ Uploads photo files, validates size, stores to local filesystem (MVP approach)
 S3 integration planned for Phase 3.
 """
 
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -53,8 +54,22 @@ def build_photo_url(profile_id: str, filename: str) -> str:
 
 
 def resolve_storage_path(current_user_id: str, filename: str) -> Path:
-    """Resolve the filesystem path for a stored profile photo."""
-    return LOCAL_STORAGE_DIR / current_user_id / filename
+    """Resolve the filesystem path for a stored profile photo.
+
+    This function prevents path traversal by treating `filename` as a basename. Any
+    path separators or absolute paths provided by a client will be sanitized.
+    """
+    profile_dir = (LOCAL_STORAGE_DIR / current_user_id).resolve()
+
+    # Force filename to be a basename (drops any ../ or absolute path parts)
+    safe_filename = Path(filename).name
+
+    file_path = (profile_dir / safe_filename).resolve()
+
+    if not str(file_path).startswith(str(profile_dir) + os.sep) and file_path != profile_dir:
+        raise HTTPException(status_code=400, detail="Invalid file name")
+
+    return file_path
 
 
 def ensure_profile_photo_uploads_enabled() -> None:

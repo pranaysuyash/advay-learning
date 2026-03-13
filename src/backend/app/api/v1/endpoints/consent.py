@@ -391,10 +391,15 @@ async def handle_dodopayments_webhook(
     consent: ParentalConsent | None = None
     consent_id = metadata.get("consent_id")
     if consent_id:
-        result = await db.execute(
-            select(ParentalConsent).where(ParentalConsent.id == UUID(consent_id))
-        )
-        consent = result.scalar_one_or_none()
+        try:
+            parsed_id = UUID(consent_id)
+        except (ValueError, TypeError):
+            parsed_id = None
+        if parsed_id:
+            result = await db.execute(
+                select(ParentalConsent).where(ParentalConsent.id == parsed_id)
+            )
+            consent = result.scalar_one_or_none()
 
     payment_id = data.get("payment_id") or data.get("id")
     if consent is None and payment_id:
@@ -406,10 +411,10 @@ async def handle_dodopayments_webhook(
         consent = result.scalar_one_or_none()
 
     if consent is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Consent record not found for webhook",
-        )
+        return {"status": "record_not_found", "event_type": event_type}
+
+    if consent.status == ConsentStatus.WITHDRAWN:
+        return {"status": "consent_withdrawn", "consent_id": str(consent.id)}
 
     if consent.status == ConsentStatus.VERIFIED and consent.card_verified:
         return {"status": "already_verified", "consent_id": str(consent.id)}

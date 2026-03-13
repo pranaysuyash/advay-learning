@@ -74,6 +74,8 @@ class ParentalConsentResponse(ParentalConsentBase):
     def normalize_verification_method(cls, value: object) -> VerificationMethod:
         raw = getattr(value, "value", value)
         if raw == "credit_card":
+            # Legacy value — preserve original provider; the endpoint or
+            # request context decides the actual provider, not the schema.
             return VerificationMethod.DODOPAYMENTS
         return VerificationMethod(raw)
 

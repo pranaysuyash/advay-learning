@@ -13,11 +13,10 @@ BACKEND_URL="${BACKEND_URL:-$APP_URL}"
 BACKUP_BEFORE_DEPLOY="${BACKUP_BEFORE_DEPLOY:-1}"
 REMOTE_BACKUP_DIR="${REMOTE_BACKUP_DIR:-${DEPLOY_PATH}/backups}"
 SSH_KNOWN_HOSTS_PATH="${SSH_KNOWN_HOSTS_PATH:-${HOME}/.ssh/known_hosts}"
+SSH_KNOWN_HOSTS_PATH="${SSH_KNOWN_HOSTS_PATH/#\~/${HOME}}"
 
-if [[ ! -f "$SSH_KNOWN_HOSTS_PATH" ]]; then
-  echo "SSH known_hosts file not found at $SSH_KNOWN_HOSTS_PATH" >&2
-  exit 1
-fi
+mkdir -p "$(dirname "$SSH_KNOWN_HOSTS_PATH")"
+touch "$SSH_KNOWN_HOSTS_PATH"
 
 SSH_OPTS=(-i "$SSH_KEY_PATH" -p "$DEPLOY_PORT" -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_KNOWN_HOSTS_PATH")
 

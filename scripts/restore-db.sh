@@ -19,6 +19,7 @@ if [[ ! -f "$BACKUP_FILE" ]]; then
 fi
 
 PGPASSWORD="$DB_PASSWORD" pg_restore \
+  --single-transaction \
   --clean \
   --if-exists \
   --no-owner \
