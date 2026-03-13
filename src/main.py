@@ -181,7 +181,7 @@ def main() -> int:
             }
         )
 
-    logger.info(f"🎯 Starting server...")
+    logger.info("🎯 Starting server...")
 
     try:
         uvicorn.run(**uvicorn_config)
