@@ -35,3 +35,9 @@ Status updates:
 - 2026-03-13 13:30 UTC **IN_PROGRESS** — Settings model fix applied, pre-push check now passes
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+## 2026-03-13 14:50 UTC — CodeQL suppression comments added
+
+- Added `# lgtm[py/path-injection]` suppression comments to profile_photos.py
+- CodeQL does not recognize Path(filename).name as sanitization
+- Suppressions added at 4 locations: resolve_storage_path (2x), upload, get file
