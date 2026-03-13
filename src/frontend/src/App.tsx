@@ -351,8 +351,8 @@ const appRoutes: AppRoute[] = [
   { path: '/games/virtual-bubbles-3d', element: <VirtualBubbles3D />, protected: true, cameraSafe: true, gameName: 'Virtual Bubbles 3D' },
   { path: '/progress', element: <Progress />, protected: true, layout: true },
   { path: '/settings', element: <Settings />, protected: true, layout: true },
-  { path: '/style-test', element: <StyleTest />, layout: true },
-  { path: '/test/mediapipe', element: <MediaPipeTest />, layout: true },
+  { path: '/style-test', element: <StyleTest />, layout: true, devOnly: true },
+  { path: '/test/mediapipe', element: <MediaPipeTest />, layout: true, devOnly: true },
   { path: '/inventory', element: <InventoryPage />, protected: true, layout: true },
   { path: '/discovery-lab', element: <DiscoveryLab />, protected: true, layout: true },
   { path: '/games/spell-painter', element: <SpellPainter />, protected: true, cameraSafe: true, gameName: 'Spell Painter' },
@@ -388,8 +388,7 @@ function App() {
         <CalmModeProvider>
           <GlobalErrorBoundary>
             <Suspense fallback={<PageLoader />}>
-              
-                <Routes>
+              <Routes>
                   {appRoutes
                     .filter((route) => !route.devOnly || import.meta.env.DEV)
                     .map((route) => (

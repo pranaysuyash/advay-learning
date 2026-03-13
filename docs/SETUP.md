@@ -201,7 +201,7 @@ git status --short -- <file>
 
 If the file was created as a temporary scratch file, move it into the repo intentionally and verify the repo copy before treating it as complete.
 
-See [AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md](docs/process/AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md) for the full rule set.
+See [AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md](../process/AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md) for the full rule set.
 
 ---
 
@@ -536,7 +536,7 @@ The `tools/` directory contains reusable utilities for development and QA:
 
 - **Video Frame Analyzer** (`tools/video_frame_analyzer.html`) - Frame-by-frame video analysis for UX/QA testing
 - **Contrast Calculator** (`tools/contrast_calculator.py`) - WCAG contrast ratio validation
-- **Kenney Platformer Asset Sync** (`tools/sync_kenney_platformer_assets.sh`) - Sync the `New Platformer Pack` subset from the purchased all-in-one Kenney bundle into the canonical frontend runtime path
+- **Kenney Platformer Asset Sync** (`tools/sync_kenney_platformer_assets.sh`) - (Deprecated) Legacy sync tool; prefer sourcing directly from the all-in-one bundle per `assets/kenney/README.md`
 
 See [tools/README.md](../tools/README.md) for full documentation and usage examples.
 

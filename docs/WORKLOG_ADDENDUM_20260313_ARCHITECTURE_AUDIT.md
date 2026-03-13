@@ -7,7 +7,7 @@ Type: AUDIT_FINDING
 Owner: Antigravity
 Status: OPEN
 Priority: P1
-Link: # (Pending GitHub issue)
+Link: PR #44
 
 **Description:**
 Implement findings from the ChatGPT frontend architecture audit (files checked: `main.tsx`, `App.tsx`, `lazyPages.tsx`, `config.ts`, `I18nProvider.tsx`, `registerServiceWorker.ts`, `itemsManifest.ts`). 
@@ -34,7 +34,7 @@ Type: AUDIT_FINDING
 Owner: Codex
 Status: IN_PROGRESS
 Priority: P2
-Link: # (Pending GitHub issue)
+Link: PR #44
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
 **Description:**
