@@ -61,7 +61,8 @@ async def setup_database():
     async with test_async_session() as session:
         for game in INITIAL_GAMES:
             # use **game since the dict already contains all required fields
-            session.add(Game(**game))
+            # Use merge to handle existing records (upsert)
+            await session.merge(Game(**game))
         await session.commit()
 
     yield

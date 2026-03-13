@@ -17,7 +17,6 @@ sys.path.insert(0, str(Path(__file__).parent / "backend"))
 try:
     import uvicorn
     from app.core.config import get_settings
-    from app.core.health import get_health_status
     from app.db.session import async_session
 except ImportError as e:
     print(f"❌ Error: Required dependencies not found: {e}")

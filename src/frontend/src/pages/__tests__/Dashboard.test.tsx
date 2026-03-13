@@ -22,8 +22,24 @@ describe('Dashboard page', () => {
     // reset stores
     useAuthStore.setState({ isGuest: false, guestSession: null });
     useProfileStore.setState({
-      profiles: [{ id: 'P1', name: 'Tester', preferred_language: 'english', created_at: now, updated_at: now, parent_id: 'parent-1' }],
-      currentProfile: { id: 'P1', name: 'Tester', preferred_language: 'english', created_at: now, updated_at: now, parent_id: 'parent-1' },
+      profiles: [
+        {
+          id: 'P1',
+          name: 'Tester',
+          preferred_language: 'english',
+          created_at: now,
+          updated_at: now,
+          parent_id: 'parent-1',
+        },
+      ],
+      currentProfile: {
+        id: 'P1',
+        name: 'Tester',
+        preferred_language: 'english',
+        created_at: now,
+        updated_at: now,
+        parent_id: 'parent-1',
+      },
       isLoading: false,
       error: null,
       fetchProfiles: vi.fn(),
@@ -58,7 +74,7 @@ describe('Dashboard page', () => {
     render(
       <MemoryRouter>
         <Dashboard />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const pendingBadge = await screen.findByText(/Pending/i);
@@ -67,25 +83,35 @@ describe('Dashboard page', () => {
     expect(failedBadge).toBeInTheDocument();
 
     fireEvent.click(pendingBadge);
-    expect(navigateMock).toHaveBeenCalledWith('/progress', { state: { profileId: 'P1' } });
-    let events = JSON.parse(window.localStorage.getItem('advay.launch.analytics.v1') || '[]');
+    expect(navigateMock).toHaveBeenCalledWith('/progress', {
+      state: { profileId: 'P1' },
+    });
+    let events = JSON.parse(
+      window.localStorage.getItem('advay.launch.analytics.v1') || '[]',
+    );
     expect(
-      events.some((e: any) =>
-        e.name === 'pending_badge_clicked' &&
-        e.metadata.profileId === 'P1' &&
-        e.metadata.count === 1
-      )
+      events.some(
+        (e: any) =>
+          e.name === 'pending_badge_clicked' &&
+          e.metadata.profileId === 'P1' &&
+          e.metadata.count === 1,
+      ),
     ).toBeTruthy();
 
     fireEvent.click(failedBadge);
-    expect(navigateMock).toHaveBeenCalledWith('/progress', { state: { profileId: 'P1' } });
-    events = JSON.parse(window.localStorage.getItem('advay.launch.analytics.v1') || '[]');
+    expect(navigateMock).toHaveBeenCalledWith('/progress', {
+      state: { profileId: 'P1' },
+    });
+    events = JSON.parse(
+      window.localStorage.getItem('advay.launch.analytics.v1') || '[]',
+    );
     expect(
-      events.some((e: any) =>
-        e.name === 'failed_badge_clicked' &&
-        e.metadata.profileId === 'P1' &&
-        e.metadata.count === 2
-      )
+      events.some(
+        (e: any) =>
+          e.name === 'failed_badge_clicked' &&
+          e.metadata.profileId === 'P1' &&
+          e.metadata.count === 2,
+      ),
     ).toBeTruthy();
   });
 });

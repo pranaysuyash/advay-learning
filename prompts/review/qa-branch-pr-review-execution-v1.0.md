@@ -29,6 +29,7 @@ Simulate a high-signal PR review for the current branch using the repo's saved P
 - `Findings:` numbered list
 
 For each finding include:
+
 - `Severity:` high | medium | low
 - `File:` path
 - `Why it matters:` short paragraph with concrete evidence

@@ -27,7 +27,7 @@ def upgrade():
             ["profile_id", "idempotency_key"],
         )
     except Exception:
-        # Some DBs (SQLite) may not enforce or allow this easily; it's ok in dev/test
+        # Some DBs (for example SQLite in dev/test) may not support this constraint step.
         pass
 
 
@@ -35,5 +35,6 @@ def downgrade():
     try:
         op.drop_constraint("uix_profile_id_idempotency_key", "progress", type_="unique")
     except Exception:
+        # Some DBs may not have created the unique constraint during upgrade.
         pass
     op.drop_column("progress", "idempotency_key")

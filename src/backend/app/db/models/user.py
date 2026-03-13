@@ -1,7 +1,9 @@
 """User model."""
 
+from __future__ import annotations
+
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import Any
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, String
@@ -9,11 +11,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
 from app.schemas.user import UserRole
-
-if TYPE_CHECKING:
-    from app.db.models.consent import ParentalConsent
-    from app.db.models.profile import Profile
-    from app.db.models.subscription_model import Subscription
 
 
 class User(Base):
@@ -43,7 +40,7 @@ class User(Base):
     )
 
     # Relationships - cascade deletes to profiles (and their progress/achievements)
-    profiles: Mapped[list["Profile"]] = relationship(
+    profiles: Mapped[list[Any]] = relationship(
         "Profile",
         back_populates="parent",
         lazy="selectin",
@@ -51,7 +48,7 @@ class User(Base):
     )
 
     # Subscriptions
-    subscriptions: Mapped[list["Subscription"]] = relationship(
+    subscriptions: Mapped[list[Any]] = relationship(
         "Subscription",
         back_populates="parent",
         lazy="selectin",
@@ -59,7 +56,7 @@ class User(Base):
     )
 
     # Parental consents (DPDPA compliance)
-    consents: Mapped[list["ParentalConsent"]] = relationship(
+    consents: Mapped[list[Any]] = relationship(
         "ParentalConsent",
         back_populates="parent",
         lazy="selectin",

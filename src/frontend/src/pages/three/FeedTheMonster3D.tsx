@@ -29,8 +29,9 @@ const foodItems: FoodItem[] = [
   { id: 'donut', name: 'Donut', icon: '🍩', color: '#ec4899' },
 ];
 
-// Monster states
-const _monsterStates = ['idle', 'happy', 'eating', 'sad'] as const;
+// Monster states (used for typing; kept in sync with animations)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const monsterStates = ['idle', 'happy', 'eating', 'sad'] as const;
 
 // Food item with physics
 function FoodItem({
@@ -38,7 +39,7 @@ function FoodItem({
   position,
   onFeed,
 }: {
-  food: typeof foodItems[0];
+  food: (typeof foodItems)[0];
   position: [number, number, number];
   onFeed: () => void;
 }) {
@@ -66,11 +67,7 @@ function FoodItem({
       ref={ref}
       onClick={() => {
         // Launch food toward monster
-        api.velocity.set(
-          (Math.random() - 0.5) * 2,
-          8,
-          5 + Math.random() * 2
-        );
+        api.velocity.set((Math.random() - 0.5) * 2, 8, 5 + Math.random() * 2);
         onFeed();
       }}
     >
@@ -80,13 +77,11 @@ function FoodItem({
 }
 
 // Monster character
-function Monster({
-  state,
-}: {
-  state: typeof monsterStates[number];
-}) {
+function Monster({ state }: { state: (typeof monsterStates)[number] }) {
   const groupRef = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF('/assets/kenney/3d/characters/character-b.glb');
+  const { scene, animations } = useGLTF(
+    '/assets/kenney/3d/characters/character-b.glb',
+  );
   useAnimations(animations, groupRef);
 
   // Animate based on state
@@ -94,7 +89,8 @@ function Monster({
     if (groupRef.current) {
       if (state === 'happy') {
         // Jump up and down
-        groupRef.current.position.y = -1 + Math.abs(Math.sin(clock.elapsedTime * 10)) * 0.3;
+        groupRef.current.position.y =
+          -1 + Math.abs(Math.sin(clock.elapsedTime * 10)) * 0.3;
       } else if (state === 'eating') {
         // Chewing motion
         groupRef.current.scale.y = 1 + Math.sin(clock.elapsedTime * 15) * 0.1;
@@ -103,7 +99,8 @@ function Monster({
         groupRef.current.rotation.z = Math.sin(clock.elapsedTime * 2) * 0.05;
       } else {
         // Idle breathing
-        groupRef.current.position.y = -1 + Math.sin(clock.elapsedTime * 2) * 0.05;
+        groupRef.current.position.y =
+          -1 + Math.sin(clock.elapsedTime * 2) * 0.05;
       }
     }
   });
@@ -112,10 +109,13 @@ function Monster({
   const monsterScene = useMemo(() => {
     const clone = scene.clone();
     const hue =
-      state === 'happy' ? 0.3 : // Green
-      state === 'sad' ? 0.6 : // Blue
-      state === 'eating' ? 0.15 : // Orange
-      0.35; // Default green
+      state === 'happy'
+        ? 0.3 // Green
+        : state === 'sad'
+          ? 0.6 // Blue
+          : state === 'eating'
+            ? 0.15 // Orange
+            : 0.35; // Default green
 
     clone.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
@@ -142,7 +142,7 @@ function Monster({
 
       {/* Monster reaction indicator */}
       <Html position={[0, 2, 0]} center>
-        <div className="text-4xl animate-bounce">
+        <div className='text-4xl animate-bounce'>
           {state === 'happy' && '😋'}
           {state === 'eating' && '😮'}
           {state === 'sad' && '😢'}
@@ -164,7 +164,7 @@ function Ground() {
   return (
     <mesh ref={ref} receiveShadow>
       <boxGeometry args={[15, 1, 10]} />
-      <meshStandardMaterial color="#3d5a80" />
+      <meshStandardMaterial color='#3d5a80' />
     </mesh>
   );
 }
@@ -181,9 +181,11 @@ function FoodSelector({
 }) {
   return (
     <Html position={[0, 3, 0]} center>
-      <div className="bg-white/95 p-4 rounded-xl shadow-lg backdrop-blur-sm">
-        <h3 className="font-bold mb-3 text-gray-800 text-center">Choose Food</h3>
-        <div className="flex gap-2">
+      <div className='bg-white/95 p-4 rounded-xl shadow-lg backdrop-blur-sm'>
+        <h3 className='font-bold mb-3 text-gray-800 text-center'>
+          Choose Food
+        </h3>
+        <div className='flex gap-2'>
           {foods.map((food) => (
             <button
               key={food.id}
@@ -195,11 +197,11 @@ function FoodSelector({
               }`}
               style={{ backgroundColor: food.color + '20' }}
             >
-              <span className="text-2xl">{food.icon}</span>
+              <span className='text-2xl'>{food.icon}</span>
             </button>
           ))}
         </div>
-        <p className="text-xs text-gray-500 mt-2 text-center">
+        <p className='text-xs text-gray-500 mt-2 text-center'>
           Click food, then click again to feed!
         </p>
       </div>
@@ -211,19 +213,31 @@ function FoodSelector({
 function ScoreUI({ score, happiness }: { score: number; happiness: number }) {
   return (
     <Html position={[-4, 3, 0]}>
-      <div className="bg-slate-800/90 text-white px-4 py-3 rounded-xl shadow-lg">
-        <div className="text-sm text-slate-400 mb-1">Score</div>
-        <div className="text-3xl font-bold">{score}</div>
-        <div className="mt-2 text-sm">
-          <span className="text-slate-400">Happiness: </span>
-          <span className={happiness > 70 ? 'text-green-400' : happiness > 40 ? 'text-yellow-400' : 'text-red-400'}>
+      <div className='bg-slate-800/90 text-white px-4 py-3 rounded-xl shadow-lg'>
+        <div className='text-sm text-slate-400 mb-1'>Score</div>
+        <div className='text-3xl font-bold'>{score}</div>
+        <div className='mt-2 text-sm'>
+          <span className='text-slate-400'>Happiness: </span>
+          <span
+            className={
+              happiness > 70
+                ? 'text-green-400'
+                : happiness > 40
+                  ? 'text-yellow-400'
+                  : 'text-red-400'
+            }
+          >
             {happiness}%
           </span>
         </div>
-        <div className="w-24 h-2 bg-slate-700 rounded-full mt-1 overflow-hidden">
+        <div className='w-24 h-2 bg-slate-700 rounded-full mt-1 overflow-hidden'>
           <div
             className={`h-full transition-all duration-300 ${
-              happiness > 70 ? 'bg-green-500' : happiness > 40 ? 'bg-yellow-500' : 'bg-red-500'
+              happiness > 70
+                ? 'bg-green-500'
+                : happiness > 40
+                  ? 'bg-yellow-500'
+                  : 'bg-red-500'
             }`}
             style={{ width: `${happiness}%` }}
           />
@@ -243,7 +257,7 @@ useGLTF.preload('/assets/kenney/3d/characters/character-b.glb');
 export default function FeedTheMonster3D() {
   const navigate = useNavigate();
   const { playSFX, preload, setMuted } = use3DGameAudio();
-  
+
   // Performance monitoring
   usePerformanceMonitor('FeedTheMonster3D', {
     reportToAnalytics: true,
@@ -252,7 +266,8 @@ export default function FeedTheMonster3D() {
   const [isMuted, setIsMuted] = useState(false);
   const [score, setScore] = useState(0);
   const [happiness, setHappiness] = useState(50);
-  const [monsterState, setMonsterState] = useState<typeof monsterStates[number]>('idle');
+  const [monsterState, setMonsterState] =
+    useState<(typeof monsterStates)[number]>('idle');
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [fedFoods, setFedFoods] = useState<string[]>([]);
   const { resetAutoCompletion } = useAutoGameCompletion('feed-the-monster-3d', {
@@ -277,10 +292,13 @@ export default function FeedTheMonster3D() {
     if (!newMuted) playSFX('click', 0.3);
   };
 
-  const handleSelectFood = useCallback((food: FoodItem) => {
-    setSelectedFood(food);
-    playSFX('click', 0.4);
-  }, [playSFX]);
+  const handleSelectFood = useCallback(
+    (food: FoodItem) => {
+      setSelectedFood(food);
+      playSFX('click', 0.4);
+    },
+    [playSFX],
+  );
 
   const handleFeed = useCallback(() => {
     if (!selectedFood) return;
@@ -335,84 +353,91 @@ export default function FeedTheMonster3D() {
 
   return (
     <GameShell gameId='feed-the-monster-3d' gameName='Feed the Monster 3D'>
-    <GameContainer title="Feed the Monster 3D" onHome={() => navigate('/games')}>
-      <div className="h-[600px] w-full rounded-xl overflow-hidden bg-[#FFF8F0] relative">
-        {/* Mute button */}
-        <button
-          onClick={toggleMute}
-          className="absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors"
-          aria-label={isMuted ? 'Unmute' : 'Mute'}
-        >
-          {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
-        </button>
-        <ThreeDGameCanvas
-          cameraPosition={[0, 2, 6]}
-          cameraTarget={[0, 0, 0]}
-          enableOrbit={true}
-          showStats={import.meta.env.DEV}
-          showFPS={import.meta.env.DEV}
-          backgroundColor="#1e293b"
-          environment="warehouse"
-        >
-          <Physics gravity={[0, -9.82, 0]}>
-            <Ground />
-            <Monster state={monsterState} />
-
-            {selectedFood && (
-              <FoodItem
-                food={selectedFood}
-                position={[(Math.random() - 0.5) * 4, 4, -3]}
-                onFeed={handleFeed}
-              />
+      <GameContainer
+        title='Feed the Monster 3D'
+        onHome={() => navigate('/games')}
+      >
+        <div className='h-[600px] w-full rounded-xl overflow-hidden bg-[#FFF8F0] relative'>
+          {/* Mute button */}
+          <button
+            onClick={toggleMute}
+            className='absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors'
+            aria-label={isMuted ? 'Unmute' : 'Mute'}
+          >
+            {isMuted ? (
+              <VolumeX className='w-5 h-5 text-white' />
+            ) : (
+              <Volume2 className='w-5 h-5 text-white' />
             )}
+          </button>
+          <ThreeDGameCanvas
+            cameraPosition={[0, 2, 6]}
+            cameraTarget={[0, 0, 0]}
+            enableOrbit={true}
+            showStats={import.meta.env.DEV}
+            showFPS={import.meta.env.DEV}
+            backgroundColor='#1e293b'
+            environment='warehouse'
+          >
+            <Physics gravity={[0, -9.82, 0]}>
+              <Ground />
+              <Monster state={monsterState} />
 
-            <FoodSelector
-              foods={foodItems}
-              onSelect={handleSelectFood}
-              selectedFood={selectedFood}
-            />
+              {selectedFood && (
+                <FoodItem
+                  food={selectedFood}
+                  position={[(Math.random() - 0.5) * 4, 4, -3]}
+                  onFeed={handleFeed}
+                />
+              )}
 
-            <ScoreUI score={score} happiness={happiness} />
-          </Physics>
-        </ThreeDGameCanvas>
-      </div>
+              <FoodSelector
+                foods={foodItems}
+                onSelect={handleSelectFood}
+                selectedFood={selectedFood}
+              />
 
-      {/* Controls */}
-      <div className="mt-4 flex justify-between items-center px-8">
-        <div className="text-sm text-slate-500">
-          <p>🎯 Feed the monster different foods!</p>
-          <p>💡 Variety = more points!</p>
+              <ScoreUI score={score} happiness={happiness} />
+            </Physics>
+          </ThreeDGameCanvas>
         </div>
 
-        <button
-          onClick={resetGame}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-medium transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Reset
-        </button>
-      </div>
+        {/* Controls */}
+        <div className='mt-4 flex justify-between items-center px-8'>
+          <div className='text-sm text-slate-500'>
+            <p>🎯 Feed the monster different foods!</p>
+            <p>💡 Variety = more points!</p>
+          </div>
 
-      {/* Happiness indicator */}
-      <div className="mt-4 flex justify-center gap-4">
-        {happiness > 80 ? (
-          <div className="flex items-center gap-2 text-green-500 font-bold">
-            <Smile className="w-6 h-6" />
-            Monster is happy!
-          </div>
-        ) : happiness < 40 ? (
-          <div className="flex items-center gap-2 text-red-500 font-bold">
-            <Frown className="w-6 h-6" />
-            Monster is hungry!
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 text-yellow-500 font-bold">
-            <span className="text-2xl">😐</span>
-            Monster is okay
-          </div>
-        )}
-      </div>
-    </GameContainer>
+          <button
+            onClick={resetGame}
+            className='flex items-center gap-2 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-medium transition-colors'
+          >
+            <RotateCcw className='w-4 h-4' />
+            Reset
+          </button>
+        </div>
+
+        {/* Happiness indicator */}
+        <div className='mt-4 flex justify-center gap-4'>
+          {happiness > 80 ? (
+            <div className='flex items-center gap-2 text-green-500 font-bold'>
+              <Smile className='w-6 h-6' />
+              Monster is happy!
+            </div>
+          ) : happiness < 40 ? (
+            <div className='flex items-center gap-2 text-red-500 font-bold'>
+              <Frown className='w-6 h-6' />
+              Monster is hungry!
+            </div>
+          ) : (
+            <div className='flex items-center gap-2 text-yellow-500 font-bold'>
+              <span className='text-2xl'>😐</span>
+              Monster is okay
+            </div>
+          )}
+        </div>
+      </GameContainer>
     </GameShell>
   );
 }

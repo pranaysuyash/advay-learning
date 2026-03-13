@@ -190,7 +190,7 @@ async def logout(request: Request, response: Response, db: AsyncSession = Depend
                     expires = datetime.fromtimestamp(exp, timezone.utc)
                     await TokenService.revoke_access_token(db, jti, expires)
             except JWTError:
-                pass  # token invalid; nothing to revoke
+                return {"message": "Logout successful"}  # token invalid; nothing to revoke
 
     clear_auth_cookies(response)
     return {"message": "Logout successful"}
@@ -316,7 +316,8 @@ async def refresh_token(
                     expires = datetime.fromtimestamp(exp, timezone.utc)
                     await TokenService.revoke_access_token(db, jti, expires)
             except JWTError:
-                pass
+                clear_auth_cookies(response)
+                raise TokenInvalidError("Invalid or revoked access token")
 
     # Create new tokens
     new_access_token = create_access_token(data={"sub": user.id})

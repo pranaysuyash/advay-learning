@@ -68,10 +68,8 @@ class CacheService:
         except Exception as e:
             logger.warning("Unexpected cache error setting key %s: %s", key, e)
         # if we reached here it means redis failed; store in fallback
-        try:
-            self._fallback[key] = json.dumps(value)
-        except Exception:
-            pass
+        serialized = json.dumps(value)
+        self._fallback[key] = serialized
         return True
 
     async def delete(self, key: str) -> bool:

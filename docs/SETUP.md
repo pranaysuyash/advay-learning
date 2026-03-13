@@ -128,10 +128,12 @@ To hard-block merges until workflow requirements are satisfied:
    - `Trivy Security Scan / trivy`
 
 Workflows:
+
 - `.github/workflows/pr-comment-gate.yml`
 - `.github/workflows/merge-readiness-gate.yml`
 
 The merge-readiness workflow blocks merge when:
+
 - PR branch is not `codex/wip-*`
 - PR is missing `Closes #...` or `TCK-...`
 - PR is not approved / has unresolved review threads / has open review requests

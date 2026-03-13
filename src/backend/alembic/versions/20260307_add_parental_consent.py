@@ -19,6 +19,7 @@ revision: str = '20260307_add_parental_consent'
 down_revision: Union[str, None] = 'f3c1a2b9d4e7'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+__all__ = ("revision", "down_revision", "branch_labels", "depends_on")
 
 
 def upgrade() -> None:

@@ -10873,7 +10873,7 @@ Targets:
 
 - Repo: learning_for_kids
 - File(s):
-  - docs/audit/game__emoji_match__video_ux_audit_2026-02-20.md (created)
+  - docs/audit/game**emoji_match**video_ux_audit_2026-02-20.md (created)
   - tools/video_compress.py (created)
   - tools/README.md (updated)
 - Video source: ~/Desktop/emoji_match.mov
@@ -10905,7 +10905,7 @@ Execution log:
 - 2026-02-20 10:50 IST | User feedback: Added level progression bug and start button interaction issues (now 4 critical issues)
 - 2026-02-20 10:44 IST | Created video_compress.py tool in tools/
 - 2026-02-20 10:45 IST | Updated tools/README.md with new tool docs
-- 2026-02-20 10:46 IST | Created audit document: game__emoji_match__video_ux_audit_2026-02-20.md
+- 2026-02-20 10:46 IST | Created audit document: game**emoji_match**video_ux_audit_2026-02-20.md
 
 Status updates:
 
@@ -10914,15 +10914,13 @@ Status updates:
 Key Findings Summary:
 
 **Critical Issues:**
+
 1. **Level progression bug** - Level 1 celebrated twice, Level 3 shown multiple times (state management issue)
 2. **Start button not pinchable** - Breaks hand-tracking paradigm, should be big pushable button
 3. Timer too fast (20s for 10 rounds = 2s per emoji) - causes child frustration
 4. "R1/10" notation unclear - children don't understand progress
 
-**Top Medium Issues:**
-3. Hand tracking lag and small detection radius
-4. Tiny hand tracking indicators (cyan circles) hard to see
-5. Cluttered background (ceiling fan, furniture) distracts from game
+**Top Medium Issues:** 3. Hand tracking lag and small detection radius 4. Tiny hand tracking indicators (cyan circles) hard to see 5. Cluttered background (ceiling fan, furniture) distracts from game
 
 Next Actions:
 
@@ -10978,6 +10976,7 @@ Execution log:
 Status updates:
 
 - 2026-03-13 **DONE** — shim removal complete; verified no remaining imports and frontend builds clean. Evidence: `rg` search returned none; `npm run type-check` now passes with zero errors.
+
 ---
 
 EOF
@@ -11075,4 +11074,66 @@ Execution log:
 Status updates:
 
 - 2026-03-13 **DONE** — shared auto embedding default switched to `BAAI/bge-m3` and docs aligned.
+
+## TCK-20260313-005 :: OPS – Stabilize indexing model after `bge-m3`/`nomic` compatibility failures
+
+Type: IMPROVEMENT
+Owner: Codex (GPT-5)
+Created: 2026-03-13
+Status: **IN_PROGRESS**
+Priority: P1
+
+Prompt Trace:
+
+- Prompt(s) used: ad-hoc user request in chat (reindex failing/running too long)
+- Lenses: operational reliability, compatibility, indexing throughput
+
+Scope contract:
+
+- In-scope: fix index failures and long-running instability by choosing a compatible local model and rerunning reset+index.
+- Out-of-scope: modify memsearch package internals (`trust_remote_code`) or add custom provider adapters.
+- Behavior change allowed: YES (retrieval infra default model).
+
+Execution log:
+
+- 2026-03-13 IST: Observed shared reindex run with `BAAI/bge-m3` still active after ~5h; user reported unresolved state.
+- 2026-03-13 IST: Stopped active index processes and reset collection `projects_workspace_shared`.
+- 2026-03-13 IST: Tested `nomic-ai/nomic-embed-text-v1.5`; failed in local provider due required `trust_remote_code=True` unsupported by current memsearch local provider.
+- 2026-03-13 IST: Tested compatible alternatives (`intfloat/multilingual-e5-base`, `BAAI/bge-base-en-v1.5`, `BAAI/bge-small-en-v1.5`) with SentenceTransformer load success.
+- 2026-03-13 IST: Set shared auto local default back to `BAAI/bge-base-en-v1.5` for compatibility and faster indexing.
+- 2026-03-13 IST: Regenerated `learning_for_kids/src/.agent/STEP1_ENV.sh` and confirmed `MEMSEARCH_MODEL=BAAI/bge-base-en-v1.5`.
+- 2026-03-13 IST: Started clean reindex with explicit env:
+  - `MEMSEARCH_PROVIDER=local MEMSEARCH_MODEL=BAAI/bge-base-en-v1.5 ./projects-memory index`
+
+Status updates:
+
+- 2026-03-13 **IN_PROGRESS** — clean reindex currently running with compatible model.
+
+
+## TCK-20260313-006 :: OPS – Finalize default embedding model as `BAAI/bge-m3` (SOTA/local)
+
+Type: IMPROVEMENT
+Owner: Codex (GPT-5)
+Created: 2026-03-13
+Status: **IN_PROGRESS**
+Priority: P1
+
+Scope contract:
+
+- In-scope: apply user-directed model policy (no smaller fallback), set default back to `BAAI/bge-m3`, reset shared collection, rerun index.
+- Out-of-scope: introduce hosted-only defaults or remote-code custom loaders.
+- Behavior change allowed: YES (retrieval infra defaults).
+
+Execution log:
+
+- 2026-03-13 IST: User requested tried-and-tested SOTA model only.
+- 2026-03-13 IST: Restored defaults from `BAAI/bge-base-en-v1.5` to `BAAI/bge-m3` in shared scripts/docs.
+- 2026-03-13 IST: Reset `projects_workspace_shared` collection.
+- 2026-03-13 IST: Regenerated project context (`src/.agent/STEP1_ENV.sh`) and verified `MEMSEARCH_MODEL=BAAI/bge-m3`.
+- 2026-03-13 IST: Started fresh full reindex with explicit env:
+  - `MEMSEARCH_PROVIDER=local MEMSEARCH_MODEL=BAAI/bge-m3 ./projects-memory index`
+
+Status updates:
+
+- 2026-03-13 **IN_PROGRESS** — indexing currently running with `BAAI/bge-m3`.
 

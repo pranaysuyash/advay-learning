@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 import ssl
 import socket
-import json
 import uuid
 import sys
 import os
-from datetime import datetime
 import binascii
 
 # Pure Python 3 WebSocket client using standard library socket+ssl
@@ -41,7 +39,6 @@ def recv_ws_frame(sock):
     if not header:
         return None, None
     
-    fin = (header[0] & 0x80) != 0
     opcode = header[0] & 0x0f
     
     length = header[1] & 0x7f

@@ -79,12 +79,12 @@ try:
     settings = get_settings()
     validate_cors_configuration(settings)
 except Exception as e:
-    # Provide helpful error message for missing environment variables
-    print(f"Configuration Error: {str(e)}")
-    print("Please ensure all required environment variables are set.")
-    print("Required: SECRET_KEY, DATABASE_URL")
-    print("Optional: APP_ENV, DEBUG, ALLOWED_ORIGINS, etc.")
-    raise
+    raise RuntimeError(
+        "Configuration Error: "
+        f"{e}. Please ensure all required environment variables are set. "
+        "Required: SECRET_KEY, DATABASE_URL. "
+        "Optional: APP_ENV, DEBUG, ALLOWED_ORIGINS, etc."
+    ) from e
 
 app = FastAPI(
     title="Advay Vision Learning API",

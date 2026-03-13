@@ -5,8 +5,11 @@ Uploads photo files, validates size, stores to local filesystem (MVP approach)
 S3 integration planned for Phase 3.
 """
 
+import os
+import re
 from datetime import datetime
 from pathlib import Path
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
@@ -27,6 +30,7 @@ ALLOWED_EXTENSIONS = ["image/jpeg", "image/png"]
 ALLOWED_MIME_TYPES = {"jpeg": "image/jpeg", "png": "image/png"}
 TARGET_RESOLUTION = (640, 480)
 LOCAL_STORAGE_DIR = Path("public/profile_photos")
+SAFE_PATH_SEGMENT_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 
 # Magic bytes for image validation (file signatures)
 IMAGE_SIGNATURES = {
@@ -52,32 +56,46 @@ def build_photo_url(profile_id: str, filename: str) -> str:
     return f"/api/v1/users/me/profiles/{profile_id}/photo/file/{filename}"
 
 
+def normalize_storage_owner_id(current_user_id: str) -> str:
+    """Normalize a storage owner id to a UUID string."""
+    try:
+        return str(UUID(current_user_id))
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail="Invalid storage owner") from exc
+
+
+def normalize_storage_filename(filename: str) -> str:
+    """Normalize an uploaded filename to a safe basename."""
+    if not filename or "\x00" in filename:
+        raise HTTPException(status_code=400, detail="Invalid file name")
+
+    safe_filename = Path(filename).name
+    if (
+        not safe_filename
+        or safe_filename in {".", ".."}
+        or not SAFE_PATH_SEGMENT_RE.fullmatch(safe_filename)
+    ):
+        raise HTTPException(status_code=400, detail="Invalid file name")
+
+    return safe_filename
+
+
 def resolve_storage_path(current_user_id: str, filename: str) -> Path:
     """Resolve the filesystem path for a stored profile photo.
 
     This function prevents path traversal by treating `filename` as a basename. Any
     path separators or absolute paths provided by a client will be sanitized.
     """
-    # Reject null bytes and path separators before any path construction
-    if not filename or "\x00" in filename:
+    safe_owner_id = normalize_storage_owner_id(current_user_id)
+    safe_filename = normalize_storage_filename(filename)
+
+    profile_dir = os.path.realpath(os.path.join(str(LOCAL_STORAGE_DIR), safe_owner_id))
+    file_path = os.path.realpath(os.path.join(profile_dir, safe_filename))
+
+    if os.path.commonpath([profile_dir, file_path]) != profile_dir:
         raise HTTPException(status_code=400, detail="Invalid file name")
 
-    # lgtm[py/path-injection] filename is sanitized to basename before use
-    profile_dir = (LOCAL_STORAGE_DIR / current_user_id).resolve()
-
-    # Force filename to be a basename (drops any ../ or absolute path parts)
-    safe_filename = Path(filename).name
-
-    if not safe_filename or safe_filename in (".", ".."):
-        raise HTTPException(status_code=400, detail="Invalid file name")
-
-    file_path = (profile_dir / safe_filename).resolve()  # lgtm[py/path-injection] safe_filename is basename-only, validated below
-
-    # Verify file_path is within profile_dir (is_relative_to available in Python 3.9+)
-    if not file_path.is_relative_to(profile_dir):
-        raise HTTPException(status_code=400, detail="Invalid file name")
-
-    return file_path
+    return Path(file_path)
 
 
 def ensure_profile_photo_uploads_enabled() -> None:
@@ -152,12 +170,15 @@ async def upload_profile_photo(
     filename = f"{profile_id}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.{extension}"
 
     # Create local storage directory
-    profile_dir = LOCAL_STORAGE_DIR / current_user.id
+    profile_dir = Path(
+        os.path.realpath(
+            os.path.join(str(LOCAL_STORAGE_DIR), normalize_storage_owner_id(current_user.id))
+        )
+    )
     profile_dir.mkdir(parents=True, exist_ok=True)
 
-    # lgtm[py/path-injection] filename is internally generated, not user-provided
     # Save file to local storage (MVP approach)
-    file_path = profile_dir / filename
+    file_path = resolve_storage_path(current_user.id, filename)
     file_path.write_bytes(contents)
 
     # Generate public URL for frontend.

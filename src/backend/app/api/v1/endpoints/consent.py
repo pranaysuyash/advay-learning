@@ -15,17 +15,6 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-# Safe logger sanitization (prevents log injection via untrusted input)
-_LOG_SANITIZER_RE = re.compile(r"[^a-zA-Z0-9_@\-\. ]")
-
-def _sanitize_log_value(value: Any) -> str:
-    if value is None:
-        return ""
-    s = str(value)
-    s = s.replace("\n", " ").replace("\r", " ")
-    sanitized = _LOG_SANITIZER_RE.sub("_", s)
-    return sanitized[:200]
-
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -46,6 +35,18 @@ from app.schemas.consent import (
     ParentalConsentResponse,
 )
 from app.services.dodo_payment_service import DodoPaymentService, get_dodo_client
+
+# Safe logger sanitization (prevents log injection via untrusted input)
+_LOG_SANITIZER_RE = re.compile(r"[^a-zA-Z0-9_@\-\. ]")
+
+
+def _sanitize_log_value(value: Any) -> str:
+    if value is None:
+        return ""
+    s = str(value)
+    s = s.replace("\n", " ").replace("\r", " ")
+    sanitized = _LOG_SANITIZER_RE.sub("_", s)
+    return sanitized[:200]
 
 logger = logging.getLogger(__name__)
 
@@ -469,14 +470,13 @@ async def handle_dodopayments_webhook(
         return {"status": "consent_withdrawn", "consent_id": str(consent.id)}
 
     if consent.status == ConsentStatus.VERIFIED and consent.card_verified:
-        # lgtm[py/log-injection] Webhook IDs are logged for audit/debugging
         logger.info(
             "Webhook received for already verified consent, ignoring",
             extra={
-                "consent_id": str(consent.id),
-                "event_type": event_type,
-                "payment_id": payment_id,
-                "webhook_id": webhook_id,
+                "consent_id": _sanitize_log_value(str(consent.id)),
+                "event_type": _sanitize_log_value(event_type),
+                "payment_id": _sanitize_log_value(payment_id),
+                "webhook_id": _sanitize_log_value(webhook_id),
             },
         )
         return {"status": "already_verified", "consent_id": str(consent.id)}
