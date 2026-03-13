@@ -10,8 +10,8 @@ from sqlalchemy import Float, Integer, and_, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.core.config import settings
 from app.api.permissions import require_roles
+from app.core.config import settings
 from app.db.models.game import Game as GameModel
 from app.db.models.profile import Profile
 from app.db.models.progress import Progress

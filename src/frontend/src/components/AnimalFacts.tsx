@@ -15,7 +15,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTTS } from '../hooks/useTTS';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getMultipleAnimalFacts } from '../utils/animalFactsApi';
 
 // Animal type with emoji mapping

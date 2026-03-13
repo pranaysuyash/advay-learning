@@ -64,7 +64,11 @@ export const PlanetSandboxContent = memo(function PlanetSandboxComponent() {
   const handleCheck = useCallback(() => {
     const result = checkChallenge(state);
     setFeedback(result.feedback);
-    result.success ? playSuccess() : playError();
+    if (result.success) {
+      playSuccess();
+    } else {
+      playError();
+    }
   }, [state, playSuccess, playError]);
 
   const handleSubmit = useCallback(() => {

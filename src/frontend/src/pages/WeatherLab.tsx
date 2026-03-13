@@ -437,7 +437,6 @@ export const WeatherLabContent = memo(function WeatherLabComponent() {
   // Initial weather fetch on mount
   useEffect(() => {
     getUserLocation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleStartChallenge = useCallback(

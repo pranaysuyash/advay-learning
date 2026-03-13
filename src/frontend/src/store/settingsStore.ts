@@ -90,12 +90,12 @@ export const useSettingsStore = create<SettingsState>()(
       // Do not persist transient demoMode, lifecycle flags or setter functions
       partialize: (state) => {
         const {
-          hydrated,
-          demoMode,
-          setDemoMode,
-          setHydrated,
-          updateSettings,
-          resetSettings,
+          hydrated: _hydrated,
+          demoMode: _demoMode,
+          setDemoMode: _setDemoMode,
+          setHydrated: _setHydrated,
+          updateSettings: _updateSettings,
+          resetSettings: _resetSettings,
           ...rest
         } = state;
         return rest as Partial<SettingsState>;

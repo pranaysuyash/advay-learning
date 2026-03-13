@@ -30,7 +30,7 @@ const foodItems: FoodItem[] = [
 ];
 
 // Monster states
-const monsterStates = ['idle', 'happy', 'eating', 'sad'] as const;
+const _monsterStates = ['idle', 'happy', 'eating', 'sad'] as const;
 
 // Food item with physics
 function FoodItem({
@@ -336,7 +336,7 @@ export default function FeedTheMonster3D() {
   return (
     <GameShell gameId='feed-the-monster-3d' gameName='Feed the Monster 3D'>
     <GameContainer title="Feed the Monster 3D" onHome={() => navigate('/games')}>
-      <div className="h-[600px] w-full rounded-xl overflow-hidden bg-slate-900 relative">
+      <div className="h-[600px] w-full rounded-xl overflow-hidden bg-[#FFF8F0] relative">
         {/* Mute button */}
         <button
           onClick={toggleMute}

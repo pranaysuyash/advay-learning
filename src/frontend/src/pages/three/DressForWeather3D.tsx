@@ -362,7 +362,7 @@ export default function DressForWeather3D() {
   return (
     <GameShell gameId='dress-for-weather-3d' gameName='Dress for Weather 3D'>
     <GameContainer title="Dress for Weather 3D" onHome={() => navigate('/games')}>
-      <div className="h-[600px] w-full rounded-xl overflow-hidden bg-slate-900 relative">
+      <div className="h-[600px] w-full rounded-xl overflow-hidden bg-[#FFF8F0] relative">
         {/* Mute button */}
         <button
           onClick={toggleMute}
