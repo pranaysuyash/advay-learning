@@ -159,3 +159,14 @@ Verification:
 
 - Attempted to directly normalize `docs/WORKLOG_ADDENDUM_v2.md` for two unresolved PR comments, but the repo worklog guard correctly blocked the commit because the file is append-only outside ticket fields.
 - Kept the historical entry intact and deferred that exact historical correction to an append-only follow-up approach so the merge fix itself does not violate repo policy.
+
+## 2026-03-13 18:40 UTC — Final backend/code-scanning cleanup (batch 5)
+
+- Fixed the backend CI lint failure by normalizing the no-op Alembic revision import blocks.
+- Removed the temporary `TYPE_CHECKING` model imports that re-triggered `py/unsafe-cyclic-import` on the PR; relationship annotations now stay concrete via forward references with local `F821` suppression on the annotation lines only.
+- Replaced the empty access-token refresh exception path in `src/backend/app/api/v1/endpoints/auth.py` with an explicit informational log so stale access cookies no longer block refresh rotation and CodeQL no longer sees an empty handler.
+
+Verification:
+
+- `cd src/backend && ../backend/.venv/bin/ruff check app tests alembic/versions` → pass
+- `cd src/backend && ../backend/.venv/bin/pytest tests/test_auth.py tests/test_cache_service.py -q` → `48 passed`

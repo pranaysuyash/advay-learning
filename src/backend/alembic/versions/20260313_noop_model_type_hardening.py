@@ -9,7 +9,6 @@ Create Date: 2026-03-13 17:15:00.000000
 
 from typing import Sequence, Union
 
-
 # revision identifiers, used by Alembic.
 revision: str = "20260313_noop_model_type_hardening"
 down_revision: Union[str, None] = "20260307_add_parental_consent"
