@@ -182,3 +182,4 @@ Verification:
   - `src/backend/app/db/models/profile.py` now types `consent` as optional
   - `src/backend/app/services/cache_service.py` now handles fallback `json.dumps` `ValueError` in addition to `TypeError`
 - Added `src/backend/alembic/versions/20260313_noop_profile_consent_optional_typing.py` to satisfy the repo’s model-change migration guard for the optional-typing-only ORM update.
+- Normalized the new no-op migration import block with Ruff so backend CI lint on the merge ref stays green.
