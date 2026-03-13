@@ -9,10 +9,22 @@ DPDPA 2023 Section 9(1) Compliance
 
 import json
 import logging
+import re
 import secrets
 from datetime import datetime
 from typing import Any
 from uuid import UUID
+
+# Safe logger sanitization (prevents log injection via untrusted input)
+_LOG_SANITIZER_RE = re.compile(r"[^a-zA-Z0-9_@\-\. ]")
+
+def _sanitize_log_value(value: Any) -> str:
+    if value is None:
+        return ""
+    s = str(value)
+    s = s.replace("\n", " ").replace("\r", " ")
+    sanitized = _LOG_SANITIZER_RE.sub("_", s)
+    return sanitized[:200]
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
@@ -392,7 +404,10 @@ async def handle_dodopayments_webhook(
         # lgtm[py/log-injection] Webhook event type and ID are logged for audit/debugging
         logger.warning(
             "Webhook event type not supported, ignoring",
-            extra={"event_type": event_type, "webhook_id": webhook_id}
+            extra={
+                "event_type": _sanitize_log_value(event_type),
+                "webhook_id": _sanitize_log_value(webhook_id),
+            },
         )
         return {"status": "ignored", "event_type": event_type}
 
@@ -406,9 +421,9 @@ async def handle_dodopayments_webhook(
             logger.warning(
                 "Webhook contains malformed consent_id UUID",
                 extra={
-                    "consent_id": consent_id,
-                    "event_type": event_type,
-                    "webhook_id": webhook_id,
+                    "consent_id": _sanitize_log_value(consent_id),
+                    "event_type": _sanitize_log_value(event_type),
+                    "webhook_id": _sanitize_log_value(webhook_id),
                 },
             )
             parsed_id = None
@@ -432,10 +447,10 @@ async def handle_dodopayments_webhook(
         logger.warning(
             "Webhook received for unknown consent record",
             extra={
-                "event_type": event_type,
-                "consent_id": consent_id,
-                "payment_id": payment_id,
-                "webhook_id": webhook_id,
+                "event_type": _sanitize_log_value(event_type),
+                "consent_id": _sanitize_log_value(consent_id),
+                "payment_id": _sanitize_log_value(payment_id),
+                "webhook_id": _sanitize_log_value(webhook_id),
             },
         )
         return {"status": "record_not_found", "event_type": event_type}
@@ -445,10 +460,10 @@ async def handle_dodopayments_webhook(
         logger.info(
             "Webhook received for withdrawn consent, ignoring",
             extra={
-                "consent_id": str(consent.id),
-                "event_type": event_type,
-                "payment_id": payment_id,
-                "webhook_id": webhook_id,
+                "consent_id": _sanitize_log_value(str(consent.id)),
+                "event_type": _sanitize_log_value(event_type),
+                "payment_id": _sanitize_log_value(payment_id),
+                "webhook_id": _sanitize_log_value(webhook_id),
             },
         )
         return {"status": "consent_withdrawn", "consent_id": str(consent.id)}

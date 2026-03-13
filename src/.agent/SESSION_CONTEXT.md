@@ -1,9 +1,9 @@
 # Session Context
 
-- Generated: 2026-03-13T05:06:55Z
+- Generated: 2026-03-13T10:09:02Z
 - Project: `learning_for_kids/src`
 - Provider: `local`
-- Model: `BAAI/bge-m3`
+- Model: `nomic-ai/nomic-embed-text-v1.5`
 - Project collection: `projects_proj_learning_for_kids_src`
 - Shared collection: `projects_workspace_shared`
 
