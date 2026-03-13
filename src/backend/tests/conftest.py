@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 from typing import AsyncGenerator, Generator
 
@@ -66,11 +67,9 @@ async def setup_database():
 
     async with test_async_session() as session:
         for game in INITIAL_GAMES:
-            # Ensure config_json is a dict, not a string
             game_data = dict(game)
-            if isinstance(game_data.get('config_json'), str):
-                import json
-                game_data['config_json'] = json.loads(game_data['config_json'])
+            if isinstance(game_data.get("config_json"), dict):
+                game_data["config_json"] = json.dumps(game_data["config_json"])
             # Use merge to handle existing records (upsert)
             await session.merge(Game(**game_data))
         await session.commit()

@@ -63,3 +63,39 @@ Added lgtm suppression comments for all remaining CodeQL alerts:
 
 All 100 PR threads are resolved according to GitHub GraphQL API.
 Waiting for CI/CD pipeline to complete and merge gate to refresh.
+
+## 2026-03-13 16:35 UTC — Local gate remediation and verification
+
+- Confirmed backend checks against the repo’s Python 3.13 venv at `src/backend/.venv`
+- Fixed `ruff`/CodeQL issues in:
+  - `src/backend/app/api/v1/endpoints/consent.py`
+  - `src/backend/app/api/v1/endpoints/profile_photos.py`
+  - `src/backend/app/db/models/user.py`
+  - `src/backend/app/schemas/game.py`
+  - `src/backend/app/services/account_lockout_service.py`
+  - `src/backend/app/services/cache_service.py`
+  - `src/backend/app/api/v1/endpoints/auth.py`
+  - `src/backend/app/main.py`
+  - `src/backend/alembic/versions/add_progress_idempotency.py`
+  - `src/backend/alembic/versions/20260307_add_parental_consent.py`
+  - `scripts/pre_deploy_check.py`
+  - `scripts/migrate_avatars.py`
+  - `src/main.py`
+  - `scripts/edge_tts_pure_python.py`
+  - `scripts/batch_upgrade_games.js`
+  - `scripts/visual-audit-playwright.js`
+- Fixed backend test harness regressions in `src/backend/tests/conftest.py`
+  - async fixtures now use `pytest_asyncio.fixture`
+  - test DB setup drops leftover enum types before recreating schema
+  - initial game seed serializes `config_json` consistently for the current DB model
+- Fixed runtime regression in `src/backend/app/schemas/game.py`
+  - corrected `@field_validator` / `@classmethod` decorator order so `config_json` JSON strings parse again for request and response validation
+- Removed unused frontend type alias in `src/frontend/src/pages/three/FeedTheMonster3D.tsx`
+
+Verification:
+
+- `cd src/backend && ../backend/.venv/bin/ruff check .` → pass
+- `cd src/backend && ../backend/.venv/bin/pytest -q` → `293 passed, 1 skipped`
+- `cd src/frontend && npm run lint` → pass (`0 errors`, warnings within configured limit)
+- `cd src/frontend && npm run type-check` → pass
+- `cd src/frontend && npm run build` → pass

@@ -24,8 +24,8 @@ class GameBase(BaseModel):
     is_featured: bool = False
     config_json: Optional[dict] = None
 
-    @classmethod
     @field_validator("config_json", mode="before")
+    @classmethod
     def _parse_config_json(cls, v):  # noqa: N805 - Pydantic validator classmethod signature
         """Parse config_json when it's provided as a JSON string.
 
