@@ -12,8 +12,9 @@ Ticket Stamp: STAMP-20260313T010200Z-codex-abcd
 Type: BUG
 Owner: Pranay
 Created: 2026-03-13
-Status: **RESOLVED**
+Status: **DONE**
 Priority: P2
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
 ### Scope contract
 
@@ -43,11 +44,11 @@ already existed and were valid.
 
 ### Fix
 
-* Updated `LLMService.ts` to declare the flag as `boolean | undefined` and
+- Updated `LLMService.ts` to declare the flag as `boolean | undefined` and
   guard accesses in `buildDefaultRuntimeConfigFromEnv`.
-* Added a global define in `vitest.config.ts` as a secondary safety net
+- Added a global define in `vitest.config.ts` as a secondary safety net
   (`__BETA_LOCAL_AI_ENABLED__: false`).
-* Augmented test setup (`src/frontend/test/setupTests.ts`) with mocks for
+- Augmented test setup (`src/frontend/test/setupTests.ts`) with mocks for
   the AI service and an explicit global assignment (redundant but harmless).
 
 After the fix all six files execute their tests; the suite now reports 34
@@ -76,7 +77,7 @@ successfully.
 
 ### Status updates
 
-- [2026-03-13 01:02Z] **RESOLVED** — environment fix applied, tests restored.
+- [2026-03-13 01:02Z] **DONE** — environment fix applied, tests restored.
 
 ---
 

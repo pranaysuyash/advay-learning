@@ -165,7 +165,7 @@ export function Login() {
             <p className='text-lg text-text-secondary font-medium mb-8'>Ready for more adventures?</p>
 
             {(error || inlineError) && (
-              <div className='bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-6 font-medium shadow-[0_4px_0_0_rgba(239,68,68,0.2)]'>
+              <div id='login-error' className='bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-6 font-medium shadow-[0_4px_0_0_rgba(239,68,68,0.2)]'>
                 <div className='flex items-center gap-2'>
                   <UIIcon name={'alert-circle' as any} className='h-5 w-5' />
                   {error || inlineError}
@@ -184,13 +184,15 @@ export function Login() {
 
             <form onSubmit={handleSubmit} className='space-y-5' noValidate>
               <div>
-                <label htmlFor='email-input' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
+                <label htmlFor='login-email-input' className='block text-sm font-bold text-advay-slate mb-2 px-1'>
                   Email Address
                 </label>
                 <div className='relative group'>
                   <UIIcon name={'mail' as any} size={20} className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6]' aria-hidden='true' />
                   <input
-                    id='email-input'
+                    id='login-email-input'
+                    name='email'
+                    data-testid='login-email-input'
                     ref={emailInputRef}
                     type='email'
                     value={email}
@@ -207,7 +209,7 @@ export function Login() {
 
               <div>
                 <div className='flex justify-between items-center mb-2 px-1'>
-                  <label htmlFor='password-input' className='text-sm font-bold text-advay-slate'>
+                  <label htmlFor='login-password-input' className='text-sm font-bold text-advay-slate'>
                     Password
                   </label>
                   <Link to='/forgot-password' className='text-sm font-bold text-[#3B82F6] hover:text-blue-700 hover:underline'>
@@ -217,7 +219,9 @@ export function Login() {
                 <div className='relative group'>
                   <UIIcon name='lock' size={20} className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6]' aria-hidden='true' />
                   <input
-                    id='password-input'
+                    id='login-password-input'
+                    name='password'
+                    data-testid='login-password-input'
                     ref={passwordInputRef}
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -286,6 +290,7 @@ export function Login() {
                 className='w-full py-3.5 bg-white text-advay-slate font-bold text-lg rounded-2xl border-2 border-[#F2CC8F] hover:border-slate-300 hover:bg-slate-50 transition shadow-[0_4px_0_#E5B86E] flex items-center justify-center gap-3 active:scale-[0.98]'
               >
                 <UIIcon name="star" size={24} className="text-amber-500" /> {t('login.guestButton')}
+                <span className='sr-only'>Try without account</span>
               </button>
 
               <p className='mt-8 text-text-secondary font-medium text-lg'>

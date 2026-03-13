@@ -10981,3 +10981,98 @@ Status updates:
 ---
 
 EOF
+
+## TCK-20260313-003 :: OPS – Mirror EchoPanel HF token into learning_for_kids env for embedding eval
+
+Type: IMPROVEMENT
+Owner: Codex (GPT-5)
+Created: 2026-03-13
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: load Hugging Face token from EchoPanel local secret source and mirror into this repo local env for evaluation commands.
+- Out-of-scope: commit secrets, rotate tokens, or alter provider logic.
+- Behavior change allowed: YES (local developer environment only).
+
+Targets:
+
+- Repo: learning_for_kids
+- Files: `.env` (local ignored secrets file), `docs/WORKLOG_ADDENDUM_v2.md`
+
+Acceptance Criteria:
+
+- [x] `ECHOPANEL_HF_TOKEN`, `HF_TOKEN`, `HUGGINGFACEHUB_API_TOKEN` set in local `learning_for_kids/.env`
+- [x] No token value printed in logs/worklog
+- [x] Auth verification succeeds against Hugging Face API
+
+Execution log:
+
+- 2026-03-13 IST: Confirmed token vars were unset in current learning_for_kids shell env.
+- 2026-03-13 IST: Read token from EchoPanel local source (`EchoPanel/.env`; keychain fallback path prepared).
+- 2026-03-13 IST: Upserted local env keys in `learning_for_kids/.env`:
+  - `ECHOPANEL_HF_TOKEN`
+  - `HF_TOKEN`
+  - `HUGGINGFACEHUB_API_TOKEN`
+- 2026-03-13 IST: Re-sourced `learning_for_kids/.env` and verified all three env vars are set (presence check only).
+- 2026-03-13 IST: Verified Hugging Face auth with `curl https://huggingface.co/api/whoami-v2` -> HTTP 200.
+
+Status updates:
+
+- 2026-03-13 **DONE** — token mirrored into local env and auth recheck passed.
+
+## TCK-20260313-004 :: OPS – Upgrade shared auto embedding default to `BAAI/bge-m3`
+
+Type: IMPROVEMENT
+Owner: Codex (GPT-5)
+Created: 2026-03-13
+Status: **DONE**
+Priority: P1
+
+Prompt Trace:
+
+- Prompt(s) used: ad-hoc user request in chat (model selection + infra update)
+- Lenses: retrieval quality, operational stability, cross-project alignment
+
+Scope contract:
+
+- In-scope: change shared Projects memory auto local default model from `BAAI/bge-base-en-v1.5` to `BAAI/bge-m3`; align docs; regenerate local `.agent` context.
+- Out-of-scope: change app runtime embedding providers; run full corpus re-index.
+- Behavior change allowed: YES (agent/context retrieval infra only).
+
+Targets:
+
+- Global scripts/docs:
+  - `/Users/pranay/Projects/agent-start`
+  - `/Users/pranay/Projects/workspace_memory/scripts/projects_memsearch.sh`
+  - `/Users/pranay/Projects/PROJECTS_AGENT_MEMORY_COMMANDS.md`
+  - `/Users/pranay/Projects/workspace_memory/docs/WORKSPACE_MEMORY_RUNBOOK.md`
+  - `/Users/pranay/Projects/workspace_memory/README.md`
+  - `/Users/pranay/Projects/MEMSEARCH_SETUP.md`
+- Repo-local generated context:
+  - `src/.agent/STEP1_ENV.sh`
+
+Acceptance Criteria:
+
+- [x] `auto` local default model changed to `BAAI/bge-m3` in both launcher scripts
+- [x] docs updated to reflect `auto` behavior and new local default
+- [x] regenerated `.agent/STEP1_ENV.sh` in this project shows `MEMSEARCH_MODEL=BAAI/bge-m3`
+
+Execution log:
+
+- 2026-03-13 IST: Updated `/Users/pranay/Projects/agent-start` local auto default from `BAAI/bge-base-en-v1.5` to `BAAI/bge-m3`.
+- 2026-03-13 IST: Updated `/Users/pranay/Projects/workspace_memory/scripts/projects_memsearch.sh` local auto default from `BAAI/bge-base-en-v1.5` to `BAAI/bge-m3`.
+- 2026-03-13 IST: Updated docs in:
+  - `/Users/pranay/Projects/PROJECTS_AGENT_MEMORY_COMMANDS.md`
+  - `/Users/pranay/Projects/workspace_memory/docs/WORKSPACE_MEMORY_RUNBOOK.md`
+  - `/Users/pranay/Projects/workspace_memory/README.md`
+  - `/Users/pranay/Projects/MEMSEARCH_SETUP.md`
+- 2026-03-13 IST: Syntax checks passed for both shell scripts (`bash -n`).
+- 2026-03-13 IST: Regenerated project context via `/Users/pranay/Projects/agent-start --project learning_for_kids/src --skip-index --quiet`.
+- 2026-03-13 IST: Verified `src/.agent/STEP1_ENV.sh` now exports `MEMSEARCH_MODEL="BAAI/bge-m3"`.
+
+Status updates:
+
+- 2026-03-13 **DONE** — shared auto embedding default switched to `BAAI/bge-m3` and docs aligned.
+
