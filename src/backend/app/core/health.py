@@ -19,11 +19,11 @@ async def check_database(db: AsyncSession) -> Dict[str, Any]:
         await db.execute(text("SELECT 1"))
         response_time = (time.time() - start_time) * 1000  # Convert to milliseconds
         return {"status": "healthy", "response_time_ms": round(response_time, 2)}
-    except Exception as e:
+    except Exception:
         response_time = (time.time() - start_time) * 1000
         return {
             "status": "unhealthy",
-            "error": str(e),
+            "error": "database_unavailable",
             "response_time_ms": round(response_time, 2),
         }
 

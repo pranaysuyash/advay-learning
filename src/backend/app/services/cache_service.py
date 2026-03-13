@@ -10,6 +10,11 @@ import redis.asyncio as redis
 logger = logging.getLogger(__name__)
 
 
+def _sanitize_log_value(value: object) -> str:
+    text = str(value).replace("\n", " ").replace("\r", " ")
+    return text[:200]
+
+
 class CacheService:
     """Redis-based caching service with optional in-memory fallback.
 
@@ -40,12 +45,24 @@ class CacheService:
                 return json.loads(value)
             return None
         except json.JSONDecodeError as e:
-            logger.warning("Cache decoding error for key %s: %s", key, e)
+            logger.warning(
+                "Cache decoding error for key %s: %s",
+                _sanitize_log_value(key),
+                _sanitize_log_value(e),
+            )
             return None
         except redis.RedisError as e:
-            logger.warning("Redis error getting key %s: %s", key, e)
+            logger.warning(
+                "Redis error getting key %s: %s",
+                _sanitize_log_value(key),
+                _sanitize_log_value(e),
+            )
         except Exception as e:  # catch any unexpected errors (e.g. event loop issues)
-            logger.warning("Unexpected cache error getting key %s: %s", key, e)
+            logger.warning(
+                "Unexpected cache error getting key %s: %s",
+                _sanitize_log_value(key),
+                _sanitize_log_value(e),
+            )
         # fall back to in-memory store if available
         if key in self._fallback:
             try:
@@ -61,12 +78,24 @@ class CacheService:
             await client.setex(key, ttl, json.dumps(value))
             return True
         except TypeError as e:
-            logger.warning("Cache serialization error for key %s: %s", key, e)
+            logger.warning(
+                "Cache serialization error for key %s: %s",
+                _sanitize_log_value(key),
+                _sanitize_log_value(e),
+            )
             return False
         except redis.RedisError as e:
-            logger.warning("Redis error setting key %s: %s", key, e)
+            logger.warning(
+                "Redis error setting key %s: %s",
+                _sanitize_log_value(key),
+                _sanitize_log_value(e),
+            )
         except Exception as e:
-            logger.warning("Unexpected cache error setting key %s: %s", key, e)
+            logger.warning(
+                "Unexpected cache error setting key %s: %s",
+                _sanitize_log_value(key),
+                _sanitize_log_value(e),
+            )
         # if we reached here it means redis failed; store in fallback
         serialized = json.dumps(value)
         self._fallback[key] = serialized
@@ -79,7 +108,11 @@ class CacheService:
             await client.delete(key)
             return True
         except redis.RedisError as e:
-            logger.warning("Redis error deleting key %s: %s", key, e)
+            logger.warning(
+                "Redis error deleting key %s: %s",
+                _sanitize_log_value(key),
+                _sanitize_log_value(e),
+            )
             return False
 
     async def invalidate_pattern(self, pattern: str) -> bool:
@@ -93,7 +126,11 @@ class CacheService:
                 await client.delete(*keys)
             return True
         except redis.RedisError as e:
-            logger.warning("Redis error invalidating pattern %s: %s", pattern, e)
+            logger.warning(
+                "Redis error invalidating pattern %s: %s",
+                _sanitize_log_value(pattern),
+                _sanitize_log_value(e),
+            )
             return False
 
     async def close(self):

@@ -12,6 +12,11 @@ from app.schemas.achievement import AchievementCreate
 logger = logging.getLogger(__name__)
 
 
+def _sanitize_log_value(value: object) -> str:
+    text = str(value).replace("\n", " ").replace("\r", " ")
+    return text[:200]
+
+
 class AchievementService:
     @staticmethod
     async def get_by_profile(db: AsyncSession, profile_id: str) -> Sequence[Achievement]:
@@ -50,5 +55,9 @@ class AchievementService:
         await db.commit()
         await db.refresh(db_obj)
 
-        logger.info(f"Unlocked achievement '{obj_in.achievement_type}' for profile {obj_in.profile_id}")
+        logger.info(
+            "Unlocked achievement %s for profile %s",
+            _sanitize_log_value(obj_in.achievement_type),
+            _sanitize_log_value(obj_in.profile_id),
+        )
         return db_obj

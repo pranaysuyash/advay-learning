@@ -44,3 +44,5 @@ _Search timed out. Retry when Ollama/Milvus are less busy._
 ### Common Failure Modes
 - Collection: `projects_workspace_shared`
 - Query: `lessons learned mistakes retrospectives postmortems`
+_Search timed out. Retry when Ollama/Milvus are less busy._
+

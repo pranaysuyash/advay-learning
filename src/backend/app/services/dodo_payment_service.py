@@ -12,6 +12,11 @@ from app.services.subscription_service import PLAN_PRICES
 
 logger = logging.getLogger(__name__)
 
+
+def _sanitize_log_value(value: object) -> str:
+    text = str(value).replace("\n", " ").replace("\r", " ")
+    return text[:200]
+
 # Environment configuration
 DODO_ENV = os.getenv("DODO_ENV", "test").lower()
 DODO_BASE_URLS = {
@@ -54,7 +59,11 @@ class DodoPaymentService:
             raise ValueError("DODO_API_KEY is required to initialize DodoPayments")
 
         base_url = DODO_BASE_URLS.get(env, DODO_BASE_URLS["test"])
-        logger.info(f"Initialized DodoPayments with environment: {env}, base_url: {base_url}")
+        logger.info(
+            "Initialized DodoPayments with environment: %s, base_url: %s",
+            _sanitize_log_value(env),
+            _sanitize_log_value(base_url),
+        )
 
         self.client = DodoPayments(
             bearer_token=self.api_token,
@@ -74,7 +83,10 @@ class DodoPaymentService:
 
         if not product_id:
             if ALLOW_PLACEHOLDER:
-                logger.warning(f"Using placeholder checkout for plan {plan_type.value} - products must be configured in Dodo dashboard")
+                logger.warning(
+                    "Using placeholder checkout for plan %s - products must be configured in Dodo dashboard",
+                    _sanitize_log_value(plan_type.value),
+                )
                 return {
                     "checkout_url": f"https://checkout.dodopayments.com/test?plan={plan_type.value}&user={user_id}",
                     "session_id": f"pending_{user_id}_{plan_type.value}",
@@ -201,10 +213,10 @@ class DodoPaymentService:
         }
 
         logger.critical("=== DODO SIGNATURE DIAGNOSTIC MODE ===")
-        logger.critical(f"webhook_id: {webhook_id}")
-        logger.critical(f"webhook_timestamp: {webhook_timestamp}")
-        logger.critical(f"payload_hash: {hash_lib.sha256(payload).hexdigest()}")
-        logger.critical(f"received_signature: {webhook_signature}")
+        logger.critical("webhook_id: %s", _sanitize_log_value(webhook_id))
+        logger.critical("webhook_timestamp: %s", _sanitize_log_value(webhook_timestamp))
+        logger.critical("payload_hash: %s", hash_lib.sha256(payload).hexdigest())
+        logger.critical("received_signature_present: %s", bool(webhook_signature))
         logger.critical("Testing signature schemes:")
 
         matching_schemes = []
@@ -219,15 +231,21 @@ class DodoPaymentService:
             matches = hmac.compare_digest(computed_sig, webhook_signature)
             status = "✓ MATCH" if matches else "✗ NO MATCH"
 
-            logger.critical(f"  {scheme_name}: {status}")
-            logger.critical(f"    computed: {computed_sig}")
+            logger.critical(
+                "Diagnostic scheme %s result: %s",
+                _sanitize_log_value(scheme_name),
+                status,
+            )
 
             if matches:
                 matching_schemes.append(scheme_name)
 
-        logger.critical(f"=== RESULTS: {len(matching_schemes)} matching scheme(s) ===")
+        logger.critical("=== RESULTS: %s matching scheme(s) ===", len(matching_schemes))
         if matching_schemes:
-            logger.critical(f"WINNING SCHEME(S): {', '.join(matching_schemes)}")
+            logger.critical(
+                "WINNING SCHEME COUNT: %s",
+                len(matching_schemes),
+            )
             logger.critical("ACTION: Update verify_webhook_signature to use the winning scheme")
         else:
             logger.critical("NO MATCHING SCHEMES - Check secret or header extraction")
@@ -248,7 +266,10 @@ class DodoPaymentService:
         """Validate that payment amount matches expected plan price."""
         expected_amount = PLAN_PRICES.get(expected_plan_type)
         if not expected_amount:
-            logger.error(f"No price configured for plan: {expected_plan_type}")
+            logger.error(
+                "No price configured for plan: %s",
+                _sanitize_log_value(expected_plan_type),
+            )
             return False
 
         # Extract amount from payment data (format varies by payment provider)
@@ -256,8 +277,10 @@ class DodoPaymentService:
 
         if paid_amount != expected_amount:
             logger.error(
-                f"Payment amount mismatch for {expected_plan_type}: "
-                f"expected {expected_amount}, got {paid_amount}"
+                "Payment amount mismatch for %s: expected %s, got %s",
+                _sanitize_log_value(expected_plan_type),
+                _sanitize_log_value(expected_amount),
+                _sanitize_log_value(paid_amount),
             )
             return False
 

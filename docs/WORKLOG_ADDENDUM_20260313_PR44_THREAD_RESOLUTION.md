@@ -99,3 +99,28 @@ Verification:
 - `cd src/frontend && npm run lint` → pass (`0 errors`, warnings within configured limit)
 - `cd src/frontend && npm run type-check` → pass
 - `cd src/frontend && npm run build` → pass
+
+## 2026-03-13 17:10 UTC — Code scanning remediation (batch 2)
+
+- Fixed remaining local code-scanning candidates in:
+  - `src/backend/app/services/cache_service.py`
+  - `src/backend/app/services/achievement_service.py`
+  - `src/backend/app/services/dodo_payment_service.py`
+  - `src/backend/app/api/v1/endpoints/subscriptions.py`
+  - `src/backend/app/api/v1/endpoints/issue_reports.py`
+  - `src/backend/app/api/v1/endpoints/progress.py`
+  - `src/backend/app/core/health.py`
+  - `src/backend/app/db/models/profile.py`
+  - `src/backend/app/db/models/progress.py`
+  - `src/backend/app/db/models/achievement.py`
+  - `src/backend/app/api/v1/endpoints/profile_photos.py`
+- Replaced raw log interpolation for untrusted values with sanitized structured logging in flagged backend paths
+- Hardened issue report clip storage path resolution with validated path segments and realpath containment checks
+- Reduced health/progress error exposure by returning stable non-sensitive messages instead of raw exception text
+- Removed remaining relationship type-only cyclic imports in profile/progress/achievement models using postponed annotations plus `Any` relationship typing
+- Tightened profile photo filename handling so generated storage paths use validated UUID-derived file segments
+
+Verification:
+
+- `cd src/backend && ../backend/.venv/bin/ruff check app tests` → pass
+- `cd src/backend && ../backend/.venv/bin/pytest tests/test_games.py tests/test_profile_photos.py tests/test_data_export.py tests/test_progress.py tests/test_subscription_service.py tests/test_subscriptions.py -q` → `103 passed`

@@ -1,16 +1,15 @@
 """Progress model for tracking learning."""
 
+from __future__ import annotations
+
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import Any
 from uuid import uuid4
 
 from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
-
-if TYPE_CHECKING:
-    from app.db.models.profile import Profile
 
 
 class Progress(Base):
@@ -50,7 +49,7 @@ class Progress(Base):
         ),
     )
     # Relationships
-    profile: Mapped["Profile"] = relationship(
+    profile: Mapped[Any] = relationship(
         "Profile",
         back_populates="progress",
         lazy="joined",

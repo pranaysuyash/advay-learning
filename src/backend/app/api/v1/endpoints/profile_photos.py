@@ -80,6 +80,14 @@ def normalize_storage_filename(filename: str) -> str:
     return safe_filename
 
 
+def normalize_storage_profile_id(profile_id: str) -> str:
+    """Normalize a profile id for use in generated storage filenames."""
+    try:
+        return str(UUID(profile_id))
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail="Invalid profile id") from exc
+
+
 def resolve_storage_path(current_user_id: str, filename: str) -> Path:
     """Resolve the filesystem path for a stored profile photo.
 
@@ -167,7 +175,8 @@ async def upload_profile_photo(
 
     # Generate filename
     extension = "jpg" if content_type == "image/jpeg" else "png"
-    filename = f"{profile_id}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.{extension}"
+    safe_profile_id = normalize_storage_profile_id(profile_id)
+    filename = f"{safe_profile_id}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.{extension}"
 
     # Create local storage directory
     profile_dir = Path(
@@ -178,7 +187,8 @@ async def upload_profile_photo(
     profile_dir.mkdir(parents=True, exist_ok=True)
 
     # Save file to local storage (MVP approach)
-    file_path = resolve_storage_path(current_user.id, filename)
+    safe_filename = normalize_storage_filename(filename)
+    file_path = resolve_storage_path(current_user.id, safe_filename)
     file_path.write_bytes(contents)
 
     # Generate public URL for frontend.
@@ -227,15 +237,15 @@ async def get_profile_photo_file(
     if not profile or profile.parent_id != current_user.id:
         raise HTTPException(status_code=403, detail="Profile not found or access denied")
 
-    if profile.avatar_url != build_photo_url(profile_id, filename):
+    safe_filename = normalize_storage_filename(filename)
+
+    if profile.avatar_url != build_photo_url(profile_id, safe_filename):
         raise HTTPException(status_code=404, detail="Profile photo not found")
 
-    file_path = resolve_storage_path(current_user.id, filename)
-    # lgtm[py/path-injection] file_path is validated by resolve_storage_path()
+    file_path = resolve_storage_path(current_user.id, safe_filename)
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Profile photo file missing")
 
-    # lgtm[py/path-injection] file_path is validated by resolve_storage_path()
     media_type = "image/png" if file_path.suffix.lower() == ".png" else "image/jpeg"
     return FileResponse(file_path, media_type=media_type)
 
