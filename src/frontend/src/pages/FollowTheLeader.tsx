@@ -23,7 +23,7 @@ import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -41,8 +41,8 @@ import {
 
 const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
   // ===== HOOKS =====
-  const { onGameComplete } = useGameDrops('follow-the-leader');
-  const { playSuccess: _playSuccess, playCelebration, playClick, playPop } = useAudio();
+  const { saveProgress, onGameComplete } = useGameCompletion('follow-the-leader');
+  const { playSuccess, playCelebration, playClick, playPop } = useAudio();
 
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -160,7 +160,7 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
 
       // Play success sound and haptic when matching starts
       if (poseMatch.matches && !wasMatchingRef.current) {
-        playPop();
+        void playSuccess();
         triggerHaptic('success');
       }
 
@@ -294,10 +294,12 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
     setGameState(null);
   };
 
-  const handleShowMenu = () => {
+  const handleShowMenu = async () => {
     playClick();
     if (gameState) {
-      onGameComplete();
+      const stats = calculateFinalStats(gameState);
+      await saveProgress({ score: stats.score, completed: true, level: gameState.level });
+      onGameComplete(stats.score);
     }
     setShowMenu(true);
     setGameState(null);

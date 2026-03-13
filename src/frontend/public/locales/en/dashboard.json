@@ -22,5 +22,11 @@
   },
   "demo": {
     "completed": "Demo completed! Ready to try with camera?"
+  },
+  "badges": {
+    "pending": "Offline progress pending",
+    "failed": "Offline progress failed",
+    "pendingCount": "Pending ({{count}})",
+    "failedCount": "Failed ({{count}})"
   }
 }

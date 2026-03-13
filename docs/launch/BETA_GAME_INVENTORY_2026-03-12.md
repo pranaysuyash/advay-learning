@@ -1,0 +1,136 @@
+# Beta Game Inventory - March 12, 2026
+
+Observed via route scan of `src/frontend/src/App.tsx`, lazy imports in `src/frontend/src/routes/lazyPages.tsx`, explicit beta gating in `src/frontend/src/config/betaGames.ts`, and the `VITE_BETA_3D_GAMES_ENABLED` launch flag.
+
+- Total game routes scanned: **122**
+- Public beta enabled routes: **122**
+- Public beta disabled routes: **0**
+- Public beta routes with wrapper + progress heuristic: **122**
+- Public beta follow-up routes: **0**
+
+## Route Inventory
+
+| Route | Beta | Component | GameShell | Progress | Session/Wellness | File |
+| --- | --- | --- | --- | --- | --- | --- |
+| `/games/air-canvas` | enabled | `AirCanvas` | yes | yes | session/wellness | `src/frontend/src/pages/AirCanvas.tsx` |
+| `/games/air-guitar-hero` | enabled | `AirGuitarHero` | yes | yes | session/wellness | `src/frontend/src/pages/AirGuitarHero.tsx` |
+| `/games/alphabet-tracing` | enabled | `AlphabetGame` | yes | yes | -/wellness | `src/frontend/src/pages/AlphabetGame.tsx` |
+| `/games/animal-sounds` | enabled | `AnimalSounds` | yes | yes | session/wellness | `src/frontend/src/pages/AnimalSounds.tsx` |
+| `/games/balance-beam` | enabled | `BalanceBeam` | yes | yes | -/- | `src/frontend/src/pages/BalanceBeam.tsx` |
+| `/games/balloon-pop-fitness` | enabled | `BalloonPopFitness` | yes | yes | session/wellness | `src/frontend/src/pages/BalloonPopFitness.tsx` |
+| `/games/beat-bounce` | enabled | `BeatBounce` | yes | yes | session/wellness | `src/frontend/src/pages/BeatBounce.tsx` |
+| `/games/beginning-sounds` | enabled | `BeginningSounds` | yes | yes | -/wellness | `src/frontend/src/pages/BeginningSounds.tsx` |
+| `/games/blend-builder` | enabled | `BlendBuilder` | yes | yes | session/wellness | `src/frontend/src/pages/BlendBuilder.tsx` |
+| `/games/body-parts` | enabled | `BodyParts` | yes | yes | session/wellness | `src/frontend/src/pages/BodyParts.tsx` |
+| `/games/bridge-builder` | enabled | `BridgeBuilder` | yes | yes | -/- | `src/frontend/src/pages/BridgeBuilder.tsx` |
+| `/games/bubble-biology` | enabled | `BubbleBiology` | yes | yes | -/- | `src/frontend/src/pages/BubbleBiology.tsx` |
+| `/games/bubble-count` | enabled | `BubbleCount` | yes | yes | session/wellness | `src/frontend/src/pages/BubbleCount.tsx` |
+| `/games/bubble-pop` | enabled | `BubblePop` | yes | yes | -/wellness | `src/frontend/src/pages/BubblePop.tsx` |
+| `/games/bubble-pop-symphony` | enabled | `BubblePopSymphony` | yes | yes | session/wellness | `src/frontend/src/pages/BubblePopSymphony.tsx` |
+| `/games/catch-sort` | enabled | `CatchSort` | yes | yes | -/- | `src/frontend/src/pages/CatchSort.tsx` |
+| `/games/chemistry-lab` | enabled | `VirtualChemistryLab` | yes | yes | session/- | `src/frontend/src/pages/VirtualChemistryLab.tsx` |
+| `/games/circle-drawing` | enabled | `CircleDrawing` | yes | yes | session/- | `src/frontend/src/pages/CircleDrawing.tsx` |
+| `/games/circuit-builder` | enabled | `CircuitBuilder` | yes | yes | -/- | `src/frontend/src/pages/CircuitBuilder.tsx` |
+| `/games/color-by-number` | enabled | `ColorByNumber` | yes | yes | session/wellness | `src/frontend/src/pages/ColorByNumber.tsx` |
+| `/games/color-match-garden` | enabled | `ColorMatchGarden` | yes | yes | -/wellness | `src/frontend/src/pages/ColorMatchGarden.tsx` |
+| `/games/color-mixing` | enabled | `ColorMixing` | yes | yes | session/wellness | `src/frontend/src/pages/ColorMixing.tsx` |
+| `/games/color-potions` | enabled | `ColorPotions` | yes | yes | -/- | `src/frontend/src/pages/ColorPotions.tsx` |
+| `/games/color-sort` | enabled | `ColorSortGame` | yes | yes | session/wellness | `src/frontend/src/pages/ColorSortGame.tsx` |
+| `/games/color-splash` | enabled | `ColorSplash` | yes | yes | session/wellness | `src/frontend/src/pages/ColorSplash.tsx` |
+| `/games/connect-the-dots` | enabled | `ConnectTheDots` | yes | yes | -/wellness | `src/frontend/src/pages/ConnectTheDots.tsx` |
+| `/games/counting-collectathon` | enabled | `CountingCollectathon` | yes | yes | -/- | `src/frontend/src/pages/CountingCollectathon.tsx` |
+| `/games/counting-objects` | enabled | `CountingObjects` | yes | yes | session/wellness | `src/frontend/src/pages/CountingObjects.tsx` |
+| `/games/cutting-practice` | enabled | `CuttingPractice` | yes | yes | session/wellness | `src/frontend/src/pages/CuttingPractice.tsx` |
+| `/games/digital-jenga` | enabled | `DigitalJenga` | yes | yes | session/wellness | `src/frontend/src/pages/DigitalJenga.tsx` |
+| `/games/dinosaur-dig` | enabled | `DinosaurDig` | yes | yes | session/wellness | `src/frontend/src/pages/DinosaurDig.tsx` |
+| `/games/dress-for-weather` | enabled | `DressForWeather` | yes | yes | session/wellness | `src/frontend/src/pages/DressForWeather.tsx` |
+| `/games/earth-time-machine` | enabled | `EarthTimeMachine` | yes | yes | -/- | `src/frontend/src/pages/EarthTimeMachine.tsx` |
+| `/games/emoji-match` | enabled | `EmojiMatch` | yes | yes | -/wellness | `src/frontend/src/pages/EmojiMatch.tsx` |
+| `/games/ending-sounds` | enabled | `EndingSounds` | yes | yes | session/wellness | `src/frontend/src/pages/EndingSounds.tsx` |
+| `/games/farm-friends` | enabled | `FarmFriends` | yes | yes | session/wellness | `src/frontend/src/pages/FarmFriends.tsx` |
+| `/games/feed-the-monster` | enabled | `FeedTheMonster` | yes | yes | session/wellness | `src/frontend/src/pages/FeedTheMonster.tsx` |
+| `/games/finger-number-show` | enabled | `FingerNumberShow` | yes | yes | -/wellness | `src/frontend/src/games/FingerNumberShow.tsx` |
+| `/games/follow-the-leader` | enabled | `FollowTheLeader` | yes | yes | session/wellness | `src/frontend/src/pages/FollowTheLeader.tsx` |
+| `/games/fraction-pizza` | enabled | `FractionPizza` | yes | yes | session/wellness | `src/frontend/src/pages/FractionPizza.tsx` |
+| `/games/free-draw` | enabled | `FreeDraw` | yes | yes | -/wellness | `src/frontend/src/pages/FreeDraw.tsx` |
+| `/games/freeze-dance` | enabled | `FreezeDance` | yes | yes | session/wellness | `src/frontend/src/pages/FreezeDance.tsx` |
+| `/games/fruit-ninja-air` | enabled | `FruitNinjaAir` | yes | yes | session/wellness | `src/frontend/src/pages/FruitNinjaAir.tsx` |
+| `/games/iss-docking` | enabled | `ISSDocking` | yes | yes | -/- | `src/frontend/src/pages/ISSDocking.tsx` |
+| `/games/kaleidoscope-hands` | enabled | `KaleidoscopeHands` | yes | yes | session/wellness | `src/frontend/src/pages/KaleidoscopeHands.tsx` |
+| `/games/language-puppet` | enabled | `LanguagePuppet` | yes | yes | -/- | `src/frontend/src/pages/LanguagePuppet.tsx` |
+| `/games/letter-catcher` | enabled | `LetterCatcher` | yes | yes | session/wellness | `src/frontend/src/pages/LetterCatcher.tsx` |
+| `/games/letter-hunt` | enabled | `LetterHunt` | yes | yes | -/wellness | `src/frontend/src/pages/LetterHunt.tsx` |
+| `/games/letter-sound-match` | enabled | `LetterSoundMatch` | yes | yes | session/wellness | `src/frontend/src/pages/LetterSoundMatch.tsx` |
+| `/games/light-painter` | enabled | `LightPainter` | yes | yes | -/- | `src/frontend/src/pages/LightPainter.tsx` |
+| `/games/logic-box-push` | enabled | `LogicBoxPush` | yes | yes | -/- | `src/frontend/src/pages/LogicBoxPush.tsx` |
+| `/games/math-jumpers` | enabled | `MathJumpers` | yes | yes | -/wellness | `src/frontend/src/pages/MathJumpers.tsx` |
+| `/games/math-monsters` | enabled | `MathMonsters` | yes | yes | -/wellness | `src/frontend/src/pages/MathMonsters.tsx` |
+| `/games/math-smash` | enabled | `MathSmash` | yes | yes | session/wellness | `src/frontend/src/pages/MathSmash.tsx` |
+| `/games/maze-runner` | enabled | `MazeRunner` | yes | yes | -/- | `src/frontend/src/pages/MazeRunner.tsx` |
+| `/games/memory-match` | enabled | `MemoryMatch` | yes | yes | session/wellness | `src/frontend/src/pages/MemoryMatch.tsx` |
+| `/games/mirror-draw` | enabled | `MirrorDraw` | yes | yes | -/wellness | `src/frontend/src/pages/MirrorDraw.tsx` |
+| `/games/mirror-duel` | enabled | `MirrorDuel` | yes | yes | -/- | `src/frontend/src/pages/MirrorDuel.tsx` |
+| `/games/mirror-maze` | enabled | `MirrorMaze` | yes | yes | -/- | `src/frontend/src/pages/MirrorMaze.tsx` |
+| `/games/money-match` | enabled | `MoneyMatch` | yes | yes | session/wellness | `src/frontend/src/pages/MoneyMatch.tsx` |
+| `/games/more-or-less` | enabled | `MoreOrLess` | yes | yes | session/wellness | `src/frontend/src/pages/MoreOrLess.tsx` |
+| `/games/music-conductor` | enabled | `MusicConductor` | yes | yes | session/- | `src/frontend/src/pages/MusicConductor.tsx` |
+| `/games/music-pinch-beat` | enabled | `MusicPinchBeat` | yes | yes | -/- | `src/frontend/src/pages/MusicPinchBeat.tsx` |
+| `/games/musical-statues` | enabled | `MusicalStatues` | yes | yes | session/wellness | `src/frontend/src/pages/MusicalStatues.tsx` |
+| `/games/nasa-sky-hunt` | enabled | `NasaSkyHunt` | yes | yes | -/- | `src/frontend/src/pages/NasaSkyHunt.tsx` |
+| `/games/number-bubble-pop` | enabled | `NumberBubblePop` | yes | yes | session/wellness | `src/frontend/src/pages/NumberBubblePop.tsx` |
+| `/games/number-sequence` | enabled | `NumberSequence` | yes | yes | session/wellness | `src/frontend/src/pages/NumberSequence.tsx` |
+| `/games/number-tap-trail` | enabled | `NumberTapTrail` | yes | yes | -/wellness | `src/frontend/src/pages/NumberTapTrail.tsx` |
+| `/games/number-tracing` | enabled | `NumberTracing` | yes | yes | -/wellness | `src/frontend/src/pages/NumberTracing.tsx` |
+| `/games/obstacle-course` | enabled | `ObstacleCourse` | yes | yes | -/wellness | `src/frontend/src/pages/ObstacleCourse.tsx` |
+| `/games/odd-one-out` | enabled | `OddOneOut` | yes | yes | -/wellness | `src/frontend/src/pages/OddOneOut.tsx` |
+| `/games/pack-lunchbox` | enabled | `PackLunchbox` | yes | yes | session/wellness | `src/frontend/src/pages/PackLunchbox.tsx` |
+| `/games/path-following` | enabled | `PathFollowing` | yes | yes | session/wellness | `src/frontend/src/pages/PathFollowing.tsx` |
+| `/games/pattern-play` | enabled | `PatternPlay` | yes | yes | session/- | `src/frontend/src/pages/PatternPlay.tsx` |
+| `/games/phonics-sounds` | enabled | `PhonicsSounds` | yes | yes | -/wellness | `src/frontend/src/pages/PhonicsSounds.tsx` |
+| `/games/phonics-tracing` | enabled | `PhonicsTracing` | yes | yes | -/wellness | `src/frontend/src/pages/PhonicsTracing.tsx` |
+| `/games/physics-demo` | enabled | `PhysicsPlayground` | yes | yes | -/- | `src/frontend/src/pages/PhysicsPlayground.tsx` |
+| `/games/physics-playground` | enabled | `PhysicsPlayground` | yes | yes | -/- | `src/frontend/src/pages/PhysicsPlayground.tsx` |
+| `/games/pinch-practice` | enabled | `PinchPractice` | yes | yes | -/- | `src/frontend/src/pages/PinchPractice.tsx` |
+| `/games/planet-sandbox` | enabled | `PlanetSandbox` | yes | yes | -/- | `src/frontend/src/pages/PlanetSandbox.tsx` |
+| `/games/plant-garden` | enabled | `PlantGarden` | yes | yes | session/wellness | `src/frontend/src/pages/PlantGarden.tsx` |
+| `/games/platformer-runner` | enabled | `PlatformerRunner` | yes | yes | session/- | `src/frontend/src/pages/PlatformerRunner.tsx` |
+| `/games/pop-the-number` | enabled | `PopTheNumber` | yes | yes | session/wellness | `src/frontend/src/pages/PopTheNumber.tsx` |
+| `/games/rainbow-bridge` | enabled | `RainbowBridge` | yes | yes | session/- | `src/frontend/src/pages/RainbowBridge.tsx` |
+| `/games/reading-along` | enabled | `ReadingAlong` | yes | yes | session/wellness | `src/frontend/src/pages/ReadingAlong.tsx` |
+| `/games/rhyme-time` | enabled | `RhymeTime` | yes | yes | -/wellness | `src/frontend/src/pages/RhymeTime.tsx` |
+| `/games/rhythm-tap` | enabled | `RhythmTap` | yes | yes | session/wellness | `src/frontend/src/pages/RhythmTap.tsx` |
+| `/games/same-and-different` | enabled | `SameAndDifferent` | yes | yes | session/wellness | `src/frontend/src/pages/SameAndDifferent.tsx` |
+| `/games/set-the-table` | enabled | `SetTheTable` | yes | yes | session/wellness | `src/frontend/src/pages/SetTheTable.tsx` |
+| `/games/shadow-match` | enabled | `ShadowMatch` | yes | yes | session/wellness | `src/frontend/src/pages/ShadowMatch.tsx` |
+| `/games/shadow-portal` | enabled | `ShadowPortal` | yes | yes | -/- | `src/frontend/src/pages/ShadowPortal.tsx` |
+| `/games/shadow-puppet-theater` | enabled | `ShadowPuppetTheater` | yes | yes | session/wellness | `src/frontend/src/pages/ShadowPuppetTheater.tsx` |
+| `/games/shape-pop` | enabled | `ShapePop` | yes | yes | -/wellness | `src/frontend/src/pages/ShapePop.tsx` |
+| `/games/shape-safari` | enabled | `ShapeSafari` | yes | yes | -/wellness | `src/frontend/src/pages/ShapeSafari.tsx` |
+| `/games/shape-sequence` | enabled | `ShapeSequence` | yes | yes | -/wellness | `src/frontend/src/pages/ShapeSequence.tsx` |
+| `/games/shape-stacker` | enabled | `ShapeStacker` | yes | yes | session/wellness | `src/frontend/src/pages/ShapeStacker.tsx` |
+| `/games/sight-word-flash` | enabled | `SightWordFlash` | yes | yes | session/wellness | `src/frontend/src/pages/SightWordFlash.tsx` |
+| `/games/simon-says` | enabled | `SimonSays` | yes | yes | session/wellness | `src/frontend/src/pages/SimonSays.tsx` |
+| `/games/simple-addition` | enabled | `SimpleAddition` | yes | yes | -/- | `src/frontend/src/pages/SimpleAddition.tsx` |
+| `/games/size-sorting` | enabled | `SizeSorting` | yes | yes | session/wellness | `src/frontend/src/pages/SizeSorting.tsx` |
+| `/games/sound-garden` | enabled | `SoundGarden` | yes | yes | session/wellness | `src/frontend/src/pages/SoundGarden.tsx` |
+| `/games/spell-painter` | enabled | `SpellPainter` | yes | yes | session/- | `src/frontend/src/pages/SpellPainter.tsx` |
+| `/games/spelling-run` | enabled | `SpellingRun` | yes | yes | -/- | `src/frontend/src/pages/SpellingRun.tsx` |
+| `/games/steady-hand-lab` | enabled | `SteadyHandLab` | yes | yes | -/wellness | `src/frontend/src/pages/SteadyHandLab.tsx` |
+| `/games/story-builder` | enabled | `StoryBuilder` | yes | yes | session/wellness | `src/frontend/src/pages/StoryBuilder.tsx` |
+| `/games/story-sequence` | enabled | `StorySequence` | yes | yes | -/- | `src/frontend/src/pages/StorySequence.tsx` |
+| `/games/syllable-clap` | enabled | `SyllableClap` | yes | yes | session/wellness | `src/frontend/src/pages/SyllableClap.tsx` |
+| `/games/target-practice` | enabled | `TargetPractice` | yes | yes | session/wellness | `src/frontend/src/pages/TargetPractice.tsx` |
+| `/games/taste-match` | enabled | `TasteMatch` | yes | yes | session/wellness | `src/frontend/src/pages/TasteMatch.tsx` |
+| `/games/temperature-sort` | enabled | `TemperatureSort` | yes | yes | session/wellness | `src/frontend/src/pages/TemperatureSort.tsx` |
+| `/games/texture-explorer` | enabled | `TextureExplorer` | yes | yes | session/wellness | `src/frontend/src/pages/TextureExplorer.tsx` |
+| `/games/tidy-up-time` | enabled | `TidyUpTime` | yes | yes | -/- | `src/frontend/src/pages/TidyUpTime.tsx` |
+| `/games/time-tell` | enabled | `TimeTell` | yes | yes | session/wellness | `src/frontend/src/pages/TimeTell.tsx` |
+| `/games/virtual-bubbles` | enabled | `VirtualBubbles` | yes | yes | session/wellness | `src/frontend/src/pages/VirtualBubbles.tsx` |
+| `/games/voice-stories` | enabled | `VoiceStories` | yes | yes | session/wellness | `src/frontend/src/pages/VoiceStories.tsx` |
+| `/games/vowel-valley` | enabled | `VowelValley` | yes | yes | -/- | `src/frontend/src/pages/VowelValley.tsx` |
+| `/games/wash-hands-dance` | enabled | `WashHandsDance` | yes | yes | session/wellness | `src/frontend/src/pages/WashHandsDance.tsx` |
+| `/games/weather-lab` | enabled | `WeatherLab` | yes | yes | -/- | `src/frontend/src/pages/WeatherLab.tsx` |
+| `/games/weather-match` | enabled | `WeatherMatch` | yes | yes | session/wellness | `src/frontend/src/pages/WeatherMatch.tsx` |
+| `/games/word-builder` | enabled | `WordBuilder` | yes | yes | -/wellness | `src/frontend/src/pages/WordBuilder.tsx` |
+| `/games/word-search` | enabled | `WordSearch` | yes | yes | session/- | `src/frontend/src/pages/WordSearch.tsx` |
+| `/games/yoga-animals` | enabled | `YogaAnimals` | yes | yes | session/wellness | `src/frontend/src/pages/YogaAnimals.tsx` |

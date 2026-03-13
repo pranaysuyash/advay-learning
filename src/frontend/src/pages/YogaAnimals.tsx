@@ -8,10 +8,8 @@ import { GameShell } from '../components/GameShell';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
-  Dog,
   Cat,
   TreeDeciduous,
-  Bird,
   Bug,
   Sparkles,
   Camera,
@@ -24,9 +22,9 @@ import {
 import { KenneyEnemy } from '../components/characters/KenneyCharacter';
 import { useAudio } from '../utils/hooks/useAudio';
 import { GameContainer } from '../components/GameContainer';
+import { UIIcon } from '../components/ui/Icon';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
-import { progressQueue } from '../services/progressQueue';
 import { useProgressStore } from '../store';
 import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
@@ -56,14 +54,14 @@ interface AnimalPose {
 const ANIMAL_POSES: AnimalPose[] = [
   {
     name: 'Lion',
-    icon: <Bug className='w-16 h-16' />,
+    icon: <img src="/assets/items/creatures/lion.png" alt="Lion" className="w-20 h-20 object-contain" />,
     description: 'Be a fierce lion!',
     instruction: 'Put your hands up like claws and open your mouth wide!',
     targets: { leftArmAngle: 45, rightArmAngle: 45, torsoAngle: 0 },
   },
   {
     name: 'Cat',
-    icon: <Cat className='w-16 h-16' />,
+    icon: <img src="/assets/items/creatures/cat.png" alt="Cat" className="w-20 h-20 object-contain" />,
     description: 'Stretch like a cat!',
     instruction:
       'Get on all fours and arch your back up like a stretching cat!',
@@ -71,14 +69,14 @@ const ANIMAL_POSES: AnimalPose[] = [
   },
   {
     name: 'Tree',
-    icon: <TreeDeciduous className='w-16 h-16' />,
+    icon: <img src="/assets/items/creatures/tree.png" alt="Tree" className="w-20 h-20 object-contain" />,
     description: 'Stand tall like a tree!',
     instruction: 'Stand on one leg, with arms stretched up like branches!',
     targets: { leftLegAngle: 90, rightLegAngle: 0, torsoAngle: 0 },
   },
   {
     name: 'Dog',
-    icon: <Dog className='w-16 h-16' />,
+    icon: <img src="/assets/items/creatures/dog.png" alt="Dog" className="w-20 h-20 object-contain" />,
     description: 'Be a happy dog!',
     instruction: 'Crouch down and stick your arms out like paws!',
     targets: { leftArmAngle: 90, rightArmAngle: 90, torsoAngle: -20 },
@@ -92,7 +90,7 @@ const ANIMAL_POSES: AnimalPose[] = [
   },
   {
     name: 'Bird',
-    icon: <Bird className='w-16 h-16' />,
+    icon: <img src="/assets/items/creatures/bird.png" alt="Bird" className="w-20 h-20 object-contain" />,
     description: 'Fly like a bird!',
     instruction: 'Stand with arms out wide like wings and flap!',
     targets: { leftArmAngle: 170, rightArmAngle: 170, torsoAngle: 0 },
@@ -106,7 +104,7 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
   const hasAccess = canAccessGame('yoga-animals');
   const { currentProfile } = useProgressStore();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('yoga-animals');
-  useGameProgress('yoga-animals');
+  const { saveProgress } = useGameProgress('yoga-animals');
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -178,11 +176,10 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
       if (!currentProfile) return;
 
       try {
-        await progressQueue.add({
-          profileId: currentProfile.id,
-          gameId: 'yoga-animals',
+        await saveProgress({
           score: finalScore,
           completed: true,
+          level: currentPoseIndex,
           metadata: {
             posesCompleted: currentPoseIndex,
             holdTime,
@@ -194,7 +191,7 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
         setSubError(err as Error);
       }
     },
-    [currentProfile, currentPoseIndex, holdTime, onGameComplete],
+    [currentProfile, currentPoseIndex, holdTime, onGameComplete, saveProgress],
   );
 
   useGameSessionProgress({
@@ -559,7 +556,7 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
           <div className='flex items-center gap-3'>
             {streak > 0 && (
               <div className='bg-orange-50 border-3 border-orange-100 px-4 py-2 rounded-[1.5rem] font-bold text-orange-500 text-lg shadow-[0_4px_0_#E5B86E] flex items-center gap-1'>
-                <span>🔥</span> <span>{streak}</span>
+                <UIIcon name="flame" size={20} /> <span>{streak}</span>
               </div>
             )}
             <div className='bg-amber-50 border-3 border-amber-100 px-6 py-3 rounded-[1.5rem] font-black text-amber-500 text-xl shadow-[0_4px_0_#E5B86E] flex items-center gap-2'>
@@ -779,8 +776,8 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
         {/* Streak Milestone Overlay */}
         {showStreakMilestone && (
           <div className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'>
-            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce'>
-              🔥 {streak} Streak! 🔥
+            <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg animate-bounce flex items-center gap-2'>
+              <UIIcon name="flame" size={32} /> {streak} Streak! <UIIcon name="flame" size={32} />
             </div>
           </div>
         )}

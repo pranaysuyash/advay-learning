@@ -1,6 +1,8 @@
 import { memo, useEffect, useState } from 'react';
 import { Navigate, useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
+import { trackLaunchEvent } from '../analytics/launch';
+import { BETA_END_DATE, BETA_LABEL } from '../config/launch';
 import { useAuthStore, useSettingsStore } from '../store';
 import { OnboardingFlow } from '../components/OnboardingFlow';
 import { Mascot } from '../components/Mascot';
@@ -62,6 +64,7 @@ export const Home = memo(function Home() {
     useState<GrowthAttribution | null>(() => getPersistedGrowthAttribution());
 
   useEffect(() => {
+    trackLaunchEvent('page_view', { page: 'home' });
     const parsedAttribution = parseGrowthAttribution(
       location.search,
       location.pathname,
@@ -93,6 +96,7 @@ export const Home = memo(function Home() {
   };
 
   const startDemo = () => {
+    trackLaunchEvent('cta_clicked', { cta: 'try_magic', source: 'home_hero' });
     trackSharedVisitCta('demo');
     loginAsGuest();
     setDemoMode(true);
@@ -100,6 +104,7 @@ export const Home = memo(function Home() {
   };
 
   const startRegistration = () => {
+    trackLaunchEvent('cta_clicked', { cta: 'create_profile', source: 'home_hero' });
     trackSharedVisitCta('register');
     navigate('/register');
   };
@@ -158,7 +163,7 @@ export const Home = memo(function Home() {
               animate={{ opacity: 1, y: 0 }}
               className="inline-block mb-8 px-6 py-3 bg-white text-[#E85D04] rounded-full font-black text-sm tracking-widest border-2 border-orange-200 shadow-[0_4px_0_#E5B86E] uppercase"
             >
-              ✨ The magic camera playground
+              ✨ {BETA_LABEL} • Free through {BETA_END_DATE}
             </motion.div>
 
             {shareAttribution?.ref === 'progress_share' && (
@@ -182,6 +187,9 @@ export const Home = memo(function Home() {
 
             <p className='text-2xl text-advay-slate mb-12 max-w-3xl mx-auto font-bold leading-relaxed'>
               Put down the tablet. Watch your kids solve math with their fingers, do yoga poses, and trace letters in mid-air!
+            </p>
+            <p className='text-sm text-slate-500 mb-8 font-black tracking-widest uppercase'>
+              No stored child photos • Camera processing stays on-device • No payment required during beta
             </p>
 
             <div className='flex flex-col sm:flex-row gap-6 justify-center items-center w-full max-w-xl mx-auto'>
@@ -208,6 +216,40 @@ export const Home = memo(function Home() {
                 ? 'Real family progress reports • No extra hardware required'
                 : 'No extra hardware required • Runs safely in your browser'}
             </p>
+            <div className='mt-6 flex flex-wrap justify-center gap-4 text-sm font-bold text-slate-500'>
+              <Link
+                to='/privacy'
+                onClick={() =>
+                  trackLaunchEvent('nav_link_clicked', {
+                    destination: '/privacy',
+                    source: 'home_hero',
+                  })
+                }
+              >
+                Privacy Promise
+              </Link>
+              <Link
+                to='/terms'
+                onClick={() =>
+                  trackLaunchEvent('nav_link_clicked', {
+                    destination: '/terms',
+                    source: 'home_hero',
+                  })
+                }
+              >
+                Terms of Play
+              </Link>
+              <Link
+                to='/support'
+                onClick={() =>
+                  trackLaunchEvent('support_contact_clicked', {
+                    source: 'home_hero',
+                  })
+                }
+              >
+                Parent Support
+              </Link>
+            </div>
           </motion.div>
         </section>
 
@@ -266,7 +308,7 @@ export const Home = memo(function Home() {
                 <h2 className="text-4xl font-black mb-8 text-white tracking-tight relative z-10">Worry-Free for Parents</h2>
                 <ul className="space-y-6 relative z-10">
                   {[
-                    "100% On-Device AI: Video frames are analyzed instantly and deleted. Nothing goes to the cloud.",
+                    "100% On-device camera processing: video is analyzed instantly and not stored as photos or clips.",
                     "Zero Advertisements, Zero Popups.",
                     "Camera-Based Sleep Lock: The game pauses automatically when parents leave the room or kids get too close.",
                   ].map((item, i) => (

@@ -7,6 +7,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -30,6 +31,7 @@ export const VowelValleyContent = memo(function VowelValleyContent() {
     const [showCelebration, setShowCelebration] = useState(false);
 
     const { onGameComplete } = useGameDrops('vowel-valley');
+    const { saveProgress } = useGameProgress('vowel-valley');
     const { playSuccess, playError, playCelebration } = useAudio();
     const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -104,7 +106,10 @@ export const VowelValleyContent = memo(function VowelValleyContent() {
                 }));
                 setShowCelebration(true);
                 playCelebration();
-                onGameComplete(newScore);
+                (async () => {
+                  await saveProgress({ score: newScore, completed: true, level: 1 });
+                  onGameComplete(newScore);
+                })();
             } else {
                 setGameState(prev => ({
                     ...prev,

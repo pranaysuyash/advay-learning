@@ -7,6 +7,7 @@ import { CanvasRenderer } from '../features/physics-playground/renderer/CanvasRe
 import { StateManager } from '../features/physics-playground/state/StateManager';
 import { HandInteraction } from '../features/physics-playground/hand-tracking/HandInteraction';
 import { HandTracker } from '../features/physics-playground/hand-tracking/HandTracker';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import {
   AccessibilityMode,
@@ -110,6 +111,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
   const [helperText, setHelperText] = useState(
     'Tap/drag OR pinch in the air to pour particles. Use 1-9 and 0 to switch materials.',
   );
+  const { savePartialProgress } = useGameCompletion('physics-playground');
 
   const { cursor, startTracking, stopTracking, isPinching, isReady } = useGameHandTracking({
     gameName: 'PhysicsPlayground',
@@ -122,6 +124,26 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
     startTracking();
     return () => stopTracking();
   }, [startTracking, stopTracking]);
+
+  useEffect(() => {
+    if (particleCount <= 0) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      void savePartialProgress({
+        score: Math.min(100, particleCount),
+        level: 1,
+        metadata: {
+          particleCount,
+          selectedType,
+          interactionMode,
+        },
+      });
+    }, 1200);
+
+    return () => window.clearTimeout(timeout);
+  }, [interactionMode, particleCount, savePartialProgress, selectedType]);
 
   useEffect(() => {
     cursorRef.current = cursor;

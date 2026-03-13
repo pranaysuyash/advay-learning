@@ -9,10 +9,12 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
+from app.core.config import settings
 from app.db.models.profile import Profile
 from app.db.models.user import User
 from app.schemas.profile import ProfilePhotoResponse
@@ -45,7 +47,29 @@ def validate_image_magic_bytes(content: bytes) -> str | None:
     return None
 
 
-@router.post("/api/v1/users/me/profiles/{profile_id}/photo", response_model=ProfilePhotoResponse)
+def build_photo_url(profile_id: str, filename: str) -> str:
+    """Build the stable API URL used to serve an uploaded profile photo."""
+    return f"/api/v1/users/me/profiles/{profile_id}/photo/file/{filename}"
+
+
+def resolve_storage_path(current_user_id: str, filename: str) -> Path:
+    """Resolve the filesystem path for a stored profile photo."""
+    return LOCAL_STORAGE_DIR / current_user_id / filename
+
+
+def ensure_profile_photo_uploads_enabled() -> None:
+    """Public beta does not allow persisted child photo uploads."""
+    if not settings.CHILD_PHOTO_UPLOADS_ENABLED:
+        raise HTTPException(
+            status_code=410,
+            detail=(
+                "Stored child profile photos are disabled for the public beta. "
+                "Use a preset character avatar instead."
+            ),
+        )
+
+
+@router.post("/users/me/profiles/{profile_id}/photo", response_model=ProfilePhotoResponse)
 async def upload_profile_photo(
     profile_id: str,
     photo: UploadFile = File(...),
@@ -53,6 +77,7 @@ async def upload_profile_photo(
     db: AsyncSession = Depends(get_db),
 ) -> ProfilePhotoResponse:
     """Upload and associate a photo with a child profile."""
+    ensure_profile_photo_uploads_enabled()
     # Verify ownership
     result = await db.execute(select(Profile).where(Profile.id == profile_id))
     profile = result.scalar_one_or_none()
@@ -109,52 +134,73 @@ async def upload_profile_photo(
 
     # Save file to local storage (MVP approach)
     file_path = profile_dir / filename
-    with open(file_path, "wb") as f:
-        f.write(contents)
+    file_path.write_bytes(contents)
 
-    # Generate public URL for frontend (local filesystem path)
-    file_url = f"/api/v1/users/me/profiles/{current_user.id}/photos/{filename}"
+    # Generate public URL for frontend.
+    file_url = build_photo_url(profile_id, filename)
 
     # Update profile with photo URL
     profile.avatar_url = file_url
-    profile.profile_photo = file_url  # type: ignore[attr-defined]
-    profile.photo_updated_at = datetime.now()  # type: ignore[attr-defined]
 
     await db.commit()
 
-    return {  # type: ignore[return-value]
+    return {
         "avatar_url": file_url,
-        "photo_updated_at": profile.photo_updated_at.isoformat(),  # type: ignore[attr-defined]
+        "photo_updated_at": datetime.utcnow().isoformat(),
     }
 
 
-@router.get("/api/v1/users/me/profiles/{profile_id}/photo", response_model=ProfilePhotoResponse)
+@router.get("/users/me/profiles/{profile_id}/photo", response_model=ProfilePhotoResponse)
 async def get_profile_photo(
     profile_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ProfilePhotoResponse:
     """Get a child's profile photo URL (avatar_url first, fall back to profile_photo)."""
+    ensure_profile_photo_uploads_enabled()
     result = await db.execute(select(Profile).where(Profile.id == profile_id))
     profile = result.scalar_one_or_none()
 
     if not profile or profile.parent_id != current_user.id:
         raise HTTPException(status_code=403, detail="Profile not found or access denied")
 
-    # Return avatar_url or profile_photo
-    avatar_url = profile.avatar_url
-    profile_photo = getattr(profile, "profile_photo", None)
-
-    return {"avatar_url": avatar_url, "profile_photo": profile_photo}  # type: ignore[return-value]
+    return {"avatar_url": profile.avatar_url, "profile_photo": profile.avatar_url}
 
 
-@router.delete("/api/v1/users/me/profiles/{profile_id}/photo", response_model=dict)
+@router.get("/users/me/profiles/{profile_id}/photo/file/{filename}")
+async def get_profile_photo_file(
+    profile_id: str,
+    filename: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> FileResponse:
+    """Serve the uploaded profile photo file for the owning parent."""
+    ensure_profile_photo_uploads_enabled()
+    result = await db.execute(select(Profile).where(Profile.id == profile_id))
+    profile = result.scalar_one_or_none()
+
+    if not profile or profile.parent_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Profile not found or access denied")
+
+    if profile.avatar_url != build_photo_url(profile_id, filename):
+        raise HTTPException(status_code=404, detail="Profile photo not found")
+
+    file_path = resolve_storage_path(current_user.id, filename)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Profile photo file missing")
+
+    media_type = "image/png" if file_path.suffix.lower() == ".png" else "image/jpeg"
+    return FileResponse(file_path, media_type=media_type)
+
+
+@router.delete("/users/me/profiles/{profile_id}/photo", response_model=dict)
 async def delete_profile_photo(
     profile_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Delete a child's profile photo (both avatar_url and profile_photo)."""
+    ensure_profile_photo_uploads_enabled()
     result = await db.execute(select(Profile).where(Profile.id == profile_id))
     profile = result.scalar_one_or_none()
 
@@ -162,23 +208,11 @@ async def delete_profile_photo(
         raise HTTPException(status_code=403, detail="Profile not found or access denied")
 
     # Get file path from database
-    profile_photo = getattr(profile, "profile_photo", None)
-    if profile_photo:
-        # Extract path from URL
-        file_path_local = None
-        if profile_photo.startswith("/api/v1/users/me/profiles/"):  # type: ignore[union-attr]
-            file_path_local = profile_photo.replace("/api/v1/users/me/profiles/", "")  # type: ignore[union-attr]
+    if profile.avatar_url:
+        filename = Path(profile.avatar_url).name
+        resolve_storage_path(current_user.id, filename).unlink(missing_ok=True)
 
-        # Delete local file
-        if file_path_local:
-            full_path = LOCAL_STORAGE_DIR / current_user.id / Path(file_path_local).name
-            if full_path.exists():
-                full_path.unlink(missing_ok=True)
-
-    # Clear profile photo fields
-    profile.avatar_url = None  # type: ignore[assignment]
-    setattr(profile, "profile_photo", None)
-    setattr(profile, "photo_updated_at", None)
+    profile.avatar_url = None
 
     await db.commit()
 

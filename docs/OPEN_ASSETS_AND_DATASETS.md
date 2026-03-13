@@ -22,7 +22,7 @@
 
 **License:** CC0 (Public Domain) - Free for commercial and non-commercial use
 
-**Usage:** All assets are already synced to `src/frontend/public/assets/kenney/`
+**Usage:** Full all-in-one bundle is available locally in `adhoc_resources`; runtime imports are synced selectively into `src/frontend/public/assets/kenney/` based on game needs.
 
 ---
 

@@ -8,6 +8,7 @@ import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { IssueReportFlowModal } from '../components/issue-reporting/IssueReportFlowModal';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useTTS } from '../hooks/useTTS';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
@@ -125,6 +126,7 @@ export function VirtualChemistryLabContent() {
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { playSuccess, playPop } = useAudio();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('chemistry-lab');
+  const { saveProgress } = useGameProgress('chemistry-lab');
 
   useGameSessionProgress({
     gameName: 'Virtual Chemistry Lab',
@@ -593,7 +595,7 @@ export function VirtualChemistryLabContent() {
                   Empty Beaker
                 </button>
                 <button
-                  onClick={() => { onGameComplete(); setIsPlaying(false); }}
+                  onClick={async () => { await saveProgress({ score: discoveredReactions.size, completed: true, level: 1 }); onGameComplete(); setIsPlaying(false); }}
                   className='flex-1 py-4 bg-white hover:bg-slate-50 border-3 border-[#F2CC8F] text-text-secondary rounded-[1.5rem] font-black text-lg transition-colors'
                 >
                   Stop Experiment

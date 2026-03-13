@@ -7,7 +7,7 @@
 import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -66,7 +66,7 @@ const COLORS = [
 
 const AirCanvasGame = memo(function AirCanvasGameComponent() {
   const navigate = useNavigate();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('air-canvas');
+  const { completeGame } = useGameCompletion('air-canvas');
   const usedColorsRef = useRef<Set<string>>(new Set());
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -341,12 +341,12 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
   };
 
   // Take snapshot
-  const takeSnapshot = () => {
+  const takeSnapshot = async () => {
     const canvas = canvasRef.current;
     if (canvas) {
       const dataUrl = canvas.toDataURL('image/png');
       setSnapshot(dataUrl);
-      onGameComplete(particleCount);
+      await completeGame({ score: particleCount, level: 1 });
       void playSuccess();
     }
   };
@@ -482,9 +482,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
                       onClick={() => {
                         setSelectedColor(color);
                         usedColorsRef.current.add(color);
-                        if (usedColorsRef.current.size >= COLORS.length) {
-                          triggerEasterEgg('egg-rainbow-canvas');
-                        }
+                        // Easter egg: using all colors - handled by game completion system
                         assetLoader.playSound('pop', 0.2);
                         void playPop();
                         triggerHaptic('success');

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { getLaunchAnalyticsSummary, trackLaunchEvent } from '../analytics/launch';
+import { BETA_END_DATE, BETA_FREE_ACCESS, SUPPORT_EMAIL, SUPPORT_MAILTO } from '../config/launch';
 import {
   useSettingsStore,
   useAuthStore,
@@ -10,6 +12,7 @@ import {
 import { useProfileStore } from '../store/profileStore';
 import { FEATURE_FLAG_META } from '../config/features';
 import { useFeatureFlags } from '../hooks/useFeatureFlag';
+import { consentApi, dataRightsApi, userApi } from '../services/api';
 // Note: Alphabet tracking removed - now unified in Dashboard
 import { UIIcon } from '../components/ui/Icon';
 import { Button, SyncStatusIndicator } from '../components/ui';
@@ -212,7 +215,7 @@ export function Settings() {
   const navigate = useNavigate();
   const settings = useSettingsStore();
   const { logout, user } = useAuthStore();
-  const { currentProfile, updateCollectiblesSettings } = useProfileStore();
+  const { currentProfile, updateCollectiblesSettings, deleteProfile } = useProfileStore();
   const aiTelemetry = useAITelemetryStore();
   // Note: Progress tracking moved to Dashboard for unified view
 
@@ -223,6 +226,13 @@ export function Settings() {
   const { playClick } = useAudio();
   const cameraPermission = settings.cameraPermissionState;
   const [parentGatePassed, setParentGatePassed] = useState(false);
+  const [exportSummary, setExportSummary] = useState<Record<string, unknown> | null>(null);
+  const [isExportingData, setIsExportingData] = useState(false);
+  const [accountDeletePassword, setAccountDeletePassword] = useState('');
+  const [profileDeletePassword, setProfileDeletePassword] = useState('');
+  const [consentRecords, setConsentRecords] = useState<
+    Array<{ id: string; child_id?: string | null; child_name?: string | null; status: string; verification_method: string }>
+  >([]);
   const collectiblesSettings =
     (currentProfile?.settings?.collectibles as
       | { enableOlderBonus?: boolean; showRarityTextForOlder?: boolean }
@@ -250,6 +260,23 @@ export function Settings() {
     };
     syncPermission();
   }, [cameraPermission, settings]);
+
+  useEffect(() => {
+    if (!parentGatePassed || !user) return;
+
+    void dataRightsApi
+      .getExportSummary()
+      .then((response) => {
+        setExportSummary(response.data);
+        trackLaunchEvent('export_summary_viewed', { source: 'settings' });
+      })
+      .catch(() => setExportSummary(null));
+
+    void consentApi
+      .list()
+      .then((response) => setConsentRecords(response.data))
+      .catch(() => setConsentRecords([]));
+  }, [parentGatePassed, user]);
 
   const handleCameraToggle = async () => {
     if (!settings.cameraEnabled) {
@@ -279,6 +306,89 @@ export function Settings() {
     });
     showToast('Collectibles bonus preference updated', 'success');
   };
+
+  const handleExportData = async (format: 'json' | 'csv') => {
+    setIsExportingData(true);
+    try {
+      trackLaunchEvent('export_requested', { source: 'settings', format });
+      const response = await dataRightsApi.downloadExport({
+        format,
+        include_progress: true,
+        include_subscriptions: true,
+      });
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `advay-export-${new Date().toISOString().split('T')[0]}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      trackLaunchEvent('export_downloaded', { source: 'settings', format });
+      showToast(`Your ${format.toUpperCase()} export is downloading.`, 'success');
+    } catch {
+      showToast('Unable to export data right now.', 'error');
+    } finally {
+      setIsExportingData(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!accountDeletePassword.trim()) {
+      showToast('Enter your password to delete the account.', 'error');
+      return;
+    }
+
+    trackLaunchEvent('account_delete_initiated', { source: 'settings' });
+    try {
+      await userApi.deleteAccount({
+        password: accountDeletePassword,
+        reason: 'Parent-requested deletion from settings',
+      });
+      trackLaunchEvent('account_delete_completed', { source: 'settings' });
+      await logout();
+      navigate('/');
+    } catch {
+      trackLaunchEvent('account_delete_cancelled', { source: 'settings' });
+      showToast('Account deletion failed. Check your password and try again.', 'error');
+    }
+  };
+
+  const handleDeleteCurrentProfile = async () => {
+    if (!currentProfile) {
+      showToast('Choose a child profile first.', 'error');
+      return;
+    }
+    if (!profileDeletePassword.trim()) {
+      showToast('Enter your password to delete this profile.', 'error');
+      return;
+    }
+
+    trackLaunchEvent('profile_delete_initiated', {
+      source: 'settings',
+      profileId: currentProfile.id,
+    });
+    try {
+      await deleteProfile(currentProfile.id, {
+        password: profileDeletePassword,
+        reason: 'Parent-requested deletion from settings',
+      });
+      setProfileDeletePassword('');
+      trackLaunchEvent('profile_delete_completed', {
+        source: 'settings',
+        profileId: currentProfile.id,
+      });
+      showToast('Child profile deleted.', 'success');
+    } catch {
+      trackLaunchEvent('profile_delete_cancelled', {
+        source: 'settings',
+        profileId: currentProfile.id,
+      });
+      showToast('Profile deletion failed. Check your password and try again.', 'error');
+    }
+  };
+
+  const launchAnalytics = getLaunchAnalyticsSummary();
 
   const handleToggleRarityText = async () => {
     if (!currentProfile) return;
@@ -678,45 +788,193 @@ export function Settings() {
                         <div className="flex-1">
                           <div className="font-black text-lg">Your Privacy Matters</div>
                           <div className="text-sm font-bold text-blue-600 mt-1">
-                            We never see or store camera video. All processing happens on your device.
+                            We never see or store camera video or child profile photos. All camera processing happens on your device.
                           </div>
-                          <a
-                            href="/privacy"
+                          <Link
+                            to="/privacy"
+                            onClick={() =>
+                              trackLaunchEvent('nav_link_clicked', {
+                                destination: '/privacy',
+                                source: 'settings_privacy_card',
+                              })
+                            }
                             className="inline-flex items-center gap-2 mt-3 text-sm font-black text-blue-700 hover:text-blue-800 hover:underline"
                           >
                             Read our Privacy Policy
                             <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M5 12h14' /><path d='m12 5 7 7-7 7' /></svg>
-                          </a>
+                          </Link>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-6 border-t-4 border-[#F2CC8F] flex flex-col sm:flex-row gap-4">
-                      <Button
-                        variant='secondary'
-                        className="flex-1 text-sm font-black bg-white border-4 border-[#F2CC8F] text-advay-slate hover:bg-slate-50 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(226,232,240,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
-                        onClick={() => showToast('Data export will be available in the next update.', 'info')}
-                      >
-                        Export Data
-                      </Button>
-                      <Button
-                        variant='secondary'
-                        className="flex-1 text-sm font-black bg-red-50 border-4 border-red-200 text-red-500 hover:bg-red-100 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(254,202,202,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
-                        onClick={async () => {
-                          if (await confirm({
-                            title: 'Restore Factory Defaults?',
-                            message: 'Erase all device configurations and restore defaults.',
-                            confirmText: 'Restore Defaults',
-                            cancelText: 'Cancel',
-                            type: 'danger',
-                          })) {
-                            settings.resetSettings();
-                            showToast('Settings restored', 'success');
-                          }
-                        }}
-                      >
-                        Restore Defaults
-                      </Button>
+                    <div className='pt-6 border-t-4 border-[#F2CC8F] space-y-6'>
+                      <div className='rounded-[1.5rem] border-4 border-[#F2CC8F] bg-slate-50 p-5'>
+                        <div className='flex items-center justify-between gap-4'>
+                          <div>
+                            <div className='font-black text-lg text-advay-slate'>Export family data</div>
+                            <div className='text-sm font-bold text-slate-500 mt-1'>
+                              Download account, profile, progress, and subscription records in JSON or CSV.
+                            </div>
+                            {exportSummary && (
+                              <div className='mt-3 text-xs font-black uppercase tracking-widest text-slate-400'>
+                                Profiles: {String(exportSummary.profile_count ?? 0)} • Progress: {String(exportSummary.progress_count ?? 0)} • Subscriptions: {String(exportSummary.subscription_count ?? 0)}
+                              </div>
+                            )}
+                          </div>
+                          <div className='flex flex-col sm:flex-row gap-3'>
+                            <Button
+                              variant='secondary'
+                              className='text-sm font-black'
+                              onClick={() => void handleExportData('json')}
+                              disabled={isExportingData}
+                            >
+                              Export JSON
+                            </Button>
+                            <Button
+                              variant='secondary'
+                              className='text-sm font-black'
+                              onClick={() => void handleExportData('csv')}
+                              disabled={isExportingData}
+                            >
+                              Export CSV
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className='rounded-[1.5rem] border-4 border-[#F2CC8F] bg-slate-50 p-5 space-y-4'>
+                        <div className='font-black text-lg text-advay-slate'>Parental consent records</div>
+                        <div className='text-sm font-bold text-slate-500'>
+                          Current beta access is free through {BETA_END_DATE}. Payment verification is disabled for launch; email-code or declaration consent is used instead.
+                        </div>
+                        {consentRecords.length > 0 ? (
+                          <div className='space-y-2'>
+                            {consentRecords.map((record) => (
+                              <div key={record.id} className='rounded-xl bg-white px-4 py-3 border-2 border-slate-200 flex items-center justify-between gap-4'>
+                                <div>
+                                  <div className='font-black text-sm text-advay-slate'>{record.child_name || 'Child profile'}</div>
+                                  <div className='text-xs font-bold text-slate-500 uppercase tracking-wide'>{record.verification_method} • {record.status}</div>
+                                </div>
+                                <span className={`rounded-full px-3 py-1 text-xs font-black uppercase ${record.status === 'verified' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                  {record.status}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className='text-sm font-bold text-slate-500'>No consent records yet. A consent prompt appears when you add a learner profile.</div>
+                        )}
+                      </div>
+
+                      <div className='rounded-[1.5rem] border-4 border-[#F2CC8F] bg-slate-50 p-5 space-y-4'>
+                        <div className='font-black text-lg text-advay-slate'>Beta analytics snapshot</div>
+                        <div className='text-sm font-bold text-slate-500'>
+                          Events tracked locally: {launchAnalytics.totalEvents}. Top launch interactions and game starts are summarized here for parent-safe beta review.
+                        </div>
+                        <div className='grid gap-3 md:grid-cols-2'>
+                          <div className='rounded-xl bg-white px-4 py-3 border-2 border-slate-200'>
+                            <div className='text-xs font-black uppercase tracking-widest text-slate-400'>Top events</div>
+                            {Object.entries(launchAnalytics.counts)
+                              .slice(0, 5)
+                              .map(([name, count]) => (
+                                <div key={name} className='mt-2 flex items-center justify-between text-sm font-bold text-slate-600'>
+                                  <span>{name}</span>
+                                  <span>{count}</span>
+                                </div>
+                              ))}
+                          </div>
+                          <div className='rounded-xl bg-white px-4 py-3 border-2 border-slate-200'>
+                            <div className='text-xs font-black uppercase tracking-widest text-slate-400'>Top games</div>
+                            {launchAnalytics.topGames.length > 0 ? (
+                              launchAnalytics.topGames.map(([gameId, count]) => (
+                                <div key={gameId} className='mt-2 flex items-center justify-between text-sm font-bold text-slate-600'>
+                                  <span>{gameId}</span>
+                                  <span>{count}</span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className='mt-2 text-sm font-bold text-slate-500'>No game telemetry yet.</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className='rounded-[1.5rem] border-4 border-red-200 bg-red-50 p-5 space-y-4'>
+                        <div className='font-black text-lg text-red-700'>Danger zone</div>
+                        {currentProfile && (
+                          <div className='rounded-xl bg-white px-4 py-4 border-2 border-red-100 space-y-3'>
+                            <div className='font-black text-advay-slate'>Delete current child profile</div>
+                            <div className='text-sm font-bold text-slate-500'>This removes the profile and its progress records.</div>
+                            <input
+                              type='password'
+                              value={profileDeletePassword}
+                              onChange={(event) => setProfileDeletePassword(event.target.value)}
+                              placeholder='Enter parent password'
+                              className='w-full rounded-xl border-2 border-red-100 bg-white px-4 py-3 font-bold text-advay-slate focus:outline-none focus:border-red-300'
+                            />
+                            <Button
+                              variant='secondary'
+                              className='w-full bg-red-100 text-red-700 border-4 border-red-200 hover:bg-red-200'
+                              onClick={() => void handleDeleteCurrentProfile()}
+                            >
+                              Delete {currentProfile.name}'s profile
+                            </Button>
+                          </div>
+                        )}
+
+                        {user && (
+                          <div className='rounded-xl bg-white px-4 py-4 border-2 border-red-100 space-y-3'>
+                            <div className='font-black text-advay-slate'>Delete account</div>
+                            <div className='text-sm font-bold text-slate-500'>This deletes the parent account, all profiles, and stored progress.</div>
+                            <input
+                              type='password'
+                              value={accountDeletePassword}
+                              onChange={(event) => setAccountDeletePassword(event.target.value)}
+                              placeholder='Enter parent password'
+                              className='w-full rounded-xl border-2 border-red-100 bg-white px-4 py-3 font-bold text-advay-slate focus:outline-none focus:border-red-300'
+                            />
+                            <Button
+                              variant='secondary'
+                              className='w-full bg-red-100 text-red-700 border-4 border-red-200 hover:bg-red-200'
+                              onClick={() => void handleDeleteAccount()}
+                            >
+                              Delete parent account
+                            </Button>
+                          </div>
+                        )}
+
+                        <div className='flex flex-col sm:flex-row gap-4'>
+                          <Button
+                            variant='secondary'
+                            className="flex-1 text-sm font-black bg-red-50 border-4 border-red-200 text-red-500 hover:bg-red-100 py-4 rounded-[1.5rem] shadow-[0_6px_0_0_rgba(254,202,202,1)] hover:shadow-none hover:translate-y-[6px] transition-all"
+                            onClick={async () => {
+                              if (await confirm({
+                                title: 'Restore Factory Defaults?',
+                                message: 'Erase all device configurations and restore defaults.',
+                                confirmText: 'Restore Defaults',
+                                cancelText: 'Cancel',
+                                type: 'danger',
+                              })) {
+                                settings.resetSettings();
+                                showToast('Settings restored', 'success');
+                              }
+                            }}
+                          >
+                            Restore Defaults
+                          </Button>
+                          <a
+                            href={SUPPORT_MAILTO}
+                            onClick={() => trackLaunchEvent('support_contact_clicked', { source: 'settings_danger_zone' })}
+                            className='flex-1 rounded-[1.5rem] border-4 border-[#F2CC8F] bg-white px-6 py-4 text-center text-sm font-black text-advay-slate shadow-[0_6px_0_0_rgba(226,232,240,1)]'
+                          >
+                            Contact support
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className='text-sm font-bold text-slate-500'>
+                        Beta is free through {BETA_END_DATE}. Support: <a href={SUPPORT_MAILTO} className='text-[#3B82F6]'>{SUPPORT_EMAIL}</a>. {BETA_FREE_ACCESS ? 'No subscription is required during beta.' : ''}
+                      </div>
                     </div>
                   </div>
                   <div className="bg-slate-50 px-8 py-4 border-t-4 border-[#F2CC8F] text-center text-sm font-black text-slate-400 tracking-wider">

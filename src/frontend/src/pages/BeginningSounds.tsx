@@ -7,10 +7,9 @@ import { GameHUD } from '../components/game/GameHUD';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { useProgressStore } from '../store';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { GameBackground } from '../components/game/GameBackground';
@@ -26,8 +25,7 @@ import {
 const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
-  const { onGameComplete } = useGameDrops('beginning-sounds');
-  const { saveProgress } = useGameProgress('beginning-sounds');
+  const { completeGame } = useGameCompletion('beginning-sounds');
   const { currentProfile } = useProgressStore();
 
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -112,12 +110,10 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
       if (!currentProfile) return;
 
       try {
-        await saveProgress({
+        await completeGame({
           score: finalScore,
-          completed: true,
           level: currentLevel,
         });
-        onGameComplete(finalScore);
       } catch (err) {
         console.error('Failed to save progress:', err);
         setError(err as Error);
@@ -128,8 +124,7 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
       currentLevel,
       correctCount,
       levelConfig,
-      onGameComplete,
-      saveProgress,
+      completeGame,
     ],
   );
 

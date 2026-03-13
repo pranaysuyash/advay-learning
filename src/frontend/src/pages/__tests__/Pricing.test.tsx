@@ -26,7 +26,7 @@ describe('Pricing page', () => {
     });
   });
 
-  it('shows the canonical prelaunch offer ladder', async () => {
+  it('shows beta-free messaging alongside future plan ladder', async () => {
     render(
       <MemoryRouter>
         <Pricing />
@@ -37,12 +37,13 @@ describe('Pricing page', () => {
       expect(getCurrentSpy).toHaveBeenCalled();
     });
 
+    expect(screen.getByText(/free during beta through March 31, 2026/i)).toBeInTheDocument();
+    expect(screen.getByText(/Payments stay off until beta ends/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/I want this after beta/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/^30 days of play$/i)).toBeInTheDocument();
-    expect(screen.getByText(/^Fixed for the month$/i)).toBeInTheDocument();
-    expect(screen.getByText(/^1 refresh window each month$/i)).toBeInTheDocument();
     expect(screen.getByText(/^No game-selection limits$/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Monthly renewals let you keep your current 5 games or pick a new set/i),
+      screen.getByText(/During beta, every game is available without payment/i),
     ).toBeInTheDocument();
   });
 });

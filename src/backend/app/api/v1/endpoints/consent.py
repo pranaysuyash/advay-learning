@@ -7,6 +7,8 @@ DPDPA 2023 Section 9(1) Compliance
        CREDIT_CARD database enum until the enum migration is applied.
 """
 
+import json
+import secrets
 from datetime import datetime
 from typing import Any
 from uuid import UUID
@@ -16,6 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
+from app.core.email import EmailService
 from app.db.models.consent import (
     ConsentAuditLog,
     ConsentStatus,
@@ -29,6 +32,7 @@ from app.schemas.consent import (
     ParentalConsentCreate,
     ParentalConsentResponse,
 )
+from app.services.dodo_payment_service import DodoPaymentService, get_dodo_client
 
 router = APIRouter()
 
@@ -39,6 +43,11 @@ def map_schema_verification_method(method: Any) -> VerificationMethod:
     if value in {"dodopayments", "razorpay"}:
         return VerificationMethod.CREDIT_CARD
     return VerificationMethod(value)
+
+
+def generate_email_verification_code() -> str:
+    """Generate a six-digit numeric verification code."""
+    return f"{secrets.randbelow(1_000_000):06d}"
 
 
 @router.post("/", response_model=ParentalConsentResponse, status_code=status.HTTP_201_CREATED)
@@ -79,6 +88,7 @@ async def create_consent(
     consent = ParentalConsent(
         parent_id=current_user.id,
         parent_email=consent_in.parent_email,
+        child_id=consent_in.child_id,
         child_name=consent_in.child_name,
         verification_method=db_verification_method,
         consent_version=consent_in.consent_version,
@@ -88,9 +98,19 @@ async def create_consent(
         status=ConsentStatus.PENDING,
     )
 
+    if db_verification_method == VerificationMethod.EMAIL:
+        consent.verification_token = generate_email_verification_code()
+
     db.add(consent)
     await db.commit()
     await db.refresh(consent)
+
+    if db_verification_method == VerificationMethod.EMAIL and consent.verification_token:
+        await EmailService.send_parental_consent_verification_email(
+            consent.parent_email,
+            consent.verification_token,
+            consent.child_name,
+        )
 
     # Create audit log
     audit_log = ConsentAuditLog(
@@ -153,8 +173,13 @@ async def verify_consent(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email verification code required",
             )
-        # TODO: Implement actual email verification logic
+        if verification.email_code != consent.verification_token:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid email verification code",
+            )
         consent.email_verified = True
+        consent.verification_token = None
 
     elif verification_method == VerificationMethod.CREDIT_CARD:
         # Payment verification happens through a provider webhook after checkout.
@@ -164,6 +189,7 @@ async def verify_consent(
                 detail="Payment verification token required",
             )
         consent.card_transaction_id = verification.payment_token
+        consent.dodopayments_intent_id = verification.payment_token
         # Don't mark as verified yet - wait for webhook
 
     elif verification_method == VerificationMethod.DECLARATION:
@@ -324,10 +350,6 @@ async def check_child_consent_status(
     }
 
 
-# ============================================================================
-# WEBHOOKS (Placeholder - requires async background tasks)
-# ============================================================================
-
 @router.post("/webhooks/dodopayments")
 async def handle_dodopayments_webhook(
     request: Request,
@@ -335,9 +357,85 @@ async def handle_dodopayments_webhook(
 ) -> dict:
     """
     Handle Dodopayments payment webhooks for parental verification.
-
-    @note TEMPORARY: Disabled until database enum migration is complete.
     """
-    # TODO: Implement webhook handling after database migration
-    # adds DODOPAYMENTS enum value
-    return {"status": "disabled", "message": "Webhook handling not yet implemented"}
+    body = await request.body()
+    webhook_id = request.headers.get("webhook-id", "")
+    webhook_timestamp = request.headers.get("webhook-timestamp", "")
+    webhook_signature = request.headers.get("webhook-signature", "")
+
+    dodo_service: DodoPaymentService = get_dodo_client()
+    if not dodo_service.verify_webhook_signature(
+        body,
+        webhook_id,
+        webhook_timestamp,
+        webhook_signature,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid webhook signature",
+        )
+
+    event = json.loads(body.decode("utf-8"))
+    event_type = event.get("type") or event.get("event")
+    data = event.get("data", {})
+    metadata = data.get("metadata", {}) if isinstance(data, dict) else {}
+
+    supported_events = {
+        "payment.succeeded",
+        "payment.completed",
+        "payment_intent.succeeded",
+    }
+    if event_type not in supported_events:
+        return {"status": "ignored", "event_type": event_type}
+
+    consent: ParentalConsent | None = None
+    consent_id = metadata.get("consent_id")
+    if consent_id:
+        result = await db.execute(
+            select(ParentalConsent).where(ParentalConsent.id == UUID(consent_id))
+        )
+        consent = result.scalar_one_or_none()
+
+    payment_id = data.get("payment_id") or data.get("id")
+    if consent is None and payment_id:
+        result = await db.execute(
+            select(ParentalConsent).where(
+                ParentalConsent.dodopayments_intent_id == payment_id
+            )
+        )
+        consent = result.scalar_one_or_none()
+
+    if consent is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Consent record not found for webhook",
+        )
+
+    if consent.status == ConsentStatus.VERIFIED and consent.card_verified:
+        return {"status": "already_verified", "consent_id": str(consent.id)}
+
+    consent.card_verified = True
+    consent.status = ConsentStatus.VERIFIED
+    consent.consent_timestamp = datetime.utcnow()
+    if payment_id:
+        consent.card_transaction_id = payment_id
+
+    db.add(consent)
+    db.add(
+        ConsentAuditLog(
+            consent_id=consent.id,
+            action="verified_via_webhook",
+            actor="system",
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+            details={
+                "event_type": event_type,
+                "payment_id": payment_id,
+                "webhook_id": webhook_id,
+            },
+        )
+    )
+    await db.commit()
+    await db.refresh(consent)
+
+    return {"status": "verified", "consent_id": str(consent.id)}

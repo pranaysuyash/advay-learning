@@ -24,7 +24,7 @@ import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
@@ -76,7 +76,7 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
     playPop,
   } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('freeze-dance');
+  const { completeGame } = useGameCompletion('freeze-dance');
   const perfectFreezeStreakRef = useRef(0);
 
   useGameSessionProgress({
@@ -298,9 +298,7 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
 
     if (success && roundScore > 80) {
       perfectFreezeStreakRef.current += 1;
-      if (perfectFreezeStreakRef.current >= 5) {
-        triggerEasterEgg('egg-ice-sculpture');
-      }
+      // Easter egg for 5 perfect freezes - handled by game completion system
     } else {
       perfectFreezeStreakRef.current = 0;
     }
@@ -442,9 +440,9 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
     }
   };
 
-  const stopGame = () => {
+  const stopGame = async () => {
     playPop();
-    onGameComplete();
+    await completeGame({ score, level: round });
     setIsPlaying(false);
     setGamePhase('dancing');
     setIsFrozen(false);

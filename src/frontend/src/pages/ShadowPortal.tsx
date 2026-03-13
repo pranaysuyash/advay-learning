@@ -16,6 +16,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -52,6 +53,7 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
   const [comboText, setComboText] = useState<string>('');
 
   const { onGameComplete } = useGameDrops('shadow-portal');
+  const { saveProgress } = useGameProgress('shadow-portal');
   const { playSuccess, playError, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -232,7 +234,10 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
             triggerHaptic('celebration');
             setShowCelebration(true);
             const scores = calculateFinalScore(updated);
-            onGameComplete(scores.total);
+            (async () => {
+              await saveProgress({ score: scores.total, completed: true, level: 1 });
+              onGameComplete(scores.total);
+            })();
             if (ttsEnabled) speak('All portals filled! Amazing!');
           }
 

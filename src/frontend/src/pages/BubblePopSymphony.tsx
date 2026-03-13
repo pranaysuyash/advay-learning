@@ -23,7 +23,7 @@ import {
   GAME_INSTRUCTIONS,
   useVoiceInstructions,
 } from '../components/game/VoiceInstructions';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   TargetSystem,
@@ -75,7 +75,7 @@ const MUSICAL_NOTES = [
 
 function BubblePopSymphonyGame() {
   // game logic hooks
-  const { onGameComplete } = useGameDrops('bubble-pop-symphony');
+  const { completeGame } = useGameCompletion('bubble-pop-symphony');
   const { playClick } = useAudio();
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({
     x: 0,
@@ -324,7 +324,7 @@ function BubblePopSymphonyGame() {
         const remaining = prev.filter((bubble) => bubble.id !== target.id);
 
         if (remaining.length === 0) {
-          onGameComplete();
+          completeGame({ score });
           window.setTimeout(() => {
             setBubbles(createBubbleSet());
             assetLoader.playSound('success', 0.55);
@@ -335,7 +335,7 @@ function BubblePopSymphonyGame() {
         return remaining;
       });
     },
-    [playNote, createBubbleSet, speak, onGameComplete],
+    [playNote, createBubbleSet, speak, completeGame],
   );
 
   const startGame = useCallback(() => {

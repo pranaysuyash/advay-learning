@@ -327,9 +327,6 @@ export function AvatarDemo() {
           setDemoConfig(config);
           console.log('Selected avatar config:', config);
         }}
-        onSelectPhoto={() => {
-          alert('Camera would open here!');
-        }}
       />
     </div>
   );

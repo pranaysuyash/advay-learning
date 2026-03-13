@@ -21,6 +21,7 @@ import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { CSSMonster } from '../components/characters/CSSMonster';
 import { KenneyCharacter } from '../components/characters/KenneyCharacter';
+import { UIIcon } from '../components/ui/Icon';
 
 import { useAudio } from '../utils/hooks/useAudio';
 import { useKenneyAudio } from '../utils/hooks/useKenneyAudio';
@@ -30,6 +31,7 @@ import '../styles/animations.css';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -150,16 +152,25 @@ interface FingerDetectionDisplayProps {
 function FingerDetectionDisplay({ detectedFingers, fingerHoldStart, isSubmitting }: FingerDetectionDisplayProps) {
   return (
     <div className="bg-gradient-to-b from-blue-100 to-blue-50 border-3 border-blue-400 rounded-3xl p-8 text-center min-w-[280px] shadow-lg">
-      <p className="text-blue-800 font-bold text-lg mb-4">🖐️ Your Answer:</p>
+      <p className="text-blue-800 font-bold text-lg mb-4">
+        <UIIcon name="hand" size={24} className="mr-2" />
+        Your Answer:
+      </p>
       <div className="text-8xl font-black text-blue-600 mb-4">
         {detectedFingers}
       </div>
       <div className="flex justify-center gap-2 text-4xl mb-4 min-h-[60px]">
         {detectedFingers === 0 ? (
-          <span className="text-slate-400 text-2xl">Show fingers! 👆</span>
+          <span className="text-slate-400 text-2xl">Show fingers! <UIIcon name="hand" size={24} className="ml-1" /></span>
         ) : (
           Array.from({ length: detectedFingers }).map((_, i) => (
-            <span key={i} className="animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>☝️</span>
+            <UIIcon
+              key={i}
+              name="hand"
+              size={40}
+              className="animate-bounce text-blue-500"
+              style={{ animationDelay: `${i * 100}ms` }}
+            />
           ))
         )}
       </div>
@@ -189,6 +200,7 @@ function MathMonstersGame() {
   const { playSuccess, playError, playClick, playMunch, playFanfare } = useAudio();
   const { playCoin, playHurt, playSelect } = useKenneyAudio();
   const { onGameComplete } = useGameDrops('math-monsters');
+  const { saveProgress } = useGameProgress('math-monsters');
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
   // ===== GAME STATE =====
@@ -337,6 +349,7 @@ function MathMonstersGame() {
     if (newGameState.completed) {
       playFanfare();
       triggerHaptic('celebration');
+      await saveProgress({ score: newGameState.score, completed: true, level: newGameState.currentLevel });
       onGameComplete();
       setShowCelebration(true);
     } else {
@@ -541,37 +554,40 @@ function MathMonstersGame() {
             progressPercentage={levelProgress}
           />
 
-          {/* Score Popup Animation */}
-          <AnimatePresence>
-            {scorePopup && (
-              <motion.div
-                initial={{ opacity: 0, y: 0, scale: 0.5 }}
-                animate={{ opacity: 1, y: -40, scale: 1.2 }}
-                exit={{ opacity: 0 }}
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
-              >
-                <div className="text-5xl font-black text-green-500 drop-shadow-lg">
-                  +{scorePopup.points}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Score Popup Animation */}
+        <AnimatePresence>
+          {scorePopup && (
+            <motion.div
+              initial={{ opacity: 0, y: 0, scale: 0.5 }}
+              animate={{ opacity: 1, y: -40, scale: 1.2 }}
+              exit={{ opacity: 0 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+            >
+              <div className="text-5xl font-black text-green-500 drop-shadow-lg flex items-center gap-2">
+                <UIIcon name="star" size={48} />
+                +{scorePopup.points}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-          {/* Streak Milestone */}
-          <AnimatePresence>
-            {showStreakMilestone && (
-              <motion.div
-                initial={{ scale: 0, rotate: -20 }}
-                animate={{ scale: 1.2, rotate: 0 }}
-                exit={{ scale: 0 }}
-                className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
-              >
-                <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
-                  🔥 {gameState.streak} Streak! 🔥
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Streak Milestone */}
+        <AnimatePresence>
+          {showStreakMilestone && (
+            <motion.div
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: 1.2, rotate: 0 }}
+              exit={{ scale: 0 }}
+              className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+            >
+              <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl flex items-center gap-2">
+                <UIIcon name="flame" size={32} />
+                {gameState.streak} Streak!
+                <UIIcon name="flame" size={32} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
           {/* Helper indicator */}
           <div className="absolute top-20 right-4 z-10">

@@ -57,8 +57,12 @@ export const getLanguageOptions = () => {
   }));
 };
 
+let initialized = false;
+
 // i18n initialization
 export const initializeI18n = () => {
+  if (initialized || i18n.isInitialized) return i18n;
+
   i18n
     // Detect user language
     .use(LanguageDetector)
@@ -69,6 +73,7 @@ export const initializeI18n = () => {
     .init({
       // Default language
       fallbackLng: 'en',
+      supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
       
       // Debug mode (disable in production)
       debug: false,
@@ -100,6 +105,7 @@ export const initializeI18n = () => {
       },
     });
 
+  initialized = true;
   return i18n;
 };
 

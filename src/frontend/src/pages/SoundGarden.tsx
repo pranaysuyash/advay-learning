@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic, HAPTIC_TYPES } from '../utils/haptics';
@@ -38,6 +39,7 @@ function SoundGardenGame() {
   const { playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('sound-garden');
+  const { saveProgress } = useGameProgress('sound-garden');
 
   useGameSessionProgress({
     gameName: 'Sound Garden',
@@ -109,7 +111,10 @@ function SoundGardenGame() {
     if (newPlayed.length >= NOTES_TO_PLAY) {
       setGameState('complete');
       playCelebration();
-      onGameComplete(calculateStars(newPlayed.length));
+      (async () => {
+        await saveProgress({ score: calculateScore(newPlayed.length), completed: true, level: 1 });
+        onGameComplete(calculateStars(newPlayed.length));
+      })();
       speakText('Beautiful music! Great job!');
     }
   }, [gameState, playedNotes, playNote, playCelebration, onGameComplete, speakText]);

@@ -11,16 +11,6 @@ import { registerServiceWorker } from './pwa/registerServiceWorker';
 
 // Initialize i18n before app render
 initializeI18n();
-void preloadItemsManifest();
-void registerServiceWorker();
-
-// Initialize React Scan for performance monitoring (development only)
-scan({
-  enabled: (import.meta as any).env?.DEV ?? true,
-  animationSpeed: 'fast',
-  showToolbar: true,
-  log: false,
-});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,19 +21,46 @@ const queryClient = new QueryClient({
   },
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true,
-        }}
-      >
-        <I18nProvider>
-          <App />
-        </I18nProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
-  </StrictMode>
-);
+async function bootstrap() {
+  // Initialize React Scan for performance monitoring (development only)
+  if (import.meta.env.DEV) {
+    scan({
+      enabled: true,
+      animationSpeed: 'fast',
+      showToolbar: true,
+      log: false,
+    });
+  }
+
+  void preloadItemsManifest().catch((error) => {
+    console.error('Failed to preload items manifest:', error);
+  });
+
+  if (import.meta.env.PROD) {
+    void registerServiceWorker();
+  }
+
+  const rootElement = document.getElementById('root');
+  if (!rootElement) {
+    throw new Error('Root element #root not found');
+  }
+
+  ReactDOM.createRoot(rootElement).render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <I18nProvider>
+            <App />
+          </I18nProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </StrictMode>
+  );
+}
+
+void bootstrap();

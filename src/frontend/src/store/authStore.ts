@@ -192,17 +192,19 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             isAuthenticated: false,
           });
+          throw error;
         }
       },
 
       checkAuth: async () => {
         // Check if user is authenticated by trying to fetch user data
         // Cookies are automatically sent with the request
+        set({ isLoading: true });
         try {
           await get().fetchUser();
-          set({ isAuthenticated: true });
+          set({ isAuthenticated: true, isLoading: false });
         } catch (error) {
-          set({ isAuthenticated: false });
+          set({ isAuthenticated: false, isLoading: false });
         }
       },
 
@@ -214,7 +216,6 @@ export const useAuthStore = create<AuthState>()(
       // Tokens are in httpOnly cookies
       partialize: (state) => ({
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
         isGuest: state.isGuest,
         guestSession: state.guestSession,
       }),

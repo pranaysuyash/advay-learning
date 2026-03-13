@@ -3,6 +3,10 @@ const STATIC_CACHE = `advay-static-${SW_VERSION}`;
 const RUNTIME_CACHE = `advay-runtime-${SW_VERSION}`;
 const MODEL_CACHE = `advay-models-${SW_VERSION}`;
 const FONT_CACHE = `advay-fonts-${SW_VERSION}`;
+const ALLOWED_EXTERNAL_ORIGINS = new Set([
+  "https://fonts.googleapis.com",
+  "https://fonts.gstatic.com",
+]);
 
 const PRECACHE_URLS = [
   "/",
@@ -46,10 +50,12 @@ function isModelRequest(url) {
 }
 
 function isGoogleFontRequest(url) {
-  return (
-    url.origin === "https://fonts.googleapis.com" ||
-    url.origin === "https://fonts.gstatic.com"
-  );
+  return ALLOWED_EXTERNAL_ORIGINS.has(url.origin);
+}
+
+function isAllowedRuntimeRequest(url) {
+  if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+  return url.origin === self.location.origin || ALLOWED_EXTERNAL_ORIGINS.has(url.origin);
 }
 
 function isStaticAssetRequest(request, url) {
@@ -63,6 +69,11 @@ function isStaticAssetRequest(request, url) {
 }
 
 async function cacheFirst(request, cacheName) {
+  const url = new URL(request.url);
+  if (!isAllowedRuntimeRequest(url)) {
+    return fetch(request);
+  }
+
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
   if (cached) return cached;
@@ -81,6 +92,11 @@ async function cacheFirst(request, cacheName) {
 }
 
 async function networkFirst(request, cacheName, fallbackUrl) {
+  const url = new URL(request.url);
+  if (!isAllowedRuntimeRequest(url)) {
+    return fetch(request);
+  }
+
   const cache = await caches.open(cacheName);
   try {
     const response = await fetch(request);
@@ -104,6 +120,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+  if (!isAllowedRuntimeRequest(url)) return;
 
   if (isNavigationRequest(request)) {
     event.respondWith(networkFirst(request, RUNTIME_CACHE, "/index.html"));

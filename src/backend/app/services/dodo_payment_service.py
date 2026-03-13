@@ -43,18 +43,21 @@ class DodoPaymentService:
     """Service for handling Dodo Payments integration."""
 
     def __init__(self):
-        self.api_key = os.getenv("DODO_API_KEY", "")
-        self.webhook_secret = os.getenv("DODO_WEBHOOK_SECRET", "")
+        self.api_token = os.getenv("DODO_API_KEY", "")
+        self.webhook_secret = (
+            os.getenv("DODO_PAYMENTS_WEBHOOK_KEY", "")
+            or os.getenv("DODO_WEBHOOK_SECRET", "")
+        )
         env = os.getenv("DODO_ENV", DODO_ENV).lower()
 
-        if not self.api_key:
+        if not self.api_token:
             raise ValueError("DODO_API_KEY is required to initialize DodoPayments")
 
         base_url = DODO_BASE_URLS.get(env, DODO_BASE_URLS["test"])
         logger.info(f"Initialized DodoPayments with environment: {env}, base_url: {base_url}")
 
         self.client = DodoPayments(
-            bearer_token=self.api_key,
+            bearer_token=self.api_token,
             base_url=base_url,
         )
 
@@ -130,21 +133,11 @@ class DodoPaymentService:
     def verify_webhook_signature(
         self, payload: bytes, webhook_id: str, webhook_timestamp: str, webhook_signature: str
     ) -> bool:
-        """Verify webhook signature from Dodo using their 3-header scheme.
+        """Verify webhook signature using Dodo's Standard Webhooks format.
 
-        CRITICAL: Signature scheme must match Dodo's exact specification.
-
-        Current implementation (NEEDS VERIFICATION):
+        Official Dodo docs specify signing the raw payload with:
         "{webhook_id}.{webhook_timestamp}.{raw_payload}"
-
-        Dodo docs reference:
-        - https://dodopayments.com/docs/webhooks (How do I verify webhooks?)
-        - May specify webhook_id + timestamp + payload OR just timestamp + payload
-
-        ACTION REQUIRED: Confirm exact "string to sign" format from official Dodo docs.
-        If Dodo uses "{timestamp}.{payload}" instead, update line below accordingly.
-
-        When DODO_VERIFY_DIAGNOSTIC=true (test env), will test multiple schemes and log results.
+        using the webhook secret key and HMAC SHA256.
         """
         if not self.webhook_secret:
             logger.error("DODO_WEBHOOK_SECRET not configured - webhook verification disabled")

@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
+import { Modal } from '../ui/Modal';
 import { LANGUAGES } from '../../data/languages';
 import { useAudio } from '../../utils/hooks/useAudio';
-import { useEffect, useRef } from 'react';
 
 interface AddChildModalProps {
   isOpen: boolean;
@@ -42,15 +42,14 @@ export function AddChildModal({
     }
   }, [isOpen, playPop]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className='bg-white border border-border rounded-xl p-6 max-w-md w-full shadow-soft-lg'
-      >
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      ariaLabel="Add Child Profile"
+    >
+      <div className='bg-white border border-border rounded-xl p-6'>
         <h2 className='text-2xl font-bold mb-4'>Add Child Profile</h2>
 
         <div className='space-y-4'>
@@ -132,7 +131,7 @@ export function AddChildModal({
             {isSubmitting ? 'Creating...' : 'Add Child'}
           </button>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </Modal>
   );
 }

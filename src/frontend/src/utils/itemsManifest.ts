@@ -41,16 +41,30 @@ const FALLBACK_ITEM_ICON_MANIFEST: ItemIconManifest = {
 let runtimeManifest: ItemIconManifest = { ...FALLBACK_ITEM_ICON_MANIFEST };
 let preloadPromise: Promise<void> | null = null;
 
+function isItemIconManifest(value: unknown): value is ItemIconManifest {
+  if (!value || typeof value !== 'object') return false;
+  return Object.values(value).every((v) => typeof v === 'string');
+}
+
 export async function preloadItemsManifest(): Promise<void> {
   if (preloadPromise) return preloadPromise;
 
   preloadPromise = fetch('/assets/items/manifest.json')
     .then(async (response) => {
-      if (!response.ok) return;
-      const manifest = (await response.json()) as ItemIconManifest;
-      runtimeManifest = { ...runtimeManifest, ...manifest };
+      if (!response.ok) {
+        throw new Error(`Manifest fetch failed: ${response.status}`);
+      }
+      const manifestJson: unknown = await response.json();
+      if (!isItemIconManifest(manifestJson)) {
+        throw new Error('Invalid item icon manifest shape');
+      }
+      runtimeManifest = { ...runtimeManifest, ...manifestJson };
     })
-    .catch(() => {
+    .catch((error) => {
+      preloadPromise = null;
+      if (import.meta.env.DEV) {
+        console.warn('[itemsManifest] Using default manifest after preload failure.', error);
+      }
       // Keep fallback mapping if manifest fetch fails.
     });
 

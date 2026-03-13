@@ -2,6 +2,9 @@ import { memo, useState, useEffect, useMemo } from 'react';
 
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { trackLaunchEvent } from '../analytics/launch';
+import { BETA_END_DATE, BETA_FREE_ACCESS } from '../config/launch';
+import { progressQueue } from '../services/progressQueue';
 import {
   useAuthStore,
   useProfileStore,
@@ -12,6 +15,7 @@ import {
 import { Mascot } from '../components/Mascot';
 import { UIIcon } from '../components/ui/Icon';
 import { GameCard } from '../components/GameCard';
+import { ParentalConsentFlow, type ConsentData } from '../components/consent';
 import { DemoInterface } from '../components/demo/DemoInterface';
 import { hasBasicCameraSupport } from '../utils/featureDetection';
 import { useToast } from '../components/ui/useToast';
@@ -21,12 +25,58 @@ import { AddChildModal } from '../components/dashboard/AddChildModal';
 import { EditProfileModal } from '../components/dashboard/EditProfileModal';
 import { UnifiedActivityFeed } from '../components/dashboard/UnifiedActivityFeed';
 import { AvatarWithBadge, AvatarPickerModal, type AvatarConfig } from '../components/avatar';
-import { subscriptionApi, type SubscriptionStatus, progressApi } from '../services/api';
+import { dataRightsApi, subscriptionApi, type SubscriptionStatus, progressApi } from '../services/api';
 import { getGameRecommendationsForProfile, type GameRecommendation } from '../services/gameRecommendations';
 import { getPlanLabel, getPlanRenewalMessage, isFullAccessPlan, isQuarterlyPack } from '../services/subscriptionPlan';
 import { useGameStatsMapForProfile } from '../hooks/useGameStats';
 import type { ProgressItem } from '../types/progress';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+
+function PendingBadge({ 
+  count, 
+  profileId: _profileId, 
+  onNavigate 
+}: { 
+  count: number; 
+  profileId: string; 
+  onNavigate: () => void;
+}) {
+  const { t } = useTranslation(['dashboard', 'common']);
+  const raw = t('dashboard:badges.pendingCount', { count });
+  const label = raw && raw.indexOf('dashboard:') === -1 ? raw : `Pending (${count})`;
+  return (
+    <div
+      onClick={onNavigate}
+      className='bg-yellow-100 border border-yellow-300 px-3 py-1 rounded-full text-yellow-800 font-medium cursor-pointer hover:bg-yellow-200 transition ml-2'
+      title={t('dashboard:badges.pending')}
+    >
+      {label}
+    </div>
+  );
+}
+
+function DeadLetterBadge({ 
+  count, 
+  profileId: _profileId, 
+  onNavigate 
+}: { 
+  count: number; 
+  profileId: string; 
+  onNavigate: () => void;
+}) {
+  const { t } = useTranslation(['dashboard', 'common']);
+  const raw = t('dashboard:badges.failedCount', { count });
+  const label = raw && raw.indexOf('dashboard:') === -1 ? raw : `Failed (${count})`;
+  return (
+    <div
+      onClick={onNavigate}
+      className='bg-red-100 border border-red-300 px-3 py-1 rounded-full text-red-800 font-medium cursor-pointer hover:bg-red-200 transition ml-2'
+      title={t('dashboard:badges.failed')}
+    >
+      {label}
+    </div>
+  );
+}
 
 // Minimal recommended games for the dashboard
 const RECOMMENDED_GAMES = [
@@ -95,6 +145,10 @@ export const Dashboard = memo(function Dashboard() {
 
   const [exporting, setExporting] = useState(false);
 
+  // offline queue badge counts
+  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [deadLetterCount, setDeadLetterCount] = useState<number>(0);
+
   // Add Child Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [childName, setChildName] = useState('');
@@ -110,6 +164,8 @@ export const Dashboard = memo(function Dashboard() {
   const [editAvatarConfig, setEditAvatarConfig] = useState<AvatarConfig | null>(null);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [progress, setProgress] = useState<ProgressItem[]>([]);
+  const [showConsentFlow, setShowConsentFlow] = useState(false);
+  const [pendingConsentProfile, setPendingConsentProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     if (!isGuest) {
@@ -140,6 +196,19 @@ export const Dashboard = memo(function Dashboard() {
       setCurrentProfile(defaultProfile);
     }
   }, [defaultProfile, currentProfile, setCurrentProfile, isGuest]);
+
+  // offline queue subscription effect
+  useEffect(() => {
+    const id = defaultProfile?.id;
+    if (!id) return;
+    const update = () => {
+      setPendingCount(progressQueue.getPending(id).length);
+      setDeadLetterCount(progressQueue.getDeadLetterCount(id));
+    };
+    update();
+    const unsub = progressQueue.subscribe(update);
+    return () => unsub();
+  }, [defaultProfile?.id]);
 
   // Fetch progress for game recommendations
   useEffect(() => {
@@ -204,21 +273,25 @@ export const Dashboard = memo(function Dashboard() {
 
   const handleExport = async () => {
     setExporting(true);
-    const exportData = {
-      exportDate: new Date().toISOString(),
-      profiles: profiles,
-      progress: letterProgress,
-    };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `learning-progress-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    setExporting(false);
+    try {
+      trackLaunchEvent('export_requested', { source: 'dashboard' });
+      const response = await dataRightsApi.downloadExport({
+        format: 'json',
+        include_progress: true,
+        include_subscriptions: true,
+      });
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `advay-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      trackLaunchEvent('export_downloaded', { source: 'dashboard', format: 'json' });
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleAddChild = async () => {
@@ -232,6 +305,21 @@ export const Dashboard = memo(function Dashboard() {
         preferred_language: childLanguage,
       });
       await fetchProfiles();
+      const latestProfiles = useProfileStore.getState().profiles;
+      const createdProfile =
+        latestProfiles.find((profile) => profile.name === childName.trim()) ??
+        latestProfiles[latestProfiles.length - 1] ??
+        null;
+      if (createdProfile) {
+        setCurrentProfile(createdProfile);
+        setPendingConsentProfile(createdProfile);
+        setShowConsentFlow(true);
+        trackLaunchEvent('child_profile_created', {
+          source: 'dashboard_add_child',
+          profileId: createdProfile.id,
+          age: createdProfile.age ?? childAge,
+        });
+      }
       setShowAddModal(false);
       setChildName('');
       setChildAge(5);
@@ -316,6 +404,33 @@ export const Dashboard = memo(function Dashboard() {
             <KenneyIcon type='star' size={24} />
             <span className='text-xl'>{totalStars.toLocaleString()}</span>
           </div>
+          {/* Offline progress badges */}
+          {pendingCount > 0 && defaultProfile?.id && (
+            <PendingBadge
+              count={pendingCount}
+              profileId={defaultProfile.id}
+              onNavigate={() => {
+                navigate('/progress', { state: { profileId: defaultProfile.id } });
+                trackLaunchEvent('pending_badge_clicked', {
+                  profileId: defaultProfile.id,
+                  count: pendingCount,
+                });
+              }}
+            />
+          )}
+          {deadLetterCount > 0 && defaultProfile?.id && (
+            <DeadLetterBadge
+              count={deadLetterCount}
+              profileId={defaultProfile.id}
+              onNavigate={() => {
+                navigate('/progress', { state: { profileId: defaultProfile.id } });
+                trackLaunchEvent('failed_badge_clicked', {
+                  profileId: defaultProfile.id,
+                  count: deadLetterCount,
+                });
+              }}
+            />
+          )}
 
           {/* ACTION BUTTONS (Hidden on small mobile, moved to nav or menu) */}
           <div className='hidden md:flex gap-2'>
@@ -345,7 +460,13 @@ export const Dashboard = memo(function Dashboard() {
             {profiles.map(p => (
               <button
                 key={p.id}
-                onClick={() => setCurrentProfile(p)}
+                onClick={() => {
+                  setCurrentProfile(p);
+                  trackLaunchEvent('child_profile_selected', {
+                    source: 'dashboard_profile_switcher',
+                    profileId: p.id,
+                  });
+                }}
                 onContextMenu={(e) => {
                   e.preventDefault();
                   handleEditProfile(p);
@@ -415,6 +536,7 @@ export const Dashboard = memo(function Dashboard() {
                         description={game.tagline}
                         path={game.path}
                         icon={game.icon}
+                        previewImage={game.previewImage}
                         ageRange={game.ageRange}
                         category={game.vibe}
                         difficulty='Easy'
@@ -522,13 +644,33 @@ export const Dashboard = memo(function Dashboard() {
         onSelect={(config) => {
           setEditAvatarConfig(config);
           setShowAvatarPicker(false);
+          trackLaunchEvent('local_avatar_selected', {
+            source: 'dashboard_avatar_picker',
+            avatarType: config.type,
+            character: config.character,
+          });
           showToast('Avatar selected! Click Save to apply changes.', 'success');
         }}
-        onSelectPhoto={() => {
-          // Would open AvatarCapture component
-          // DEBUG: console.log('Photo avatar selected');
-        }}
       />
+
+      {showConsentFlow && pendingConsentProfile && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm'>
+          <ParentalConsentFlow
+            parentEmail={useAuthStore.getState().user?.email || ''}
+            childId={pendingConsentProfile.id}
+            childName={pendingConsentProfile.name}
+            onCancel={() => {
+              setShowConsentFlow(false);
+              setPendingConsentProfile(null);
+            }}
+            onConsentComplete={(_consent: ConsentData) => {
+              setShowConsentFlow(false);
+              setPendingConsentProfile(null);
+              showToast('Parental consent verified for this profile.', 'success');
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 });
@@ -549,6 +691,25 @@ function SubscriptionCard() {
     return (
       <div className="px-6 lg:px-12">
         <div className="animate-pulse bg-white rounded-xl h-24 border-2 border-slate-100"></div>
+      </div>
+    );
+  }
+
+  if (BETA_FREE_ACCESS && (!subscription?.has_active || !subscription.subscription)) {
+    return (
+      <div className="px-6 lg:px-12 mb-6">
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-6 text-white">
+          <h3 className="text-xl font-bold mb-2">Public Beta Access Is On</h3>
+          <p className="text-emerald-50 mb-4">
+            All shipped games are free during beta through {BETA_END_DATE}. You can still review future plans for after beta.
+          </p>
+          <Link
+            to="/pricing"
+            className="inline-block bg-white text-emerald-700 px-6 py-2 rounded-lg font-semibold hover:bg-emerald-50"
+          >
+            See future plans
+          </Link>
+        </div>
       </div>
     );
   }

@@ -1,0 +1,36 @@
+name: Remote DB Backup
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Prepare SSH key
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          test -n "$DEPLOY_SSH_KEY"
+          install -m 600 /dev/null ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+
+      - name: Run backup on remote host
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_KEY_PATH: ~/.ssh/deploy_key
+          REMOTE_BACKUP_DIR: ${{ secrets.REMOTE_BACKUP_DIR }}
+        run: |
+          ssh -i "$SSH_KEY_PATH" -p "${DEPLOY_PORT:-22}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && BACKUP_DIR='${REMOTE_BACKUP_DIR:-$DEPLOY_PATH/backups}' ./scripts/backup-db.sh"

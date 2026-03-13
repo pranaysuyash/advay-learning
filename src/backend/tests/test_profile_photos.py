@@ -48,15 +48,13 @@ class TestProfilePhotoUpload:
     async def test_upload_jpeg_photo(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession, test_user: dict
     ):
-        """Test uploading a valid JPEG photo."""
+        """Public beta should reject persisted child photo uploads."""
         from app.db.models.profile import Profile
         from app.services.user_service import UserService
 
-        # Get the actual user ID
         user = await UserService.get_by_email(db_session, test_user["email"])
         assert user is not None
 
-        # Create a profile for the test user
         profile = Profile(
             name="Test Child",
             age=5,
@@ -67,24 +65,21 @@ class TestProfilePhotoUpload:
         await db_session.commit()
         await db_session.refresh(profile)
 
-        # Create test file
         files = {"photo": ("test.jpg", io.BytesIO(VALID_JPEG_BYTES), "image/jpeg")}
 
         response = await client.post(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             files=files,
             headers=auth_headers,
         )
 
-        assert response.status_code == 200
-        data = response.json()
-        assert "avatar_url" in data
-        assert "photo_updated_at" in data
+        assert response.status_code == 410
+        assert "disabled for the public beta" in response.json()["detail"].lower()
 
     async def test_upload_png_photo(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession, test_user: dict
     ):
-        """Test uploading a valid PNG photo."""
+        """Public beta should reject PNG uploads too."""
         from app.db.models.profile import Profile
         from app.services.user_service import UserService
 
@@ -104,14 +99,12 @@ class TestProfilePhotoUpload:
         files = {"photo": ("test.png", io.BytesIO(VALID_PNG_BYTES), "image/png")}
 
         response = await client.post(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             files=files,
             headers=auth_headers,
         )
 
-        assert response.status_code == 200
-        data = response.json()
-        assert "avatar_url" in data
+        assert response.status_code == 410
 
     async def test_upload_photo_wrong_profile(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession
@@ -147,13 +140,12 @@ class TestProfilePhotoUpload:
         files = {"photo": ("test.jpg", io.BytesIO(VALID_JPEG_BYTES), "image/jpeg")}
 
         response = await client.post(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             files=files,
             headers=auth_headers,
         )
 
-        assert response.status_code == 403
-        assert "access denied" in response.json()["detail"].lower()
+        assert response.status_code == 410
 
     async def test_upload_photo_nonexistent_profile(
         self, client: AsyncClient, auth_headers: dict
@@ -164,23 +156,23 @@ class TestProfilePhotoUpload:
         files = {"photo": ("test.jpg", io.BytesIO(VALID_JPEG_BYTES), "image/jpeg")}
 
         response = await client.post(
-            f"/api/v1/api/v1/users/me/profiles/{str(uuid4())}/photo",
+            f"/api/v1/users/me/profiles/{str(uuid4())}/photo",
             files=files,
             headers=auth_headers,
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 410
 
     async def test_upload_photo_no_auth(self, client: AsyncClient):
         """Test uploading photo without authentication fails."""
         files = {"photo": ("test.jpg", io.BytesIO(VALID_JPEG_BYTES), "image/jpeg")}
 
         response = await client.post(
-            "/api/v1/api/v1/users/me/profiles/some-id/photo",
+            "/api/v1/users/me/profiles/some-id/photo",
             files=files,
         )
 
-        assert response.status_code == 401
+        assert response.status_code == 410 or response.status_code == 401
 
     async def test_upload_photo_invalid_file_type(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession, test_user: dict
@@ -206,13 +198,12 @@ class TestProfilePhotoUpload:
         files = {"photo": ("test.txt", io.BytesIO(b"This is not an image"), "text/plain")}
 
         response = await client.post(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             files=files,
             headers=auth_headers,
         )
 
-        assert response.status_code == 415
-        assert "invalid file type" in response.json()["detail"].lower()
+        assert response.status_code == 410
 
     async def test_upload_photo_spoofed_content_type(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession, test_user: dict
@@ -238,18 +229,17 @@ class TestProfilePhotoUpload:
         files = {"photo": ("spoof.jpg", io.BytesIO(b"This is not a JPEG"), "image/jpeg")}
 
         response = await client.post(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             files=files,
             headers=auth_headers,
         )
 
-        assert response.status_code == 415
-        assert "invalid image" in response.json()["detail"].lower()
+        assert response.status_code == 410
 
     async def test_upload_photo_too_large(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession, test_user: dict
     ):
-        """Test uploading oversized file fails."""
+        """Public beta should reject uploads before file-size validation."""
         from app.db.models.profile import Profile
         from app.services.user_service import UserService
 
@@ -271,13 +261,13 @@ class TestProfilePhotoUpload:
         files = {"photo": ("large.jpg", io.BytesIO(large_content), "image/jpeg")}
 
         response = await client.post(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             files=files,
             headers=auth_headers,
         )
 
-        assert response.status_code == 413
-        assert "too large" in response.json()["detail"].lower()
+        assert response.status_code == 410
+        assert "disabled for the public beta" in response.json()["detail"].lower()
 
 
 class TestProfilePhotoGet:
@@ -286,7 +276,7 @@ class TestProfilePhotoGet:
     async def test_get_profile_photo(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession, test_user: dict
     ):
-        """Test getting profile photo URL."""
+        """Public beta should not expose persisted child profile photos."""
         from app.db.models.profile import Profile
         from app.services.user_service import UserService
 
@@ -297,7 +287,7 @@ class TestProfilePhotoGet:
             name="Test Child",
             age=5,
             preferred_language="en",
-            avatar_url="/api/v1/api/v1/users/me/profiles/test/photos/test.jpg",
+            avatar_url="/api/v1/users/me/profiles/test/photo/file/test.jpg",
             parent_id=user.id,
         )
         db_session.add(profile)
@@ -305,18 +295,17 @@ class TestProfilePhotoGet:
         await db_session.refresh(profile)
 
         response = await client.get(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             headers=auth_headers,
         )
 
-        assert response.status_code == 200
-        data = response.json()
-        assert "avatar_url" in data
+        assert response.status_code == 410
+        assert "disabled for the public beta" in response.json()["detail"].lower()
 
     async def test_get_profile_photo_wrong_user(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession
     ):
-        """Test getting photo of profile not owned by user fails."""
+        """Public beta should reject all persisted photo access."""
         from uuid import uuid4
 
         from app.core.security import get_password_hash
@@ -344,15 +333,16 @@ class TestProfilePhotoGet:
         await db_session.refresh(profile)
 
         response = await client.get(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             headers=auth_headers,
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 410
+        assert "disabled for the public beta" in response.json()["detail"].lower()
 
     async def test_get_profile_photo_no_auth(self, client: AsyncClient):
         """Test getting photo without auth fails."""
-        response = await client.get("/api/v1/api/v1/users/me/profiles/some-id/photo")
+        response = await client.get("/api/v1/users/me/profiles/some-id/photo")
         assert response.status_code == 401
 
 
@@ -362,7 +352,7 @@ class TestProfilePhotoDelete:
     async def test_delete_profile_photo(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession, test_user: dict
     ):
-        """Test deleting profile photo."""
+        """Public beta should not expose persisted child profile photo deletion."""
         from app.db.models.profile import Profile
         from app.services.user_service import UserService
 
@@ -373,7 +363,7 @@ class TestProfilePhotoDelete:
             name="Test Child",
             age=5,
             preferred_language="en",
-            avatar_url="/api/v1/api/v1/users/me/profiles/test/photos/test.jpg",
+            avatar_url="/api/v1/users/me/profiles/test/photo/file/test.jpg",
             parent_id=user.id,
         )
         db_session.add(profile)
@@ -381,17 +371,17 @@ class TestProfilePhotoDelete:
         await db_session.refresh(profile)
 
         response = await client.delete(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             headers=auth_headers,
         )
 
-        assert response.status_code == 200
-        assert "deleted" in response.json()["message"].lower()
+        assert response.status_code == 410
+        assert "disabled for the public beta" in response.json()["detail"].lower()
 
     async def test_delete_profile_photo_wrong_user(
         self, client: AsyncClient, auth_headers: dict, db_session: AsyncSession
     ):
-        """Test deleting photo of profile not owned by user fails."""
+        """Public beta should reject all persisted photo deletion attempts."""
         from uuid import uuid4
 
         from app.core.security import get_password_hash
@@ -419,13 +409,14 @@ class TestProfilePhotoDelete:
         await db_session.refresh(profile)
 
         response = await client.delete(
-            f"/api/v1/api/v1/users/me/profiles/{profile.id}/photo",
+            f"/api/v1/users/me/profiles/{profile.id}/photo",
             headers=auth_headers,
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 410
+        assert "disabled for the public beta" in response.json()["detail"].lower()
 
     async def test_delete_profile_photo_no_auth(self, client: AsyncClient):
         """Test deleting photo without auth fails."""
-        response = await client.delete("/api/v1/api/v1/users/me/profiles/some-id/photo")
+        response = await client.delete("/api/v1/users/me/profiles/some-id/photo")
         assert response.status_code == 401

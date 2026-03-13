@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useTTS } from '../hooks/useTTS';
 import { useAudio } from '../utils/hooks/useAudio';
 import { GameContainer } from '../components/GameContainer';
@@ -78,7 +78,7 @@ export const FingerNumberShowContent = memo(function FingerNumberShowContentComp
   const [celebrationValue, setCelebrationValue] = useState<string>('');
   const { speak, isEnabled: ttsEnabled, isAvailable: ttsAvailable } = useTTS();
   const { playFanfare: playCelebration, playSuccess, playPop } = useAudio();
-  const { onGameComplete } = useGameDrops('finger-number-show');
+  const { onGameComplete, saveProgress } = useGameCompletion('finger-number-show');
 
   // Language and mode selection
   type GameMode = 'numbers' | 'letters';
@@ -488,7 +488,18 @@ export const FingerNumberShowContent = memo(function FingerNumberShowContentComp
   };
 
   const stopGame = () => {
-    onGameComplete();
+    if (score > 0) {
+      void saveProgress({
+        score,
+        completed: score >= 100,
+        level: difficulty + 1,
+        metadata: {
+          mode: gameMode,
+          streak,
+        },
+      });
+    }
+    onGameComplete(score);
     setIsPlaying(false);
     setFeedback('');
     if (promptTimeoutRef.current) {

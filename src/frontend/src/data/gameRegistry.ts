@@ -19,6 +19,7 @@
  */
 
 import type { IconName } from '../components/ui/Icon';
+import { isBetaGameEnabled } from '../config/betaGames';
 import type { DropEntry } from './collectibles';
 import type { EasterEgg } from './easterEggs';
 
@@ -42,6 +43,7 @@ export interface GameManifest {
   tagline: string; // fun one-liner — NOT "learn X", but "do Y!"
   path: string;
   icon: IconName | string;
+  previewImage?: string; // High fidelity image for game card headers
 
   // World & feel
   worldId: string;
@@ -118,6 +120,7 @@ import {
   STORY_CORNER_GAMES,
 } from './gameRegistries/storyCorner';
 import { PLATFORM_WORLD_GAMES } from './gameRegistries/platformWorld';
+import { THREE_D_WORLD_GAMES } from './gameRegistries/threeDWorld';
 
 export const GAME_REGISTRY: GameManifest[] = [
   ...LETTER_LAND_GAMES,
@@ -141,6 +144,7 @@ export const GAME_REGISTRY: GameManifest[] = [
   ...NUMBER_JUNGLE_EXTRA_GAMES,
   ...PLATFORM_WORLD_GAMES,
   ...VOICE_INPUT_GAMES,
+  ...THREE_D_WORLD_GAMES,
 ];
 
 // ─── LOOKUP HELPERS ─────────────────────────────────────────────────────
@@ -169,20 +173,28 @@ export function getGameManifest(id: string): GameManifest | undefined {
 }
 
 export function getListedGames(): GameManifest[] {
-  return GAME_REGISTRY.filter((g) => g.listed);
+  return GAME_REGISTRY.filter((g) => g.listed && isBetaGameEnabled(g.id));
 }
 
 export function getGamesByWorld(worldId: string): GameManifest[] {
-  return GAME_REGISTRY.filter((g) => g.worldId === worldId && g.listed);
+  return GAME_REGISTRY.filter(
+    (g) => g.worldId === worldId && g.listed && isBetaGameEnabled(g.id),
+  );
 }
 
 export function getGamesByVibe(vibe: GameVibe): GameManifest[] {
-  return GAME_REGISTRY.filter((g) => g.vibe === vibe && g.listed);
+  return GAME_REGISTRY.filter(
+    (g) => g.vibe === vibe && g.listed && isBetaGameEnabled(g.id),
+  );
 }
 
 export function getAllWorlds(): string[] {
   return [
-    ...new Set(GAME_REGISTRY.filter((g) => g.listed).map((g) => g.worldId)),
+    ...new Set(
+      GAME_REGISTRY.filter((g) => g.listed && isBetaGameEnabled(g.id)).map(
+        (g) => g.worldId,
+      ),
+    ),
   ];
 }
 

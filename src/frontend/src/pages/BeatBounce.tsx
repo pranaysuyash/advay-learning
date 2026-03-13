@@ -10,8 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
@@ -55,8 +54,7 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
   const beatTimeRef = useRef(0);
 
   const { playSuccess, playClick, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('beat-bounce');
-  const { saveProgress } = useGameProgress('beat-bounce');
+  const { completeGame } = useGameCompletion('beat-bounce');
   useGameSessionProgress({ gameName: 'Beat Bounce', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const level = LEVELS.find(l => l.level === currentLevel) || LEVELS[0];
@@ -85,10 +83,9 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
 
   const handleComplete = useCallback(async () => {
     setGameState('complete');
-    await saveProgress({ score, completed: true, level: currentLevel });
-    onGameComplete(score);
+    await completeGame({ score, level: currentLevel });
     playSuccess();
-  }, [score, currentLevel, onGameComplete, playSuccess, saveProgress]);
+  }, [score, currentLevel, completeGame, playSuccess]);
 
   const handleTap = useCallback(() => {
     if (gameState !== 'playing') return;

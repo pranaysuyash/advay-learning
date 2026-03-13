@@ -98,26 +98,14 @@ cd tools && python3 -m http.server 8080
   - Unused only
   - By category (Collectibles, HUD, Characters, etc.)
 - **Search:** Find assets by name, description, or tags
-- **Usage Information:** See which games/components use each asset
-- **Report Generation:** Export audit report as markdown
 
-### Integration with Code
+---
 
-The tool mirrors the TypeScript registry:
-- Source: `src/frontend/src/utils/kenneyAssetRegistry.ts`
-- Audit: `docs/audit/KENNEY_ASSET_AUDIT_COMPLETE.md`
+## Deprecated Tools
 
-### Report Output Example
+### Platformer-Specific Sync Tool
 
-```markdown
-# Kenney Asset Usage Report
-
-Generated: 2026-03-09
-
-## Summary
-- Total Assets: 450
-- Used: 15 (3.3%)
-```
+The `tools/sync_kenney_platformer_assets.sh` script is now deprecated. All assets should be sourced from the Kenney all-in-one bundle. Refer to the updated workflow in `assets/kenney/README.md` for importing assets.
 
 ---
 
@@ -126,6 +114,7 @@ Generated: 2026-03-09
 **Purpose:** Preload critical Kenney assets before gameplay to eliminate mid-game loading delays.
 
 **Files:**
+
 - `src/frontend/src/components/AssetPreloader.tsx`
 - `src/frontend/src/utils/assetLoader.ts`
 
@@ -139,6 +128,7 @@ Generated: 2026-03-09
 ### Usage
 
 **Preloader Component:**
+
 ```tsx
 import { AssetPreloader, CRITICAL_ASSETS } from './components/AssetPreloader';
 
@@ -147,7 +137,7 @@ function GameApp() {
 
   if (!ready) {
     return (
-      <AssetPreloader 
+      <AssetPreloader
         assets={CRITICAL_ASSETS}
         onComplete={() => setReady(true)}
         minDisplayTime={1500}
@@ -160,11 +150,18 @@ function GameApp() {
 ```
 
 **Lazy Loading:**
+
 ```tsx
-import { lazyLoadImage, loadGameAssets, ASSET_MANIFESTS } from './utils/assetLoader';
+import {
+  lazyLoadImage,
+  loadGameAssets,
+  ASSET_MANIFESTS,
+} from './utils/assetLoader';
 
 // Load single image
-const coinImage = await lazyLoadImage('/assets/kenney/platformer/collectibles/coin_gold.png');
+const coinImage = await lazyLoadImage(
+  '/assets/kenney/platformer/collectibles/coin_gold.png',
+);
 
 // Load all assets for a game
 const assets = await loadGameAssets('myGame', ASSET_MANIFESTS.platformer);
@@ -209,6 +206,7 @@ node tools/generate-sprite-atlas.js \
 ### Requirements
 
 **For full image generation:**
+
 - ImageMagick (`brew install imagemagick` on macOS)
 - OR Node.js Canvas library (`npm install canvas`)
 
@@ -218,6 +216,7 @@ The script currently generates JSON manifests only. Full image packing requires 
 ### Manual Atlas Creation
 
 For collectibles, a manifest is pre-generated at:
+
 - `src/frontend/public/assets/kenney/atlas/collectibles.json`
 
 This can be used with CSS background-position or canvas drawing.
@@ -254,20 +253,70 @@ const coinFrame = atlasManifest.frames['coin_gold'];
 ---
 
 ## Summary
+
 - Total Assets: 450
 - Used: 15 (3.3%)
 - Unused: 435 (96.7%)
 
+---
+
+## 🎮 Control Mode Route Audit (CV vs Pointer)
+
+**Purpose:** Generate a detailed, route-level audit of game control patterns to track alignment with the app’s CV/MediaPipe-first direction.
+
+**File:** `tools/control_mode_audit.py`
+
+### What it produces
+
+- JSON dataset: `docs/audit/control_mode_route_audit_<date>.json`
+- Markdown report: `docs/audit/CONTROL_MODE_AUDIT_<date>.md`
+
+### Why this exists
+
+- Quantifies how many routed games are CV-intended vs pointer-primary.
+- Detects high-risk mismatches (camera-gated routes that still appear pointer-primary).
+- Creates a repeatable baseline for migration planning and progress tracking.
+
+### Usage
+
+```bash
+# From repo root
+python3 tools/control_mode_audit.py --date 2026-03-12
+
+# Optional
+python3 tools/control_mode_audit.py --root /path/to/repo --date YYYY-MM-DD
+```
+
+### Method (high level)
+
+1. Parse `/games/*` routes from `src/frontend/src/App.tsx`
+2. Map routed components to `src/frontend/src/pages/*.tsx` and `src/frontend/src/games/*.tsx`
+3. Detect CV and pointer control signals via static patterns
+4. Classify each route into:
+   - `CV_PRIMARY_OR_INTENDED`
+   - `HYBRID_CV_PLUS_POINTER`
+   - `CV_SIGNAL_NO_GUARD`
+   - `POINTER_PRIMARY`
+   - `UNDETERMINED`
+
+### Notes
+
+- Classification is heuristic and should be manually validated for edge cases.
+- Use this report as an audit baseline, not as sole proof of runtime behavior.
+
 ## Unused Assets (435)
+
 - hud_heart_half: Half heart
 - hud_key_blue: Blue key icon
 - ...
 
 ## Recommendations
+
 1. Import UI Pack assets (868 files available)
 2. Replace emoji with Kenney assets
 3. Use unused backgrounds for game themes
-```
+
+````
 
 ---
 
@@ -293,7 +342,7 @@ open tools/performance_benchmark.html
 # Or serve locally
 cd tools && python3 -m http.server 8080
 # Then open http://localhost:8080/performance_benchmark.html
-```
+````
 
 ### Test Scenarios
 
@@ -313,7 +362,7 @@ cd tools && python3 -m http.server 8080
 
 ## 🧰 Kenney Asset Sync Tool
 
-**Purpose:** Synchronize Kenney `New Platformer Pack` assets from the local purchased Kenney bundle into the frontend canonical asset path.
+**Purpose:** Synchronize the Kenney `New Platformer Pack` subset from the local purchased all-in-one Kenney bundle into the frontend canonical asset path.
 
 **File:** `tools/sync_kenney_platformer_assets.sh`
 
@@ -321,8 +370,10 @@ cd tools && python3 -m http.server 8080
 
 - Avoid manual copy mistakes and partial imports.
 - Keep one canonical runtime path: `src/frontend/public/assets/kenney/platformer`.
-- Make future pack refreshes repeatable from the purchased local Kenney bundle.
+- Make refreshes repeatable from the purchased local all-in-one Kenney bundle.
 - Ensure agents check the in-project runtime asset folder first before importing new files.
+
+This tool is intentionally **platformer-pack specific**. For non-platformer packs in the all-in-one bundle, copy only required files into `src/frontend/public/assets/kenney/<pack-or-domain>/` and document imports in `assets/kenney/README.md`.
 
 ### Usage
 
@@ -399,6 +450,7 @@ python3 tools/hand_tracking_latency_analyzer.py tools/emoji_match.mov tools/late
 ### Output Format
 
 **Console Report:**
+
 ```
 🎯 Tracking Performance:
    Avg hand-pointer distance: 2,016.73 px ❌ CRITICAL
@@ -503,11 +555,13 @@ node tools/qa_analysis/profile_customization_capture.js
 ## 📊 Frame Analysis Workflow
 
 ### 1. Extract Video Metadata
+
 ```bash
 python3 tools/video_frame_analyzer.py <video_path> info
 ```
 
 **Example Output:**
+
 ```json
 {
   "fps": 59.07,
@@ -519,17 +573,21 @@ python3 tools/video_frame_analyzer.py <video_path> info
 ```
 
 ### 2. Extract Frames for Analysis
+
 ```bash
 python3 tools/video_frame_analyzer.py <video_path> extract
 ```
 
 **Results:**
+
 - Frames saved to `tools/frames/` directory
 - Named with frame numbers and timestamps
 - Sample interval: 0.5s (adjustable in code)
 
 ### 3. Manual Frame Analysis
+
 Use the extracted frames to identify:
+
 - Hand-tracking cursor visibility (or lack thereof)
 - Target sizes relative to screen dimensions
 - Game state transitions and pacing
@@ -537,7 +595,9 @@ Use the extracted frames to identify:
 - Instruction clarity and duration
 
 ### 4. Generate QA Report
+
 Create detailed audit reports following the UI/UX framework:
+
 - Severity-ranked issues (S1/S2/S3)
 - Timestamp-backed evidence
 - Child-friendly design principles
@@ -582,6 +642,7 @@ Create detailed audit reports following the UI/UX framework:
 ### Toddler Motor Control Guidelines
 
 **Age 2-4 years:**
+
 - **Fine motor skills:** Developing, not precise
 - **Target sizes:** Minimum 15-20% of screen width
 - **Hitboxes:** 2-3x visible target size
@@ -589,6 +650,7 @@ Create detailed audit reports following the UI/UX framework:
 - **Attention span:** Short, needs frequent reinforcement
 
 **Design Principles:**
+
 - One obvious next action at any time
 - Forgiving interaction (big targets, generous hitboxes)
 - Immediate, clear success feedback
@@ -600,10 +662,12 @@ Create detailed audit reports following the UI/UX framework:
 ## 📋 Report Template Structure
 
 ### 1. One-Paragraph Summary
+
 - What the game is
 - Top 3 experience failures
 
 ### 2. Metrics Snapshot
+
 - Tracking latency measurements
 - Jitter rating
 - Target size analysis
@@ -611,15 +675,18 @@ Create detailed audit reports following the UI/UX framework:
 - Recovery times
 
 ### 3. State Machine Table
+
 - Game states, user goals, system signals
 - Failure modes and fix ideas
 
 ### 4. Issues List (Prioritized)
+
 - **S1 Blocker:** Game-breaking for toddlers
 - **S2 Major:** Significantly impacts experience
 - **S3 Minor:** Polish and optimization
 
 ### 5. Design Principles Violated
+
 - Visibility of system status
 - Feedback & recognition
 - Error prevention
@@ -627,10 +694,12 @@ Create detailed audit reports following the UI/UX framework:
 - Cognitive load management
 
 ### 6. Quick Wins vs Deep Work
+
 - Quick wins: ≤2 hours each
 - Deep work: Multi-day projects
 
 ### 7. Regression Test Checklist
+
 - Pre-deployment testing requirements
 - Acceptance criteria for "good" experience
 
@@ -679,6 +748,7 @@ tools/
 ### First Time Setup
 
 1. **Install dependencies:**
+
    ```bash
    pip install opencv-python numpy
    ```
@@ -689,10 +759,11 @@ tools/
    - Ensure good lighting and visible hand movements
 
 3. **Run analysis:**
+
    ```bash
    # Get video info
    python3 tools/video_frame_analyzer.py tools/<game_name>.mov info
-   
+
    # Extract frames
    python3 tools/video_frame_analyzer.py tools/<game_name>.mov extract
    ```
@@ -716,6 +787,7 @@ tools/
 **File:** `docs/audit/emoji_match_gameplay_audit_2026-02-20.md`
 
 **Key Findings:**
+
 - **CRITICAL:** No visible hand-tracking cursor (0:00-2:00)
 - **CRITICAL:** Targets too small (~2-3% vs. required 15-20% of screen)
 - **MAJOR:** No clear success/failure feedback
@@ -723,6 +795,7 @@ tools/
 - **MAJOR:** Pacing too fast (<0.5s transitions vs. 2-3s needed)
 
 **Recommendations:**
+
 1. Add 20-30px high-contrast cursor dot (S1)
 2. Increase target sizes to 15-20% screen width (S1)
 3. Implement clear feedback animations (S2)
@@ -753,6 +826,7 @@ The analysis tool extracts frames at intervals, so it works with large files. If
 ### Frame Extraction Slow
 
 For faster analysis:
+
 1. Reduce video resolution before processing
 2. Extract fewer frames (increase interval)
 3. Use SSD for better I/O performance
@@ -783,6 +857,7 @@ When adding new analysis capabilities:
 ## 📞 Support
 
 For issues or questions about the analysis tools:
+
 1. Check this README first
 2. Review the example audit report
 3. Examine the tool source code comments
@@ -810,6 +885,7 @@ They are parameterized for local paths (no hardcoded `/home/z/...`).
 ## 📁 UX Audit Reports
 
 Completed UX audits are stored in `docs/ux_audit/<game_name>/` with:
+
 - `README.md` - Audit summary and recommendations
 - `UX_AUDIT_REPORT.md` - Comprehensive code-based analysis
 - `VISUAL_CONFIRMATION_REPORT.md` - Frame-by-frame visual analysis
@@ -820,6 +896,7 @@ Completed UX audits are stored in `docs/ux_audit/<game_name>/` with:
 **Location:** `docs/ux_audit/emoji_match/`
 
 **Process:**
+
 1. Code review of `src/frontend/src/pages/EmojiMatch.tsx`
 2. Video recording of gameplay (2:00, 60fps)
 3. Frame extraction at 1fps intervals
@@ -827,6 +904,7 @@ Completed UX audits are stored in `docs/ux_audit/<game_name>/` with:
 5. Correlation of code findings with visual evidence
 
 **Key Findings:**
+
 - HIT_RADIUS (0.12) too strict for toddlers → Increase to 0.18
 - Cursor (40px) too small → Increase to 80px
 - Timer creates anxiety → Hide for ages 2-4

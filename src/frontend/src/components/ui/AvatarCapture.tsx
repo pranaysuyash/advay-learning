@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import apiClient from '../../services/api';
+import { profileApi } from '../../services/api';
 
 interface AvatarCaptureProps {
   isOpen: boolean;
@@ -93,15 +93,10 @@ export function AvatarCapture({
     try {
       // Create form data with captured photo
       const formData = new FormData();
-      formData.append('profile_id', profileId);
       formData.append('photo', dataUrlToBlob(capturedPhoto));
 
       // Upload to backend API
-      const response = await apiClient.post(`/api/v1/users/me/profiles/${profileId}/photo`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await profileApi.uploadPhoto(profileId, formData);
 
       // Update parent component with new photo URL
       onSavePhoto(response.data.avatar_url);

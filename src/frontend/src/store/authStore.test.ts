@@ -194,7 +194,7 @@ describe('AuthStore', () => {
       vi.mocked(authApi.getMe).mockRejectedValueOnce(new Error('Unauthorized'));
 
       const store = useAuthStore.getState();
-      await store.fetchUser();
+      await expect(store.fetchUser()).rejects.toThrow('Unauthorized');
 
       const state = useAuthStore.getState();
       expect(state.user).toBeNull();
@@ -232,9 +232,9 @@ describe('AuthStore', () => {
         user: { id: '1', email: 'test@example.com', role: UserRole.PARENT, is_active: true },
       });
 
-      // Call fetchUser directly (which checkAuth calls)
+      // Call checkAuth which should swallow the error and set isAuthenticated: false
       const store = useAuthStore.getState();
-      await store.fetchUser();
+      await store.checkAuth();
 
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(false);

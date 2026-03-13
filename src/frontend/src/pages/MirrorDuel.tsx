@@ -17,6 +17,7 @@
 import { memo, useCallback, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
@@ -356,4 +357,12 @@ const POSES = [
 
 (window as any).POSES = POSES;
 
-export default MirrorDuelContent;
+export const MirrorDuel = memo(function MirrorDuelShell() {
+  return (
+    <GameShell gameId='mirror-duel' gameName='Mirror Duel'>
+      <MirrorDuelContent />
+    </GameShell>
+  );
+});
+
+export default MirrorDuel;

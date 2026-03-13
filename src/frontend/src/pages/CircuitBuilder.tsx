@@ -13,6 +13,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
+import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import {
   createInitialState,
@@ -52,6 +53,16 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const { resetAutoCompletion } = useAutoGameCompletion('circuit-builder', {
+    when: state.status === 'success',
+    score: calculateFinalScore(state).totalScore,
+    level: CHALLENGES.findIndex((c) => c.id === state.currentChallengeId) + 1,
+    metadata: {
+      challengeId: state.currentChallengeId,
+      attempts: state.attempts,
+      timeElapsed: state.timeElapsed,
+    },
+  });
 
   // Timer
   useEffect(() => {
@@ -72,6 +83,7 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
   const handleStartChallenge = useCallback(
     (challengeId: string) => {
       playClick();
+      resetAutoCompletion();
       setState(startChallenge(state, challengeId));
       setSelectedTool(null);
       setSelectedComponent(null);
@@ -81,7 +93,7 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
         void speak(challenge.description);
       }
     },
-    [state, playClick, speak],
+    [state, playClick, speak, resetAutoCompletion],
   );
 
   const handleCanvasClick = useCallback(
@@ -151,11 +163,12 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
 
   const handleReset = useCallback(() => {
     playClick();
+    resetAutoCompletion();
     setState((prev) => resetChallenge(prev));
     setSelectedComponent(null);
     setIsConnecting(false);
     setFeedback(null);
-  }, [playClick]);
+  }, [playClick, resetAutoCompletion]);
 
   const handleRemoveComponent = useCallback(
     (componentId: string) => {
@@ -209,11 +222,11 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
                 <h3 className='text-xl font-bold text-amber-700 mb-2'>{challenge.name}</h3>
                 <p className='text-gray-600 text-sm mb-3'>{challenge.description}</p>
                 <div className='flex flex-wrap gap-2'>
-                  {challenge.requiredComponents.map((type) => {
+                  {challenge.requiredComponents.map((type, idx) => {
                     const info = getComponentInfo(type);
                     return (
                       <span
-                        key={type}
+                        key={`${type}-${idx}`}
                         className='px-2 py-1 bg-amber-100 rounded-full text-xs'
                         title={info.name}
                       >
@@ -261,7 +274,7 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
           </p>
           <div className='flex gap-4'>
             <button
-              onClick={() => setState(createInitialState())}
+              onClick={() => { resetAutoCompletion(); setState(createInitialState()); }}
               className='px-6 py-3 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition-colors'
             >
               Back to Menu

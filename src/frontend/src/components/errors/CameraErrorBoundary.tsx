@@ -25,15 +25,30 @@ interface CameraErrorBoundaryState {
 
 function classifyCameraError(error: Error): CameraErrorKind {
   const message = error.message.toLowerCase();
-  if (/(permission|denied|notallowed|notfound|camera)/.test(message)) {
+  const name = (error as Error & { name?: string }).name?.toLowerCase() ?? '';
+
+  if (
+    /notallowederror|permission|denied/.test(name) ||
+    /permission|denied|notallowed/.test(message)
+  ) {
     return 'permission';
   }
+
+  if (
+    /notfounderror|devicesnotfounderror/.test(name) ||
+    /notfound|no camera|no device/.test(message)
+  ) {
+    return 'permission';
+  }
+
   if (/(mediapipe|initializ|model|landmarker)/.test(message)) {
     return 'init';
   }
+
   if (/(runtime|render|worker|frame)/.test(message)) {
     return 'runtime';
   }
+
   return 'unknown';
 }
 

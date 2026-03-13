@@ -16,11 +16,10 @@ import {
 } from '../components/game/DragDropSystem';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
-import { triggerHaptic } from '../utils/haptics';
+import { triggerHaptic, HAPTIC_TYPES } from '../utils/haptics';
 import {
   ANIMALS,
   type Animal,
@@ -31,6 +30,7 @@ import {
   calculateScore,
   calculateStars,
 } from '../games/farmFriendsLogic';
+import { getAnimalFact } from '../utils/animalFactsApi';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
 
 const FEEDS_NEEDED = 5;
@@ -45,14 +45,16 @@ function FarmFriendsGame() {
   const [mistakes, setMistakes] = useState(0);
   const [score, setScore] = useState(0);
   const [showFeedback, setShowFeedback] = useState<{ correct: boolean; message: string } | null>(null);
+  const [animalFact, setAnimalFact] = useState<string | null>(null);
+  const [showFact, setShowFact] = useState(false);
+  const [isLoadingFact, setIsLoadingFact] = useState(false);
   
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({ x: 0, y: 0 });
   const [isPinching, setIsPinching] = useState(false);
 
   const { playSuccess, playCelebration, playClick, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('farm-friends');
-  const { saveProgress } = useGameProgress('farm-friends');
+  const { completeGame } = useGameCompletion('farm-friends');
 
   useGameSessionProgress({
     gameName: 'Farm Friends',
@@ -67,6 +69,29 @@ function FarmFriendsGame() {
       speak(text);
     }
   }, [speak, ttsEnabled]);
+
+  const handleAnimalClick = useCallback(async () => {
+    if (!currentAnimal || isLoadingFact) return;
+    
+    playPop();
+    triggerHaptic(HAPTIC_TYPES.SUCCESS);
+    setIsLoadingFact(true);
+    setShowFact(true);
+    
+    const fact = await getAnimalFact(currentAnimal.id);
+    setAnimalFact(fact);
+    setIsLoadingFact(false);
+    
+    // Auto-read the fact if TTS is enabled
+    if (ttsEnabled) {
+      speak(`Did you know? ${fact}`);
+    }
+  }, [currentAnimal, isLoadingFact, playPop, speak, ttsEnabled]);
+
+  const handleCloseFact = useCallback(() => {
+    playClick();
+    setShowFact(false);
+  }, [playClick]);
 
   const initializeLevel = useCallback(() => {
     const animal = getRandomAnimal();
@@ -139,8 +164,7 @@ function FarmFriendsGame() {
         setTimeout(async () => {
           setGameState('complete');
           playCelebration();
-          await saveProgress({ score: score + 25, completed: true, level: 1, metadata: { fedCount: newFed } });
-          onGameComplete(calculateStars(score + 25));
+          await completeGame({ score: score + 25, completed: true, level: 1, metadata: { fedCount: newFed } });
           speakText('Great job! You fed all the animals!');
         }, 1000);
       } else {
@@ -160,7 +184,7 @@ function FarmFriendsGame() {
     }
     
     setTimeout(() => setShowFeedback(null), 1000);
-  }, [currentAnimal, fedCount, mistakes, score, playSuccess, playClick, playCelebration, onGameComplete, speakText, initializeLevel]);
+  }, [currentAnimal, fedCount, mistakes, score, playSuccess, playClick, playCelebration, completeGame, speakText, initializeLevel]);
 
   const handleItemDroppedOutside = useCallback((_item: DraggableItem) => {
     playClick();
@@ -297,17 +321,90 @@ function FarmFriendsGame() {
 
           {/* Animal */}
           <div className="flex flex-col items-center justify-center" style={{ height: '40%' }}>
-            <motion.div
+            <motion.button
+              type="button"
               key={currentAnimal.id}
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              className="text-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleAnimalClick}
+              className="text-center relative group cursor-pointer"
             >
               <div className="text-9xl mb-2">{currentAnimal.emoji}</div>
               <h2 className="text-3xl font-black text-green-700">{currentAnimal.name}</h2>
               <p className="text-lg text-green-600">What does {currentAnimal.name} like to eat?</p>
-            </motion.div>
+              <span className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                💡 Tap me!
+              </span>
+            </motion.button>
           </div>
+
+          {/* Animal Fact Modal */}
+          <AnimatePresence>
+            {showFact && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+                onClick={handleCloseFact}
+              >
+                <motion.div
+                  initial={{ scale: 0.8, y: 50 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.8, y: 50 }}
+                  className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="text-center mb-4">
+                    <span className="text-5xl">{currentAnimal?.emoji}</span>
+                    <h3 className="text-xl font-black text-green-600 mt-2">
+                      Did you know?
+                    </h3>
+                  </div>
+
+                  <div className="bg-green-50 rounded-2xl p-4 mb-4 min-h-[80px] flex items-center justify-center">
+                    {isLoadingFact ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                        className="text-3xl"
+                      >
+                        🌀
+                      </motion.div>
+                    ) : (
+                      <p className="text-lg font-bold text-green-700 text-center">
+                        {animalFact}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (animalFact && ttsEnabled) {
+                          speak(`Did you know? ${animalFact}`);
+                        }
+                      }}
+                      disabled={isLoadingFact || !ttsEnabled}
+                      className="flex-1 py-3 bg-blue-100 hover:bg-blue-200 disabled:bg-gray-100 text-blue-700 disabled:text-gray-400 rounded-xl font-bold transition-all"
+                    >
+                      🔊 Read
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCloseFact}
+                      className="flex-1 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition-all"
+                    >
+                      Cool! ✨
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Drag and Drop */}
           <DragDropSystem

@@ -14,7 +14,9 @@
  */
 
 import { PregenAudioCache } from './PregenAudioCache';
-import { KokoroTTSEngine, KokoroStatus } from './KokoroTTSEngine';
+import type { KokoroTTSEngine, KokoroStatus } from './KokoroTTSEngine';
+
+declare const __BETA_LOCAL_AI_ENABLED__: boolean;
 
 export interface TTSOptions {
   /** Speech rate: 0.1 to 10 (default: 1.0) */
@@ -79,7 +81,8 @@ export class TTSService {
   private voicesLoaded: boolean = false;
 
   // Tier 2: Kokoro-82M engine
-  private kokoroEngine: KokoroTTSEngine;
+  private kokoroEngine: KokoroTTSEngine | null = null;
+  private kokoroImportPromise: Promise<KokoroTTSEngine | null> | null = null;
 
   // General state
   private enabled: boolean = true;
@@ -97,9 +100,6 @@ export class TTSService {
         this.synth.onvoiceschanged = () => this.loadVoices();
       }
     }
-
-    // Initialize Kokoro engine instance (Tier 2) — doesn't load model yet
-    this.kokoroEngine = new KokoroTTSEngine();
 
     // Preload pre-generated audio cache (Tier 1). Skip in unit tests to reduce
     // noise and avoid media setup work in jsdom.
@@ -180,10 +180,13 @@ export class TTSService {
    * Safe to call multiple times.
    */
   initKokoro(): void {
-    if (this.isTestEnv) return;
+    if (this.isTestEnv || !__BETA_LOCAL_AI_ENABLED__) return;
     if (this.enginePreference === 'web-speech') return;
-    this.kokoroEngine.init().catch((err) => {
-      console.warn('[TTSService] Kokoro init failed, will use fallback:', err);
+    void this.ensureKokoroEngine().then((engine) => {
+      if (!engine) return;
+      engine.init().catch((err) => {
+        console.warn('[TTSService] Kokoro init failed, will use fallback:', err);
+      });
     });
   }
 
@@ -191,21 +194,30 @@ export class TTSService {
    * Get Kokoro model status
    */
   getKokoroStatus(): KokoroStatus {
-    return this.kokoroEngine.getStatus();
+    return this.kokoroEngine?.getStatus() ?? 'idle';
   }
 
   /**
    * Get Kokoro model loading progress (0-100)
    */
   getKokoroProgress(): number {
-    return this.kokoroEngine.getLoadProgress();
+    return this.kokoroEngine?.getLoadProgress() ?? 0;
   }
 
   /**
    * Subscribe to Kokoro engine events
    */
   onKokoroEvent(callback: Parameters<KokoroTTSEngine['on']>[0]): () => void {
-    return this.kokoroEngine.on(callback);
+    if (!__BETA_LOCAL_AI_ENABLED__) {
+      return () => {};
+    }
+    if (this.kokoroEngine) {
+      return this.kokoroEngine.on(callback);
+    }
+    void this.ensureKokoroEngine().then((engine) => {
+      engine?.on(callback);
+    });
+    return () => {};
   }
 
   /**
@@ -220,7 +232,7 @@ export class TTSService {
   // ---------------------------------------------------------------------------
 
   isAvailable(): boolean {
-    return this.synth !== null || this.kokoroEngine.isReady();
+    return this.synth !== null || this.kokoroEngine?.isReady() === true;
   }
 
   isEnabled(): boolean {
@@ -269,13 +281,15 @@ export class TTSService {
    */
   private speakWithFallback(text: string, options: TTSOptions): Promise<void> {
     const useKokoro =
-      this.enginePreference !== 'web-speech' && this.kokoroEngine.isReady();
+      __BETA_LOCAL_AI_ENABLED__ &&
+      this.enginePreference !== 'web-speech' &&
+      this.kokoroEngine?.isReady() === true;
 
     if (useKokoro) {
       this._lastActiveEngine = 'kokoro';
       console.log('[TTSService] Engine: kokoro');
       const effectiveVolume = Math.min(options.volume ?? 1.0, this.volume);
-      return this.kokoroEngine
+      return this.kokoroEngine!
         .speak(text, effectiveVolume, options.kokoroVoice)
         .catch((err) => {
           console.warn(
@@ -286,8 +300,9 @@ export class TTSService {
           return this.webSpeechSpeak(text, options);
         });
     } else if (
+      __BETA_LOCAL_AI_ENABLED__ &&
       this.enginePreference !== 'web-speech' &&
-      this.kokoroEngine.getStatus() === 'loading'
+      this.kokoroEngine?.getStatus() === 'loading'
     ) {
       // We are still loading the Kokoro model, let's gracefully fall back to web speech for now
       console.log(
@@ -338,7 +353,7 @@ export class TTSService {
       }
     }
     PregenAudioCache.stop();
-    this.kokoroEngine.stop();
+    this.kokoroEngine?.stop();
   }
 
   pause(): void {
@@ -397,7 +412,28 @@ export class TTSService {
    */
   dispose(): void {
     this.stop();
-    this.kokoroEngine.dispose();
+    this.kokoroEngine?.dispose();
+  }
+
+  private async ensureKokoroEngine(): Promise<KokoroTTSEngine | null> {
+    if (!__BETA_LOCAL_AI_ENABLED__) {
+      return null;
+    }
+    if (this.kokoroEngine) {
+      return this.kokoroEngine;
+    }
+    if (!this.kokoroImportPromise) {
+      this.kokoroImportPromise = import('./KokoroTTSEngine')
+        .then((module) => {
+          this.kokoroEngine = new module.KokoroTTSEngine();
+          return this.kokoroEngine;
+        })
+        .catch((error) => {
+          console.warn('[TTSService] Failed to load Kokoro runtime:', error);
+          return null;
+        });
+    }
+    return this.kokoroImportPromise;
   }
 }
 

@@ -1,24 +1,28 @@
 /**
  * GameShell Component
- * 
+ *
  * Wrapper component that provides standard game infrastructure:
  * - Subscription access control
  * - Error boundary
  * - Wellness timer
  * - Reduced motion support
- * 
+ *
  * This is the NEW standardized wrapper for game quality remediation.
  * For the layout container with header, use GameContainer.
- * 
+ *
  * @see docs/audit/GAME_QUALITY_REMEDIATION_PLAN.md
  * @ticket GQ-002, GQ-003, GQ-004, GQ-007
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useReducedMotion } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useGameSubscription } from '../hooks/useGameSubscription';
+import { trackLaunchEvent } from '../analytics/launch';
 import { GameErrorBoundary } from './errors/GameErrorBoundary';
 import WellnessTimer from './WellnessTimer';
+import { progressQueue } from '../services/progressQueue';
+import { UIIcon } from './ui/Icon';
 
 interface GameShellProps {
   /** Unique game ID */
@@ -39,10 +43,10 @@ interface GameShellProps {
 
 /**
  * Standard game shell with infrastructure (subscription, error handling, wellness)
- * 
+ *
  * Use this for NEW games or when refactoring existing games for quality compliance.
  * For layout container with header, use GameContainer.
- * 
+ *
  * @example
  * ```tsx
  * <GameShell gameId="alphabet-tracing" gameName="Draw Letters">
@@ -63,16 +67,61 @@ export const GameShell: React.FC<GameShellProps> = ({
   const reducedMotion = useReducedMotion();
   const [error, setError] = useState<Error | null>(null);
 
+  // Pending progress indicator logic
+  const location = useLocation();
+  const navigate = useNavigate();
+  const profileId = (location.state as any)?.profileId as string | undefined;
+  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [deadLetterCount, setDeadLetterCount] = useState<number>(0);
+
+  useEffect(() => {
+    const update = () => {
+      if (profileId) {
+        setPendingCount(progressQueue.getPending(profileId).length);
+        setDeadLetterCount(progressQueue.getDeadLetterCount(profileId));
+      } else {
+        setPendingCount(0);
+        setDeadLetterCount(0);
+      }
+    };
+    update();
+    const unsubscribe = progressQueue.subscribe(update);
+    return unsubscribe;
+  }, [profileId]);
+
+  useEffect(() => {
+    const startedAt = Date.now();
+    trackLaunchEvent('game_launched', { gameId, gameName });
+    trackLaunchEvent('game_session_started', { gameId, gameName });
+    return () => {
+      trackLaunchEvent('game_session_ended', {
+        gameId,
+        gameName,
+        durationMs: Date.now() - startedAt,
+      });
+    };
+  }, [gameId, gameName]);
+
   // SEO-001: Set per-page document title for search indexing and social sharing
   useEffect(() => {
     const prev = document.title;
     document.title = `${gameName} — Advay Learning for Kids`;
-    return () => { document.title = prev; };
+    return () => {
+      document.title = prev;
+    };
   }, [gameName]);
 
-  const handleError = useCallback((err: Error) => {
-    setError(err);
-  }, []);
+  const handleError = useCallback(
+    (err: Error) => {
+      trackLaunchEvent('recoverable_client_error', {
+        gameId,
+        gameName,
+        message: err.message,
+      });
+      setError(err);
+    },
+    [gameId, gameName],
+  );
 
   const handleRetry = useCallback(() => {
     setError(null);
@@ -80,54 +129,68 @@ export const GameShell: React.FC<GameShellProps> = ({
 
   // Loading state
   if (isLoading) {
-    return loadingComponent ?? (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFF8F0]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-xl font-black text-advay-slate">Loading {gameName}...</p>
+    return (
+      loadingComponent ?? (
+        <div className='min-h-screen flex items-center justify-center bg-[#FFF8F0]'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4'></div>
+            <p className='text-xl font-black text-advay-slate'>
+              Loading {gameName}...
+            </p>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 
   // Access denied state
   if (!hasAccess) {
-    return accessDeniedComponent ?? (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFF8F0] p-4">
-        <div className="max-w-md w-full bg-white rounded-[2.5rem] p-8 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-center">
-          <div className="text-6xl mb-4">🔒</div>
-          <h1 className="text-3xl font-black text-advay-slate mb-4">
-            Premium Game
-          </h1>
-          <p className="text-lg text-text-secondary mb-6">
-            {gameName} is available with a subscription. Ask a parent to unlock all games!
-          </p>
-          <button
-            onClick={() => window.location.href = '/subscribe'}
-            className="w-full px-6 py-4 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#1D4ED8] transition-all"
-          >
-            View Plans
-          </button>
+    return (
+      accessDeniedComponent ?? (
+        <div className='min-h-screen flex items-center justify-center bg-[#FFF8F0] p-4'>
+          <div className='max-w-md w-full bg-white rounded-[2.5rem] p-8 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-center'>
+            <div className='text-6xl mb-4'>🔒</div>
+            <h1 className='text-3xl font-black text-advay-slate mb-4'>
+              Premium Game
+            </h1>
+            <p className='text-lg text-text-secondary mb-6'>
+              {gameName} is available with a subscription. Ask a parent to
+              unlock all games!
+            </p>
+            <button
+              onClick={() => {
+                trackLaunchEvent('cta_clicked', {
+                  cta: 'pricing_from_locked_game',
+                  gameId,
+                  gameName,
+                });
+                window.location.href = '/pricing';
+              }}
+              className='w-full px-6 py-4 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#1D4ED8] transition-all'
+            >
+              View Plans
+            </button>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFF8F0] p-4">
-        <div className="max-w-md w-full bg-white rounded-[2.5rem] p-8 border-3 border-red-200 shadow-[0_4px_0_#FECACA] text-center">
-          <div className="text-6xl mb-4">😕</div>
-          <h1 className="text-3xl font-black text-advay-slate mb-4">
+      <div className='min-h-screen flex items-center justify-center bg-[#FFF8F0] p-4'>
+        <div className='max-w-md w-full bg-white rounded-[2.5rem] p-8 border-3 border-red-200 shadow-[0_4px_0_#FECACA] text-center'>
+          <div className='text-6xl mb-4'>😕</div>
+          <h1 className='text-3xl font-black text-advay-slate mb-4'>
             Oops! Something went wrong
           </h1>
-          <p className="text-lg text-text-secondary mb-6">
+          <p className='text-lg text-text-secondary mb-6'>
             Don't worry, your progress is saved. Let's try again!
           </p>
           <button
             onClick={handleRetry}
-            className="w-full px-6 py-4 bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#059669] transition-all"
+            className='w-full px-6 py-4 bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#059669] transition-all'
           >
             Try Again
           </button>
@@ -146,8 +209,41 @@ export const GameShell: React.FC<GameShellProps> = ({
   );
 
   return (
-    <div className={`min-h-screen bg-[#FFF8F0] ${reducedMotion ? 'reduce-motion' : ''}`}>
+    <div
+      className={`min-h-screen bg-[#FFF8F0] ${reducedMotion ? 'reduce-motion' : ''}`}
+    >
       {showWellnessTimer && <WellnessTimer />}
+      {/* Pending indicator for offline progress queue; click to view/sync progress */}
+      {pendingCount > 0 && (
+        <button
+          type='button'
+          onClick={() => {
+            if (profileId) {
+              trackLaunchEvent('pending_badge_clicked', { profileId, count: pendingCount, gameId });
+              navigate('/progress', { state: { profileId } });
+            }
+          }}
+          className='inline-flex items-center gap-2 bg-yellow-100 border-2 border-yellow-200 text-yellow-700 px-4 py-2 rounded-xl text-sm font-bold cursor-pointer'
+        >
+          <UIIcon name='warning' size={16} />
+          Pending ({pendingCount})
+        </button>
+      )}
+      {deadLetterCount > 0 && (
+        <button
+          type='button'
+          onClick={() => {
+            if (profileId) {
+              trackLaunchEvent('failed_badge_clicked', { profileId, count: deadLetterCount, gameId });
+              navigate('/progress', { state: { profileId } });
+            }
+          }}
+          className='inline-flex items-center gap-2 bg-red-100 border-2 border-red-200 text-red-700 px-4 py-2 rounded-xl text-sm font-bold cursor-pointer'
+        >
+          <UIIcon name='alert-triangle' size={16} />
+          Failed ({deadLetterCount})
+        </button>
+      )}
       {content}
     </div>
   );

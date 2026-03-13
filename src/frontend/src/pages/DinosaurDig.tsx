@@ -9,13 +9,17 @@
 import { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
+import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
+import { CameraThumbnail } from '../components/game/CameraThumbnail';
+import type { TrackedHandFrame } from '../types/tracking';
 import {
   DINOSAURS,
   type Dino,
@@ -43,10 +47,15 @@ function DinosaurDigGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const diggingRef = useRef<number>(0);
 
+  // Hand tracking state
+  const webcamRef = useRef<Webcam>(null);
+  const [isHandDetected, setIsHandDetected] = useState(false);
+  const lastHandStateRef = useRef(false);
+  const handFrameCountRef = useRef(0);
+
   const { playSuccess, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('dinosaur-dig');
-  const { saveProgress } = useGameProgress('dinosaur-dig');
+  const { completeGame } = useGameCompletion('dinosaur-dig');
 
   useGameSessionProgress({
     gameName: 'Dinosaur Dig',
@@ -181,6 +190,48 @@ function DinosaurDigGame() {
     measureUncover();
   }, [measureUncover]);
 
+  // Hand tracking frame handler — brushes dirt during digging phase
+  const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
+    if (gameState !== 'digging') return;
+    const tip = frame.indexTip;
+
+    if (tip) {
+      const canvasX = tip.x * CANVAS_W;
+      const canvasY = tip.y * CANVAS_H;
+      brushAt(canvasX, canvasY);
+
+      // Throttle measureUncover to every 10th frame
+      handFrameCountRef.current += 1;
+      if (handFrameCountRef.current % 10 === 0) {
+        measureUncover();
+      }
+
+      if (!lastHandStateRef.current) {
+        setIsHandDetected(true);
+        lastHandStateRef.current = true;
+      }
+    } else {
+      if (lastHandStateRef.current) {
+        setIsHandDetected(false);
+        lastHandStateRef.current = false;
+      }
+    }
+  }, [gameState, brushAt, measureUncover]);
+
+  const { isReady, isLoading, startTracking } = useGameHandTracking({
+    gameName: 'DinosaurDig',
+    webcamRef,
+    onFrame: handleHandFrame,
+    isRunning: gameState === 'digging' || gameState === 'assembling',
+  });
+
+  // Auto-start hand tracking when digging or assembling begins
+  useEffect(() => {
+    if ((gameState === 'digging' || gameState === 'assembling') && !isReady && !isLoading) {
+      void startTracking();
+    }
+  }, [gameState, isReady, isLoading, startTracking]);
+
   const handleBoneClick = useCallback(async (bone: DinoBone) => {
     if (gameState !== 'assembling') return;
 
@@ -198,13 +249,12 @@ function DinosaurDigGame() {
       setShowDino(true);
       setGameState('complete');
       playCelebration();
-      await saveProgress({ score: newScore, completed: true, level: 1 });
-      onGameComplete(calculateStars(newScore));
+      await completeGame({ score: newScore, completed: true, level: 1 });
       speakText(`You assembled a ${currentDino?.name}! Amazing!`);
     } else {
       speakText(`Found the ${bone.name}! Keep going!`);
     }
-  }, [gameState, placedBones, currentDino, playSuccess, playCelebration, onGameComplete, speakText, saveProgress]);
+  }, [gameState, placedBones, currentDino, playSuccess, playCelebration, completeGame, speakText]);
 
   const handlePlayAgain = () => {
     startGame();
@@ -269,6 +319,14 @@ function DinosaurDigGame() {
       {/* Digging Screen */}
       {gameState === 'digging' && (
         <div className="flex flex-col h-full">
+          <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameState === 'digging'} />
+          <HandTrackingStatus
+            isHandDetected={isHandDetected}
+            pauseOnHandLost={true}
+            voicePrompt={true}
+            showMascot={true}
+            compact={true}
+          />
           {/* Header */}
           <div className="flex justify-between items-center p-4">
             <button
@@ -327,6 +385,14 @@ function DinosaurDigGame() {
       {/* Assembling Screen */}
       {gameState === 'assembling' && currentDino && (
         <div className="flex flex-col h-full">
+          <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameState === 'assembling'} />
+          <HandTrackingStatus
+            isHandDetected={isHandDetected}
+            pauseOnHandLost={true}
+            voicePrompt={true}
+            showMascot={true}
+            compact={true}
+          />
           {/* Header */}
           <div className="flex justify-between items-center p-4">
             <button

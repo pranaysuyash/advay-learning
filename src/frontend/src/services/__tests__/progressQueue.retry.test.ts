@@ -15,6 +15,7 @@ import {
   generateUUID,
 } from '../../repositories/__tests__/testHelpers';
 import { MAX_RETRIES } from '../progressConstants';
+import { trackLaunchEvent, LAUNCH_ANALYTICS_STORAGE_KEY } from '../../analytics/launch';
 
 // Mock API client factory
 function createMockApiClient(responses: Array<{ status: number; data?: any; error?: string }>) {
@@ -88,11 +89,26 @@ describe('progressQueue retry logic (with DI)', () => {
         { status: 200 },
       ]);
 
+      // clear any pre-existing analytics events to avoid noise
+      window.localStorage.removeItem(LAUNCH_ANALYTICS_STORAGE_KEY);
+
       const result = await queue.syncAll(mockApi);
 
       expect(result.synced).toBe(2);
       expect(result.failed).toBe(0);
       expect(queue.getPendingCount()).toBe(0);
+
+      // verify analytics event was stored
+      const raw = window.localStorage.getItem(LAUNCH_ANALYTICS_STORAGE_KEY) || '[]';
+      const events = JSON.parse(raw);
+      expect(events).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'progress_sync_result',
+            metadata: expect.objectContaining({ synced: 2 }),
+          }),
+        ])
+      );
     });
 
     it('processes items in retry count order (lowest first)', async () => {

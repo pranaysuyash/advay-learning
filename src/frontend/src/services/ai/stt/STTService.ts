@@ -16,8 +16,9 @@ import type {
   STTTranscript,
   STTProviderStatus,
 } from './STTProvider';
-import { WhisperSTTProvider } from './WhisperSTTProvider';
 import { WebSpeechSTTProvider } from './WebSpeechSTTProvider';
+
+declare const __BETA_LOCAL_AI_ENABLED__: boolean;
 
 export interface STTServiceOptions {
   /** Preferred provider: 'auto' | 'whisper' | 'web-speech' | 'cloud' */
@@ -45,7 +46,7 @@ const DEFAULT_OPTIONS: Required<STTServiceOptions> = {
 };
 
 export interface STTServiceDependencies {
-  createWhisperProvider?: () => STTProvider;
+  createWhisperProvider?: () => Promise<STTProvider>;
   createWebSpeechProvider?: () => STTProvider;
 }
 
@@ -63,7 +64,11 @@ export class STTService {
     this.options = { ...DEFAULT_OPTIONS };
     this.deps = {
       createWhisperProvider:
-        deps.createWhisperProvider ?? (() => new WhisperSTTProvider()),
+        deps.createWhisperProvider ??
+        (async () => {
+          const module = await import('./WhisperSTTProvider');
+          return new module.WhisperSTTProvider();
+        }),
       createWebSpeechProvider:
         deps.createWebSpeechProvider ?? (() => new WebSpeechSTTProvider()),
     };
@@ -73,11 +78,15 @@ export class STTService {
     this.options = { ...DEFAULT_OPTIONS, ...options };
 
     if (this.options.provider === 'auto') {
+      if (!__BETA_LOCAL_AI_ENABLED__) {
+        this.options.provider = 'web-speech';
+      } else {
       // delegate to shared runtime utility which encapsulates the
       // whisper/web‑speech/cloud decision logic used across the project
-      const { detectBestSTTProvider } =
-        await import('../../../utils/runtimeUtils');
-      this.options.provider = await detectBestSTTProvider();
+        const { detectBestSTTProvider } =
+          await import('../../../utils/runtimeUtils');
+        this.options.provider = await detectBestSTTProvider();
+      }
     }
 
     await this.initializeProvider();
@@ -132,7 +141,7 @@ export class STTService {
   private async initializeProvider(): Promise<void> {
     switch (this.options.provider) {
       case 'whisper':
-        this.provider = this.deps.createWhisperProvider();
+        this.provider = await this.deps.createWhisperProvider();
         break;
       case 'web-speech':
         this.provider = this.deps.createWebSpeechProvider();

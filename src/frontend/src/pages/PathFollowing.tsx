@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -7,8 +8,12 @@ import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { CameraThumbnail } from '../components/game/CameraThumbnail';
+import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { LEVELS, createPath, isOnPath, type PathPoint } from '../games/pathFollowingLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import type { TrackedHandFrame } from '../types/tracking';
 
 function PathFollowingContent() {
   const navigate = useNavigate();
@@ -34,29 +39,26 @@ function PathFollowingContent() {
     metaData: { progress },
   });
 
-  const startGame = () => {
-    const { path: newPath } = createPath(currentLevel);
-    setPath(newPath);
-    setScore(0);
-    setProgress(0);
-    setOffPath(false);
-    setCursorPos({ x: 0, y: 0 });
-    setGameState('playing');
-    playClick();
-  };
+  const webcamRef = useRef<Webcam>(null);
+  const [isHandDetected, setIsHandDetected] = useState(false);
+  const lastHandStateRef = useRef(false);
+  const pathRef = useRef<PathPoint[]>(path);
+  pathRef.current = path;
+  const lastPathUpdateRef = useRef(0);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (gameState !== 'playing') return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+  // Shared path-following logic used by both hand tracking and mouse
+  const processPathPosition = useCallback((x: number, y: number) => {
+    // Throttle: max once per 50ms to avoid excessive setState batches
+    const now = performance.now();
+    if (now - lastPathUpdateRef.current < 50) return;
+    lastPathUpdateRef.current = now;
+
     setCursorPos({ x, y });
 
-    if (isOnPath(x, y, path, 50)) {
+    if (isOnPath(x, y, pathRef.current, 50)) {
       setOffPath(false);
       setProgress((p) => {
         const newProgress = Math.min(p + 1, 100);
-        // Add streak for every 10 progress points
         if (newProgress % 10 === 0 && newProgress > p) {
           const newStreak = Math.floor(newProgress / 10);
           setStreak(newStreak);
@@ -84,6 +86,57 @@ function PathFollowingContent() {
         triggerHaptic('error');
       }
     }
+  }, [streak, playSuccess, playCelebration]);
+
+  const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
+    if (gameState !== 'playing') return;
+    const tip = frame.indexTip;
+
+    if (tip) {
+      processPathPosition(tip.x * 384, tip.y * 256);
+
+      if (!lastHandStateRef.current) {
+        setIsHandDetected(true);
+        lastHandStateRef.current = true;
+      }
+    } else {
+      if (lastHandStateRef.current) {
+        setIsHandDetected(false);
+        lastHandStateRef.current = false;
+      }
+    }
+  }, [gameState, processPathPosition]);
+
+  const { isReady, isLoading, startTracking } = useGameHandTracking({
+    gameName: 'PathFollowing',
+    isRunning: gameState === 'playing',
+    webcamRef,
+    onFrame: handleHandFrame,
+  });
+
+  useEffect(() => {
+    if (gameState === 'playing' && !isReady && !isLoading) {
+      void startTracking();
+    }
+  }, [gameState, isReady, isLoading, startTracking]);
+
+  const startGame = () => {
+    const { path: newPath } = createPath(currentLevel);
+    setPath(newPath);
+    setScore(0);
+    setProgress(0);
+    setOffPath(false);
+    setCursorPos({ x: 0, y: 0 });
+    setGameState('playing');
+    playClick();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (gameState !== 'playing') return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    processPathPosition(x, y);
   };
 
   const handleFinish = useCallback(async () => {
@@ -241,6 +294,9 @@ function PathFollowingContent() {
               >
                 Finish Game
               </button>
+
+              <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameState === 'playing'} />
+              <HandTrackingStatus isHandDetected={isHandDetected} pauseOnHandLost={false} voicePrompt={true} showMascot={true} compact={true} />
             </>
           )}
 

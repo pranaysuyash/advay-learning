@@ -29,6 +29,31 @@ export interface LoadedAsset {
   gameId?: string;
 }
 
+const SAME_ORIGIN_PROTOCOLS = new Set(['http:', 'https:']);
+const INLINE_ASSET_PROTOCOLS = new Set(['data:', 'blob:']);
+
+function resolveAssetUrl(src: string): URL {
+  return new URL(src, window.location.origin);
+}
+
+function assertAllowedAssetUrl(src: string, type: AssetType): URL {
+  const url = resolveAssetUrl(src);
+  const isInlineAsset = INLINE_ASSET_PROTOCOLS.has(url.protocol);
+
+  if (isInlineAsset) {
+    if (type === 'json') {
+      throw new Error(`JSON assets must use same-origin http(s) URLs: ${src}`);
+    }
+    return url;
+  }
+
+  if (!SAME_ORIGIN_PROTOCOLS.has(url.protocol) || url.origin !== window.location.origin) {
+    throw new Error(`Cross-origin assets are not allowed: ${src}`);
+  }
+
+  return url;
+}
+
 // ============================================================================
 // CACHE MANAGEMENT
 // ============================================================================
@@ -120,6 +145,7 @@ export async function lazyLoadImage(
   src: string,
   id?: string
 ): Promise<HTMLImageElement> {
+  const assetUrl = assertAllowedAssetUrl(src, 'image');
   const cacheId = id || src;
   
   // Check cache
@@ -143,7 +169,7 @@ export async function lazyLoadImage(
       resolve(img);
     };
     img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
-    img.src = src;
+    img.src = assetUrl.toString();
   });
 }
 
@@ -154,6 +180,7 @@ export async function lazyLoadAudio(
   src: string,
   id?: string
 ): Promise<HTMLAudioElement> {
+  const assetUrl = assertAllowedAssetUrl(src, 'audio');
   const cacheId = id || src;
   
   const cached = assetCache.get(cacheId);
@@ -174,7 +201,7 @@ export async function lazyLoadAudio(
       resolve(audio);
     };
     audio.onerror = () => reject(new Error(`Failed to load audio: ${src}`));
-    audio.src = src;
+    audio.src = assetUrl.toString();
     audio.load();
   });
 }
@@ -209,7 +236,8 @@ export async function batchLoadAssets(
             data = await lazyLoadAudio(asset.src, asset.id);
           } else {
             // JSON
-            const response = await fetch(asset.src);
+            const assetUrl = assertAllowedAssetUrl(asset.src, 'json');
+            const response = await fetch(assetUrl.toString());
             data = await response.json();
           }
 
@@ -346,6 +374,8 @@ export function clearAssetCache(): void {
 export function isAssetCached(id: string): boolean {
   return assetCache.has(id);
 }
+
+export { assertAllowedAssetUrl };
 
 // ============================================================================
 // ASSET MANIFESTS

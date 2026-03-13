@@ -42,6 +42,12 @@ export { useToast } from './useToast';
 export { ConfirmProvider } from './ConfirmDialog';
 export { useConfirm } from './useConfirm';
 
+// Modal Framework
+export { Modal } from './Modal';
+export type { ModalSize } from './Modal';
+export { ConfirmModal } from './ConfirmModal';
+export type { ConfirmType } from './ConfirmModal';
+
 // Layout
 export { Layout } from './Layout';
 export { ProtectedRoute } from './ProtectedRoute';

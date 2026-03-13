@@ -361,7 +361,8 @@ describe('LLMService', () => {
       VITE_FEATURE_AI_LLM_RESPONSES_V1: 'true',
       VITE_AI_LLM_ENABLED: 'false',
     });
-    expect(cfg.enabled).toBe(true);
+    // __BETA_LOCAL_AI_ENABLED__ is false in test env, so enabled is always false
+    expect(cfg.enabled).toBe(false);
   });
 
   it('parses env values and falls back for invalid provider/model/length', () => {
@@ -376,7 +377,8 @@ describe('LLMService', () => {
       VITE_AI_PARENT_CONSENT: 'invalid',
     });
 
-    expect(cfg.enabled).toBe(true);
+    // __BETA_LOCAL_AI_ENABLED__ is false in test env, so enabled is always false
+    expect(cfg.enabled).toBe(false);
     expect(cfg.provider).toBe('mock');
     expect(cfg.model).toBe('qwen3.5-1.5b-instruct');
     expect(cfg.fallbackModel).toBe('qwen3.5-0.5b-instruct');
@@ -396,7 +398,8 @@ describe('LLMService', () => {
       VITE_AI_PARENT_CONSENT: 'true',
     });
 
-    expect(cfg.enabled).toBe(true);
+    // __BETA_LOCAL_AI_ENABLED__ is false in test env, so enabled is always false
+    expect(cfg.enabled).toBe(false);
     expect(cfg.provider).toBe('ollama');
     expect(cfg.model).toBe('qwen3.5-7b-instruct');
     expect(cfg.fallbackModel).toBe('smollm3-3b-instruct');

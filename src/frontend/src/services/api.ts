@@ -6,6 +6,7 @@ import type {
   IssueReportSessionResponse,
   IssueReportUploadResponse,
 } from '../types/issueReporting';
+import { trackLaunchEvent } from '../analytics/launch';
 
 const env = (import.meta as any).env ?? {};
 const API_VERSION = env.VITE_API_VERSION || 'v1';
@@ -63,6 +64,11 @@ apiClient.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
+    trackLaunchEvent('api_failure', {
+      url: requestUrl,
+      status: error.response?.status ?? 0,
+      method: originalRequest?.method ?? 'unknown',
+    });
     return Promise.reject(error);
   },
 );
@@ -105,6 +111,8 @@ export const userApi = {
   getMe: () => apiClient.get('/users/me'),
   updateMe: (data: { email?: string; password?: string }) =>
     apiClient.put('/users/me', data),
+  deleteAccount: (data: { password: string; reason?: string }) =>
+    apiClient.delete('/users/me', { data }),
 };
 
 // Profile API
@@ -126,8 +134,18 @@ export const profileApi = {
       settings?: Record<string, unknown>;
     }>,
   ) => apiClient.patch(`/users/me/profiles/${profileId}`, data),
-  deleteProfile: (profileId: string) =>
-    apiClient.delete(`/users/me/profiles/${profileId}`),
+  deleteProfile: (profileId: string, data: { password: string; reason?: string }) =>
+    apiClient.delete(`/users/me/profiles/${profileId}`, { data }),
+  uploadPhoto: (profileId: string, formData: FormData) =>
+    apiClient.post(`/users/me/profiles/${profileId}/photo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
+  getPhoto: (profileId: string) =>
+    apiClient.get(`/users/me/profiles/${profileId}/photo`),
+  deletePhoto: (profileId: string) =>
+    apiClient.delete(`/users/me/profiles/${profileId}/photo`),
 };
 
 // Progress API
@@ -150,6 +168,64 @@ export const progressApi = {
     apiClient.post('/progress/', data, { params: { profile_id: profileId } }),
   getStats: (profileId: string) =>
     apiClient.get('/progress/stats', { params: { profile_id: profileId } }),
+};
+
+export interface ConsentRecord {
+  id: string;
+  parent_id: string;
+  parent_email: string;
+  child_id?: string | null;
+  child_name?: string | null;
+  verification_method: 'email' | 'dodopayments' | 'declaration';
+  consent_version: string;
+  data_processing_purpose: string;
+  status: 'pending' | 'verified' | 'withdrawn' | 'expired';
+  email_verified: boolean;
+  card_verified: boolean;
+  declaration_signed: boolean;
+  consent_timestamp?: string | null;
+  withdrawal_timestamp?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const consentApi = {
+  list: () => apiClient.get<ConsentRecord[]>('/consent/'),
+  create: (data: {
+    parent_email: string;
+    child_id?: string;
+    child_name?: string;
+    verification_method: 'email' | 'dodopayments' | 'declaration';
+    consent_version?: string;
+    data_processing_purpose?: string;
+  }) => apiClient.post<ConsentRecord>('/consent/', data),
+  verify: (
+    consentId: string,
+    data: {
+      verification_method: 'email' | 'dodopayments' | 'declaration';
+      email_code?: string;
+      payment_token?: string;
+      declaration_accepted?: boolean;
+    },
+  ) => apiClient.post<ConsentRecord>(`/consent/${consentId}/verify`, data),
+  withdraw: (consentId: string, data: { reason?: string; effective_immediately?: boolean }) =>
+    apiClient.post<ConsentRecord>(`/consent/${consentId}/withdraw`, data),
+  get: (consentId: string) => apiClient.get<ConsentRecord>(`/consent/${consentId}`),
+};
+
+export const dataRightsApi = {
+  getExportSummary: () => apiClient.get<Record<string, unknown>>('/data-export/export/summary'),
+  requestExport: (data: { format: 'json' | 'csv'; include_progress?: boolean; include_subscriptions?: boolean }) =>
+    apiClient.post('/data-export/export', data),
+  downloadExport: async (params: {
+    format: 'json' | 'csv';
+    include_progress?: boolean;
+    include_subscriptions?: boolean;
+  }) =>
+    apiClient.get('/data-export/export/download', {
+      params,
+      responseType: 'blob',
+    }),
 };
 
 // Issue Reporting API

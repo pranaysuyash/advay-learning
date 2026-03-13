@@ -1,4 +1,6 @@
-export async function registerServiceWorker(): Promise<void> {
+export async function registerServiceWorker(
+  onUpdateAvailable?: () => void
+): Promise<void> {
   if (import.meta.env.DEV) return;
   if (!("serviceWorker" in navigator)) return;
   if (!window.isSecureContext) return;
@@ -14,6 +16,7 @@ export async function registerServiceWorker(): Promise<void> {
           worker.state === "installed" &&
           navigator.serviceWorker.controller
         ) {
+          onUpdateAvailable?.();
           console.info("[PWA] New app version available; reload to update.");
         }
       });

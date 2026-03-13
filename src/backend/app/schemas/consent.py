@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class VerificationMethod(str, Enum):
@@ -31,6 +31,7 @@ class ConsentStatus(str, Enum):
 class ParentalConsentBase(BaseModel):
     """Base consent data"""
     parent_email: str
+    child_id: Optional[str] = None
     child_name: Optional[str] = None
     verification_method: VerificationMethod
     consent_version: str = "1.0"
@@ -49,6 +50,8 @@ class ParentalConsentCreate(ParentalConsentBase):
 
 class ParentalConsentResponse(ParentalConsentBase):
     """Schema for consent response"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     parent_id: str
     child_id: Optional[str] = None
@@ -61,8 +64,18 @@ class ParentalConsentResponse(ParentalConsentBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    @field_validator("id", mode="before")
+    @classmethod
+    def stringify_id(cls, value: object) -> str:
+        return str(value)
+
+    @field_validator("verification_method", mode="before")
+    @classmethod
+    def normalize_verification_method(cls, value: object) -> VerificationMethod:
+        raw = getattr(value, "value", value)
+        if raw == "credit_card":
+            return VerificationMethod.DODOPAYMENTS
+        return VerificationMethod(raw)
 
 
 class ConsentVerificationRequest(BaseModel):

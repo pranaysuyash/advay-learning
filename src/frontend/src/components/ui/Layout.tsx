@@ -1,5 +1,7 @@
 import { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { trackLaunchEvent } from '../../analytics/launch';
+import { BETA_LABEL } from '../../config/launch';
 import { useSettingsStore } from '../../store';
 import { Button } from './Button';
 import { useCalmModeContext } from '../../hooks/useCalmMode';
@@ -12,11 +14,15 @@ export function Layout({ children }: LayoutProps) {
   const { demoMode, setDemoMode } = useSettingsStore();
   const { isCalmMode, colors } = useCalmModeContext();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const exitDemo = () => {
     setDemoMode(false);
-    // Navigate to home page
-    window.location.href = '/';
+    navigate('/');
+  };
+
+  const trackNavClick = (destination: string, source: 'header' | 'footer') => {
+    trackLaunchEvent('nav_link_clicked', { destination, source });
   };
 
   const navLinks = [
@@ -78,6 +84,7 @@ export function Layout({ children }: LayoutProps) {
                   <li key={link.path}>
                     <Link
                       to={link.path}
+                      onClick={() => trackNavClick(link.path, 'header')}
                       className={`text-sm font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${isActive
                         ? 'bg-[#3B82F6]/10 text-[#3B82F6]'
                         : 'text-text-secondary hover:text-[#3B82F6] hover:bg-slate-50'
@@ -101,14 +108,32 @@ export function Layout({ children }: LayoutProps) {
         <div className='absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.22)_1px,transparent_1px)] bg-[length:14px_14px] opacity-20 pointer-events-none mix-blend-overlay'></div>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10 text-center'>
           <div className='flex flex-wrap items-center justify-center gap-6 text-sm font-bold text-slate-400'>
-            <p>© {new Date().getFullYear()} Advay Learning</p>
+            <p>© {new Date().getFullYear()} Advay Learning • {BETA_LABEL}</p>
             <span className='text-advay-slate hidden sm:inline'>•</span>
-            <Link to='/privacy' className='hover:text-white transition-colors focus:outline-none focus:text-white'>
+            <Link
+              to='/privacy'
+              onClick={() => trackNavClick('/privacy', 'footer')}
+              className='hover:text-white transition-colors focus:outline-none focus:text-white'
+            >
               Privacy Promise
             </Link>
             <span className='text-advay-slate hidden sm:inline'>•</span>
-            <Link to='/terms' className='hover:text-white transition-colors focus:outline-none focus:text-white'>
+            <Link
+              to='/terms'
+              onClick={() => trackNavClick('/terms', 'footer')}
+              className='hover:text-white transition-colors focus:outline-none focus:text-white'
+            >
               Terms of Play
+            </Link>
+            <span className='text-advay-slate hidden sm:inline'>•</span>
+            <Link
+              to='/support'
+              onClick={() =>
+                trackLaunchEvent('support_contact_clicked', { source: 'footer' })
+              }
+              className='hover:text-white transition-colors focus:outline-none focus:text-white'
+            >
+              Support
             </Link>
           </div>
         </div>

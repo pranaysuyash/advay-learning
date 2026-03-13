@@ -4,6 +4,7 @@ import { pickSpacedPoints } from './targetPracticeLogic';
 export interface Emotion {
   name: string;
   emoji: string;
+  icon?: string;
   color: string;
 }
 
@@ -13,14 +14,14 @@ export interface EmotionTarget extends Emotion {
 }
 
 export const EMOTIONS: Emotion[] = [
-  { name: 'Happy', emoji: '😊', color: '#FFD700' },
-  { name: 'Sad', emoji: '😢', color: '#4FC3F7' },
-  { name: 'Angry', emoji: '😠', color: '#EF5350' },
-  { name: 'Surprised', emoji: '😲', color: '#FF9800' },
-  { name: 'Scared', emoji: '😨', color: '#CE93D8' },
-  { name: 'Silly', emoji: '🤪', color: '#66BB6A' },
-  { name: 'Sleepy', emoji: '😴', color: '#90CAF9' },
-  { name: 'Love', emoji: '🥰', color: '#F48FB1' },
+  { name: 'Happy', emoji: '😊', icon: '/assets/items/emotions/happy.png', color: '#FFD700' },
+  { name: 'Sad', emoji: '😢', icon: '/assets/items/emotions/sad.png', color: '#4FC3F7' },
+  { name: 'Angry', emoji: '😠', icon: '/assets/items/emotions/angry.png', color: '#EF5350' },
+  { name: 'Surprised', emoji: '😲', icon: '/assets/items/emotions/surprised.png', color: '#FF9800' },
+  { name: 'Scared', emoji: '😨', icon: '/assets/items/emotions/scared.png', color: '#CE93D8' },
+  { name: 'Silly', emoji: '🤪', icon: '/assets/items/emotions/silly.png', color: '#66BB6A' },
+  { name: 'Sleepy', emoji: '😴', icon: '/assets/items/emotions/sleepy.png', color: '#90CAF9' },
+  { name: 'Love', emoji: '🥰', icon: '/assets/items/emotions/love.png', color: '#F48FB1' },
 ];
 
 export function buildRound(

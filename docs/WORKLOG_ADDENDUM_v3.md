@@ -5942,7 +5942,7 @@ Verification:
 ```bash
 # Auth flow works
 curl -X POST http://localhost:8001/api/v1/auth/login \
-  -d "username=test@example.com&password=TestPass123!"
+  -d "username=test@example.com&password=$TEST_PASSWORD"
 # -> {"message":"Login successful",...}
 
 curl http://localhost:8001/api/v1/auth/me -b cookies.txt
@@ -14512,5 +14512,61 @@ Evidence log:
 Status updates:
 
 - 2026-03-12 **DONE** — Closed #22/#26/#27 and left delivery epics #23/#24/#25 open with queue order.
+
+---
+
+
+### TCK-20260312-001 :: Implement NASA Sky Hunt Game (Discovery Lab)
+
+Ticket Stamp: STAMP-20260312T095904Z-codex-jawp
+
+Type: FEATURE
+Owner: Pranay
+Created: 2026-03-12 15:00 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Implement NASA Sky Hunt space exploration game for ages 6-12 with 10 celestial objects, 5 challenges, educational space facts
+- Out-of-scope: Real NASA API integration (uses curated educational content), AR mode
+- Behavior change allowed: YES (new game)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s):
+  - `src/frontend/src/games/nasaSkyHuntLogic.ts`
+  - `src/frontend/src/games/__tests__/nasaSkyHuntLogic.test.ts`
+  - `src/frontend/src/pages/NasaSkyHunt.tsx`
+  - `src/frontend/src/data/gameRegistries/labOfWonders.ts`
+  - `src/frontend/src/routes/lazyPages.tsx`
+  - `src/frontend/src/App.tsx`
+
+Acceptance Criteria:
+
+- [x] Game logic with 10 celestial objects (stars, planets, constellations, galaxies, nebulae)
+- [x] 5 challenges with increasing difficulty
+- [x] Educational facts for each object
+- [x] Click-to-find mechanics with position-based detection
+- [x] Progress tracking and timer
+- [x] 57 unit tests covering all logic
+- [x] React component with starfield background
+- [x] Registry entry with easter egg
+- [x] Lazy-loaded route at `/games/nasa-sky-hunt`
+- [x] TypeScript compilation passes
+
+Execution log:
+
+- 2026-03-12 14:30 IST | Created game logic module | Evidence: `nasaSkyHuntLogic.ts` with 10 celestial objects
+- 2026-03-12 14:45 IST | Created comprehensive test suite | Evidence: 57 tests passing
+- 2026-03-12 15:00 IST | Created React component | Evidence: `NasaSkyHunt.tsx` with interactive starfield
+- 2026-03-12 15:05 IST | Added registry entry | Evidence: Entry in `labOfWonders.ts`
+- 2026-03-12 15:08 IST | Added lazy import and route | Evidence: Route at `/games/nasa-sky-hunt`
+- 2026-03-12 15:10 IST | TypeScript verification | Evidence: `tsc --noEmit` exits 0
+
+Status updates:
+
+- 2026-03-12 15:10 IST **DONE** — NASA Sky Hunt game fully implemented with 57 tests
 
 ---

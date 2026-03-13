@@ -24,8 +24,7 @@ import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useStreakTracking, type ScorePopup } from '../hooks/useStreakTracking';
@@ -394,8 +393,7 @@ const BalloonGameArea = memo(function BalloonGameArea({
 
 const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
   // ===== HOOKS =====
-  const { onGameComplete } = useGameDrops('balloon-pop-fitness');
-  const { saveProgress } = useGameProgress('balloon-pop-fitness');
+  const { completeGame } = useGameCompletion('balloon-pop-fitness');
   const { playPop, playSuccess, playCelebration, playClick } = useAudio();
 
   // ===== GAME STATE =====
@@ -563,8 +561,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
         setTimeout(async () => {
           setShowCelebration(true);
           playCelebration();
-          await saveProgress({ score: gameState?.score || 0, completed: true, level: gameState?.level || 1 });
-          onGameComplete();
+          await completeGame({ score: gameState?.score || 0, level: gameState?.level || 1 });
         }, 500);
       }
 
@@ -581,7 +578,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     gameState?.gameActive,
     incrementStreak,
     lastSpawnTime,
-    onGameComplete,
+    completeGame,
     playCelebration,
     playPop,
     playSuccess,
@@ -632,8 +629,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     playClick();
     // Reward completion only when the game actually finished.
     if (gameState && !gameState.gameActive) {
-      await saveProgress({ score: gameState.score, completed: true, level: gameState.level });
-      onGameComplete();
+      await completeGame({ score: gameState.score, level: gameState.level });
     }
     setShowMenu(true);
     setGameState(null);

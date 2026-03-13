@@ -10,8 +10,7 @@ import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
@@ -42,8 +41,7 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
   } | null>(null);
 
   const { playClick, playSuccess, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('digital-jenga');
-  const { saveProgress } = useGameProgress('digital-jenga');
+  const { completeGame } = useGameCompletion('digital-jenga');
 
   useGameSessionProgress({
     gameName: 'Digital Jenga',
@@ -198,10 +196,9 @@ const DigitalJengaGame = memo(function DigitalJengaGameComponent() {
   };
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score: towerHeight, completed: true, level: currentLevel });
-    await onGameComplete(towerHeight);
+    await completeGame({ score: towerHeight, completed: true, level: currentLevel });
     navigate('/games');
-  }, [towerHeight, currentLevel, onGameComplete, navigate, playClick, saveProgress]);
+  }, [towerHeight, currentLevel, navigate, playClick, completeGame]);
 
   return (
     <GameContainer

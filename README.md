@@ -66,19 +66,10 @@ Access:
 
 ## 🧪 Test Accounts
 
-For development and testing, the following accounts are pre-configured:
+Use locally seeded development accounts only. Keep test credentials in local environment or fixture setup, not in repo docs.
 
-| Email                       | Plan      | Status | Purpose                   |
-| --------------------------- | --------- | ------ | ------------------------- |
-| `pranay.suyash@gmail.com`   | Yearly    | Active | Full feature testing      |
-| `testquarterly@example.com` | Quarterly | Active | Subscription swap testing |
-
-**Login Credentials:**
-
-- Email: `testquarterly@example.com`
-- Password: `TestPass123!`
-
-The quarterly account can be used to test upgrading to yearly subscription. The yearly account has full access to all premium features.
+- Suggested flow: create accounts through the running app or backend fixtures after local setup.
+- If you need deterministic credentials for manual testing, store them in an untracked local notes file or shell variables.
 
 ## 🏗️ Tech Stack
 
@@ -140,6 +131,10 @@ This project uses a comprehensive AI agent coordination system:
 - **docs/audit/ISSUE_REGISTER.md**: Canonical deduplicated issue status
 - **docs/WORKLOG_ADDENDUM_*.md**: Execution logs and evidence trail
 - **docs/audit/**: Audit artifacts for code review
+
+### Agent metadata folders
+
+- Certain nested paths (for example `src/frontend/src/frontend/`) only exist to hold the `.agent/AGENT_KICKOFF_PROMPT.txt`/`.agent/SESSION_CONTEXT.md` metadata that tells a localized agent which sources to load next. The actual running frontend lives in `src/frontend/src`. Do not delete or rearrange the `.../frontend/src/frontend/.agent` hierarchy without updating the automation instructions that depend on it, because removing those metadata files will cause the prompt cascade described in `/Users/pranay/Projects/learning_for_kids/src/frontend/src/.agent/AGENT_KICKOFF_PROMPT.txt` to break.
 
 ### GitHub Task Backbone (Required)
 

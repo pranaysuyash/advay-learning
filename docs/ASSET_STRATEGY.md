@@ -20,8 +20,10 @@
 
 ### What's Already Landed
 
-- `assets/kenney/` — folder structure for 7 packs (mostly empty, README with download instructions)
-- `src/frontend/public/assets/kenney-platformer/` — Kenney platformer sprites in use by PlatformerRunner
+- `assets/kenney/` — local-source policy + import workflow documentation
+- `src/frontend/public/assets/kenney/` — canonical runtime root for Kenney assets
+- Local purchased source available: `/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0`
+- `src/frontend/public/assets/kenney-platformer/` — legacy path retained for backward compatibility (do not use for new imports)
 - `src/frontend/public/assets/backgrounds/` — 3 weather backgrounds (rainy, sunny, snowy)
 - `src/frontend/public/assets/icons/` — ~100+ SVG icons (fruits, animals, objects)
 - `src/frontend/public/assets/sounds/` — some audio files
@@ -139,15 +141,18 @@ export function ItemIcon({ item, size = 48 }: { item: CollectibleItem; size?: nu
 | **Artifacts** (6) | First Word Scroll, Periodic Key, etc. | AI-generate unique legendary item art |
 | **Food** (5) | Cookie, Apple, Pizza, Ice Cream, Cake | Kenney food pack |
 
-**Priority downloads from CC0 sources:**
+**Priority local imports from existing Kenney all-in-one source:**
 
 ```bash
-# Kenney packs to download immediately:
-# 1. https://kenney.nl/assets/game-icons          → item icons (1000+)
-# 2. https://kenney.nl/assets/animal-pack          → creature items
-# 3. https://kenney.nl/assets/food-kit             → food items
-# 4. https://kenney.nl/assets/ui-pack              → shapes, UI elements
-# 5. https://kenney.nl/assets/rpg-items            → tools, artifacts
+# Source from existing local bundle (no re-download needed):
+# /Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0
+#
+# For platformer subset refreshes:
+# tools/sync_kenney_platformer_assets.sh
+#
+# For non-platformer packs:
+# copy only required files to src/frontend/public/assets/kenney/<pack-or-domain>/
+# and document imported files in assets/kenney/README.md
 
 # OpenGameArt searches:
 # https://opengameart.org/art-search?keys=potion+icon&license=CC0
@@ -189,13 +194,13 @@ export function ItemIcon({ item, size = 48 }: { item: CollectibleItem; size?: nu
 | **Per-game ambient** | ~10 | OpenGameArt — search per theme |
 | **Music loops** | 5-10 | OpenGameArt or [Kenney Music](https://kenney.nl/assets/music-jingles) |
 
-**Immediate download:**
+**Immediate local sourcing (no new download):**
 ```bash
-# Kenney audio packs (free):
-# https://kenney.nl/assets/ui-audio              → 100+ UI sounds
-# https://kenney.nl/assets/interface-sounds       → clicks, beeps
-# https://kenney.nl/assets/music-jingles          → celebration jingles
-# https://kenney.nl/assets/voiceover-pack         → "correct!", "try again"
+# Use existing all-in-one bundle first:
+# /Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0
+#
+# Import only required files to canonical runtime path:
+# src/frontend/public/assets/kenney/<pack-or-domain>/
 #
 # mixkit.co (direct download, no login):
 # https://mixkit.co/free-sound-effects/game/      → game SFX
@@ -247,7 +252,9 @@ src/frontend/public/assets/
 │   ├── feedback/            # correct.ogg, wrong.ogg, celebrate.ogg
 │   ├── drops/               # item-drop.ogg, easter-egg.ogg
 │   └── music/               # world-specific loops
-├── kenney-platformer/        # ✅ Already in use
+├── kenney/                   # ✅ Canonical runtime root
+│   └── platformer/           # ✅ Active platformer subset
+├── kenney-platformer/        # legacy path (avoid for new imports)
 ├── backgrounds/              # ✅ Weather backgrounds
 └── icons/                    # ✅ Existing SVG icons
 ```
@@ -274,10 +281,11 @@ Format preferences:
 ## Quick-Start Checklist
 
 ```markdown
-- [ ] Download Kenney Game Icons pack → extract to assets/kenney/game-icons/
-- [ ] Download Kenney UI Audio pack → extract to assets/kenney/ui-audio/
-- [ ] Download Kenney Food Kit → extract to assets/kenney/food-kit/
-- [ ] Download Kenney Animal Pack → extract to assets/kenney/animal-pack/
+- [ ] Confirm required assets are not already in `src/frontend/public/assets/kenney/`
+- [ ] Source missing assets from local all-in-one bundle in `adhoc_resources`
+- [ ] Use `tools/sync_kenney_platformer_assets.sh` for New Platformer Pack refreshes
+- [ ] For non-platformer packs, import only required files into `src/frontend/public/assets/kenney/<pack-or-domain>/`
+- [ ] Document imported files/pack source in `assets/kenney/README.md`
 - [ ] Add `icon?: string` field to CollectibleItem interface
 - [ ] Create ItemIcon component (icon > emoji fallback)
 - [ ] Map first 10 items to Kenney icons (food + shapes)
@@ -309,4 +317,4 @@ children's educational game, whimsical style, no text"
 
 ---
 
-**Next action:** Download Kenney Game Icons + Food Kit + Animal Pack, then start mapping items in Phase 1.
+**Next action:** Use the local all-in-one Kenney bundle already available in `adhoc_resources`, then start mapping items in Phase 1.

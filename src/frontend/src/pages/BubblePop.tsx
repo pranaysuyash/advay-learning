@@ -14,9 +14,9 @@ import { useNavigate } from 'react-router-dom';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -65,7 +65,7 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const [assetsLoaded, setAssetsLoaded] = useState(false);
-  const { onGameComplete } = useGameDrops('bubble-pop');
+  const { completeGame } = useGameCompletion('bubble-pop');
 
   // Audio
   const { playClick } = useAudio();
@@ -102,13 +102,13 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
             missedCount: gameState.missedCount,
           },
         });
-        onGameComplete(finalScore);
+        completeGame({ score: finalScore, level: gameState.level });
       } catch (err) {
         // Error handled by GameShell error boundary
         console.error('Failed to save progress:', err);
       }
     },
-    [saveProgress, gameState.level, gameState.poppedCount, gameState.missedCount, onGameComplete]
+    [saveProgress, completeGame, gameState.level, gameState.poppedCount, gameState.missedCount]
   );
 
   // Microphone input for blow detection - using config constants

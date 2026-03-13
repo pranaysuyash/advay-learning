@@ -3,6 +3,7 @@ import { useFeatureFlag } from './useFeatureFlag';
 import { llmService } from '../services/ai/llm';
 import { ttsService } from '../services/ai/tts/TTSService';
 import { useSettingsStore, useAITelemetryStore } from '../store';
+import { BETA_LOCAL_AI_ENABLED } from '../config/launch';
 
 interface VoicePromptOptions {
   rate?: number;
@@ -40,7 +41,8 @@ export function useVoicePrompt(): UseVoicePromptReturn {
   const [requiresCloudConsent, setRequiresCloudConsent] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<TTSVoiceInfo[]>([]);
   const [preferredVoice, setPreferredVoiceState] = useState<string>('');
-  const llmResponsesEnabled = useFeatureFlag('ai.llmResponsesV1');
+  const llmResponsesEnabled =
+    BETA_LOCAL_AI_ENABLED && useFeatureFlag('ai.llmResponsesV1');
   const cloudFallbackEnabled = useFeatureFlag('ai.cloudFallbackV1');
   const parentConsentForCloudAI = useSettingsStore(
     (s) => s.parentConsentForCloudAI,

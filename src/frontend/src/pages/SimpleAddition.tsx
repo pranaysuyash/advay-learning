@@ -15,7 +15,7 @@ import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -45,9 +45,19 @@ export const SimpleAdditionContent = memo(function SimpleAdditionGame() {
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
   const [hoveredOption, setHoveredOption] = useState<number | null>(null);
 
-  const { onGameComplete } = useGameDrops('simple-addition');
   const { playSuccess, playError, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
+  const finalScore = gameState.status === 'complete' ? calculateFinalScore(gameState).total : gameState.score;
+  const { resetAutoCompletion } = useAutoGameCompletion('simple-addition', {
+    when: gameState.status === 'complete',
+    score: finalScore,
+    level: difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3,
+    metadata: {
+      difficulty,
+      problemsSolved: gameState.problemsSolved,
+      streak: gameState.streak,
+    },
+  });
 
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
@@ -141,8 +151,6 @@ export const SimpleAdditionContent = memo(function SimpleAdditionGame() {
             const completed = { ...prev, status: 'complete' as const };
             setShowCelebration(true);
             playCelebration();
-            const scores = calculateFinalScore(completed);
-            onGameComplete(scores.total);
             return completed;
           });
         }, 1500);
@@ -171,19 +179,21 @@ export const SimpleAdditionContent = memo(function SimpleAdditionGame() {
         setFeedback(null);
       }, 1500);
     }
-  }, [gameState, playSuccess, playError, playCelebration, speak, ttsEnabled, onGameComplete]);
+  }, [gameState, playSuccess, playError, playCelebration, speak, ttsEnabled]);
 
   const handleStart = useCallback(() => {
+    resetAutoCompletion();
     setGameState((prev) => startGame(prev, difficulty));
     if (ttsEnabled) {
       speak(`Let's practice addition! Choose the correct answer!`);
     }
-  }, [difficulty, speak, ttsEnabled]);
+  }, [difficulty, speak, ttsEnabled, resetAutoCompletion]);
 
   const handleGameComplete = useCallback(() => {
     setShowCelebration(false);
+    resetAutoCompletion();
     setGameState(createInitialState());
-  }, []);
+  }, [resetAutoCompletion]);
 
   // Render visual representations
   const renderVisuals = (count: number, emoji: string) => {

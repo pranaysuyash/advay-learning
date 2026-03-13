@@ -25,6 +25,10 @@ interface Settings {
 }
 
 interface SettingsState extends Settings {
+  hydrated: boolean; // whether persisted state has been rehydrated
+  setHydrated: () => void;
+  demoMode: boolean; // transient demo mode (not persisted)
+  setDemoMode: (v: boolean) => void;
   updateSettings: (settings: Partial<Settings>) => void;
   resetSettings: () => void;
 }
@@ -49,14 +53,7 @@ const defaultSettings: Settings = {
   preferredVoice: '', // Default: empty (use system default voice)
 };
 
-interface SettingsState extends Settings {
-  hydrated: boolean; // whether persisted state has been rehydrated
-  setHydrated: () => void;
-  demoMode: boolean; // transient demo mode (not persisted)
-  setDemoMode: (v: boolean) => void;
-  updateSettings: (settings: Partial<Settings>) => void;
-  resetSettings: () => void;
-}
+
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
@@ -69,14 +66,14 @@ export const useSettingsStore = create<SettingsState>()(
       setDemoMode: (v: boolean) => set({ demoMode: v }),
 
       updateSettings: (newSettings) => {
-        set((state) => {
+        set((_state) => {
           // If language is updated and gameLanguage isn't explicitly provided,
           // keep gameLanguage in sync with language for game content localization.
-          const merged = { ...state, ...newSettings } as SettingsState;
+          const nextData: Partial<SettingsState> = { ...newSettings };
           if (newSettings.language && newSettings.gameLanguage === undefined) {
-            merged.gameLanguage = newSettings.language;
+            nextData.gameLanguage = newSettings.language;
           }
-          return merged;
+          return nextData;
         });
       },
 
@@ -90,10 +87,17 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'advay-settings',
-      // Do not persist transient demoMode or setter functions
+      // Do not persist transient demoMode, lifecycle flags or setter functions
       partialize: (state) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { demoMode, setDemoMode, setHydrated, ...rest } = state as any;
+        const {
+          hydrated,
+          demoMode,
+          setDemoMode,
+          setHydrated,
+          updateSettings,
+          resetSettings,
+          ...rest
+        } = state;
         return rest as Partial<SettingsState>;
       },
       onRehydrateStorage: () => (state) => {

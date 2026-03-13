@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { ttsService, TTSOptions, ActiveEngine } from '../services/ai/tts/TTSService';
 import { useSettingsStore } from '../store/settingsStore';
+import { BETA_LOCAL_AI_ENABLED } from '../config/launch';
 
 export interface UseTTSReturn {
   /** Speak text with optional configuration */
@@ -62,6 +63,7 @@ export interface UseTTSReturn {
 export function useTTS(): UseTTSReturn {
   const soundEnabled = useSettingsStore((state) => state.soundEnabled);
   const ttsEngine = useSettingsStore((state) => state.ttsEngine);
+  const effectiveEngine = BETA_LOCAL_AI_ENABLED ? ttsEngine : 'web-speech';
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isModelLoading, setIsModelLoading] = useState(false);
   const [modelLoadProgress, setModelLoadProgress] = useState(0);
@@ -75,9 +77,12 @@ export function useTTS(): UseTTSReturn {
 
   // Sync engine preference and initialize Kokoro if needed
   useEffect(() => {
-    ttsService.setEnginePreference(ttsEngine);
+    ttsService.setEnginePreference(effectiveEngine);
 
-    if (ttsEngine === 'auto' || ttsEngine === 'kokoro') {
+    if (
+      BETA_LOCAL_AI_ENABLED &&
+      (effectiveEngine === 'auto' || effectiveEngine === 'kokoro')
+    ) {
       setIsModelLoading(true);
 
       const unsubscribe = ttsService.onKokoroEvent((event) => {
@@ -103,13 +108,14 @@ export function useTTS(): UseTTSReturn {
     } else {
       setIsModelLoading(false);
     }
-  }, [ttsEngine]);
+  }, [effectiveEngine]);
 
   // Track speaking state
   useEffect(() => {
     const checkSpeaking = () => {
       if (mountedRef.current) {
-        setIsSpeaking(ttsService.isSpeaking());
+        const currentlySpeaking = ttsService.isSpeaking();
+        setIsSpeaking((prev) => (prev !== currentlySpeaking ? currentlySpeaking : prev));
       }
     };
 

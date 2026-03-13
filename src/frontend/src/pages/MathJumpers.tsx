@@ -19,6 +19,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -55,6 +56,7 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
   const [isLoading] = useState(false);
   
   const { onGameComplete } = useGameDrops('math-jumpers');
+  const { saveProgress } = useGameProgress('math-jumpers');
   const { playSuccess, playError, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   
@@ -157,7 +159,10 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
               setShowCelebration(true);
               playCelebration();
               const finalScore = calculateFinalScore(next);
-              onGameComplete(finalScore.total);
+              (async () => {
+                await saveProgress({ score: finalScore.total, completed: true, level: 1 });
+                onGameComplete(finalScore.total);
+              })();
             }
             return next;
           });

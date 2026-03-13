@@ -21,22 +21,30 @@ echo "=========================================="
 echo "Database Backup - $DATE"
 echo "=========================================="
 
+BACKUP_FILE="$BACKUP_DIR/${DB_NAME}_${DATE}.dump"
+
 # Build pg_dump command
 PGPASSWORD="${DB_PASSWORD}" pg_dump \
     --host "$DB_HOST" \
     --port "$DB_PORT" \
     --username "$DB_USER" \
+    --dbname "$DB_NAME" \
     --format=custom \
     --compress=9 \
     --verbose \
-    --file "$BACKUP_DIR/${DB_NAME}_${DATE}.dump"
+    --file "$BACKUP_FILE"
 
 # Check if backup was successful
 if [ $? -eq 0 ]; then
-    echo "Backup created: $BACKUP_DIR/${DB_NAME}_${DATE}.dump"
-    
+    echo "Backup created: $BACKUP_FILE"
+
+    if [[ ! -s "$BACKUP_FILE" ]]; then
+        echo "ERROR: Backup file is empty"
+        exit 1
+    fi
+
     # Get file size
-    SIZE=$(du -h "$BACKUP_DIR/${DB_NAME}_${DATE}.dump" | cut -f1)
+    SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
     echo "Backup size: $SIZE"
     
     # Create symlink to latest backup

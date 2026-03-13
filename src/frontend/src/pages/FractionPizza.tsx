@@ -21,7 +21,7 @@ import {
   type DropZone,
 } from '../components/game/DragDropSystem';
 import { type ScreenCoordinate } from '../utils/coordinateTransform';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -86,7 +86,7 @@ function PizzaVisual({ fraction, size }: { fraction: Fraction, size: number }) {
 }
 
 function FractionPizzaGame() {
-  const { onGameComplete } = useGameDrops('fraction-pizza');
+  const { completeGame } = useGameCompletion('fraction-pizza');
   const { playClick, playSuccess, playError, playPop } = useAudio();
   const webcamRef = useRef<Webcam>(null);
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({ x: 0, y: 0 });
@@ -227,7 +227,7 @@ function FractionPizzaGame() {
         setShowSuccess(true);
         speak(`Yummy! That's exactly ${item.data.label} of the pizza!`);
 
-        setTimeout(() => {
+        setTimeout(async () => {
           if (round >= 4) {
             if (currentLevel < LEVELS.length - 1) {
               setCurrentLevel((prev) => prev + 1);
@@ -235,7 +235,7 @@ function FractionPizzaGame() {
               resetStreak();
               speak("Amazing! Let's try harder pizzas!");
             } else {
-              onGameComplete();
+              await completeGame({ score });
               triggerHaptic('celebration');
               speak("You're a Fraction Pizza Master!");
             }
@@ -252,7 +252,7 @@ function FractionPizzaGame() {
         speak(`Oops! That slice says ${item.data.label}. Try another one!`);
       }
     },
-    [round, currentLevel, speak, onGameComplete, playSuccess, playError, incrementStreak, resetStreak, setScorePopup]
+    [round, currentLevel, speak, completeGame, playSuccess, playError, incrementStreak, resetStreak, setScorePopup]
   );
 
   const handleItemDroppedOutside = useCallback((item: DraggableItem) => {

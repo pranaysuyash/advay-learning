@@ -9,6 +9,7 @@ import type { GameControl } from '../components/GameControls';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -40,6 +41,7 @@ export const MusicPinchBeatContent = memo(function MusicPinchBeatComponent() {
   const { playPop, playError, playFanfare: playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete, triggerEasterEgg } = useGameDrops('music-pinch-beat');
+  const { saveProgress } = useGameProgress('music-pinch-beat');
   const playedLanesRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
@@ -168,7 +170,8 @@ export const MusicPinchBeatContent = memo(function MusicPinchBeatComponent() {
     }
   };
 
-  const stopGame = () => {
+  const stopGame = async () => {
+    await saveProgress({ score: streak, completed: true, level: 1 });
     onGameComplete();
     setIsPlaying(false);
     setCursorX(null);

@@ -3,7 +3,8 @@
 **Status:** Canonical local source documented  
 **Primary Source:** `/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0`  
 **Local Bundle Snapshot Added:** 2026-03-03  
-**Current New Platformer Pack Payload Timestamp:** 2025-12-03  
+**Tracked Pack Payload Timestamps (runtime-synced packs):**  
+- `2D assets/New Platformer Pack`: 2025-12-03  
 **Runtime Source of Truth:** `src/frontend/public/assets/kenney/`  
 **License:** CC0 (Public Domain)
 
@@ -25,7 +26,7 @@ Do not re-download Kenney packs if the purchased local bundle already contains t
 Use the dates above as the freshness marker:
 
 - `Local Bundle Snapshot Added` tells us when this purchased bundle was placed in the shared local resource folder for this workspace.
-- `Current New Platformer Pack Payload Timestamp` tells us the packaged asset snapshot currently backing the runtime sync.
+- `Tracked Pack Payload Timestamps` list pack-level snapshots currently backed by explicit sync/import workflows.
 
 If Kenney releases newer packs later, update these dates when the local bundle is refreshed so agents can quickly tell whether the repo is using the latest downloaded snapshot.
 
@@ -55,36 +56,25 @@ If the file is not already in the repo, use the purchased bundle under:
 /Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0
 ```
 
-For New Platformer Pack assets, use the repo sync tool:
+For assets previously categorized under "New Platformer Pack," use the all-in-one bundle path directly. Avoid using the `tools/sync_kenney_platformer_assets.sh` script, as it is now deprecated.
 
-```bash
-tools/sync_kenney_platformer_assets.sh
-```
+For non-platformer packs from the all-in-one bundle:
 
-That syncs from:
-
-```bash
-/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0/2D assets/New Platformer Pack
-```
-
-Into:
-
-```bash
-src/frontend/public/assets/kenney/platformer
-```
+1. Copy only required files into `src/frontend/public/assets/kenney/<pack-or-domain>/`
+2. Avoid creating duplicate runtime roots
+3. Document imported pack/file paths in this README
 
 ---
 
 ## Current Canonical Runtime Paths
 
-- `src/frontend/public/assets/kenney/platformer`
-- `src/frontend/public/assets/kenney/platformer/characters`
-- `src/frontend/public/assets/kenney/platformer/enemies`
-- `src/frontend/public/assets/kenney/platformer/tiles`
-- `src/frontend/public/assets/kenney/platformer/backgrounds`
-- `src/frontend/public/assets/kenney/platformer/sounds`
-- `src/frontend/public/assets/kenney/platformer/collectibles`
-- `src/frontend/public/assets/kenney/platformer/hud`
+- `src/frontend/public/assets/kenney/collectibles`
+- `src/frontend/public/assets/kenney/characters`
+- `src/frontend/public/assets/kenney/enemies`
+- `src/frontend/public/assets/kenney/tiles`
+- `src/frontend/public/assets/kenney/backgrounds`
+- `src/frontend/public/assets/kenney/sounds`
+- `src/frontend/public/assets/kenney/hud`
 
 Keep frontend asset URLs pointed at these runtime paths. Do not introduce alternate duplicate runtime directories unless the project explicitly adopts a new canonical path.
 

@@ -202,6 +202,7 @@ export const Games = memo(function Games() {
                 description={game.tagline}
                 path={game.path}
                 icon={game.icon}
+                previewImage={game.previewImage}
                 ageRange={`${game.ageRange} years`}
                 category={world?.name ?? game.worldId}
                 difficulty={vibe?.label ?? 'Unknown'}

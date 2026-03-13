@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -35,6 +36,12 @@ const CircleDrawingContent = memo(function CircleDrawingContent() {
     const maxReachedProgressRef = useRef(0);
 
     const { playPop, playSuccess: _playSuccess, playError: _playError, playCelebration: playFanfare } = useAudio();
+    const { resetAutoCompletion } = useAutoGameCompletion('circle-drawing', {
+        when: showCelebration,
+        score,
+        level,
+        metadata: { progress: 100 },
+    });
 
     useGameSessionProgress({
         gameName: 'Circle Drawing',
@@ -110,6 +117,7 @@ const CircleDrawingContent = memo(function CircleDrawingContent() {
     });
 
     const startGame = (lvl: number = 1) => {
+        resetAutoCompletion();
         setIsPlaying(true);
         setLevel(lvl);
         setProgress(0);

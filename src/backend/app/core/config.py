@@ -74,6 +74,10 @@ class Settings(BaseSettings):
 
     # Frontend URL (for email links)
     FRONTEND_URL: str = "http://localhost:6173"
+    SUPPORT_EMAIL: str = "support@advay.app"
+    EMAIL_FROM: str = "Advay Learning <onboarding@resend.dev>"
+    BETA_FREE_ACCESS: bool = False
+    CHILD_PHOTO_UPLOADS_ENABLED: bool = False
 
     # Storage
     USE_LOCAL_STORAGE: bool = True

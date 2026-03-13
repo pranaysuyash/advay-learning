@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { trackLaunchEvent } from '../analytics/launch';
 import { useAuthStore } from '../store';
 import { authApi } from '../services/api';
 import { profileApi } from '../services/api';
@@ -49,6 +50,7 @@ export function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    trackLaunchEvent('login_started', { source: 'login_form' });
     clearError();
     setShowResend(false);
     setResendMessage('');
@@ -68,6 +70,7 @@ export function Login() {
 
     try {
       await login(email, password);
+      trackLaunchEvent('login_completed', { source: 'login_form' });
       const pendingLearnerProfile = loadPendingLearnerProfile();
       if (pendingLearnerProfile) {
         try {
@@ -88,6 +91,7 @@ export function Login() {
       setTimeout(() => navigate('/dashboard'), 50);
     } catch (error: unknown) {
       playError();
+      trackLaunchEvent('login_failed', { source: 'login_form' });
       // Check if error is due to unverified email
       const errorMsg =
         (error as { response?: { data?: { detail?: string } } })?.response?.data
@@ -104,6 +108,7 @@ export function Login() {
   const handleResendVerification = async () => {
     try {
       const response = await authApi.resendVerification(email);
+      trackLaunchEvent('email_verification_sent', { source: 'login_resend' });
       setResendMessage(response.data.message);
       setShowResend(false);
     } catch {

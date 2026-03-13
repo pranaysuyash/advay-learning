@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useAuthStore } from '../store';
+import { BETA_FREE_ACCESS } from '../config/launch';
 import { subscriptionApi } from '../services/subscriptionApi';
 
 export function useSubscription() {
@@ -12,7 +13,7 @@ export function useSubscription() {
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [accessibleGames, setAccessibleGames] = useState<Set<string>>(new Set());
   const [statusSource, setStatusSource] = useState<
-    'active_subscription' | 'no_subscription' | 'api_error' | 'guest_demo' | 'invalid_plan' | null
+    'active_subscription' | 'no_subscription' | 'api_error' | 'guest_demo' | 'invalid_plan' | 'beta_free_access' | null
   >(null);
   const [errorReason, setErrorReason] = useState<string | null>(null);
 
@@ -22,6 +23,15 @@ export function useSubscription() {
         setHasActiveSubscription(false);
         setAccessibleGames(new Set());
         setStatusSource(null);
+        setErrorReason(null);
+        setIsLoading(false);
+        return;
+      }
+
+      if (BETA_FREE_ACCESS) {
+        setHasActiveSubscription(true);
+        setAccessibleGames(new Set(['*']));
+        setStatusSource('beta_free_access');
         setErrorReason(null);
         setIsLoading(false);
         return;

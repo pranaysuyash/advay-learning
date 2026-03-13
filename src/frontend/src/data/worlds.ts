@@ -139,6 +139,14 @@ export const WORLDS: World[] = [
     bgGradient: 'from-green-50 to-emerald-50',
     description: 'Run, jump, and dodge!',
   },
+  {
+    id: '3d-world',
+    name: '3D World',
+    emoji: '🎲',
+    color: '#8B5CF6',
+    bgGradient: 'from-violet-50 to-purple-50',
+    description: 'Step into the third dimension!',
+  },
 ];
 
 export const WORLDS_BY_ID: Record<string, World> = Object.fromEntries(

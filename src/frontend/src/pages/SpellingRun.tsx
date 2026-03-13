@@ -6,6 +6,7 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -41,6 +42,7 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
     const imagesRef = useRef<Record<string, HTMLImageElement>>({});
 
     const { onGameComplete } = useGameDrops('spelling-run');
+    const { saveProgress } = useGameProgress('spelling-run');
     const { playError, playCelebration } = useAudio();
     const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -123,7 +125,10 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
 
                     if (next.status === 'complete') {
                         playCelebration();
-                        onGameComplete(next.score);
+                        (async () => {
+                          await saveProgress({ score: next.score, completed: true, level: 1 });
+                          onGameComplete(next.score);
+                        })();
                     } else if (next.status === 'failed') {
                         playError();
                         // Reset or show game over

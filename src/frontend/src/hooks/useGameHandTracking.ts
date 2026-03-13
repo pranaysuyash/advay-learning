@@ -289,17 +289,28 @@ export function useGameHandTracking(
         }
 
         if (frame.indexTip) {
-          setCursor(frame.indexTip);
+          setCursor(prev => {
+            if (!prev) return frame.indexTip;
+            const dx = Math.abs(prev.x - frame.indexTip!.x);
+            const dy = Math.abs(prev.y - frame.indexTip!.y);
+            return (dx > 0.001 || dy > 0.001) ? frame.indexTip : prev;
+          });
         } else {
-          setCursor(null);
+          setCursor(prev => prev === null ? null : null);
         }
 
         const currentPinch = frame.pinch.state;
-        setPinchState((prevState) => ({
-          ...prevState,
-          isPinching: currentPinch.isPinching,
-          distance: currentPinch.distance,
-        }));
+        setPinchState((prevState) => {
+          if (prevState.isPinching === currentPinch.isPinching && 
+              Math.abs(prevState.distance - currentPinch.distance) < 0.01) {
+            return prevState;
+          }
+          return {
+            ...prevState,
+            isPinching: currentPinch.isPinching,
+            distance: currentPinch.distance,
+          };
+        });
 
         previousPinchRef.current = currentPinch;
         pinchStateRef.current = currentPinch;
@@ -362,8 +373,8 @@ export function useGameHandTracking(
     isRunning: runtimeEnabled,
     targetFps,
     onFrame: useCallback((_deltaTime, currentFps) => {
-      setFps(currentFps);
-      setAverageFps(currentFps); // Simplified for now, could implement proper averaging
+      setFps(prev => Math.abs(prev - currentFps) > 1 ? Math.round(currentFps) : prev);
+      setAverageFps(prev => Math.abs(prev - currentFps) > 1 ? Math.round(currentFps) : prev);
     }, []),
   });
 
@@ -380,18 +391,29 @@ export function useGameHandTracking(
       (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
         // Update cursor position
         if (frame.indexTip) {
-          setCursor(frame.indexTip);
+          setCursor(prev => {
+            if (!prev) return frame.indexTip;
+            const dx = Math.abs(prev.x - frame.indexTip!.x);
+            const dy = Math.abs(prev.y - frame.indexTip!.y);
+            return (dx > 0.001 || dy > 0.001) ? frame.indexTip : prev;
+          });
         } else {
           setCursor(null);
         }
 
         // Update pinch state with transition detection
         const currentPinch = frame.pinch.state;
-        setPinchState((prevState) => ({
-          ...prevState,
-          isPinching: currentPinch.isPinching,
-          distance: currentPinch.distance,
-        }));
+        setPinchState((prevState) => {
+          if (prevState.isPinching === currentPinch.isPinching && 
+              Math.abs(prevState.distance - currentPinch.distance) < 0.01) {
+            return prevState;
+          }
+          return {
+            ...prevState,
+            isPinching: currentPinch.isPinching,
+            distance: currentPinch.distance,
+          };
+        });
 
         previousPinchRef.current = currentPinch;
         pinchStateRef.current = currentPinch;

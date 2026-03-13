@@ -25,7 +25,7 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -91,7 +91,7 @@ const ColorPotionsContent = memo(function ColorPotionsContent() {
   // Hooks
   const { playPop, playSuccess, playError, playCelebration: playCelebrationSound, playLevelUp } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('color-potions');
+  const { completeGame } = useGameCompletion('color-potions');
   
   // Keep refs in sync
   useEffect(() => {
@@ -286,8 +286,8 @@ const ColorPotionsContent = memo(function ColorPotionsContent() {
   // Finish game
   const handleFinish = useCallback(async () => {
     playPop();
-    await onGameComplete(progress.discoveredRecipeIds.length);
-  }, [playPop, onGameComplete, progress.discoveredRecipeIds.length]);
+    await completeGame({ score: progress.discoveredRecipeIds.length, completed: true, level: 1 });
+  }, [playPop, completeGame, progress.discoveredRecipeIds.length]);
   
   // Menu controls
   const menuControls: GameControl[] = [

@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { triggerHaptic } from '../utils/haptics';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   LEVELS,
@@ -22,11 +21,7 @@ interface Point {
 }
 
 // Inner game component
-interface KaleidoscopeHandsGameProps {
-  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
-}
-
-const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ saveProgress }: KaleidoscopeHandsGameProps) {
+const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -37,7 +32,7 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ sav
   const colorProgressRef = useRef(0);
 
   const { playClick, playPop } = useAudio();
-  const { onGameComplete } = useGameDrops('kaleidoscope-hands');
+  const { completeGame } = useGameCompletion('kaleidoscope-hands');
   const levelConfig = getLevelConfig(currentLevel);
 
   useGameSessionProgress({
@@ -186,10 +181,9 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ sav
   const handleFinish = useCallback(async () => {
     playClick();
     const finalScore = Math.round(score / 10);
-    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
-    await onGameComplete(finalScore);
+    await completeGame({ score: finalScore, level: currentLevel });
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [score, completeGame, navigate, playClick, currentLevel]);
 
   return (
     <GameContainer
@@ -264,8 +258,6 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent({ sav
 
 // Main export wrapped with GameShell
 export const KaleidoscopeHands = memo(function KaleidoscopeHandsComponent() {
-  const { saveProgress } = useGameProgress('kaleidoscope-hands');
-
   return (
     <GameShell
       gameId="kaleidoscope-hands"
@@ -273,7 +265,7 @@ export const KaleidoscopeHands = memo(function KaleidoscopeHandsComponent() {
       showWellnessTimer={true}
       enableErrorBoundary={true}
     >
-      <KaleidoscopeHandsGame saveProgress={saveProgress} />
+      <KaleidoscopeHandsGame />
     </GameShell>
   );
 });

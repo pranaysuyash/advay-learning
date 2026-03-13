@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameProgress } from '../hooks/useGameProgress';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -39,6 +40,7 @@ function TextureExplorerGame() {
   const { playSuccess, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { onGameComplete } = useGameDrops('texture-explorer');
+  const { saveProgress } = useGameProgress('texture-explorer');
 
   useGameSessionProgress({
     gameName: 'Texture Explorer',
@@ -89,7 +91,10 @@ function TextureExplorerGame() {
       if (newMatched >= MATCHES_NEEDED) {
         setGameState('complete');
         playCelebration();
-        onGameComplete(calculateStars(newMatched));
+        (async () => {
+          await saveProgress({ score: calculateScore(newMatched, mistakes), completed: true, level: 1 });
+          onGameComplete(calculateStars(newMatched));
+        })();
         speakText('Great job! You matched all the textures!');
       } else {
         const nextItems = availableItems.filter(i => i.id !== currentItem.id);
