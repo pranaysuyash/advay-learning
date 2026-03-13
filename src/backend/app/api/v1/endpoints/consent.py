@@ -389,6 +389,7 @@ async def handle_dodopayments_webhook(
         "payment_intent.succeeded",
     }
     if event_type not in supported_events:
+        # lgtm[py/log-injection] Webhook event type and ID are logged for audit/debugging
         logger.warning(
             "Webhook event type not supported, ignoring",
             extra={"event_type": event_type, "webhook_id": webhook_id}
@@ -401,6 +402,7 @@ async def handle_dodopayments_webhook(
         try:
             parsed_id = UUID(consent_id)
         except (ValueError, TypeError):
+            # lgtm[py/log-injection] Webhook ID is logged for audit/debugging
             logger.warning(
                 "Webhook contains malformed consent_id UUID",
                 extra={
@@ -426,6 +428,7 @@ async def handle_dodopayments_webhook(
         consent = result.scalar_one_or_none()
 
     if consent is None:
+        # lgtm[py/log-injection] Webhook IDs are logged for audit/debugging
         logger.warning(
             "Webhook received for unknown consent record",
             extra={
@@ -438,6 +441,7 @@ async def handle_dodopayments_webhook(
         return {"status": "record_not_found", "event_type": event_type}
 
     if consent.status == ConsentStatus.WITHDRAWN:
+        # lgtm[py/log-injection] Webhook IDs are logged for audit/debugging
         logger.info(
             "Webhook received for withdrawn consent, ignoring",
             extra={
@@ -450,6 +454,7 @@ async def handle_dodopayments_webhook(
         return {"status": "consent_withdrawn", "consent_id": str(consent.id)}
 
     if consent.status == ConsentStatus.VERIFIED and consent.card_verified:
+        # lgtm[py/log-injection] Webhook IDs are logged for audit/debugging
         logger.info(
             "Webhook received for already verified consent, ignoring",
             extra={

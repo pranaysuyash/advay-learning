@@ -71,8 +71,7 @@ def resolve_storage_path(current_user_id: str, filename: str) -> Path:
     if not safe_filename or safe_filename in (".", ".."):
         raise HTTPException(status_code=400, detail="Invalid file name")
 
-    # lgtm[py/path-injection] safe_filename is basename-only, validated below
-    file_path = (profile_dir / safe_filename).resolve()
+    file_path = (profile_dir / safe_filename).resolve()  # lgtm[py/path-injection] safe_filename is basename-only, validated below
 
     # Verify file_path is within profile_dir (is_relative_to available in Python 3.9+)
     if not file_path.is_relative_to(profile_dir):
@@ -211,6 +210,7 @@ async def get_profile_photo_file(
         raise HTTPException(status_code=404, detail="Profile photo not found")
 
     file_path = resolve_storage_path(current_user.id, filename)
+    # lgtm[py/path-injection] file_path is validated by resolve_storage_path()
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Profile photo file missing")
 
