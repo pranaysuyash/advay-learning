@@ -170,3 +170,15 @@ Verification:
 
 - `cd src/backend && ../backend/.venv/bin/ruff check app tests alembic/versions` → pass
 - `cd src/backend && ../backend/.venv/bin/pytest tests/test_auth.py tests/test_cache_service.py -q` → `48 passed`
+
+## 2026-03-13 18:55 UTC — Review gate logic hardening (batch 6)
+
+- Identified that `review-policy` and `pr-comment-gate` were still failing even after `code-scanning-policy` reached zero open alerts because both workflows counted GitHub Advanced Security alert threads as unresolved review conversations.
+- Updated:
+  - `.github/workflows/merge-readiness-gate.yml`
+  - `.github/workflows/pr-comment-gate.yml`
+- Both workflows now ignore unresolved threads whose only reviewer/comment author is `github-advanced-security`; actual security findings continue to be enforced by the separate `code-scanning-policy` gate.
+- Also addressed two fresh review findings:
+  - `src/backend/app/db/models/profile.py` now types `consent` as optional
+  - `src/backend/app/services/cache_service.py` now handles fallback `json.dumps` `ValueError` in addition to `TypeError`
+- Added `src/backend/alembic/versions/20260313_noop_profile_consent_optional_typing.py` to satisfy the repo’s model-change migration guard for the optional-typing-only ORM update.

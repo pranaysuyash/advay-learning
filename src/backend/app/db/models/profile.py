@@ -49,7 +49,7 @@ class Profile(Base):
     )
 
     # Parental consent for this child (DPDPA compliance)
-    consent: Mapped["ParentalConsent"] = relationship(  # noqa: F821
+    consent: Mapped["ParentalConsent | None"] = relationship(  # noqa: F821
         "ParentalConsent",
         back_populates="child",
         lazy="selectin",

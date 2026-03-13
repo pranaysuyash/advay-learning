@@ -99,7 +99,7 @@ class CacheService:
         # if we reached here it means redis failed; store in fallback
         try:
             serialized = json.dumps(value)
-        except TypeError as e:
+        except (TypeError, ValueError) as e:
             logger.warning(
                 "Fallback cache serialization error for key %s: %s",
                 _sanitize_log_value(key),

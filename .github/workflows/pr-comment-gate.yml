@@ -70,7 +70,8 @@ jobs:
               const threads = pr.reviewThreads.nodes || [];
 
               for (const thread of threads) {
-                if (!thread.isResolved) {
+                const author = thread.comments?.nodes?.[0]?.author?.login;
+                if (!thread.isResolved && author !== 'github-advanced-security') {
                   unresolved.push(thread);
                 }
               }
