@@ -332,7 +332,7 @@ const appRoutes: AppRoute[] = [
   { path: '/games/circle-drawing', element: <CircleDrawing />, protected: true, cameraSafe: true, gameName: 'Circle Drawing' },
   { path: '/games/spelling-run', element: <SpellingRun />, protected: true, cameraSafe: true, gameName: 'Spelling Run' },
   { path: '/games/vowel-valley', element: <VowelValley />, protected: true, cameraSafe: true, gameName: 'Vowel Valley' },
-  { path: '/games/wash-hands-dance', element: <WashHandsDance />, protected: true, cameraSafe: true, gameName: 'Wash Hands Dance' },
+  { path: '/games/wash-hands-dance', element: <WashHandsDance />, protected: true, cameraSafe: true, gameName: 'Wash Hands Dance', cameraRequiredMessage: 'This game needs your camera to track your hand movements for washing hands!' },
   { path: '/games/pack-lunchbox', element: <PackLunchbox />, protected: true, cameraSafe: true, gameName: 'Pack Lunchbox' },
   { path: '/games/set-the-table', element: <SetTheTable />, protected: true, cameraSafe: true, gameName: 'Set The Table' },
   { path: '/games/temperature-sort', element: <TemperatureSort />, protected: true, cameraSafe: true, gameName: 'Temperature Sort' },
