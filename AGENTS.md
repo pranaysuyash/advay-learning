@@ -40,6 +40,9 @@ Outputs:
 - If `.agent` files are missing or stale, run `/Users/pranay/Projects/agent-start --skip-index` before planning changes.
 - Do not start implementation until `.agent/AGENT_KICKOFF_PROMPT.txt` and `.agent/SESSION_CONTEXT.md` are loaded.
 
+### Nested agent metadata directories
+- Some directories (for example `/Users/pranay/Projects/learning_for_kids/src/frontend/src/frontend/`) exist solely to hold nested `.agent/` metadata (see `/Users/pranay/Projects/learning_for_kids/src/frontend/src/frontend/.agent/AGENT_KICKOFF_PROMPT.txt`). The actual runtime frontend code lives in `src/frontend/src`. Remove or refactor these folders only as part of a documented automation cleanup, otherwise the localized prompt order described in each `AGENT_KICKOFF_PROMPT.txt` will fail for agents entering that subtree.
+
 ### Optional commit safety net
 Install repo-local git pre-commit hooks that refresh and stage `.agent/*` before commit:
 ```bash
@@ -331,15 +334,16 @@ echo "Added to tools/README.md with usage examples"
 
 - `/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0`
 - Local bundle snapshot added: `2026-03-03`
-- Current `New Platformer Pack` payload timestamp: `2025-12-03`
+- Tracked pack payload timestamps (runtime-synced packs): `2D assets/New Platformer Pack` = `2025-12-03`
 
 **Required workflow when an agent needs Kenney assets:**
 
 1. Check whether the asset already exists in the project under `src/frontend/public/assets/kenney/`.
 2. If it exists, reuse that in-project runtime asset instead of importing a duplicate.
 3. If it does not exist, source it from the local purchased Kenney bundle above.
-4. For New Platformer Pack assets, use `tools/sync_kenney_platformer_assets.sh` instead of ad-hoc copying.
-5. If the local bundle is replaced with a newer Kenney download, update the recorded snapshot dates in `AGENTS.md`, `docs/SETUP.md`, and `assets/kenney/README.md` as part of the same change.
+4. For `New Platformer Pack` assets, use `tools/sync_kenney_platformer_assets.sh` instead of ad-hoc copying.
+5. For non-platformer packs in the all-in-one bundle, copy only the required files into `src/frontend/public/assets/kenney/<pack-or-domain>/` and document the import in `assets/kenney/README.md`.
+6. If the local bundle is replaced with a newer Kenney download, update the recorded snapshot dates in `AGENTS.md`, `docs/SETUP.md`, and `assets/kenney/README.md` as part of the same change.
 
 **Do not:**
 
@@ -557,7 +561,7 @@ The audit-to-ticket gap exists because:
 - [ ] Determine work type and select correct prompt
 - [ ] Define scope contract (invariants, non-goals, acceptance criteria)
 - [ ] Create or update worklog ticket
-- [ ] Verify environment (Python 3.13+, Node 18+, uv installed)
+- [ ] Verify environment (Python 3.13+, Node 22+, uv installed)
 - [ ] Check existing venv (don't create duplicates)
 - [ ] Check running servers (frontend on 6173, backend on 8001)
 - [ ] **Document every user inquiry or idea**: whenever a user asks for ideas, feedback, analysis, or requests, create or append an appropriate file under `docs/` (e.g. `BRAINSTORM_IDEAS.md`). Requests are a mandate, not optional.
@@ -1238,7 +1242,7 @@ prompts/
 - `docs/audit/*.md` - Audit artifacts
 - `docs/process/CODE_PRESERVATION_GUIDELINES.md` - When to delete vs. implement unused code
 - `docs/ARCHITECTURE.md` - System design
-- `docs/SECURITY.md` - Security guidelines
+- `docs/security/SECURITY.md` - Security guidelines
 - `docs/SETUP.md` - Environment setup
 - `docs/PROCESS_PROMPTS.md` - Prompt/persona registry + review cadence reminders
 

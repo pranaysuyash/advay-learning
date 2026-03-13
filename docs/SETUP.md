@@ -7,7 +7,7 @@
 
 > Tip: To switch to the recommended Node version (nvm): `nvm use 22`
 
-- **PostgreSQL**: 17+
+- **PostgreSQL**: 16+
 - **uv**: Python package manager
 - **Git**: Version control
 
@@ -201,7 +201,7 @@ git status --short -- <file>
 
 If the file was created as a temporary scratch file, move it into the repo intentionally and verify the repo copy before treating it as complete.
 
-See [AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md](/Users/pranay/Projects/learning_for_kids/docs/process/AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md) for the full rule set.
+See [AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md](docs/process/AGENT_SHELL_WRITE_AND_COMPLETION_GUARDRAILS.md) for the full rule set.
 
 ---
 
@@ -499,7 +499,7 @@ This script:
 
 - Backend: <http://localhost:8001/health>
 - API Docs: <http://localhost:8001/docs>
-- Frontend: <http://localhost:5173>
+- Frontend: <http://localhost:6173>
 
 ## Running Tests
 
@@ -536,43 +536,18 @@ The `tools/` directory contains reusable utilities for development and QA:
 
 - **Video Frame Analyzer** (`tools/video_frame_analyzer.html`) - Frame-by-frame video analysis for UX/QA testing
 - **Contrast Calculator** (`tools/contrast_calculator.py`) - WCAG contrast ratio validation
-- **Kenney Platformer Asset Sync** (`tools/sync_kenney_platformer_assets.sh`) - Sync the purchased Kenney bundle's New Platformer Pack into the canonical frontend runtime path
+- **Kenney Platformer Asset Sync** (`tools/sync_kenney_platformer_assets.sh`) - Sync the `New Platformer Pack` subset from the purchased all-in-one Kenney bundle into the canonical frontend runtime path
 
 See [tools/README.md](../tools/README.md) for full documentation and usage examples.
 
 **When to add tools**: If you create a helpful utility (analyzer, converter, validator, test harness), save it to `tools/` with documentation instead of creating one-off scripts.
 
-## Kenney Asset Workflow
+## Kenney Asset Policy Update
 
-Canonical local Kenney source for this repo:
-
-- `/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0`
-- Local bundle snapshot added to shared resources: `2026-03-03`
-- Current `2D assets/New Platformer Pack` payload timestamp: `2025-12-03`
-
-Use this workflow before importing or refreshing Kenney assets:
-
-1. Check whether the needed file already exists under `src/frontend/public/assets/kenney/`.
-2. If it already exists, reuse that runtime path in code instead of re-importing.
-3. If it does not exist, source it from the purchased Kenney bundle path above.
-4. For New Platformer Pack assets, sync into the canonical runtime folder with the repo tool:
+The project now uses the Kenney all-in-one bundle as the primary source for assets. Platformer-specific sync tools are deprecated. Ensure all assets are sourced from:
 
 ```bash
-# From repo root
-tools/sync_kenney_platformer_assets.sh
+/Users/pranay/Projects/adhoc_resources/Kenney Game Assets All-in-1 3.4.0
 ```
 
-Canonical platformer asset runtime path:
-
-- `src/frontend/public/assets/kenney/platformer`
-
-Note:
-
-- Keep this path as the source of truth for frontend game asset URLs.
-- Avoid creating new ad-hoc runtime paths when importing new packs.
-- Do not re-download or duplicate Kenney assets if the purchased local bundle already contains them.
-- When the purchased bundle is refreshed with newer Kenney packs, update these dates in this section so future agents can tell whether the local snapshot is stale.
-
----
-
-**Next**: See [AGENTS.md](../AGENTS.md) for development workflow.
+For new assets, follow the updated workflow in `assets/kenney/README.md`. Avoid referencing platformer-specific paths or tools.
