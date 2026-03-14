@@ -250,7 +250,7 @@ export default function CuttingPractice3D() {
           {/* Game Over */}
           {gameOver && (
             <Html center>
-              <div className="bg-slate-900/95 text-white p-8 rounded-2xl shadow-2xl text-center">
+              <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)' }} className="text-white p-8 rounded-2xl shadow-2xl text-center">
                 <Trophy className="w-16 h-16 mx-auto mb-4 text-yellow-400" />
                 <h2 className="text-3xl font-bold mb-2">Game Over!</h2>
                 <p className="text-slate-400 mb-4">Final Score: {score}</p>

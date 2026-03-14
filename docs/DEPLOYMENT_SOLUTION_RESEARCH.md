@@ -259,6 +259,35 @@ jobs:
 | Neon PostgreSQL  | $69-200/month       | Enterprise features  |
 | **Total**        | **~$120-400/month** |                      |
 
+## If You Hit Free-Tier Limits (What To Do)
+
+### 1) Monitor usage proactively
+- **Cloudflare Pages**: track bandwidth, build minutes, and request count in the Pages dashboard.
+- **Railway**: monitor remaining credits and CPU/memory usage in the Railway dashboard.
+- **Neon**: check compute hours and storage usage; set up email alerts if available.
+
+### 2) Immediate “cheap” mitigations
+- Reduce deployment frequency (avoid unnecessary pushes).
+- Compress and optimize static assets (images, WASM, fonts).
+- Add cache headers to static assets so Cloudflare serves cached versions longer.
+- Use “stale-while-revalidate” patterns for API responses (cache on edge).
+
+### 3) Upgrade path (minimal cost bump)
+- **Cloudflare Pages** → move to Pro only if you hit high concurrent build limits or need advanced analytics.
+- **Railway** → bump to Hobby/Pro only when you hit credit exhaustion; you can also add a second service and split workloads.
+- **Neon** → move to Launch/Scale plans once you pass free compute hours or storage limits.
+
+### 4) Architectural lever: cache more, compute less
+- Use Redis (e.g., Railway Redis add-on) to cache frequent API results.
+- Throttle high-volume endpoints and reduce logging in production.
+- Batch writes (progress tracking) rather than writing every event.
+
+### 5) Fallback “pay only when needed” plan
+If you want a truly zero monthly base spend:
+- Keep Cloudflare Pages and Neon on free tiers.
+- Keep Railway on the free credit / minimal hourly usage.
+- When load spikes, raise Railway resources temporarily and then scale back.
+
 ## Security & Compliance
 
 ### Data Privacy (COPPA/FERPA Compliance)

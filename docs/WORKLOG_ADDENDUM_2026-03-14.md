@@ -569,3 +569,26 @@ Status updates:
 - [2026-03-14 18:12] **DONE** — All findings implemented, tests passing
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+---
+
+## TCK-20260314-009 :: CI Lint Fix - 3D Game Overlay Styles
+
+Ticket Stamp: STAMP-20260314T130500Z-codex-ci1
+
+Type: CI_FIX
+Owner: Pranay
+Created: 2026-03-14
+Status: **DONE**
+
+Execution log:
+
+- [2026-03-14 19:30] Fixed 5 eslint `no-restricted-syntax` errors for `bg-slate-900` in 3D game overlays
+- [2026-03-14 19:31] Replaced Tailwind classes with inline `rgba(15, 23, 42, ...)` styles in CountingCollectathon3D.tsx, CuttingPractice3D.tsx, ShapePop3D.tsx
+- [2026-03-14 19:32] Created GitHub issue #49 for PR linking (enforce-pr-linking gate)
+
+Status updates:
+
+- [2026-03-14 19:32] **DONE** — CI lint errors fixed, PR linked to issue #49
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
