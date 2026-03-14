@@ -20,7 +20,10 @@ describe('AuthStore', () => {
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      isGuest: false,
+      guestSession: null,
     });
+    localStorage.clear();
     vi.clearAllMocks();
   });
 
@@ -251,6 +254,50 @@ describe('AuthStore', () => {
 
       const state = useAuthStore.getState();
       expect(state.error).toBeNull();
+    });
+  });
+
+  describe('guest session persistence', () => {
+    it('rehydrates guest sessions as authenticated for protected routes', async () => {
+      localStorage.setItem(
+        'auth-storage',
+        JSON.stringify({
+          state: {
+            user: {
+              id: 'guest-1',
+              email: 'guest@demo.local',
+              role: UserRole.GUEST,
+              is_active: true,
+            },
+            isGuest: true,
+            guestSession: {
+              id: 'guest-1',
+              childProfile: {
+                id: 'guest-child-1',
+                name: 'Guest Player',
+                age: 5,
+                preferredLanguage: 'english',
+              },
+              progress: {
+                lettersLearned: 0,
+                totalLetters: 26,
+                averageAccuracy: 0,
+                totalTime: 0,
+              },
+              createdAt: Date.now(),
+            },
+          },
+          version: 0,
+        }),
+      );
+
+      await (useAuthStore as any).persist.rehydrate();
+
+      const state = useAuthStore.getState();
+      expect(state.isGuest).toBe(true);
+      expect(state.isAuthenticated).toBe(true);
+      expect(state.user?.role).toBe(UserRole.GUEST);
+      expect(state.guestSession?.childProfile.name).toBe('Guest Player');
     });
   });
 

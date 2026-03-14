@@ -34,13 +34,16 @@ Scope: Routed `/games/*` pages in `src/frontend/src/App.tsx`
 
 ## Priority Risk Slice: Camera-gated but Pointer-Primary
 
-These routes are camera-gated in routing but show pointer-primary signals in page logic; they are highest-priority candidates for CV-first remediation.
+These routes were camera-gated in routing but showed pointer-primary signals in page logic. CV integration has been implemented for high-priority games.
 
-- `/games/air-guitar-hero` → `AirGuitarHero` (`/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/AirGuitarHero.tsx`)
-- `/games/kaleidoscope-hands` → `KaleidoscopeHands` (`/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/KaleidoscopeHands.tsx`)
-- `/games/phonics-tracing` → `PhonicsTracing` (`/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/PhonicsTracing.tsx`)
-- `/games/shadow-puppet-theater` → `ShadowPuppetTheater` (`/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/ShadowPuppetTheater.tsx`)
-- `/games/target-practice` → `TargetPractice` (`/Users/pranay/Projects/learning_for_kids/src/frontend/src/pages/TargetPractice.tsx`)
+### ✅ COMPLETED - CV Integrated
+- `/games/target-practice` → `AirGuitarHero` ✅ CV aim + pinch to shoot (TCK-20260314-005)
+- `/games/kaleidoscope-hands` → `KaleidoscopeHands` ✅ CV hand tracking for drawing (TCK-20260314-005)
+
+### ⏳ PENDING - CV Integration Required
+- `/games/air-guitar-hero` → `AirGuitarHero` - Hand tracking for strumming gestures
+- `/games/phonics-tracing` → `PhonicsTracing` - Pinch-to-trace functionality
+- `/games/shadow-puppet-theater` → `ShadowPuppetTheater` - Hand pose detection
 
 ## Full Route Matrix
 

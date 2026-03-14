@@ -17,8 +17,7 @@ import {
 } from '../components/game/DragDropSystem';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -48,8 +47,7 @@ function PackLunchboxGame() {
 
   const { playSuccess, playCelebration, playClick, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('pack-lunchbox');
-  const { saveProgress } = useGameProgress('pack-lunchbox');
+  const { completeGame } = useGameCompletion('pack-lunchbox');
 
   useGameSessionProgress({
     gameName: 'Pack Lunchbox',
@@ -140,8 +138,7 @@ function PackLunchboxGame() {
       setScore(finalScore);
       setGameState('complete');
       playCelebration();
-      saveProgress({ score: finalScore, completed: true });
-      onGameComplete(calculateStars(finalScore));
+      completeGame({ score: finalScore });
       if (result.isBalanced) {
         speakText('Perfect lunchbox! Perfectly balanced and complete!');
       } else {
@@ -160,7 +157,7 @@ function PackLunchboxGame() {
         speakText('Looking good! Keep going!');
       }
     }
-  }, [lunchboxItems, playSuccess, playCelebration, playClick, speakText, saveProgress, onGameComplete]);
+  }, [lunchboxItems, playSuccess, playCelebration, playClick, speakText, completeGame]);
 
   const handleItemDroppedOutside = useCallback((_item: DraggableItem) => {
     playClick();

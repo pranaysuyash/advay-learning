@@ -214,7 +214,7 @@ complexity_metrics_for_blob() {
   if [[ "$HAS_LIZARD" == "1" ]]; then
     local ext tmp
     ext="${file##*.}"
-    tmp="$(mktemp "/tmp/feature-check-ccn.XXXXXX.${ext}")"
+    tmp="$(mktemp "/tmp/feature-check-ccn-${ext}.XXXXXX")"
     printf "%s" "$content" > "$tmp"
     python3 - "$tmp" <<'PY'
 import sys

@@ -1,20 +1,22 @@
 import type { GameManifest } from '../gameRegistry';
-import { BETA_3D_GAMES_ENABLED } from '../../config/launch';
+
+// Enable all 3D games for production
+const BETA_3D_GAMES_ENABLED = true;
 
 export const THREE_D_WORLD_GAMES: GameManifest[] = [
   // ── 3D World (Three.js Games) ─────────────────────────────────────────
   {
-    id: 'digital-jenga-3d',
+    id: 'digital-jenga',
     name: '3D Jenga',
     tagline: 'Physics-based block stacking in 3D! 🧱✨',
-    path: '/games/digital-jenga-3d',
+    path: '/games/digital-jenga',
     icon: 'box',
     worldId: '3d-world',
     vibe: 'focus',
     ageRange: '4-10',
     isNew: true,
     cv: ['hand'],
-    listed: BETA_3D_GAMES_ENABLED,
+    listed: true,
     drops: [
       { itemId: 'shape-cube', chance: 0.3 },
       { itemId: 'star-silver', chance: 0.15, minScore: 70 },

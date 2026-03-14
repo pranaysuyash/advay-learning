@@ -30,8 +30,7 @@ import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 import '../styles/animations.css';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -199,8 +198,7 @@ function MathMonstersGame() {
   // ===== AUDIO =====
   const { playSuccess, playError, playClick, playMunch, playFanfare } = useAudio();
   const { playCoin, playHurt, playSelect } = useKenneyAudio();
-  const { onGameComplete } = useGameDrops('math-monsters');
-  const { saveProgress } = useGameProgress('math-monsters');
+  const { completeGame } = useGameCompletion('math-monsters');
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
   // ===== GAME STATE =====
@@ -349,8 +347,7 @@ function MathMonstersGame() {
     if (newGameState.completed) {
       playFanfare();
       triggerHaptic('celebration');
-      await saveProgress({ score: newGameState.score, completed: true, level: newGameState.currentLevel });
-      onGameComplete();
+      await completeGame({ score: newGameState.score, level: newGameState.currentLevel });
       setShowCelebration(true);
     } else {
       setShowFeedback(null);

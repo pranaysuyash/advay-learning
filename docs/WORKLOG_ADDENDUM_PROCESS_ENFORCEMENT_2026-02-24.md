@@ -47,6 +47,7 @@ Execution log:
 - [2026-02-24] Wired `onGameComplete()` calls in `DressForWeather` and `MathMonsters` completion paths.
 - [2026-02-24] Hardened `audioManager.playPop()` with fallback when mocked/test audio context lacks buffer APIs.
 - [2026-02-24] Verified frontend typecheck passes.
+- [2026-03-13] Updated agent guidance docs to explicitly cross-reference `.github/copilot-instructions.md` with `AGENTS.md` and added version/last-updated metadata to the Copilot doc.
 
 Evidence:
 
@@ -55,9 +56,10 @@ Evidence:
 - Command: `cd src/frontend && npx vitest related --run --reporter=dot <changed-files>`
 - Output: command succeeds (no related test files found for current change set)
 - Observed: `.githooks/pre-push` now runs `type-check` and `vitest related` for changed frontend source files in push range.
-- Observed: `AGENTS.md` and `docs/SETUP.md` document no-bypass policy and emergency override protocol.
-- Inferred: Commit-hook bypasses are now constrained by push-time validation, reducing risk of silently shipping unchecked code.
-- Unknown: Remaining historical full-suite test failures outside this remediation scope until dedicated cleanup ticket.
+- Observed: `AGENTS.md` now explicitly asks editors to check `.github/copilot-instructions.md` for matching guidance.
+- Observed: `.github/copilot-instructions.md` now includes version/last-updated metadata and an explicit sync reminder.
+- Inferred: Documentation and workflow guidance are now explicitly linked, reducing drift between the two guidance documents.
+- Unknown: Whether other agent-facing docs need similar cross-references.
 
 Status updates:
 

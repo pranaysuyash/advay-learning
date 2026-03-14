@@ -245,17 +245,20 @@ describe('progressQueue (with DI)', () => {
   });
 
   describe('subscribe', () => {
-    it('notifies subscribers on change', () => {
+    it('notifies subscribers on change', async () => {
       const { queue } = makeFreshQueue();
       const callback = vi.fn();
 
       queue.subscribe(callback);
       queue.enqueue(createValidItem());
 
+      // F3: Notifications are batched via queueMicrotask
+      await Promise.resolve();
+
       expect(callback).toHaveBeenCalled();
     });
 
-    it('unsubscribe removes listener', () => {
+    it('unsubscribe removes listener', async () => {
       const { queue } = makeFreshQueue();
       const callback = vi.fn();
 
@@ -263,6 +266,9 @@ describe('progressQueue (with DI)', () => {
       unsubscribe();
 
       queue.enqueue(createValidItem());
+
+      // F3: Notifications are batched via queueMicrotask
+      await Promise.resolve();
 
       expect(callback).not.toHaveBeenCalled();
     });

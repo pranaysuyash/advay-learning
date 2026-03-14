@@ -180,7 +180,7 @@ export class TTSService {
    * Safe to call multiple times.
    */
   initKokoro(): void {
-    if (this.isTestEnv || !__BETA_LOCAL_AI_ENABLED__) return;
+    if (this.isTestEnv) return;
     if (this.enginePreference === 'web-speech') return;
     void this.ensureKokoroEngine().then((engine) => {
       if (!engine) return;
@@ -208,9 +208,6 @@ export class TTSService {
    * Subscribe to Kokoro engine events
    */
   onKokoroEvent(callback: Parameters<KokoroTTSEngine['on']>[0]): () => void {
-    if (!__BETA_LOCAL_AI_ENABLED__) {
-      return () => {};
-    }
     if (this.kokoroEngine) {
       return this.kokoroEngine.on(callback);
     }
@@ -281,9 +278,8 @@ export class TTSService {
    */
   private speakWithFallback(text: string, options: TTSOptions): Promise<void> {
     const useKokoro =
-      __BETA_LOCAL_AI_ENABLED__ &&
-      this.enginePreference !== 'web-speech' &&
-      this.kokoroEngine?.isReady() === true;
+       this.enginePreference !== 'web-speech' &&
+       this.kokoroEngine?.isReady() === true;
 
     if (useKokoro) {
       this._lastActiveEngine = 'kokoro';
@@ -300,10 +296,9 @@ export class TTSService {
           return this.webSpeechSpeak(text, options);
         });
     } else if (
-      __BETA_LOCAL_AI_ENABLED__ &&
-      this.enginePreference !== 'web-speech' &&
-      this.kokoroEngine?.getStatus() === 'loading'
-    ) {
+       this.enginePreference !== 'web-speech' &&
+       this.kokoroEngine?.getStatus() === 'loading'
+     ) {
       // We are still loading the Kokoro model, let's gracefully fall back to web speech for now
       console.log(
         '[TTSService] Kokoro is still loading, falling back to Web Speech temporarily',
@@ -416,9 +411,6 @@ export class TTSService {
   }
 
   private async ensureKokoroEngine(): Promise<KokoroTTSEngine | null> {
-    if (!__BETA_LOCAL_AI_ENABLED__) {
-      return null;
-    }
     if (this.kokoroEngine) {
       return this.kokoroEngine;
     }

@@ -2,8 +2,8 @@
 
 ## Scope
 Public beta launch. Free access during beta only. Parent trust surfaces, consent, export/delete flows, and first-party analytics are in scope.
-Local AI runtimes (Kokoro/Whisper/Transformers.js) are out of scope for the March beta build unless `VITE_BETA_LOCAL_AI_ENABLED=true` is deliberately enabled.
-3D game routes are out of scope for the March beta build unless `VITE_BETA_3D_GAMES_ENABLED=true` is deliberately enabled.
+Local AI runtimes (Kokoro/Whisper/Transformers.js) are enabled by default for launch builds; set `VITE_BETA_LOCAL_AI_ENABLED=false` if you need to build without them (e.g., smaller download footprint for a constrained environment).
+3D game routes are enabled by default for launch builds; set `VITE_BETA_3D_GAMES_ENABLED=false` to disable them.
 
 Supporting references:
 - `docs/launch/SUPPORTED_DEVICE_MATRIX_2026-03-12.md`

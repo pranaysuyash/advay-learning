@@ -24,12 +24,18 @@ const queryClient = new QueryClient({
 async function bootstrap() {
   // Initialize React Scan for performance monitoring (development only)
   if (import.meta.env.DEV) {
-    scan({
-      enabled: true,
-      animationSpeed: 'fast',
-      showToolbar: true,
-      log: false,
-    });
+    const query = new URLSearchParams(window.location.search);
+    const scanEnabled =
+      query.get('reactScan') === '1' ||
+      window.localStorage.getItem('react_scan_enabled') === '1';
+    if (scanEnabled) {
+      scan({
+        enabled: true,
+        animationSpeed: 'fast',
+        showToolbar: true,
+        log: false,
+      });
+    }
   }
 
   void preloadItemsManifest().catch((error) => {

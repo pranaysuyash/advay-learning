@@ -4,8 +4,7 @@ import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { GameHUD } from '../components/game/GameHUD';
@@ -27,8 +26,7 @@ function SightWordFlashContent() {
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('sight-word-flash');
-  const { saveProgress } = useGameProgress('sight-word-flash');
+  const { completeGame } = useGameCompletion('sight-word-flash');
   const showPending = useRef(false);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -125,10 +123,9 @@ function SightWordFlashContent() {
   const handleStart = () => { playClick(); startGame(); };
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score: correct, completed: true, level: currentLevel });
-    await onGameComplete(correct);
+    await completeGame({ score: correct, level: currentLevel });
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [correct, completeGame, navigate, playClick, currentLevel]);
 
   const currentWord = words[currentIndex];
 

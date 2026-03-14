@@ -15,8 +15,7 @@ import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -52,8 +51,7 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [comboText, setComboText] = useState<string>('');
 
-  const { onGameComplete } = useGameDrops('shadow-portal');
-  const { saveProgress } = useGameProgress('shadow-portal');
+  const { completeGame } = useGameCompletion('shadow-portal');
   const { playSuccess, playError, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -235,8 +233,7 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
             setShowCelebration(true);
             const scores = calculateFinalScore(updated);
             (async () => {
-              await saveProgress({ score: scores.total, completed: true, level: 1 });
-              onGameComplete(scores.total);
+              await completeGame({ score: scores.total, level: 1 });
             })();
             if (ttsEnabled) speak('All portals filled! Amazing!');
           }
@@ -260,7 +257,7 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [silhouetteRegions, playSuccess, playError, playCelebration, speak, ttsEnabled, onGameComplete]);
+  }, [silhouetteRegions, playSuccess, playError, playCelebration, speak, ttsEnabled, completeGame]);
 
   // Timer
   useEffect(() => {

@@ -1,39 +1,79 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { audioManager, SoundType } from '../audioManager';
 
 export function useAudio() {
-  // Initialize on mount - resume context on first interaction
+  const [isInitialized, setIsInitialized] = useState(false);
+  const initializationPromiseRef = useRef<Promise<void> | null>(null);
+  const initializeResolverRef = useRef<(() => void) | null>(null);
+
+  // Initialize on first user interaction
   useEffect(() => {
-    const handleInteraction = () => {
-      audioManager.initialize();
+    const handleInteraction = async () => {
+      if (!isInitialized) {
+        try {
+          audioManager.initialize();
+          setIsInitialized(true);
+          
+          // Resolve any waiting promises
+          if (initializeResolverRef.current) {
+            initializeResolverRef.current();
+            initializeResolverRef.current = null;
+          }
+        } catch (error) {
+          console.warn('Failed to initialize audio context:', error);
+        }
+      }
     };
     
-    document.addEventListener('click', handleInteraction, { once: true });
-    document.addEventListener('touchstart', handleInteraction, { once: true });
+    const handleClick = () => handleInteraction();
+    const handleTouchStart = () => handleInteraction();
+    
+    document.addEventListener('click', handleClick);
+    document.addEventListener('touchstart', handleTouchStart);
     
     return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('touchstart', handleTouchStart);
     };
-  }, []);
+  }, [isInitialized]);
 
-  const play = useCallback((sound: SoundType) => {
-    audioManager.play(sound);
-  }, []);
+  // Wait for initialization if needed
+  const waitForInitialization = useCallback(async (): Promise<void> => {
+    if (isInitialized) {
+      return;
+    }
+    
+    if (!initializationPromiseRef.current) {
+      initializationPromiseRef.current = new Promise<void>((resolve) => {
+        initializeResolverRef.current = resolve;
+      });
+    }
+    
+    return initializationPromiseRef.current;
+  }, [isInitialized]);
 
-  const playSuccess = useCallback(() => audioManager.play('success'), []);
-  const playError = useCallback(() => audioManager.play('error'), []);
-  const playClick = useCallback(() => audioManager.play('click'), []);
-  const playHover = useCallback(() => audioManager.play('hover'), []);
-  const playCelebration = useCallback(() => audioManager.play('celebration'), []);
-  const playLevelUp = useCallback(() => audioManager.play('levelUp'), []);
-  const playBounce = useCallback(() => audioManager.play('bounce'), []);
-  const playPop = useCallback(() => audioManager.play('pop'), []);
-  const playMunch = useCallback(() => audioManager.play('munch'), []);
-  const playChirp = useCallback(() => audioManager.play('chirp'), []);
-  const playFanfare = useCallback(() => audioManager.play('fanfare'), []);
-  const playFlip = useCallback(() => audioManager.play('flip'), []);
-  const playShake = useCallback(() => audioManager.play('shake'), []);
+  const play = useCallback(async (sound: SoundType) => {
+    try {
+      await waitForInitialization();
+      audioManager.play(sound);
+    } catch (error) {
+      console.warn('Failed to play sound:', error);
+    }
+  }, [waitForInitialization]);
+
+  const playSuccess = useCallback(() => play('success'), [play]);
+  const playError = useCallback(() => play('error'), [play]);
+  const playClick = useCallback(() => play('click'), [play]);
+  const playHover = useCallback(() => play('hover'), [play]);
+  const playCelebration = useCallback(() => play('celebration'), [play]);
+  const playLevelUp = useCallback(() => play('levelUp'), [play]);
+  const playBounce = useCallback(() => play('bounce'), [play]);
+  const playPop = useCallback(() => play('pop'), [play]);
+  const playMunch = useCallback(() => play('munch'), [play]);
+  const playChirp = useCallback(() => play('chirp'), [play]);
+  const playFanfare = useCallback(() => play('fanfare'), [play]);
+  const playFlip = useCallback(() => play('flip'), [play]);
+  const playShake = useCallback(() => play('shake'), [play]);
 
   const setVolume = useCallback((volume: number) => {
     audioManager.setSFXVolume(volume);

@@ -11,8 +11,7 @@ import { Sparkles, Trash2 } from 'lucide-react';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useSubscription } from '../hooks/useSubscription';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -33,8 +32,8 @@ import {
 function LightPainterGameContent() {
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('light-painter');
-  const { onGameComplete: _onGameComplete } = useGameDrops('light-painter');
-  const { saveProgress: _saveProgress } = useGameProgress('light-painter');
+  // Game completion hook - available when needed
+  useGameCompletion('light-painter');
 
   const { playClick } = useAudio();
   const [gameState, setGameState] = useState<GameState>(createInitialState());

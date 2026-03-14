@@ -13,10 +13,7 @@ import {
 import type { LLMProviderAdapter } from './LLMProvider';
 import { MockLLMProvider } from './providers/MockLLMProvider';
 
-// compile-time flag injected by Vite; may be undefined in test environments
-// `declare` ensures TypeScript understands its existence, but the runtime access
-// must guard for undefined to avoid ReferenceError.
-declare const __BETA_LOCAL_AI_ENABLED__: boolean | undefined;
+
 
 // runtime utility functions (avoids duplication of environment logic)
 import { selectLLMRuntimePlan } from '../../../utils/runtimeUtils';
@@ -150,15 +147,12 @@ function buildDefaultRuntimeConfigFromEnv(
   envOverride?: Record<string, any>,
 ): LLMRuntimeConfig {
   const env = envOverride ?? (import.meta as any).env ?? {};
+  const betaLocalAiEnabled = parseBoolean(env.VITE_BETA_LOCAL_AI_ENABLED, false);
   const llmFlag = parseBoolean(env.VITE_FEATURE_AI_LLM_RESPONSES_V1, false);
   const explicitEnabled = parseBoolean(env.VITE_AI_LLM_ENABLED, false);
 
   return {
-    // feature flag takes precedence and acts as an OR with explicit setting
-    // guard against undefined (e.g. test envs lacking the define)
-    enabled:
-      (typeof __BETA_LOCAL_AI_ENABLED__ !== 'undefined' && __BETA_LOCAL_AI_ENABLED__ === true) &&
-      (llmFlag || explicitEnabled),
+    enabled: betaLocalAiEnabled && (llmFlag || explicitEnabled),
     provider: parseProvider(env.VITE_AI_LLM_PROVIDER, 'mock'),
     model: parseModel(env.VITE_AI_LLM_MODEL, 'qwen3.5-1.5b-instruct'),
     fallbackModel: parseModel(

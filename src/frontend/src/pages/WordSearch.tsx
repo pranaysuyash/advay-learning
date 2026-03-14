@@ -5,8 +5,7 @@ import { motion } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, generateWordSearch } from '../games/wordSearchLogic';
@@ -27,8 +26,7 @@ export function WordSearchContent() {
   );
 
   const { playClick, playSuccess } = useAudio();
-  const { onGameComplete } = useGameDrops('word-search');
-  const { saveProgress } = useGameProgress('word-search');
+  const { completeGame } = useGameCompletion('word-search');
 
   useGameSessionProgress({
     gameName: 'Word Search',
@@ -104,10 +102,9 @@ export function WordSearchContent() {
   };
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score: foundWords.length, completed: true, level: currentLevel });
-    await onGameComplete(foundWords.length);
+    await completeGame({ score: foundWords.length, level: currentLevel });
     navigate('/games');
-  }, [foundWords.length, onGameComplete, navigate, playClick, currentLevel, saveProgress]);
+  }, [foundWords.length, completeGame, navigate, playClick, currentLevel]);
 
   return (
     <GameContainer

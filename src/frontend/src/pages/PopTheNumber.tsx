@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, generateBubbles, checkPop, calculateScore, type NumberBubble } from '../games/popTheNumberLogic';
 import { triggerHaptic } from '../utils/haptics';
@@ -28,8 +27,7 @@ function PopTheNumberContent() {
   const levelRef = useRef(LEVELS[0]);
 
   const { playClick, playSuccess, playError, playPop } = useAudio();
-  const { onGameComplete } = useGameDrops('pop-the-number');
-  const { saveProgress } = useGameProgress('pop-the-number');
+  const { completeGame } = useGameCompletion('pop-the-number');
   useGameSessionProgress({ gameName: 'Pop the Number', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const level = LEVELS.find(l => l.id === currentLevel) || LEVELS[0];
@@ -52,10 +50,9 @@ function PopTheNumberContent() {
 
   const handleComplete = useCallback(async () => {
     setGameState('complete');
-    await saveProgress({ score, completed: true, level: currentLevel });
-    await onGameComplete(score);
+    await completeGame({ score, level: currentLevel });
     playSuccess();
-  }, [score, onGameComplete, playSuccess, saveProgress, currentLevel]);
+  }, [score, playSuccess, completeGame, currentLevel]);
 
   const handleBubbleClick = useCallback((bubbleId: number) => {
     if (gameState !== 'playing') return;
@@ -129,8 +126,7 @@ function PopTheNumberContent() {
             setGameState('complete');
             // Schedule async operations after state update
             setTimeout(async () => {
-              await saveProgress({ score, completed: true, level: currentLevel });
-              await onGameComplete(score);
+              await completeGame({ score, level: currentLevel });
               playSuccess();
             }, 0);
             return 0;
@@ -145,7 +141,7 @@ function PopTheNumberContent() {
         clearInterval(timerRef.current);
       }
     };
-  }, [gameState, score, onGameComplete, playSuccess, saveProgress, currentLevel]);
+  }, [gameState, score, playSuccess, completeGame, currentLevel]);
 
   return (
     <GameContainer title="Pop the Number" onHome={handleBack} reportSession={false}>

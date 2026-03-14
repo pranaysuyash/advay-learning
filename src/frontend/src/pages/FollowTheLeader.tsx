@@ -41,7 +41,7 @@ import {
 
 const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
   // ===== HOOKS =====
-  const { saveProgress, onGameComplete } = useGameCompletion('follow-the-leader');
+  const { completeGame } = useGameCompletion('follow-the-leader');
   const { playSuccess, playCelebration, playClick, playPop } = useAudio();
 
   // ===== GAME STATE =====
@@ -298,8 +298,7 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
     playClick();
     if (gameState) {
       const stats = calculateFinalStats(gameState);
-      await saveProgress({ score: stats.score, completed: true, level: gameState.level });
-      onGameComplete(stats.score);
+      await completeGame({ score: stats.score, level: gameState.level });
     }
     setShowMenu(true);
     setGameState(null);

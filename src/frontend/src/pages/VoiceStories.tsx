@@ -4,8 +4,7 @@ import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, getStoriesForLevel, type Story } from '../games/voiceStoriesLogic';
@@ -22,8 +21,7 @@ function VoiceStoriesContent() {
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess } = useAudio();
-  const { onGameComplete } = useGameDrops('voice-stories');
-  const { saveProgress } = useGameProgress('voice-stories');
+  const { completeGame } = useGameCompletion('voice-stories');
 
   useGameSessionProgress({ gameName: 'Voice Stories', score, level: currentLevel, isPlaying: true, metaData: { currentLine } });
 
@@ -65,10 +63,9 @@ function VoiceStoriesContent() {
   const handleFinish = useCallback(async () => {
     playClick();
     const finalScore = Math.round(score / 20);
-    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
-    await onGameComplete(finalScore);
+    await completeGame({ score: finalScore, level: currentLevel });
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [score, completeGame, navigate, playClick, currentLevel]);
 
   const currentLineData = currentStory?.lines[currentLine];
 

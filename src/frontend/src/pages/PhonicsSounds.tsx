@@ -11,8 +11,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { GameShell } from '../components/GameShell';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -77,8 +76,7 @@ const PhonicsSoundsContent = memo(function PhonicsSoundsComponent() {
 
   const { playPop, playError, playSuccess, playCelebration, playClick, playLevelUp } = useAudio();
   const { speak, speakLetter, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('phonics-sounds');
-  const { saveProgress } = useGameProgress('phonics-sounds');
+  const { completeGame, triggerEasterEgg } = useGameCompletion('phonics-sounds');
   const correctVowelsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -184,8 +182,7 @@ const PhonicsSoundsContent = memo(function PhonicsSoundsComponent() {
         levelTimeoutRef.current = setTimeout(async () => {
           setShowCelebration(false);
           if (levelRef.current >= MAX_LEVEL) {
-            onGameComplete();
-            await saveProgress({ score: scoreRef.current, completed: true, level: levelRef.current });
+            await completeGame({ score: scoreRef.current, level: levelRef.current });
             setGameCompleted(true);
             setIsPlaying(false);
           } else {
@@ -210,7 +207,7 @@ const PhonicsSoundsContent = memo(function PhonicsSoundsComponent() {
       isAdvancingRef.current = false;
       startRound();
     }
-  }, [playCelebration, startRound]);
+  }, [playCelebration, startRound, completeGame, levelRef]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {

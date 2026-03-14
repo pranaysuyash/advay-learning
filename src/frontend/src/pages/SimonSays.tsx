@@ -17,8 +17,7 @@ import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { GameShell } from '../components/GameShell';
 import { KenneyCharacter } from '../components/characters/KenneyCharacter';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -499,8 +498,7 @@ const SimonSaysContent = memo(function SimonSays() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
   const animationRef = useRef<number>(0);
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('simon-says');
-  useGameProgress('simon-says');
+  const { completeGame, triggerEasterEgg } = useGameCompletion('simon-says');
 
   const [isLoading, setIsLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -768,7 +766,7 @@ const SimonSaysContent = memo(function SimonSays() {
 
   const stopGame = () => {
     playPop();
-    onGameComplete();
+    completeGame({ score });
     setIsPlaying(false);
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { readFileSync } from 'fs';
@@ -20,12 +20,9 @@ const getPackageName = (id) => {
   return match ? match[1] : null;
 };
 
-const betaLocalAIEnabled =
-  String(process.env.VITE_BETA_LOCAL_AI_ENABLED).toLowerCase() === 'true';
-const betaThreeDGamesEnabled =
-  String(process.env.VITE_BETA_3D_GAMES_ENABLED).toLowerCase() === 'true';
+// Note: Env vars are loaded inside the config function below using loadEnv
 
-const getAppChunk = (id) => {
+const getAppChunk = (id, betaThreeDGamesEnabled = false) => {
   if (id.includes('/src/services/ai/')) {
     return 'app-ai';
   }
@@ -52,112 +49,115 @@ const getAppChunk = (id) => {
   return undefined;
 };
 
-const vendorChunkByPackage = {
-  '@huggingface/transformers': 'transformers-runtime',
-  'onnxruntime-web': 'onnx-runtime',
-  'onnxruntime-common': 'onnx-runtime',
-  'kokoro-js': 'kokoro-runtime',
-  '@mediapipe/tasks-vision': 'vision-runtime',
-  '@tensorflow/tfjs': 'tfjs-runtime',
-  'framer-motion': 'motion-runtime',
-  'react-router-dom': 'router-runtime',
-  'chart.js': 'charts-runtime',
-  'react-chartjs-2': 'charts-runtime',
-  'react': 'react-core',
-  'react-dom': 'react-core',
-  'scheduler': 'react-core',
-  'zustand': 'state-runtime',
-  '@tanstack/react-query': 'query-runtime',
-  'axios': 'network-runtime',
-  'lucide-react': 'icons-runtime',
-  'i18next': 'i18n-runtime',
-  'react-i18next': 'i18n-runtime',
-  'i18next-browser-languagedetector': 'i18n-runtime',
-  'i18next-http-backend': 'i18n-runtime',
+// Base vendor chunks - 3D chunks added dynamically based on env
+const getVendorChunks = (betaThreeDGamesEnabled = false) => {
+  const chunks = {
+    '@huggingface/transformers': 'transformers-runtime',
+    'onnxruntime-web': 'onnx-runtime',
+    'onnxruntime-common': 'onnx-runtime',
+    'kokoro-js': 'kokoro-runtime',
+    '@mediapipe/tasks-vision': 'vision-runtime',
+    '@tensorflow/tfjs': 'tfjs-runtime',
+    'framer-motion': 'motion-runtime',
+    'react-router-dom': 'router-runtime',
+    'chart.js': 'charts-runtime',
+    'react-chartjs-2': 'charts-runtime',
+    'react': 'react-core',
+    'react-dom': 'react-core',
+    'scheduler': 'react-core',
+    'zustand': 'state-runtime',
+    '@tanstack/react-query': 'query-runtime',
+    'axios': 'network-runtime',
+    'lucide-react': 'icons-runtime',
+    'i18next': 'i18n-runtime',
+    'react-i18next': 'i18n-runtime',
+    'i18next-browser-languagedetector': 'i18n-runtime',
+    'i18next-http-backend': 'i18n-runtime',
+  };
+  
+  if (betaThreeDGamesEnabled) {
+    Object.assign(chunks, {
+      'three': 'three-core',
+      'three-stdlib': 'three-stdlib-runtime',
+      'camera-controls': 'three-stdlib-runtime',
+      'maath': 'three-helpers-runtime',
+      'meshline': 'three-helpers-runtime',
+      'troika-three-text': 'three-text-runtime',
+      'troika-three-utils': 'three-text-runtime',
+      'troika-worker-utils': 'three-text-runtime',
+      'stats.js': 'three-helpers-runtime',
+      '@react-three/fiber': 'r3f-runtime',
+      '@react-three/drei': 'drei-runtime',
+      '@react-three/cannon': 'react-cannon-runtime',
+      '@pmndrs/cannon-worker-api': 'cannon-runtime',
+      'cannon-es': 'cannon-runtime',
+      'cannon-es-debugger': 'cannon-runtime',
+      '@react-spring/three': 'spring-3d-runtime',
+    });
+  }
+  
+  return chunks;
 };
 
-if (betaThreeDGamesEnabled) {
-  Object.assign(vendorChunkByPackage, {
-    'three': 'three-core',
-    'three-stdlib': 'three-stdlib-runtime',
-    'camera-controls': 'three-stdlib-runtime',
-    'maath': 'three-helpers-runtime',
-    'meshline': 'three-helpers-runtime',
-    'troika-three-text': 'three-text-runtime',
-    'troika-three-utils': 'three-text-runtime',
-    'troika-worker-utils': 'three-text-runtime',
-    'stats.js': 'three-helpers-runtime',
-    '@react-three/fiber': 'r3f-runtime',
-    '@react-three/drei': 'drei-runtime',
-    '@react-three/cannon': 'react-cannon-runtime',
-    '@pmndrs/cannon-worker-api': 'cannon-runtime',
-    'cannon-es': 'cannon-runtime',
-    'cannon-es-debugger': 'cannon-runtime',
-    '@react-spring/three': 'spring-3d-runtime',
-  });
-}
+export default defineConfig(({ mode }) => {
+  // Load env variables from .env files
+  const env = loadEnv(mode, process.cwd(), '');
+  
+  // Default to enabled for launch builds unless explicitly disabled.
+  const betaLocalAIEnabled =
+    String(env.VITE_BETA_LOCAL_AI_ENABLED).toLowerCase() !== 'false';
+  const betaThreeDGamesEnabled =
+    String(env.VITE_BETA_3D_GAMES_ENABLED).toLowerCase() !== 'false';
 
-export default defineConfig({
-  cacheDir: '.vite_cache_new',
-  plugins: [
-    react(),
-  ],
-  define: {
-    __APP_VERSION__: JSON.stringify(packageJson.version),
-    __GIT_SHA__: JSON.stringify(gitSha),
-    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
-    __BETA_LOCAL_AI_ENABLED__: JSON.stringify(
-      String(process.env.VITE_BETA_LOCAL_AI_ENABLED).toLowerCase() === 'true',
-    ),
-    __BETA_3D_GAMES_ENABLED__: JSON.stringify(betaThreeDGamesEnabled),
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      ...(!betaLocalAIEnabled
-        ? {
-            '@huggingface/transformers': path.resolve(
-              __dirname,
-              './src/services/ai/beta-stubs/transformers.ts',
-            ),
-            'kokoro-js': path.resolve(
-              __dirname,
-              './src/services/ai/beta-stubs/kokoro.ts',
-            ),
-          }
-        : {}),
+  return {
+    cacheDir: '.vite_cache_new',
+    plugins: [
+      react(),
+    ],
+    define: {
+      __APP_VERSION__: JSON.stringify(packageJson.version),
+      __GIT_SHA__: JSON.stringify(gitSha),
+      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+      __BETA_LOCAL_AI_ENABLED__: JSON.stringify(betaLocalAIEnabled),
+      __BETA_3D_GAMES_ENABLED__: JSON.stringify(betaThreeDGamesEnabled),
     },
-  },
-  worker: {
-    format: 'es',
-  },
-  optimizeDeps: {
-    exclude: ['kokoro-js'],
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            const packageName = getPackageName(id);
-            const vendorChunk = packageName ? vendorChunkByPackage[packageName] : null;
-            if (vendorChunk) {
-              return vendorChunk;
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
+    worker: {
+      format: 'es',
+    },
+    optimizeDeps: {
+      exclude: ['kokoro-js'],
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              const packageName = getPackageName(id);
+              const vendorChunks = getVendorChunks(betaThreeDGamesEnabled);
+              const vendorChunk = packageName ? vendorChunks[packageName] : null;
+              if (vendorChunk) {
+                return vendorChunk;
+              }
             }
-          }
 
-          return getAppChunk(id);
+            return getAppChunk(id, betaThreeDGamesEnabled);
+          },
         },
       },
     },
-  },
-  server: {
-    port: 6173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8001',
-        changeOrigin: true,
+    server: {
+      port: 6173,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8001',
+          changeOrigin: true,
+        },
       },
     },
-  },
+  };
 });

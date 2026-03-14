@@ -5,8 +5,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, getWordsForLevel, checkAnswer, type SyllableWord } from '../games/syllableClapLogic';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
@@ -28,8 +27,7 @@ function SyllableClapContent() {
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('syllable-clap');
-  const { saveProgress } = useGameProgress('syllable-clap');
+  const { completeGame } = useGameCompletion('syllable-clap');
 
   useGameSessionProgress({
     gameName: 'Syllable Clap',
@@ -115,10 +113,9 @@ function SyllableClapContent() {
   const handleStart = () => { playClick(); startGame(); };
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score: correct, completed: true, level: currentLevel });
-    await onGameComplete(correct);
+    await completeGame({ score: correct, level: currentLevel });
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [correct, completeGame, navigate, playClick, currentLevel]);
 
   const currentWord = words[currentIndex];
   const maxSyllables = LEVELS[currentLevel - 1]?.maxSyllables ?? 3;

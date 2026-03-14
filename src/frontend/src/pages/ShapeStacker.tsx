@@ -5,8 +5,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { GameHUD } from '../components/game/GameHUD';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -59,8 +58,7 @@ function ShapeStackerContent() {
 
   const { playSuccess, playClick, playError } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('shape-stacker');
-  const { saveProgress } = useGameProgress('shape-stacker');
+  const { completeGame } = useGameCompletion('shape-stacker');
   useGameSessionProgress({ gameName: 'Shape Stacker', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   // Slower fall speed, scaling with level
@@ -86,10 +84,9 @@ function ShapeStackerContent() {
     const finalScore = calculateScore(matches, targets.length, timeLeft);
     setScore(finalScore);
     setGameState('complete');
-    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
-    await onGameComplete(finalScore);
+    await completeGame({ score: finalScore, level: currentLevel });
     playSuccess();
-  }, [matches, targets.length, timeLeft, onGameComplete, playSuccess, saveProgress, currentLevel]);
+  }, [matches, targets.length, timeLeft, completeGame, playSuccess, currentLevel]);
 
   const handleShapeClick = useCallback((shape: FallingShape) => {
     if (gameState !== 'playing') return;

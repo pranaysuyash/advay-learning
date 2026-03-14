@@ -7,8 +7,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { GameShell } from '../components/GameShell';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -73,8 +72,7 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
 
   const { playPop, playError, playFanfare } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('number-tap-trail');
-  const { saveProgress } = useGameProgress('number-tap-trail');
+  const { completeGame, triggerEasterEgg } = useGameCompletion('number-tap-trail');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -141,9 +139,8 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
     levelTimeoutRef.current = setTimeout(async () => {
       setShowCelebration(false);
       if (levelRef.current >= MAX_LEVEL) {
-        onGameComplete();
         triggerEasterEgg('egg-golden-number');
-        await saveProgress({ score: scoreRef.current, completed: true, level: levelRef.current });
+        await completeGame({ score: scoreRef.current, level: levelRef.current });
         setGameCompleted(true);
         setIsPlaying(false);
       } else {
@@ -151,7 +148,7 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
       }
       levelTimeoutRef.current = null;
     }, 1800);
-  }, [playFanfare, saveProgress]);
+  }, [playFanfare, completeGame]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {

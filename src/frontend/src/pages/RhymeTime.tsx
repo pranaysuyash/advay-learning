@@ -37,8 +37,7 @@ import {
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { SVGBird } from '../components/characters/SVGBird';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
@@ -260,8 +259,7 @@ function RhymeTimeContent() {
   // ===== AUDIO =====
   const { playSuccess, playError, playClick, playChirp, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('rhyme-time');
-  useGameProgress('rhyme-time');
+  const { completeGame } = useGameCompletion('rhyme-time');
   
   // ===== GAME STATE =====
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
@@ -443,7 +441,7 @@ function RhymeTimeContent() {
   
   const handleShowMenu = () => {
     playClick();
-    onGameComplete();
+    void completeGame({ score: gameState?.score || 0, level: 1 });
     setShowMenu(true);
     setGameState(null);
     setCurrentRound(null);

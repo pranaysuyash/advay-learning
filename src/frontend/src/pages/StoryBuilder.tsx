@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import {
   createStoryBuilderRound,
@@ -16,8 +15,7 @@ import {
 function StoryBuilderGame() {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('story-builder');
-  const { saveProgress } = useGameProgress('story-builder');
+  const { completeGame } = useGameCompletion('story-builder');
 
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -79,8 +77,7 @@ function StoryBuilderGame() {
     if (round >= roundsPerSession) {
       playCelebration();
       const finalScore = score + 25;
-      await saveProgress({ score: finalScore, completed: true, level: 1 });
-      await onGameComplete(finalScore);
+      await completeGame({ score: finalScore, level: 1 });
       setTimeout(() => {
         setActiveRound(null);
       }, 1100);
@@ -94,7 +91,7 @@ function StoryBuilderGame() {
 
   const handleFinish = async () => {
     playClick();
-    await onGameComplete(score);
+    await completeGame({ score, level: 1 });
     navigate('/games');
   };
 

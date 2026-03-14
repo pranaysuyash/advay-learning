@@ -34,6 +34,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type RefObject,
@@ -63,6 +64,13 @@ const VISION_WORKER_FORCE_MAIN_THREAD =
   'true';
 
 export type GameHandTrackingRuntimeMode = 'main-thread' | 'worker';
+export type HandTrackingLifecycleState =
+  | 'idle'
+  | 'starting'
+  | 'running'
+  | 'lost'
+  | 'error'
+  | 'stopped';
 
 interface WorkerRuntimeConfig {
   enabled: boolean;
@@ -146,6 +154,10 @@ export interface UseGameHandTrackingReturn {
     durationMs: number;
     retry: () => void;
   };
+  /** Explicit lifecycle state for camera/tracking UX */
+  lifecycleState: HandTrackingLifecycleState;
+  /** Active delegate for the current runtime session */
+  activeDelegate: 'GPU' | 'CPU' | null;
 }
 
 export function resolveHandTrackingRuntimeMode(params: {
@@ -205,6 +217,12 @@ export function useGameHandTracking(
   const [runtimeFallbackReason, setRuntimeFallbackReason] = useState<
     string | null
   >(null);
+  const [lifecycleState, setLifecycleState] = useState<HandTrackingLifecycleState>(
+    'idle',
+  );
+  const [sessionRunningDelegate, setSessionRunningDelegate] = useState<
+    'GPU' | 'CPU' | null
+  >(null);
 
   // Tracking loss detection - ISSUE-002
   const pauseOnTrackingLossEnabled = useFeatureFlag('safety.pauseOnTrackingLoss');
@@ -226,6 +244,68 @@ export function useGameHandTracking(
     VISION_WORKER_ENABLED_BY_ENV &&
     !VISION_WORKER_FORCE_MAIN_THREAD;
 
+  const pinchConfig = useMemo<PinchOptions>(
+    () => ({
+      ...pinch,
+    }),
+    [pinch.landmarks?.[0], pinch.landmarks?.[1], pinch.releaseThreshold, pinch.startThreshold],
+  );
+  const smoothingConfig = useMemo<OneEuroFilterOptions | false>(() => {
+    if (smoothing === false) {
+      return false;
+    }
+
+    return {
+      ...smoothing,
+    };
+  }, [smoothing === false, smoothing && smoothing.beta, smoothing && smoothing.dCutoff, smoothing && smoothing.minCutoff]);
+  const resolvedHandTrackingOptions = useMemo<UseHandTrackingOptions>(
+    () => ({
+      numHands: 1,
+      minDetectionConfidence: 0.3,
+      minHandPresenceConfidence: 0.3,
+      minTrackingConfidence: 0.3,
+      delegate: 'GPU',
+      enableFallback: true,
+      ...handTracking,
+    }),
+    [
+      handTracking.delegate,
+      handTracking.enableFallback,
+      handTracking.minDetectionConfidence,
+      handTracking.minHandPresenceConfidence,
+      handTracking.minTrackingConfidence,
+      handTracking.numHands,
+    ],
+  );
+  const workerHandTrackingOptions = useMemo<UseHandTrackingOptions>(
+    () => ({
+      numHands: resolvedHandTrackingOptions.numHands ?? 1,
+      minDetectionConfidence: resolvedHandTrackingOptions.minDetectionConfidence ?? 0.3,
+      minHandPresenceConfidence:
+        resolvedHandTrackingOptions.minHandPresenceConfidence ?? 0.3,
+      minTrackingConfidence: resolvedHandTrackingOptions.minTrackingConfidence ?? 0.3,
+      delegate: resolvedHandTrackingOptions.delegate ?? 'GPU',
+      enableFallback: resolvedHandTrackingOptions.enableFallback ?? true,
+    }),
+    [
+      resolvedHandTrackingOptions.delegate,
+      resolvedHandTrackingOptions.enableFallback,
+      resolvedHandTrackingOptions.minDetectionConfidence,
+      resolvedHandTrackingOptions.minHandPresenceConfidence,
+      resolvedHandTrackingOptions.minTrackingConfidence,
+      resolvedHandTrackingOptions.numHands,
+    ],
+  );
+  const resolvedWorkerConfig = useMemo<WorkerRuntimeConfig>(
+    () => ({
+      enabled: workerRequestedByOptions && runtimeFallbackReason === null,
+      targetFps: workerConfig?.targetFps,
+      transferMode: workerConfig?.transferMode ?? 'bitmap',
+    }),
+    [runtimeFallbackReason, workerConfig?.targetFps, workerConfig?.transferMode, workerRequestedByOptions],
+  );
+
   // Track pinch state for transitions
   const previousPinchRef = useRef(pinchState);
   const pinchStateRef = useRef(pinchState);
@@ -236,16 +316,11 @@ export function useGameHandTracking(
     isLoading: isModelLoading,
     error: handTrackingError,
     isReady: isHandTrackingReady,
+    activeDelegate: handTrackingDelegate,
     initialize: initializeHandTracking,
     reset: resetHandTracking,
   } = useHandTracking({
-    numHands: 1,
-    minDetectionConfidence: 0.3,
-    minHandPresenceConfidence: 0.3,
-    minTrackingConfidence: 0.3,
-    delegate: 'GPU',
-    enableFallback: true,
-    ...handTracking,
+    ...resolvedHandTrackingOptions,
   });
 
   const {
@@ -257,21 +332,10 @@ export function useGameHandTracking(
     isRunning: (isRunning ?? isTracking) && runtimeFallbackReason === null,
     webcamRef,
     targetFps,
-    handTracking: {
-      numHands: handTracking.numHands ?? 1,
-      minDetectionConfidence: handTracking.minDetectionConfidence ?? 0.3,
-      minHandPresenceConfidence: handTracking.minHandPresenceConfidence ?? 0.3,
-      minTrackingConfidence: handTracking.minTrackingConfidence ?? 0.3,
-      delegate: handTracking.delegate ?? 'GPU',
-      enableFallback: handTracking.enableFallback ?? true,
-    },
-    pinchOptions: pinch,
+    handTracking: workerHandTrackingOptions,
+    pinchOptions: pinchConfig,
     resetPinchOnNoHand,
-    workerConfig: {
-      enabled: workerRequestedByOptions && runtimeFallbackReason === null,
-      targetFps: workerConfig?.targetFps,
-      transferMode: workerConfig?.transferMode ?? 'bitmap',
-    },
+    workerConfig: resolvedWorkerConfig,
     onFrame: useCallback(
       (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
         // Reset tracking loss on frame received - ISSUE-002
@@ -321,7 +385,7 @@ export function useGameHandTracking(
     onNoVideoFrame: useCallback(() => {
       setCursor(null);
       if (resetPinchOnNoHand) {
-        const defaultState = createDefaultPinchState(pinch);
+        const defaultState = createDefaultPinchState(pinchConfig);
         setPinchState(defaultState);
         previousPinchRef.current = defaultState;
         pinchStateRef.current = defaultState;
@@ -342,7 +406,7 @@ export function useGameHandTracking(
       }
       
       onNoVideoFrame?.();
-    }, [onNoVideoFrame, pinch, resetPinchOnNoHand, pauseOnTrackingLossEnabled, isTracking]),
+    }, [isTracking, onNoVideoFrame, pauseOnTrackingLossEnabled, pinchConfig, resetPinchOnNoHand]),
     onError: useCallback(
       (error: unknown) => {
         onError?.(error as Error);
@@ -368,6 +432,11 @@ export function useGameHandTracking(
       ? (isRunning ?? isTracking) && isWorkerReady
       : (isRunning ?? isTracking) && isHandTrackingReady;
 
+  const effectiveError =
+    activeRuntimeMode === 'worker' ? workerError : handTrackingError;
+  const effectiveLoading =
+    activeRuntimeMode === 'worker' ? isWorkerLoading : isModelLoading;
+
   // Game loop for consistent timing
   useGameLoop({
     isRunning: runtimeEnabled,
@@ -384,9 +453,9 @@ export function useGameHandTracking(
     handLandmarker: activeRuntimeMode === 'main-thread' ? landmarker : null,
     webcamRef,
     targetFps,
-    pinchOptions: pinch,
+    pinchOptions: pinchConfig,
     resetPinchOnNoHand,
-    smoothing,
+    smoothing: smoothingConfig,
     onFrame: useCallback(
       (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
         // Update cursor position
@@ -424,13 +493,13 @@ export function useGameHandTracking(
     onNoVideoFrame: useCallback(() => {
       setCursor(null);
       if (resetPinchOnNoHand) {
-        const defaultState = createDefaultPinchState(pinch);
+        const defaultState = createDefaultPinchState(pinchConfig);
         setPinchState(defaultState);
         previousPinchRef.current = defaultState;
         pinchStateRef.current = defaultState;
       }
       onNoVideoFrame?.();
-    }, [onNoVideoFrame, pinch, resetPinchOnNoHand]),
+    }, [onNoVideoFrame, pinchConfig, resetPinchOnNoHand]),
     onError: useCallback(
       (error: unknown) => {
         console.error(`[${gameName}] Hand tracking error:`, error);
@@ -445,6 +514,7 @@ export function useGameHandTracking(
     if (isTracking) return;
 
     try {
+      setLifecycleState('starting');
       setIsTracking(true);
 
       // Initialize hand tracking if not ready
@@ -456,11 +526,16 @@ export function useGameHandTracking(
         await initializeHandTracking();
       }
 
+      setSessionRunningDelegate(
+        activeRuntimeMode === 'main-thread' ? handTrackingDelegate : null,
+      );
       onReady?.();
     } catch (error) {
       console.error(`[${gameName}] Failed to start tracking:`, error);
       onError?.(error as Error);
       setIsTracking(false);
+      setSessionRunningDelegate(null);
+      setLifecycleState('error');
     }
   }, [
     isTracking,
@@ -468,22 +543,10 @@ export function useGameHandTracking(
     isModelLoading,
     activeRuntimeMode,
     initializeHandTracking,
+    handTrackingDelegate,
     gameName,
     onReady,
     onError,
-  ]);
-
-  useEffect(() => {
-    if (!isRunning) return;
-    if (activeRuntimeMode !== 'main-thread') return;
-    if (isHandTrackingReady || isModelLoading) return;
-    void initializeHandTracking();
-  }, [
-    activeRuntimeMode,
-    initializeHandTracking,
-    isHandTrackingReady,
-    isModelLoading,
-    isRunning,
   ]);
 
   // Stop tracking
@@ -491,14 +554,16 @@ export function useGameHandTracking(
     if (!isTracking) return;
 
     setIsTracking(false);
+    setSessionRunningDelegate(null);
     setCursor(null);
-    const defaultState = createDefaultPinchState(pinch);
+    const defaultState = createDefaultPinchState(pinchConfig);
     setPinchState(defaultState);
     previousPinchRef.current = defaultState;
     pinchStateRef.current = defaultState;
+    setLifecycleState('stopped');
 
     onStopped?.();
-  }, [isTracking, pinch, onStopped]);
+  }, [isTracking, onStopped, pinchConfig]);
 
   // Reset tracking
   const resetTracking = useCallback(() => {
@@ -508,11 +573,13 @@ export function useGameHandTracking(
     }
     // Clear any pending state
     setCursor(null);
-    const defaultState = createDefaultPinchState(pinch);
+    const defaultState = createDefaultPinchState(pinchConfig);
     setPinchState(defaultState);
     previousPinchRef.current = defaultState;
     pinchStateRef.current = defaultState;
-  }, [activeRuntimeMode, stopTracking, resetHandTracking, pinch]);
+    setSessionRunningDelegate(null);
+    setLifecycleState('idle');
+  }, [activeRuntimeMode, stopTracking, resetHandTracking, pinchConfig]);
 
   // Retry tracking after loss - ISSUE-002
   const retryTracking = useCallback(async () => {
@@ -533,6 +600,7 @@ export function useGameHandTracking(
       await resetHandTracking();
       await initializeHandTracking();
     }
+    setLifecycleState('starting');
   }, [activeRuntimeMode, resetHandTracking, initializeHandTracking]);
 
   // Update tracking loss duration while lost - ISSUE-002
@@ -557,6 +625,7 @@ export function useGameHandTracking(
     if (activeRuntimeMode !== 'main-thread') return;
     resetHandTracking();
     if (isTracking) {
+      setLifecycleState('starting');
       await initializeHandTracking();
     }
   }, [
@@ -566,16 +635,50 @@ export function useGameHandTracking(
     initializeHandTracking,
   ]);
 
-  // Cleanup on unmount
+  useEffect(() => {
+    let nextState = lifecycleState;
+
+    if (!isRunning || !isTracking) {
+      nextState = lifecycleState === 'stopped' ? 'stopped' : 'idle';
+    } else if (effectiveError) {
+      nextState = 'error';
+    } else if (effectiveLoading) {
+      nextState = 'starting';
+    } else if (trackingLossState.isLost) {
+      nextState = 'lost';
+    } else if (cursor !== null || runtimeEnabled) {
+      nextState = 'running';
+    }
+
+    if (nextState !== lifecycleState) {
+      setLifecycleState(nextState);
+    }
+  }, [
+    cursor,
+    effectiveError,
+    effectiveLoading,
+    isRunning,
+    isTracking,
+    lifecycleState,
+    runtimeEnabled,
+    trackingLossState.isLost,
+  ]);
+
+  const stopTrackingRef = useRef(stopTracking);
+
+  useEffect(() => {
+    stopTrackingRef.current = stopTracking;
+  }, [stopTracking]);
+
   useEffect(() => {
     return () => {
-      stopTracking();
+      stopTrackingRef.current();
       // Clear tracking loss timer - ISSUE-002
       if (trackingLossTimerRef.current) {
         clearTimeout(trackingLossTimerRef.current);
       }
     };
-  }, [stopTracking]);
+  }, []);
 
   return {
     isReady:
@@ -601,9 +704,8 @@ export function useGameHandTracking(
     reinitialize,
     fps,
     averageFps,
-    error: activeRuntimeMode === 'worker' ? workerError : handTrackingError,
-    isLoading:
-      activeRuntimeMode === 'worker' ? isWorkerLoading : isModelLoading,
+    error: effectiveError,
+    isLoading: effectiveLoading,
     webcamRef,
     isPinching: pinchState.isPinching,
     handVisible: cursor !== null,
@@ -613,6 +715,11 @@ export function useGameHandTracking(
       durationMs: trackingLossState.durationMs,
       retry: retryTracking,
     },
+    lifecycleState,
+    activeDelegate:
+      activeRuntimeMode === 'main-thread'
+        ? handTrackingDelegate ?? sessionRunningDelegate
+        : sessionRunningDelegate,
   };
 }
 

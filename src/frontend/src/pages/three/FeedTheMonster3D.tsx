@@ -260,8 +260,7 @@ export default function FeedTheMonster3D() {
 
   // Performance monitoring
   usePerformanceMonitor('FeedTheMonster3D', {
-    reportToAnalytics: true,
-    fpsThreshold: 30,
+    warnThreshold: 30,
   });
   const [isMuted, setIsMuted] = useState(false);
   const [score, setScore] = useState(0);

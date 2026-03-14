@@ -26,8 +26,7 @@ import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
@@ -87,8 +86,7 @@ function gridCols(pairCount: number) {
 
 const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
-  const { onGameComplete } = useGameDrops('memory-match');
-  const { saveProgress } = useGameProgress('memory-match');
+  const { completeGame } = useGameCompletion('memory-match');
   const { playFlip, playSuccess, playError, playCelebration, playClick } =
     useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -211,11 +209,10 @@ const MemoryMatchGame = memo(function MemoryMatchGameComponent() {
       triggerHaptic('celebration');
       setShowCelebration(true);
       (async () => {
-        await saveProgress({ score, completed: true, level: 1 });
-        onGameComplete(score);
+        await completeGame({ score, level: 1 });
       })();
     }
-  }, [completed, score, saveProgress, onGameComplete, playCelebration]);
+  }, [completed, score, completeGame, playCelebration]);
 
   // ── Hint function ──────────────────────────────────────────────────────────
   const useHint = useCallback(() => {

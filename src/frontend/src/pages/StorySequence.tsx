@@ -22,8 +22,7 @@ import { AssetPreloader } from '../components/AssetPreloader';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -446,8 +445,7 @@ function StorySequenceContent() {
   // ===== AUDIO =====
   const { playSuccess, playClick, playFlip, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('story-sequence');
-  const { saveProgress } = useGameProgress('story-sequence');
+  const { completeGame } = useGameCompletion('story-sequence');
 
   // ===== GAME STATE =====
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -713,8 +711,7 @@ function StorySequenceContent() {
   };
 
   const handleGameComplete = async () => {
-    await saveProgress({ score: 100, completed: true, level: 1 });
-    onGameComplete();
+    await completeGame({ score: 100, level: 1 });
     playCelebration();
     setShowCelebration(true);
     if (gameState) {

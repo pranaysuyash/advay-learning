@@ -16,9 +16,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { triggerHaptic } from '../utils/haptics';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import {
@@ -35,14 +34,14 @@ const TOTAL_DIGITS = 10;
 
 // Inner game component
 interface NumberTracingGameProps {
-  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
+  completeGame: (data: { score: number; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
 }
 
-const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgress }: NumberTracingGameProps) {
+const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGame: completeGameProp }: NumberTracingGameProps) {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const reducedMotion = useReducedMotion();
-  
+
   const [currentDigit, setCurrentDigit] = useState(0);
   const [strokePoints, setStrokePoints] = useState<TracePoint[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -56,7 +55,6 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('number-tracing');
   const currentTemplate = useMemo(() => getTemplateForDigit(currentDigit), [currentDigit]);
 
   // Draw canvas
@@ -154,15 +152,13 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
         if (completedDigits.length + 1 >= TOTAL_DIGITS) {
           playCelebration();
           setShowCelebration(true);
-          void saveProgress({
+          void completeGameProp({
             score: newScore,
-            completed: true,
             metadata: {
               completed_digits: [...completedDigits, currentDigit],
               total_accuracy: accuracy,
             },
           });
-          onGameComplete(newScore);
         } else {
           // Next digit after delay
           setTimeout(() => {
@@ -183,7 +179,7 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
       console.error('Trace evaluation error:', err);
       setFeedback('Oops! Try again.');
     }
-  }, [isDrawing, strokePoints, currentTemplate, hintsUsed, score, currentDigit, completedDigits, playSuccess, playError, reducedMotion, saveProgress, onGameComplete]);
+  }, [isDrawing, strokePoints, currentTemplate, hintsUsed, score, currentDigit, completedDigits, playSuccess, playError, reducedMotion, completeGameProp]);
 
   const handleUseHint = () => {
     playClick();
@@ -320,7 +316,7 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ saveProgres
 
 // Main export wrapped with GameShell
 export const NumberTracing = memo(function NumberTracingComponent() {
-  const { saveProgress } = useGameProgress('number-tracing');
+  const { completeGame: completeGameHook } = useGameCompletion('number-tracing');
 
   return (
     <GameShell
@@ -329,7 +325,7 @@ export const NumberTracing = memo(function NumberTracingComponent() {
       showWellnessTimer={true}
       enableErrorBoundary={true}
     >
-      <NumberTracingGame saveProgress={saveProgress} />
+      <NumberTracingGame completeGame={completeGameHook} />
     </GameShell>
   );
 });

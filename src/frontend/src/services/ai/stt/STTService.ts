@@ -18,8 +18,6 @@ import type {
 } from './STTProvider';
 import { WebSpeechSTTProvider } from './WebSpeechSTTProvider';
 
-declare const __BETA_LOCAL_AI_ENABLED__: boolean;
-
 export interface STTServiceOptions {
   /** Preferred provider: 'auto' | 'whisper' | 'web-speech' | 'cloud' */
   provider?: 'auto' | 'whisper' | 'web-speech' | 'cloud';
@@ -78,15 +76,11 @@ export class STTService {
     this.options = { ...DEFAULT_OPTIONS, ...options };
 
     if (this.options.provider === 'auto') {
-      if (!__BETA_LOCAL_AI_ENABLED__) {
-        this.options.provider = 'web-speech';
-      } else {
       // delegate to shared runtime utility which encapsulates the
       // whisper/web‑speech/cloud decision logic used across the project
-        const { detectBestSTTProvider } =
-          await import('../../../utils/runtimeUtils');
-        this.options.provider = await detectBestSTTProvider();
-      }
+      const { detectBestSTTProvider } =
+        await import('../../../utils/runtimeUtils');
+      this.options.provider = await detectBestSTTProvider();
     }
 
     await this.initializeProvider();

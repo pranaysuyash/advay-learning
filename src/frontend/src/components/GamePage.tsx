@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { useCallback, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from './GameContainer';
@@ -7,31 +6,25 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useGameProgress } from '../hooks/useGameProgress';
 import { useProgressStore } from '../store';
 import { useGameDrops } from '../hooks/useGameDrops';
+import { trackLaunchEvent } from '../analytics/launch';
+import {
+  GamePageContext as GamePageContextObject,
+  type GamePageContextValue,
+} from './GamePageContext';
 
-// exported interface describes the shape of the context value
-export interface GamePageContext {
-  score: number;
-  setScore: React.Dispatch<React.SetStateAction<number>>;
-  currentLevel: number;
-  setCurrentLevel: React.Dispatch<React.SetStateAction<number>>;
-  handleFinish: (opts?: {
-    finalScore?: number;
-    level?: number;
-  }) => Promise<void>;
-}
-
-// actual React context object; consumers will import this
-export const GamePageContext = React.createContext<GamePageContext | null>(
-  null,
-);
+// re-export for backward compatibility
+export type { GamePageContextValue } from './GamePageContext';
+export const GamePageContext = GamePageContextObject;
 
 // small reusable UI shown anytime a game child throws or save fails
 function GameErrorScreen({
   message,
   onHome,
+  onRetry,
 }: {
   message?: string;
   onHome?: () => void;
+  onRetry?: () => void;
 }) {
   return (
     <div className='flex items-center justify-center min-h-full'>
@@ -43,6 +36,7 @@ function GameErrorScreen({
         <div className='flex gap-3 justify-center'>
           {onHome && (
             <button
+              type='button'
               onClick={onHome}
               className='px-6 py-3 bg-slate-200 rounded-xl font-bold'
             >
@@ -50,7 +44,8 @@ function GameErrorScreen({
             </button>
           )}
           <button
-            onClick={() => window.location.reload()}
+            type='button'
+            onClick={onRetry ?? (() => window.location.reload())}
             className='px-6 py-3 bg-[#3B82F6] text-white rounded-xl font-bold'
           >
             Reload
@@ -64,12 +59,13 @@ function GameErrorScreen({
 // simple error boundary that catches render-time exceptions and shows
 // an inline fallback (same UI as the GamePage error state). The boundary does
 // not update the parent state, which avoids nested render/update races that
-// previously triggered hook-order mismatches in tests.
+// previously triggered hook-order mismatches in tests. The parent passes a
+// `retryKey` that increments to force a full unmount/remount of children.
 class GamePageErrorBoundary extends React.Component<
-  { children: React.ReactNode; onHome: () => void },
+  { children: React.ReactNode; onHome: () => void; gameId: string; retryKey: number },
   { error: Error | null }
 > {
-  constructor(props: { children: React.ReactNode; onHome: () => void }) {
+  constructor(props: { children: React.ReactNode; onHome: () => void; gameId: string; retryKey: number }) {
     super(props);
     this.state = { error: null };
   }
@@ -79,13 +75,15 @@ class GamePageErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error) {
-    // we could log to monitoring here, but do not touch parent state
+    trackLaunchEvent('game_render_error', {
+      gameId: this.props.gameId,
+      message: error.message,
+    });
     console.error('GamePage rendering error:', error);
   }
 
   render() {
     if (this.state.error) {
-      // only render the inner error UI; outer GameContainer remains intact
       return (
         <GameErrorScreen
           message={this.state.error.message}
@@ -101,13 +99,16 @@ interface GamePageProps {
   title: string;
   gameId: string;
   reportSession?: boolean;
-  children: (ctx: GamePageContext) => React.ReactNode;
+  /** Called after successful save with final score and level */
+  onComplete?: (finalScore: number, level: number) => void;
+  children: (ctx: GamePageContextValue) => React.ReactNode;
 }
 
 export function GamePage({
   title,
   gameId,
   reportSession = true,
+  onComplete,
   children,
 }: GamePageProps) {
   // ALL HOOKS MUST BE CALLED FIRST, BEFORE ANY CONDITIONAL RETURNS
@@ -125,6 +126,8 @@ export function GamePage({
 
   const [score, _setScore] = useState(0);
   const [currentLevel, _setCurrentLevel] = useState(1);
+  // retryKey increments to force error boundary remount on retry
+  const [retryKey, setRetryKey] = useState(0);
 
   const setScore: React.Dispatch<React.SetStateAction<number>> = useCallback(
     (u) => {
@@ -152,14 +155,13 @@ export function GamePage({
   // exceptions because those are handled by the boundary above.
   const [error, setError] = useState<Error | null>(null);
   const submittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // progress helper – this does *not* catch so that callers can handle
   // failures in one place. `handleFinish` is responsible for updating state.
   const handleGameComplete = useCallback(
     async (finalScore: number, level: number) => {
       if (!currentProfile) {
-        // missing profile usually means the user navigated away or the
-        // session expired; treat as an error so the caller can react.
         throw new Error('No profile selected');
       }
       const durationSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
@@ -178,34 +180,47 @@ export function GamePage({
     async (opts?: { finalScore?: number; level?: number }) => {
       if (submittingRef.current) return;
       submittingRef.current = true;
+      setIsSubmitting(true);
       const finalScore = opts?.finalScore ?? scoreRef.current;
       const level = opts?.level ?? levelRef.current;
 
       try {
         await handleGameComplete(finalScore, level);
+        // F5: Reset timer for next round in multi-round games
+        startTimeRef.current = Date.now();
+        // F4: Notify caller of completion
+        onComplete?.(finalScore, level);
       } catch (err) {
         console.error('Progress save failed', err);
         setError(err as Error);
       } finally {
         submittingRef.current = false;
+        setIsSubmitting(false);
       }
-      // navigation should be handled by caller via context or external link
     },
-    [handleGameComplete],
+    [handleGameComplete, onComplete],
   );
 
+  const handleRetry = useCallback(() => {
+    setError(null);
+    scoreRef.current = 0;
+    levelRef.current = 1;
+    startTimeRef.current = Date.now();
+    setRetryKey((k) => k + 1);
+  }, []);
+
   const ctxValue = useMemo(
-    () => ({ score, setScore, currentLevel, setCurrentLevel, handleFinish }),
-    [score, currentLevel, handleFinish],
+    () => ({ score, setScore, currentLevel, setCurrentLevel, isSubmitting, handleFinish }),
+    [score, currentLevel, isSubmitting, handleFinish, setScore, setCurrentLevel],
   );
 
   // NOW we can do conditional early returns after all hooks are called
 
-  // rendering
   if (subLoading) {
     return (
       <div
         role='status'
+        aria-label='Loading game…'
         className='flex items-center justify-center min-h-screen'
       >
         <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-red-500'></div>
@@ -218,15 +233,13 @@ export function GamePage({
     return <AccessDenied gameName={title} gameId={gameId} />;
   }
 
-  // save-error UI – boundary handles render‑time errors
   if (error) {
-    // reuse the shared error screen inside the existing container so the
-    // header/home button stays visible; also pass onHome for consistency
     return (
-      <GameContainer title={title} onHome={() => navigate('/games')}>
+      <GameContainer title={title} reportSession={reportSession} onHome={() => navigate('/games')}>
         <GameErrorScreen
           message={error.message}
           onHome={() => navigate('/games')}
+          onRetry={handleRetry}
         />
       </GameContainer>
     );
@@ -237,9 +250,15 @@ export function GamePage({
       title={title}
       onHome={() => navigate('/games')}
       showScore={reportSession}
+      reportSession={reportSession}
       score={score}
     >
-      <GamePageErrorBoundary onHome={() => navigate('/games')}>
+      <GamePageErrorBoundary
+        key={retryKey}
+        onHome={() => navigate('/games')}
+        gameId={gameId}
+        retryKey={retryKey}
+      >
         <GamePageContext.Provider value={ctxValue}>
           {children(ctxValue)}
         </GamePageContext.Provider>

@@ -21,8 +21,7 @@ import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameShell } from '../components/GameShell';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -58,8 +57,7 @@ const ShapeSafariContent = memo(function ShapeSafari() {
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
   // ===== GAME STATE =====
-  const { onGameComplete } = useGameDrops('shape-safari');
-  const { saveProgress: _saveProgress } = useGameProgress('shape-safari');
+  const { completeGame } = useGameCompletion('shape-safari');
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [currentScene, setCurrentScene] = useState<SafariScene | null>(null);
   const [showMenu, setShowMenu] = useState(true);
@@ -429,7 +427,10 @@ const ShapeSafariContent = memo(function ShapeSafari() {
 
   const handleShowMenu = () => {
     playClick();
-    onGameComplete();
+    if (gameState?.completed) {
+      const finalScore = calculateFinalScore(gameState);
+      completeGame({ score: finalScore, level: 1 });
+    }
     setShowMenu(true);
     setGameState(null);
     setCurrentScene(null);

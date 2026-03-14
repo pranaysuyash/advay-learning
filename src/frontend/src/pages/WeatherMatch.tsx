@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateGame, calculateScore, type Weather, type GamePair } from '../games/weatherMatchLogic';
@@ -29,8 +28,7 @@ function WeatherMatchContent() {
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
 
   const { playClick, playSuccess, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('weather-match');
-  const { saveProgress } = useGameProgress('weather-match');
+  const { completeGame } = useGameCompletion('weather-match');
 
   useGameSessionProgress({ gameName: 'Weather Match', score, level: currentLevel, isPlaying: true, metaData: { correct } });
 
@@ -86,10 +84,9 @@ function WeatherMatchContent() {
   const handleStart = () => { playClick(); startGame(); };
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score: correct, completed: true, level: currentLevel });
-    await onGameComplete(correct);
+    await completeGame({ score: correct, level: currentLevel });
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [correct, completeGame, navigate, playClick, currentLevel]);
 
   return (
     <GameContainer title="Weather Match" onHome={() => navigate('/games')} reportSession={false}>

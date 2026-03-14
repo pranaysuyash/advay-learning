@@ -20,11 +20,10 @@ export const MAX_RETRY_DELAY_MS = 16000;
 /** Jitter range in milliseconds (added to delay to prevent thundering herd) */
 export const RETRY_JITTER_MS = 500;
 
-/** Debounce window for rapid enqueue operations in milliseconds */
-export const ENQUEUE_DEBOUNCE_MS = 100;
-
 /** Minimum ms between enqueue() calls from the same profile_id (per-profile gate) */
 export const ENQUEUE_RATE_LIMIT_MS = 50;
+/** Backward-compatible alias for older queue callers */
+export const ENQUEUE_DEBOUNCE_MS = ENQUEUE_RATE_LIMIT_MS;
 
 /** Maximum enqueue() calls allowed globally per minute (circuit-breaker ceiling) */
 export const MAX_ENQUEUE_PER_MINUTE = 120;

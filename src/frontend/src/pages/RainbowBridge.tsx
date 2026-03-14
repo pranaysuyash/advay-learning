@@ -5,8 +5,7 @@ import { motion } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -63,8 +62,7 @@ export function RainbowBridgeContent() {
   const currentIndexRef = useRef(0);
 
   const { playPop, playSuccess, playClick } = useAudio();
-  const { onGameComplete } = useGameDrops('rainbow-bridge');
-  const { saveProgress } = useGameProgress('rainbow-bridge');
+  const { completeGame } = useGameCompletion('rainbow-bridge');
   useGameSessionProgress({ gameName: 'Rainbow Bridge', score, level: currentLevel, isPlaying: gameState === 'playing' });
 
   const level = LEVELS.find(l => l.level === currentLevel) || LEVELS[0];
@@ -86,10 +84,9 @@ export function RainbowBridgeContent() {
 
   const handleComplete = useCallback(async () => {
     setGameState('complete');
-    await saveProgress({ score, completed: true, level: currentLevel });
-    onGameComplete(score);
+    await completeGame({ score, level: currentLevel });
     playSuccess();
-  }, [score, currentLevel, onGameComplete, playSuccess, saveProgress]);
+  }, [score, currentLevel, playSuccess, completeGame]);
 
   const handleDotPress = useCallback((x: number, y: number) => {
     if (gameState !== 'playing') return;

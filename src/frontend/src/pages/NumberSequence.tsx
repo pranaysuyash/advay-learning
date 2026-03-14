@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -19,8 +18,7 @@ import { triggerHaptic } from '../utils/haptics';
 function NumberSequenceGame() {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('number-sequence');
-  const { saveProgress } = useGameProgress('number-sequence');
+  const { completeGame } = useGameCompletion('number-sequence');
 
   const [level, setLevel] = useState(1);
   const [score, setScore] = useState(0);
@@ -107,8 +105,7 @@ function NumberSequenceGame() {
       playCelebration();
       triggerHaptic('celebration');
       const finalScore = score + (ok ? calculateScore(streak + (ok ? 1 : 0), level) : 0);
-      await saveProgress({ score: finalScore, completed: true, level });
-      await onGameComplete(finalScore);
+      await completeGame({ score: finalScore, level });
       setTimeout(() => {
         setActiveRound(null);
       }, 1200);
@@ -122,8 +119,7 @@ function NumberSequenceGame() {
 
   const handleFinish = async () => {
     playClick();
-    await saveProgress({ score, completed: true, level });
-    await onGameComplete(score);
+    await completeGame({ score, level });
     navigate('/games');
   };
 

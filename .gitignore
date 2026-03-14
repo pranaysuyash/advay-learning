@@ -138,6 +138,7 @@ evaluations/**/raw_captures/
 docs/audit/screenshots/
 docs/screenshots/
 src/frontend/screenshots/
+src/screenshots/
 docs/ux_audit/**/keyframe_*.jpg
 docs/ux_audit/**/keyframe_*.jpeg
 docs/ux_audit/**/keyframe_*.png

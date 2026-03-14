@@ -1,0 +1,4 @@
+model,dim,load_s,throughput_texts_per_s,toy_semantic_acc,toy_margin_mean,toy_margin_min,total_eval_texts,status
+BAAI/bge-m3,1024,6.837,433.76,1.000,0.2818,0.1858,256,ok
+mixedbread-ai/mxbai-embed-large-v1,1024,4.213,635.89,1.000,0.3783,0.2510,256,ok
+intfloat/multilingual-e5-base,768,6.423,946.91,1.000,0.0911,0.0461,256,ok

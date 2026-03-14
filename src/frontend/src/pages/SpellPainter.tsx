@@ -5,8 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   LEVELS,
@@ -38,8 +37,7 @@ export function SpellPainterContent() {
   const currentLevelRef = useRef(1);
 
   const { playClick, playSuccess } = useAudio();
-  const { onGameComplete } = useGameDrops('spell-painter');
-  const { saveProgress } = useGameProgress('spell-painter');
+  const { completeGame } = useGameCompletion('spell-painter');
   useGameSessionProgress({
     gameName: 'Spell Painter',
     score,
@@ -169,10 +167,9 @@ export function SpellPainterContent() {
 
   const handleComplete = useCallback(async () => {
     setGameState('complete');
-    await saveProgress({ score, completed: true, level: currentLevelRef.current });
-    onGameComplete(score);
+    await completeGame({ score, level: currentLevelRef.current });
     playSuccess();
-  }, [score, onGameComplete, playSuccess, saveProgress]);
+  }, [score, completeGame, playSuccess]);
 
   const handleBack = useCallback(() => {
     navigate('/games');

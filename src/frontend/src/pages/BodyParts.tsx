@@ -12,7 +12,7 @@ import { GameShell } from '../components/GameShell';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { GameBackground } from '../components/game/GameBackground';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
@@ -66,7 +66,7 @@ function BodyPartsGame({
   } = useStreakTracking();
 
   const { playClick, playSuccess, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('body-parts');
+  const { completeGame } = useGameCompletion('body-parts');
 
   useGameSessionProgress({
     gameName: 'Body Parts',
@@ -139,21 +139,20 @@ function BodyPartsGame({
     async (finalScore: number) => {
       try {
         await finishContext(); // wrapper will record progress/additional metadata as needed
-        onGameComplete(finalScore);
+        await completeGame({ score: finalScore, level: 1 });
       } catch (err) {
         console.error('Failed to complete', err);
         setError(err as Error);
       }
     },
-    [finishContext, onGameComplete],
+    [finishContext, completeGame],
   );
 
   const handleFinish = useCallback(async () => {
     playClick();
     await handleGameComplete(score);
-    await onGameComplete(correct);
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick, handleGameComplete, score]);
+  }, [navigate, playClick, handleGameComplete, score]);
 
   if (!assetsLoaded) {
     return (

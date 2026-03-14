@@ -60,6 +60,7 @@ export function useHandTracking(
   const [landmarker, setLandmarker] = useState<HandLandmarker | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [activeDelegate, setActiveDelegate] = useState<'GPU' | 'CPU' | null>(null);
 
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
@@ -67,6 +68,7 @@ export function useHandTracking(
   const isInitializingRef = useRef(false);
   // Track current delegate for fallback logic
   const currentDelegateRef = useRef(opts.delegate);
+  const preferredDelegateRef = useRef<'GPU' | 'CPU'>(opts.delegate);
 
   useEffect(() => {
     // Reset mounted state on remount (React Strict Mode)
@@ -78,6 +80,11 @@ export function useHandTracking(
       isInitializingRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    preferredDelegateRef.current = opts.delegate;
+    currentDelegateRef.current = opts.delegate;
+  }, [opts.delegate]);
 
   /**
    * Initialize the hand landmarker
@@ -94,10 +101,10 @@ export function useHandTracking(
     try {
       // Determine delegates to try
       const delegatesToTry: Array<'GPU' | 'CPU'> = opts.enableFallback
-        ? opts.delegate === 'GPU'
+        ? preferredDelegateRef.current === 'GPU'
           ? ['GPU', 'CPU']
           : ['CPU', 'GPU']
-        : [opts.delegate];
+        : [preferredDelegateRef.current];
 
       let lastError: Error | null = null;
       let loadedLandmarker: HandLandmarker | null = null;
@@ -126,6 +133,8 @@ export function useHandTracking(
 
           if (lm) {
             loadedLandmarker = lm;
+            preferredDelegateRef.current = delegate;
+            setActiveDelegate(delegate);
             if (IS_DEV) {
               console.log(`[useHandTracking] Successfully loaded with ${delegate}`);
             }
@@ -158,6 +167,7 @@ export function useHandTracking(
       if (isMountedRef.current) {
         setError(e as Error);
         setLandmarker(null);
+        setActiveDelegate(null);
       }
     } finally {
       if (isMountedRef.current) {
@@ -187,28 +197,27 @@ export function useHandTracking(
     setLandmarker(null);
     setError(null);
     setIsLoading(false);
+    setActiveDelegate(null);
     isInitializingRef.current = false;
-    currentDelegateRef.current = opts.delegate;
+    currentDelegateRef.current = preferredDelegateRef.current;
   }, [landmarker, opts.delegate]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount - VisionService is a singleton, so we only reset landmarker
+  // if this specific hook was the one that initialized it or if we are truly shutting down.
   useEffect(() => {
     return () => {
-      if (landmarker) {
-        if (IS_DEV) {
-          console.log('[useHandTracking] Cleaning up landmarker');
-        }
-        // Reset the service landmarker - this closes and clears it
-        visionService.resetHandLandmarker();
-      }
+      isMountedRef.current = false;
+      // We don't automatically reset visionService here because other games might use it
+      // but we do ensure our local state is clear.
     };
-  }, [landmarker]);
+  }, []);
 
   return {
     landmarker,
     isLoading,
     error,
     isReady: landmarker !== null && !isLoading && error === null,
+    activeDelegate,
     initialize,
     reset,
   };

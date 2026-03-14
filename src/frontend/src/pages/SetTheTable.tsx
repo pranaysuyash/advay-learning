@@ -16,8 +16,7 @@ import {
 } from '../components/game/DragDropSystem';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -47,8 +46,7 @@ function SetTheTableGame() {
 
   const { playSuccess, playCelebration, playClick, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('set-the-table');
-  const { saveProgress } = useGameProgress('set-the-table');
+  const { completeGame } = useGameCompletion('set-the-table');
 
   useGameSessionProgress({
     gameName: 'Set the Table',
@@ -166,14 +164,13 @@ function SetTheTableGame() {
       setGameState('complete');
       playCelebration();
       (async () => {
-        await saveProgress({ score: finalScore, completed: true, level: 1 });
-        onGameComplete(calculateStars(finalScore));
+        await completeGame({ score: finalScore, level: 1 });
       })();
       speakText('Table is all set! Good job!');
     } else {
       speakText('Good! Keep going!');
     }
-  }, [placedItems, playSuccess, playCelebration, playClick, speakText, onGameComplete, attempts]);
+  }, [placedItems, playSuccess, playCelebration, playClick, speakText, completeGame, attempts]);
 
   const handleItemDroppedOutside = useCallback((_item: DraggableItem) => {
     playClick();

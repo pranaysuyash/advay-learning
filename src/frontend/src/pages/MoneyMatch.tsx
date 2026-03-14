@@ -4,8 +4,7 @@ import { AssetPreloader } from '../components/AssetPreloader';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
@@ -49,8 +48,7 @@ function MoneyMatchContent() {
   const [feedback, setFeedback] = useState('');
 
   const { playClick, playSuccess, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('money-match');
-  const { saveProgress } = useGameProgress('money-match');
+  const { completeGame } = useGameCompletion('money-match');
 
   useGameSessionProgress({
     gameName: 'Money Match',
@@ -124,10 +122,9 @@ function MoneyMatchContent() {
   };
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score: correct, completed: true, level: currentLevel });
-    await onGameComplete(correct);
+    await completeGame({ score: correct, level: currentLevel });
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [correct, completeGame, navigate, playClick, currentLevel]);
 
   const currentTotal = selectedCoins.reduce((sum, c) => sum + c.value, 0);
 

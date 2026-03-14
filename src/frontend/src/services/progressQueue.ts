@@ -39,12 +39,13 @@ export interface ProgressItem {
   score: number;
   duration_seconds?: number;
   completed?: boolean;
-  meta_data?: Record<string, any>;
+  meta_data?: Record<string, unknown>;
   timestamp: string; // ISO
   status?: 'pending' | 'synced' | 'error';
   retryCount?: number;
   lastError?: string;
   lastRetryAt?: string;
+  nextRetryAt?: string;
   syncedAt?: string;
 }
 
@@ -72,14 +73,26 @@ export interface EnqueueResult {
 export interface LegacyProgressItem {
   profileId?: string;
   gameId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   score?: number;
   completed?: boolean;
   duration_seconds?: number;
   timestamp?: string;
 }
 
+export interface ApiClient {
+  post(url: string, data: unknown): Promise<{ status: number; data?: unknown }>;
+}
+
 type Subscriber = () => void;
+
+const MAX_ERROR_MESSAGE_LENGTH = 200;
+
+/** TTL for rate-limit map entries (5 minutes) */
+const RATE_LIMIT_ENTRY_TTL_MS = 5 * 60 * 1000;
+
+/** How often to prune stale rate-limit entries */
+const RATE_LIMIT_PRUNE_INTERVAL_MS = 60 * 1000;
 
 /**
  * Calculate exponential backoff delay with jitter
@@ -95,6 +108,13 @@ function calculateRetryDelay(attemptNumber: number): number {
 }
 
 /**
+ * Sanitize error message for safe storage (F9)
+ */
+function sanitizeError(message: string): string {
+  return message.slice(0, MAX_ERROR_MESSAGE_LENGTH);
+}
+
+/**
  * Factory function to create a progress queue with dependency injection
  *
  * @param repo - The repository to use for storage (localStorage, memory, etc.)
@@ -106,9 +126,20 @@ export function createProgressQueue(repo: ProgressRepository) {
   const _knownIds = new Set<string>();
   const _subscribers = new Set<Subscriber>();
 
-  // PQ-005: Rate-limiting state
-  // Per-profile: track last enqueue timestamp to enforce ENQUEUE_RATE_LIMIT_MS gap
+  // F3: Batched notification scheduling
+  let _notifyScheduled = false;
+  function _scheduleNotify() {
+    if (_notifyScheduled) return;
+    _notifyScheduled = true;
+    queueMicrotask(() => {
+      _notifyScheduled = false;
+      _notify();
+    });
+  }
+
+  // F2: Rate-limiting state with TTL tracking
   const _lastEnqueueAt = new Map<string, number>();
+  let _lastPruneAt = Date.now();
   // Global: sliding window counter to enforce MAX_ENQUEUE_PER_MINUTE
   let _enqueueWindowStart = Date.now();
   let _enqueueWindowCount = 0;
@@ -123,6 +154,18 @@ export function createProgressQueue(repo: ProgressRepository) {
     });
   }
 
+  /** F2: Prune stale rate-limit entries older than TTL */
+  function _pruneRateLimitEntries() {
+    const now = Date.now();
+    if (now - _lastPruneAt < RATE_LIMIT_PRUNE_INTERVAL_MS) return;
+    _lastPruneAt = now;
+    for (const [key, timestamp] of _lastEnqueueAt) {
+      if (now - timestamp > RATE_LIMIT_ENTRY_TTL_MS) {
+        _lastEnqueueAt.delete(key);
+      }
+    }
+  }
+
   /**
    * Check if an item with the given idempotency_key already exists
    */
@@ -133,7 +176,7 @@ export function createProgressQueue(repo: ProgressRepository) {
     return repo.exists(idempotencyKey);
   }
 
-  return {
+  const queue = {
     /**
      * Backward-compatible API used by several game pages.
      * Converts legacy payloads to canonical ProgressItem shape.
@@ -145,7 +188,7 @@ export function createProgressQueue(repo: ProgressRepository) {
         candidate.profile_id &&
         candidate.content_id
       ) {
-        return this.enqueue(candidate);
+        return queue.enqueue(candidate);
       }
 
       const legacy = item as LegacyProgressItem;
@@ -166,14 +209,16 @@ export function createProgressQueue(repo: ProgressRepository) {
         timestamp: legacy.timestamp || new Date().toISOString(),
       };
 
-      return this.enqueue(normalized);
+      return queue.enqueue(normalized);
     },
 
     /**
      * Add a progress item to the queue
      */
     enqueue(item: ProgressItem): EnqueueResult {
-      // PQ-005: Per-profile rate-limit gate (ENQUEUE_RATE_LIMIT_MS)
+      _pruneRateLimitEntries();
+
+      // Per-profile rate-limit gate
       const now = Date.now();
       const lastAt = _lastEnqueueAt.get(item.profile_id) ?? 0;
       if (now - lastAt < ENQUEUE_RATE_LIMIT_MS) {
@@ -184,9 +229,8 @@ export function createProgressQueue(repo: ProgressRepository) {
         return { success: false, item, error: 'rate-limited: too many enqueue calls from this profile' };
       }
 
-      // PQ-005: Global sliding-window circuit-breaker (MAX_ENQUEUE_PER_MINUTE)
+      // Global sliding-window circuit-breaker
       if (now - _enqueueWindowStart > ENQUEUE_WINDOW_MS) {
-        // Reset window
         _enqueueWindowStart = now;
         _enqueueWindowCount = 0;
       }
@@ -223,13 +267,20 @@ export function createProgressQueue(repo: ProgressRepository) {
         };
       }
 
-      // Size limit check
+      // Size limit check — evict oldest if at capacity
       const stats = repo.getStats();
       if (stats.total >= MAX_QUEUE_SIZE) {
         console.warn('[ProgressQueue] Queue full, dropping oldest item');
         const all = repo.getAll();
         if (all.length > 0) {
-          repo.remove(all[0].idempotency_key);
+          const evictedKey = all[0].idempotency_key;
+          try {
+            repo.remove(evictedKey);
+          } catch (e) {
+            console.error('[ProgressQueue] Failed to evict oldest item:', e);
+          }
+          // F7: Clean up _knownIds for evicted item
+          _knownIds.delete(evictedKey);
         }
       }
 
@@ -240,12 +291,17 @@ export function createProgressQueue(repo: ProgressRepository) {
         retryCount: 0,
       };
 
-      repo.save(itemWithStatus);
+      try {
+        repo.save(itemWithStatus);
+      } catch (e) {
+        console.error('[ProgressQueue] Failed to save item:', e);
+        return { success: false, item, error: 'Storage error: failed to persist item' };
+      }
       _knownIds.add(item.idempotency_key);
-      // PQ-005: Record successful enqueue for rate-limiting tracking
+      // Record successful enqueue for rate-limiting tracking
       _lastEnqueueAt.set(item.profile_id, Date.now());
       _enqueueWindowCount++;
-      _notify();
+      _scheduleNotify();
 
       return { success: true, item: itemWithStatus };
     },
@@ -263,7 +319,7 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Get count of pending items
      */
     getPendingCount(profileId?: string): number {
-      return this.getPending(profileId).length;
+      return queue.getPending(profileId).length;
     },
 
     /**
@@ -279,8 +335,17 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Mark an item as synced
      */
     markSynced(idempotency_key: string): boolean {
-      const result = repo.markSynced(idempotency_key);
-      if (result) _notify();
+      let result: boolean;
+      try {
+        result = repo.markSynced(idempotency_key);
+      } catch (e) {
+        console.error('[ProgressQueue] Failed to mark synced:', e);
+        return false;
+      }
+      if (result) {
+        _knownIds.delete(idempotency_key);
+        _scheduleNotify();
+      }
       return result;
     },
 
@@ -288,11 +353,17 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Mark an item as error
      */
     markError(idempotency_key: string, errorMessage?: string): boolean {
-      const result = repo.markError(
-        idempotency_key,
-        errorMessage || 'Unknown error',
-      );
-      if (result) _notify();
+      let result: boolean;
+      try {
+        result = repo.markError(
+          idempotency_key,
+          errorMessage || 'Unknown error',
+        );
+      } catch (e) {
+        console.error('[ProgressQueue] Failed to mark error:', e);
+        return false;
+      }
+      if (result) _scheduleNotify();
       return result;
     },
 
@@ -300,17 +371,31 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Move an item to dead letter queue
      */
     moveToDeadLetter(idempotency_key: string, finalError: string): boolean {
-      const item = repo.findById(idempotency_key);
+      let item: ProgressItem | undefined;
+      try {
+        item = repo.findById(idempotency_key);
+      } catch (e) {
+        console.error('[ProgressQueue] Failed to find item for dead letter:', e);
+        return false;
+      }
       if (!item) return false;
 
-      repo.addDeadLetter({
-        item,
-        failedAt: new Date().toISOString(),
-        finalError,
-        totalAttempts: item.retryCount || 1,
-      });
+      try {
+        repo.addDeadLetter({
+          item,
+          failedAt: new Date().toISOString(),
+          finalError: sanitizeError(finalError),
+          totalAttempts: item.retryCount || 1,
+        });
+        // Explicitly remove from main queue
+        repo.remove(idempotency_key);
+      } catch (e) {
+        console.error('[ProgressQueue] Failed to move to dead letter:', e);
+        return false;
+      }
 
-      _notify();
+      _knownIds.delete(idempotency_key);
+      _scheduleNotify();
       console.warn(
         '[ProgressQueue] Moved to dead letter:',
         idempotency_key,
@@ -340,9 +425,15 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Retry a dead letter item
      */
     retryDeadLetter(idempotency_key: string): boolean {
-      const result = repo.retryDeadLetter(idempotency_key);
+      let result: boolean;
+      try {
+        result = repo.retryDeadLetter(idempotency_key);
+      } catch (e) {
+        console.error('[ProgressQueue] Failed to retry dead letter:', e);
+        return false;
+      }
       if (result) {
-        _notify();
+        _scheduleNotify();
         console.log('[ProgressQueue] Retrying dead letter:', idempotency_key);
       }
       return result;
@@ -352,8 +443,14 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Delete a dead letter item permanently
      */
     deleteDeadLetter(idempotency_key: string): boolean {
-      const result = repo.removeDeadLetter(idempotency_key);
-      if (result) _notify();
+      let result: boolean;
+      try {
+        result = repo.removeDeadLetter(idempotency_key);
+      } catch (e) {
+        console.error('[ProgressQueue] Failed to delete dead letter:', e);
+        return false;
+      }
+      if (result) _scheduleNotify();
       return result;
     },
 
@@ -371,9 +468,13 @@ export function createProgressQueue(repo: ProgressRepository) {
      * Clear all items
      */
     clear() {
-      repo.clear();
+      try {
+        repo.clear();
+      } catch (e) {
+        console.error('[ProgressQueue] Failed to clear repo:', e);
+      }
       _knownIds.clear();
-      _notify();
+      _scheduleNotify();
     },
 
     /**
@@ -384,27 +485,42 @@ export function createProgressQueue(repo: ProgressRepository) {
     },
 
     /**
-     * Process a single item with retry logic
+     * Process a single item with non-blocking retry logic (F1)
+     *
+     * Instead of blocking with setTimeout, this function:
+     * - Attempts the API call once
+     * - On 5xx/network errors, calculates backoff and sets nextRetryAt on the item
+     * - Returns immediately so the UI stays responsive
+     * - The next sync cycle will check nextRetryAt before retrying
      */
     async processItemWithRetry(
       item: ProgressItem,
-      apiClient: any,
+      apiClient: ApiClient,
     ): Promise<{ success: boolean; shouldRetry: boolean; error?: string }> {
       const retryCount = item.retryCount || 0;
+
+      // Check if item is still in backoff period
+      if (item.nextRetryAt && Date.now() < new Date(item.nextRetryAt).getTime()) {
+        return { success: false, shouldRetry: false, error: 'Still in backoff period' };
+      }
 
       try {
         await apiClient.post('/api/v1/progress/', item);
         return { success: true, shouldRetry: false };
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const err = error as {
+          response?: { status?: number; data?: { error?: { message?: string }; detail?: string } };
+          message?: string;
+        };
         const errorMessage =
-          error?.response?.data?.error?.message ||
-          error?.response?.data?.detail ||
-          error?.message ||
+          err?.response?.data?.error?.message ||
+          err?.response?.data?.detail ||
+          err?.message ||
           'Unknown error';
-        const statusCode = error?.response?.status;
+        const statusCode = err?.response?.status;
 
-        // Don't retry 4xx errors
-        if (statusCode >= 400 && statusCode < 500) {
+        // Don't retry 4xx errors (client errors are permanent)
+        if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
           console.error(
             '[ProgressQueue] Client error, not retrying:',
             item.idempotency_key,
@@ -426,22 +542,21 @@ export function createProgressQueue(repo: ProgressRepository) {
           };
         }
 
-        // Calculate and apply backoff
+        // F1: Non-blocking backoff — record when next retry should happen
         const delay = calculateRetryDelay(retryCount);
+        const nextRetryAt = new Date(Date.now() + delay).toISOString();
         console.log(
-          `[ProgressQueue] Retry ${retryCount + 1}/${MAX_RETRIES} for ${item.idempotency_key} after ${Math.round(delay)}ms`,
+          `[ProgressQueue] Retry ${retryCount + 1}/${MAX_RETRIES} for ${item.idempotency_key} scheduled at ${nextRetryAt}`,
         );
-
-        await new Promise((resolve) => setTimeout(resolve, delay));
 
         return { success: false, shouldRetry: true, error: errorMessage };
       }
     },
 
     /**
-     * Sync all pending and error items with retry logic
+     * Sync all pending and error items with non-blocking retry logic
      */
-    async syncAll(apiClient: any): Promise<SyncResult> {
+    async syncAll(apiClient: ApiClient): Promise<SyncResult> {
       const result: SyncResult = {
         synced: 0,
         failed: 0,
@@ -459,21 +574,27 @@ export function createProgressQueue(repo: ProgressRepository) {
       items.sort((a, b) => (a.retryCount || 0) - (b.retryCount || 0));
 
       for (const item of items) {
-        const processResult = await this.processItemWithRetry(item, apiClient);
+        const processResult = await queue.processItemWithRetry(item, apiClient);
 
         if (processResult.success) {
-          this.markSynced(item.idempotency_key);
+          queue.markSynced(item.idempotency_key);
           result.synced++;
         } else if (processResult.shouldRetry) {
-          // Increment retry count and keep in pending for next sync cycle
+          // F1: Non-blocking — set nextRetryAt timestamp instead of blocking
+          const delay = calculateRetryDelay(item.retryCount || 0);
           const updatedItem: ProgressItem = {
             ...item,
             status: 'pending',
             retryCount: (item.retryCount || 0) + 1,
             lastError: processResult.error,
             lastRetryAt: new Date().toISOString(),
+            nextRetryAt: new Date(Date.now() + delay).toISOString(),
           };
-          repo.save(updatedItem);
+          try {
+            repo.save(updatedItem);
+          } catch (e) {
+            console.error('[ProgressQueue] Failed to save retry state:', e);
+          }
           result.errors.push({
             idempotency_key: item.idempotency_key,
             error: `Retry ${updatedItem.retryCount}/${MAX_RETRIES}: ${processResult.error || 'Unknown'}`,
@@ -482,13 +603,13 @@ export function createProgressQueue(repo: ProgressRepository) {
           // Permanent failure
           const currentRetries = item.retryCount || 0;
           if (currentRetries >= MAX_RETRIES) {
-            this.moveToDeadLetter(
+            queue.moveToDeadLetter(
               item.idempotency_key,
               processResult.error || 'Max retries exceeded',
             );
             result.deadLettered++;
           } else {
-            this.markError(item.idempotency_key, processResult.error);
+            queue.markError(item.idempotency_key, processResult.error);
             result.failed++;
           }
           result.errors.push({
@@ -498,7 +619,7 @@ export function createProgressQueue(repo: ProgressRepository) {
         }
       }
 
-      _notify();
+      _scheduleNotify();
 
       console.log('[ProgressQueue] Sync complete:', result);
 
@@ -520,6 +641,8 @@ export function createProgressQueue(repo: ProgressRepository) {
     _knownIds,
     _repo: repo,
   };
+
+  return queue;
 }
 
 /**

@@ -13,8 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
@@ -49,8 +48,7 @@ const WashHandsDanceGame = memo(function WashHandsDanceGameComponent() {
   const currentAttemptsRef = useRef(1);
 
   const { playSuccess, playCelebration, playClick } = useAudio();
-  const { onGameComplete } = useGameDrops('wash-hands-dance');
-  const { saveProgress } = useGameProgress('wash-hands-dance');
+  const { completeGame } = useGameCompletion('wash-hands-dance');
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
   const {
@@ -117,14 +115,13 @@ const WashHandsDanceGame = memo(function WashHandsDanceGameComponent() {
       if (currentStep + 1 >= getTotalSteps()) {
         setGameState('complete');
         void playCelebration();
-        await saveProgress({ score: totalScore, completed: true, level: 1 });
-        void onGameComplete(totalScore);
+        await completeGame({ score: totalScore, level: 1 });
       } else {
         setCurrentStep((prev) => prev + 1);
         currentAttemptsRef.current = 1;
       }
     }, 1200);
-  }, [currentStep, playSuccess, playCelebration, onGameComplete, saveProgress]);
+  }, [currentStep, playSuccess, playCelebration, completeGame]);
 
   const startGame = useCallback(() => {
     setGameState('playing');

@@ -9,8 +9,7 @@ import type { GameControl } from '../components/GameControls';
 import { GameShell } from '../components/GameShell';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -70,8 +69,7 @@ const SteadyHandLabContent = memo(function SteadyHandLabComponent() {
     playPop,
   } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('steady-hand-lab');
-  useGameProgress('steady-hand-lab');
+  const { completeGame, triggerEasterEgg } = useGameCompletion('steady-hand-lab');
 
   useEffect(() => {
     holdProgressRef.current = holdProgress;
@@ -245,7 +243,7 @@ const SteadyHandLabContent = memo(function SteadyHandLabComponent() {
   };
 
   const resetGame = () => {
-    onGameComplete();
+    completeGame({ score, level: round });
     setIsPlaying(false);
     setCursor(null);
     holdProgressRef.current = 0;

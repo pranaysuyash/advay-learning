@@ -25,6 +25,10 @@ export const Games = memo(function Games() {
   const { currentProfile, profiles, setCurrentProfile } = useProfileStore();
   const [showProfilePicker, setShowProfilePicker] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState<string | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCvFilters, setSelectedCvFilters] = useState<Set<string>>(
+    new Set(),
+  );
   const { statsMap } = useGameStatsMapForProfile(currentProfile?.age);
 
   const normalizeTranslationList = (value: unknown): string[] => {
@@ -32,14 +36,47 @@ export const Games = memo(function Games() {
     return value.filter((item): item is string => typeof item === 'string');
   };
 
+  const toggleCvFilter = (cv: string) => {
+    setSelectedCvFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(cv)) next.delete(cv);
+      else next.add(cv);
+      return next;
+    });
+  };
+
   // Games come from the registry — single source of truth
   const allGames = useMemo(() => getListedGames(), []);
   const worlds = useMemo(() => getAllWorlds(), []);
 
   const availableGames = useMemo(() => {
-    if (selectedWorld === 'all') return allGames;
-    return allGames.filter((g) => g.worldId === selectedWorld);
-  }, [allGames, selectedWorld]);
+    let games =
+      selectedWorld === 'all'
+        ? allGames
+        : allGames.filter((g) => g.worldId === selectedWorld);
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      games = games.filter(
+        (g) =>
+          g.name.toLowerCase().includes(q) ||
+          g.tagline.toLowerCase().includes(q) ||
+          g.worldId.toLowerCase().includes(q) ||
+          g.vibe.toLowerCase().includes(q) ||
+          g.cv.some((tag) => tag.toLowerCase().includes(q)),
+      );
+    }
+
+    if (selectedCvFilters.size > 0) {
+      games = games.filter((g) =>
+        [...selectedCvFilters].every((cv) =>
+          g.cv.includes(cv as 'hand' | 'pose' | 'face' | 'voice'),
+        ),
+      );
+    }
+
+    return games;
+  }, [allGames, selectedWorld, searchQuery, selectedCvFilters]);
 
   const specialFeatures = normalizeTranslationList(
     t('info.special.features', { returnObjects: true }),
@@ -136,6 +173,58 @@ export const Games = memo(function Games() {
           </div>
         </header>
 
+        {/* Search & CV Filters */}
+        <div className='mb-6 space-y-3'>
+          <div className='relative'>
+            <span className='absolute left-5 top-1/2 -translate-y-1/2 text-2xl pointer-events-none'>
+              🔍
+            </span>
+            <input
+              type='text'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder='Search games...'
+              className='w-full pl-14 pr-12 py-4 text-lg font-bold bg-white border-3 border-[#F2CC8F] rounded-[2rem] shadow-[0_4px_0_#E5B86E] placeholder:text-slate-300 text-advay-slate focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_4px_0_#3B82F6] transition-all'
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className='absolute right-5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-500 font-bold transition-colors'
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <div className='flex flex-wrap gap-2'>
+            {(['hand', 'pose', 'face', 'voice'] as const).map((cv) => {
+              const isActive = selectedCvFilters.has(cv);
+              const cvMeta: Record<
+                string,
+                { emoji: string; label: string }
+              > = {
+                hand: { emoji: '✋', label: 'Hand' },
+                pose: { emoji: '🤸', label: 'Pose' },
+                face: { emoji: '😊', label: 'Face' },
+                voice: { emoji: '🎤', label: 'Voice' },
+              };
+              const cfg = cvMeta[cv];
+              return (
+                <button
+                  key={cv}
+                  onClick={() => toggleCvFilter(cv)}
+                  className={`px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5 ${
+                    isActive
+                      ? 'bg-[#E85D04] text-white shadow-lg'
+                      : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#E85D04]'
+                  }`}
+                >
+                  {cfg.emoji} {cfg.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* World Filter Tabs */}
         <div className='flex flex-wrap gap-2 mb-8'>
           <button
@@ -187,6 +276,17 @@ export const Games = memo(function Games() {
         </div>
 
         {/* Games Grid */}
+        {availableGames.length === 0 && (
+          <div className='text-center py-16 mb-16'>
+            <div className='text-6xl mb-4'>🔍</div>
+            <h3 className='text-2xl font-black text-advay-slate mb-2'>
+              No games found!
+            </h3>
+            <p className='text-lg font-bold text-text-secondary'>
+              Try a different search or filter
+            </p>
+          </div>
+        )}
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16'>
           {availableGames.map((game, index) => {
             const world = WORLDS_BY_ID[game.worldId];

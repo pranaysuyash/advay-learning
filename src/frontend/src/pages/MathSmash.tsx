@@ -8,8 +8,7 @@ import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, generateQuestion, generateOptions, type Question } from '../games/mathSmashLogic';
 import { GameCursor } from '../components/game/GameCursor';
@@ -31,8 +30,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { useWindowSize } from '../hooks/useWindowSize';
 
 function MathSmashGameComponent() {
-  const { onGameComplete } = useGameDrops('math-smash');
-  const { saveProgress } = useGameProgress('math-smash');
+  const { completeGame } = useGameCompletion('math-smash');
   const { playClick, playSuccess, playError, playPop } = useAudio();
   const webcamRef = useRef<Webcam>(null);
 
@@ -165,8 +163,7 @@ function MathSmashGameComponent() {
             setRound(0);
             speak("Awesome! Let's try harder math!");
           } else {
-            await saveProgress({ score: correct + 1, completed: true, level: currentLevel + 1 });
-            onGameComplete(correct + 1);
+            await completeGame({ score: correct + 1, level: currentLevel + 1 });
             speak("You're a Math Master!");
           }
         } else {
@@ -181,7 +178,7 @@ function MathSmashGameComponent() {
       speak(`Oops! The answer is not ${target.data.value}. Try again!`);
       // Shake animation could go here
     }
-  }, [round, currentLevel, correct, speak, onGameComplete, playSuccess, playError, incrementStreak, resetStreak, setScorePopup]);
+  }, [round, currentLevel, correct, speak, completeGame, playSuccess, playError, incrementStreak, resetStreak, setScorePopup]);
 
   const startGame = useCallback(() => {
     setGameStarted(true);

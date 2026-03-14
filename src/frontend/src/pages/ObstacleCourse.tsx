@@ -6,8 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { triggerHaptic } from '../utils/haptics';
 import { AssetPreloader } from '../components/AssetPreloader';
 import {
@@ -118,8 +117,7 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
 
   const { playClick, playError, playLevelUp, playCelebration, playSuccess } =
     useAudio();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('obstacle-course');
-  const { saveProgress } = useGameProgress('obstacle-course');
+  const { completeGame, triggerEasterEgg } = useGameCompletion('obstacle-course');
 
   useEffect(() => {
     phaseRef.current = phase;
@@ -148,8 +146,7 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
       setMovementHint('Course complete');
 
       const normalizedScore = Math.min(100, Math.round(state.score / 4));
-      await saveProgress({ score: normalizedScore, completed: true, level: state.level });
-      onGameComplete(normalizedScore);
+      await completeGame({ score: normalizedScore, level: state.level });
 
       if (state.bestStreak >= 5) {
         triggerEasterEgg('egg-course-champion');
@@ -157,7 +154,7 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
 
       playCelebration();
     },
-    [onGameComplete, playCelebration, triggerEasterEgg, saveProgress],
+    [completeGame, playCelebration, triggerEasterEgg],
   );
 
   const scheduleNextLevel = useCallback(

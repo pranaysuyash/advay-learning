@@ -382,7 +382,7 @@ interface ParentDataControls {
 | Tool | License | Self-Host | COPPA Ready | PII Handling | On-Device | Real-time | Cost (Self-hosted) |
 |------|---------|-----------|-------------|--------------|-----------|-----------|-------------------|
 | **PostHog** | MIT | ✅ Docker | ⚠️ Configurable | ❌ Requires config | ❌ | ✅ | Free (unlimited) |
-| **Umami** | MIT | ✅ Docker/Vercel | ⚠️ Configurable | ✅ No PII by default | ❌ | ✅ | Free |
+| **Umami** | MIT | ✅ Docker / Cloudflare | ⚠️ Configurable | ✅ No PII by default | ❌ | ✅ | Free |
 | **Plausible** | AGPL | ✅ Docker | ✅ Privacy-first | ✅ No PII | ❌ | ✅ | €9/mo or self-host |
 | **Fathom** | Proprietary | ❌ SaaS only | ✅ Privacy-first | ✅ No PII | ❌ | ✅ | $14/mo |
 | **Matomo** | GPL | ✅ Docker | ⚠️ Configurable | ⚠️ Requires config | ⚠️ Optional | ✅ | Free (on-prem) |
@@ -448,7 +448,7 @@ posthog.init('YOUR_KEY', {
 - ✅ Fully open-source (MIT license)
 - ✅ No PII collected by default
 - ✅ Very lightweight (~1KB script)
-- ✅ Easy self-hosting (Docker, Vercel, Railway)
+- ✅ Easy self-hosting (Docker, Cloudflare, Railway)
 - ✅ GDPR-compliant out of the box
 - ✅ Clean, simple dashboard
 

@@ -14,9 +14,9 @@ Traditional SPAs just serve HTML, CSS, and JS logic. Advay Vision must serve:
 If we serve these from a traditional backend (like Heroku or an EC2 instance), we will incur massive bandwidth costs, and users in remote areas will experience 10+ second load times before a game starts.
 
 ### The Solution: Aggressive Edge Caching
-*   **Frontend & Media**: Deployed on **Vercel** or **Cloudflare Pages** (Free Tier).
-*   **The Strategy**: The WASM binaries and AI models are placed in the `public/` directory and served directly via the Edge CDN. 
-*   **Why it works**: Cloudflare/Vercel caches these static files instantly at nodes closest to the user (e.g., a node in Mumbai). The user downloads the 10MB AI model at local broadband speeds, bypassing our servers entirely.
+*   **Frontend & Media**: Deployed on **Cloudflare Pages** (or equivalent edge CDN) using the `public/` directory for static assets.
+*   **The Strategy**: The WASM binaries and AI models are placed in the `public/` directory and served directly via an edge CDN.
+*   **Why it works**: Edge CDNs (e.g., Cloudflare Pages) cache these static files at nodes closest to the user (e.g., Mumbai). The user downloads the 10MB AI model at local broadband speeds, bypassing our servers entirely.
 *   **Cost**: $0. Bandwidth on these free tiers is extremely generous (100GB to Unlimited for static assets).
 
 ---
@@ -50,8 +50,8 @@ To keep the engineering team small and agile, deployment must be invisible.
 
 *   **GitHub Actions**: 
     1.  **PR Check**: Lints code, runs TypeScript compiler, verifies MediaPipe imports are correct.
-    2.  **Preview Environments**: Every Pull Request automatically generates a unique Vercel URL. You can test a new game tracking logic on your phone without merging it.
-    3.  **Production Deploy**: Pushing to `main` automatically builds the React app, pushes to Vercel global CDN, containerizes the FastAPI code, and deploys to Cloud Run.
+    2.  **Preview Environments**: Every Pull Request automatically generates a unique preview deployment URL (e.g., Cloudflare Pages preview or similar). You can test a new game tracking logic on your phone without merging it.
+    3.  **Production Deploy**: Pushing to `main` automatically builds the React app, publishes the static site to the edge CDN (Cloudflare Pages or equivalent), containerizes the FastAPI code, and deploys to Cloud Run (or your chosen backend host).
 *   **Effort**: Zero-touch deployments. A developer pushes code, and 3 minutes later it is globally available.
 
 ---
@@ -70,7 +70,7 @@ By adopting this architecture, we achieve infinite scalability and sub-second lo
 
 | Component | Technology Choice | Immediate Cost | Scaling Cost |
 | :--- | :--- | :--- | :--- |
-| **Frontend CDN** | Vercel / Cloudflare Pages | $0 | Low / Capped |
+| **Frontend CDN** | Cloudflare Pages (or equivalent edge CDN) | $0 | Low / Capped |
 | **Backend API** | FastAPI on Google Cloud Run | $0 | Usage Based (Pennies) |
 | **Database** | Neon Serverless Postgres | $0 | Usage Based |
 | **WebRTC / Multiplayer** | P2P + Lightweight Signaling | $0 | Very Low |

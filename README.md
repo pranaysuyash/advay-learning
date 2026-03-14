@@ -76,8 +76,21 @@ Use locally seeded development accounts only. Keep test credentials in local env
 - **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
 - **Backend**: Python 3.13+, FastAPI, SQLAlchemy
 - **CV Engine**: MediaPipe, TensorFlow.js, OpenCV
+- **3D Engine**: Three.js + React Three Fiber + Rapier Physics
 - **Database**: PostgreSQL (both dev and production)
 - **Storage**: AWS S3 / Local filesystem
+
+### Game Development Stack
+
+**3D Games:** React Three Fiber + Rapier Physics  
+See [docs/architecture/GAME_ENGINES_AND_PHYSICS.md](docs/architecture/GAME_ENGINES_AND_PHYSICS.md) for full comparison of physics engines and game frameworks.
+
+- **Rapier**: Modern WASM-based 3D physics (current choice)
+- **Cannon.js**: Legacy physics (being phased out)
+- **Three.js**: 3D rendering engine
+- **React Three Fiber**: React integration for Three.js
+
+**2D Games:** React + Canvas or Phaser (for complex 2D)
 - **Auth**: JWT-based authentication
 
 ## 📚 Documentation
