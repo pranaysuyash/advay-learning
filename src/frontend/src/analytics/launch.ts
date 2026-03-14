@@ -35,6 +35,7 @@ export type LaunchEventName =
   | 'game_session_ended'
   | 'progress_queued'
   | 'progress_queue_failed'
+  | 'progress_sync_result'
   | 'pricing_interest_clicked'
   | 'beta_pricing_viewed'
   | 'subscription_blocked_for_beta'
@@ -49,6 +50,7 @@ export type LaunchEventName =
   | 'profile_delete_cancelled'
   | 'recoverable_client_error'
   | 'fatal_client_error'
+  | 'game_render_error'
   | 'api_failure'
   | 'pending_badge_clicked'
   | 'failed_badge_clicked'
@@ -73,7 +75,9 @@ function getSessionId(): string {
   if (typeof window === 'undefined') return 'server';
   const existing = window.sessionStorage.getItem(LAUNCH_ANALYTICS_SESSION_KEY);
   if (existing) return existing;
-  const next = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const next =
+    globalThis.crypto?.randomUUID?.() ??
+    `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   window.sessionStorage.setItem(LAUNCH_ANALYTICS_SESSION_KEY, next);
   return next;
 }
@@ -85,7 +89,12 @@ function getRoute(): string {
 
 function getContext(): LaunchAnalyticsEvent['context'] {
   if (typeof window === 'undefined') {
-    return { viewport: 'unknown', browser: 'unknown', os: 'unknown', deviceType: 'desktop' };
+    return {
+      viewport: 'unknown',
+      browser: 'unknown',
+      os: 'unknown',
+      deviceType: 'desktop',
+    };
   }
 
   const width = window.innerWidth;
@@ -108,7 +117,8 @@ function getContext(): LaunchAnalyticsEvent['context'] {
         : /Windows/.test(userAgent)
           ? 'windows'
           : 'other';
-  const deviceType = width < 640 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop';
+  const deviceType =
+    width < 640 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop';
 
   return {
     viewport: `${width}x${window.innerHeight}`,
@@ -121,8 +131,11 @@ function getContext(): LaunchAnalyticsEvent['context'] {
 function sanitizeMetadata(
   metadata: Record<string, unknown>,
 ): Record<string, string | number | boolean | null> {
-  const blockedPattern = /(email|password|token|photo|image|video|frame|cameraData|name)$/i;
-  return Object.entries(metadata).reduce<Record<string, string | number | boolean | null>>((acc, [key, value]) => {
+  const blockedPattern =
+    /(email|password|token|photo|image|video|frame|cameraData|name)$/i;
+  return Object.entries(metadata).reduce<
+    Record<string, string | number | boolean | null>
+  >((acc, [key, value]) => {
     if (blockedPattern.test(key)) return acc;
     if (
       typeof value === 'string' ||
@@ -152,7 +165,9 @@ export function trackLaunchEvent(
   if (typeof window === 'undefined') return;
 
   const event: LaunchAnalyticsEvent = {
-    id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id:
+      globalThis.crypto?.randomUUID?.() ??
+      `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     name,
     timestamp: new Date().toISOString(),
     sessionId: getSessionId(),
@@ -168,8 +183,21 @@ export function trackLaunchEvent(
   );
 }
 
-export function trackPageView(page: string, metadata: Record<string, unknown> = {}): void {
+export function trackPageView(
+  page: string,
+  metadata: Record<string, unknown> = {},
+): void {
   trackLaunchEvent('page_view', { page, ...metadata });
+}
+
+export function trackEvent(
+  name: string,
+  metadata: Record<string, unknown> = {},
+): void {
+  trackLaunchEvent('recoverable_client_error', {
+    eventName: name,
+    ...metadata,
+  });
 }
 
 export function getLaunchEvents(): LaunchAnalyticsEvent[] {

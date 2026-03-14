@@ -8,9 +8,8 @@ import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -23,11 +22,7 @@ import {
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
 // Inner game component
-interface ShadowPuppetTheaterGameProps {
-  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
-}
-
-const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({ saveProgress }: ShadowPuppetTheaterGameProps) {
+const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent() {
   const navigate = useNavigate();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentShape, setCurrentShape] = useState<PuppetShape | null>(null);
@@ -41,7 +36,7 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('shadow-puppet-theater');
+  const { completeGame } = useGameCompletion('shadow-puppet-theater');
 
   const levelConfig = useMemo(() => getLevelConfig(currentLevel), [currentLevel]);
 
@@ -127,10 +122,9 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({
   const handleFinish = useCallback(async () => {
     playClick();
     const finalScore = Math.round(score / levelConfig.shapesPerRound);
-    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
-    await onGameComplete(finalScore);
+    await completeGame({ score: finalScore, level: currentLevel });
     navigate('/games');
-  }, [score, levelConfig, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [score, levelConfig, completeGame, navigate, playClick, currentLevel]);
 
   const handleRestart = () => {
     playClick();
@@ -268,8 +262,6 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent({
 
 // Main export wrapped with GameShell
 export const ShadowPuppetTheater = memo(function ShadowPuppetTheaterComponent() {
-  const { saveProgress } = useGameProgress('shadow-puppet-theater');
-
   return (
     <GameShell
       gameId="shadow-puppet-theater"
@@ -277,7 +269,7 @@ export const ShadowPuppetTheater = memo(function ShadowPuppetTheaterComponent() 
       showWellnessTimer={true}
       enableErrorBoundary={true}
     >
-      <ShadowPuppetTheaterGame saveProgress={saveProgress} />
+      <ShadowPuppetTheaterGame />
     </GameShell>
   );
 });

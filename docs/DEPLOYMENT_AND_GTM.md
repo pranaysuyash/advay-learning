@@ -22,25 +22,29 @@
 
 | Platform | Pros | Cons | Free Tier | Paid |
 |----------|------|------|-----------|------|
-| **Vercel** | Best Vite support, edge functions, instant preview deploys, analytics | Vendor lock-in for serverless functions | 100 GB bandwidth, 6000 build min/mo | Pro $20/mo |
+| **Cloudflare Pages** | Best edge CDN, unlimited bandwidth, preview deploys, Workers integration | Requires Wrangler CLI for advanced config | Unlimited bandwidth (free tier) | Pro $25/mo |
 | **Netlify** | Great DX, form handling, split testing, identity service | Slower builds, limited edge functions | 100 GB bandwidth, 300 build min/mo | Pro $19/mo |
 | **Cloudflare Pages** | Fastest global CDN, unlimited bandwidth, Workers integration | Newer platform, fewer integrations | Unlimited bandwidth, 500 builds/mo | Pro $25/mo |
 
-**Recommendation: Vercel**
-- Native Vite support with zero-config
-- Preview deploys for every PR
+**Recommendation: Cloudflare Pages**
+- Best edge CDN with unlimited bandwidth for static assets
+- Preview deploys for every PR (Cloudflare Pages preview deployments)
 - Edge caching optimized for SPA + large WASM bundles (MediaPipe)
-- Built-in Web Analytics (privacy-friendly)
+- Works well with Cloudflare Workers for lightweight serverless functions
 
 **Configuration:**
 ```bash
-# vercel.json
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-}
+# wrangler.toml (Cloudflare Pages)
+name = "<PROJECT_NAME>"
+project = "<PROJECT_NAME>"
+account_id = "<ACCOUNT_ID>"
+
+[build]
+  command = "npm run build"
+  directory = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
 ```
 
 ### Backend Hosting
@@ -110,9 +114,9 @@ const MEDIAPIPE_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@late
               ┌────────────────┼────────────────┐
               │                │                │
      ┌────────▼──────┐  ┌─────▼──────┐  ┌──────▼──────┐
-     │  Vercel CDN   │  │  Railway   │  │  jsDelivr   │
-     │  (Frontend)   │  │  (API)     │  │  (ML Models)│
-     │  React SPA    │  │  FastAPI   │  │  WASM+Model │
+     │  Cloudflare   │  │  Railway   │  │  jsDelivr   │
+     │  CDN / Pages  │  │  (API)     │  │  (ML Models)│
+     │  (Frontend)   │  │  FastAPI   │  │  WASM+Model │
      │  + Assets     │  │  + Auth    │  │  Files      │
      └───────────────┘  └─────┬──────┘  └─────────────┘
                               │

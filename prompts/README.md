@@ -56,7 +56,7 @@ This folder contains the reusable prompts that govern how agents work on this re
 - **UI/UX Design Audit + Frontend Code Review (Kids Camera Learning App)**: `prompts/ui/ui-ux-design-audit-v1.0.0.md`
 
 ### Engineering (Dev)
-
+- **Game Juice & Kid-Friendly Feedback Audit**: `prompts/audit/game-juice-v1.0.md`
 - **Reality-First repo auditor** (docs vs code verification): `prompts/audit/reality-first-repo-auditor-v1.0.md`
   - Core principle: "Docs are hypotheses. Code is ground truth."
   - 7-phase process: orientation → standards discovery → docs inventory → code verification → discrepancy handling → doc debt closure → readiness assessment

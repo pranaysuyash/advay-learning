@@ -11,8 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -39,8 +38,7 @@ function TextureExplorerGame() {
 
   const { playSuccess, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('texture-explorer');
-  const { saveProgress } = useGameProgress('texture-explorer');
+  const { completeGame } = useGameCompletion('texture-explorer');
 
   useGameSessionProgress({
     gameName: 'Texture Explorer',
@@ -92,8 +90,7 @@ function TextureExplorerGame() {
         setGameState('complete');
         playCelebration();
         (async () => {
-          await saveProgress({ score: calculateScore(newMatched, mistakes), completed: true, level: 1 });
-          onGameComplete(calculateStars(newMatched));
+          await completeGame({ score: calculateScore(newMatched, mistakes), level: 1 });
         })();
         speakText('Great job! You matched all the textures!');
       } else {
@@ -113,7 +110,7 @@ function TextureExplorerGame() {
     }
 
     setTimeout(() => setShowFeedback(null), 1000);
-  }, [gameState, currentItem, matched, mistakes, availableItems, playSuccess, playClick, playCelebration, onGameComplete, speakText]);
+  }, [gameState, currentItem, matched, mistakes, availableItems, playSuccess, playClick, playCelebration, completeGame, speakText]);
 
   const handlePlayAgain = () => {
     startGame();

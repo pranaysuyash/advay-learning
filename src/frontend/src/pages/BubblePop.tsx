@@ -16,7 +16,6 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameCompletion } from '../hooks/useGameCompletion';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -56,16 +55,12 @@ const {
   BLOW_COOLDOWN,
 } = BUBBLE_GAME_CONFIG;
 
-// Inner game component - receives progress hook from GameShell wrapper
-interface BubblePopGameProps {
-  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
-}
-
-const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: BubblePopGameProps) {
+// Inner game component
+const BubblePopGame = memo(function BubblePopGameComponent() {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const [assetsLoaded, setAssetsLoaded] = useState(false);
-  const { completeGame } = useGameCompletion('bubble-pop');
+  const { completeGame, saveProgress } = useGameCompletion('bubble-pop');
 
   // Audio
   const { playClick } = useAudio();
@@ -577,8 +572,6 @@ const BubblePopGame = memo(function BubblePopGameComponent({ saveProgress }: Bub
 
 // Main export wrapped with GameShell
 export const BubblePop = memo(function BubblePopComponent() {
-  const { saveProgress } = useGameProgress('bubble-pop');
-
   return (
     <GameShell
       gameId="bubble-pop"
@@ -586,7 +579,7 @@ export const BubblePop = memo(function BubblePopComponent() {
       showWellnessTimer={true}
       enableErrorBoundary={true}
     >
-      <BubblePopGame saveProgress={saveProgress} />
+      <BubblePopGame />
     </GameShell>
   );
 });

@@ -19,7 +19,6 @@ import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { OptionChips } from '../components/game/OptionChips';
 import { GameCursor } from '../components/game/GameCursor';
 import { useGameCompletion } from '../hooks/useGameCompletion';
-import { useGameDrops } from '../hooks/useGameDrops';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -95,8 +94,7 @@ const ConnectTheDotsGame = memo(function ConnectTheDotsComponent() {
   // Sound effects
   const { playFanfare: playCelebration, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { completeGame } = useGameCompletion('connect-the-dots');
-  const { triggerEasterEgg } = useGameDrops('connect-the-dots');
+  const { completeGame, triggerEasterEgg } = useGameCompletion('connect-the-dots');
 
   const [isHandTrackingEnabled, setIsHandTrackingEnabled] = useState(true);
   const [isPinching, setIsPinching] = useState(false);

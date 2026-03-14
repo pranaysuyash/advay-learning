@@ -23,8 +23,7 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -62,8 +61,7 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
   // Hooks
   const { playPop, playSuccess } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('mirror-maze');
-  const { saveProgress } = useGameProgress('mirror-maze');
+  const { completeGame } = useGameCompletion('mirror-maze');
 
   // Get current maze
   const maze = getCurrentMaze(gameState.level);
@@ -158,8 +156,7 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
         } else {
           // All levels complete
           (async () => {
-            await saveProgress({ score, completed: true, level: 3 });
-            onGameComplete(score);
+            await completeGame({ score, level: 3 });
           })();
         }
       }, 2000);
@@ -168,7 +165,7 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
     }
 
     animationRef.current = requestAnimationFrame(gameLoop);
-  }, [gameState, tilt, maze, playSuccess, incrementStreak, ttsEnabled, speak, onGameComplete]);
+  }, [gameState, tilt, maze, playSuccess, incrementStreak, ttsEnabled, speak, completeGame]);
 
   // Keyboard controls (fallback)
   useEffect(() => {

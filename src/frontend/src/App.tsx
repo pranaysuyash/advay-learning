@@ -117,7 +117,7 @@ const {
   ShapeStacker,
   SizeSorting,
   NumberBubblePop,
-  DigitalJenga,
+
   WeatherMatch,
   FractionPizza,
   TimeTell,
@@ -162,6 +162,10 @@ const {
   ObstacleCourse3D,
   FeedTheMonster3D,
   VirtualBubbles3D,
+  CuttingPractice3D,
+  ShapePop3D,
+  CountingCollectathon3D,
+  ISSDocking3D,
   FingerPaintingMadness,
 } = lazyPages;
 
@@ -770,10 +774,10 @@ const appRoutes: AppRoute[] = [
   },
   {
     path: '/games/digital-jenga',
-    element: <DigitalJenga />,
+    element: <DigitalJenga3D />,
     protected: true,
     cameraSafe: true,
-    gameName: 'Digital Jenga',
+    gameName: 'Digital Jenga 3D',
   },
   {
     path: '/games/weather-match',
@@ -886,6 +890,13 @@ const appRoutes: AppRoute[] = [
     protected: true,
     cameraSafe: true,
     gameName: 'Counting Collect-a-thon',
+  },
+  {
+    path: '/games/iss-docking-3d',
+    element: <ISSDocking3D />,
+    protected: true,
+    cameraSafe: false,
+    gameName: 'ISS Docking 3D',
   },
   {
     path: '/games/math-jumpers',
@@ -1064,13 +1075,7 @@ const appRoutes: AppRoute[] = [
     cameraSafe: true,
     gameName: 'Tidy Up Time',
   },
-  {
-    path: '/games/digital-jenga-3d',
-    element: <DigitalJenga3D />,
-    protected: true,
-    cameraSafe: true,
-    gameName: 'Digital Jenga 3D',
-  },
+
   {
     path: '/games/dress-for-weather-3d',
     element: <DressForWeather3D />,
@@ -1098,6 +1103,27 @@ const appRoutes: AppRoute[] = [
     protected: true,
     cameraSafe: true,
     gameName: 'Virtual Bubbles 3D',
+  },
+  {
+    path: '/games/cutting-practice-3d',
+    element: <CuttingPractice3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Fruit Ninja 3D',
+  },
+  {
+    path: '/games/shape-pop-3d',
+    element: <ShapePop3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Shape Pop 3D',
+  },
+  {
+    path: '/games/counting-collectathon-3d',
+    element: <CountingCollectathon3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Counting Adventure 3D',
   },
   { path: '/progress', element: <Progress />, protected: true, layout: true },
   { path: '/settings', element: <Settings />, protected: true, layout: true },

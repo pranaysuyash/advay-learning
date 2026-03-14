@@ -4,8 +4,7 @@ import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -28,8 +27,7 @@ function PathFollowingContent() {
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('path-following');
-  const { saveProgress } = useGameProgress('path-following');
+  const { completeGame } = useGameCompletion('path-following');
 
   useGameSessionProgress({
     gameName: 'Path Following',
@@ -142,10 +140,9 @@ function PathFollowingContent() {
   const handleFinish = useCallback(async () => {
     playClick();
     const finalScore = Math.round(score / 20);
-    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
-    await onGameComplete(finalScore);
+    await completeGame({ score: finalScore, level: currentLevel });
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [score, completeGame, navigate, playClick, currentLevel]);
 
   const pathWidth = path.length > 0 ? 50 : 0;
 

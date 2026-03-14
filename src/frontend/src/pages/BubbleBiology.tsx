@@ -23,7 +23,6 @@ import type { GameControl } from '../components/GameControls';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -43,11 +42,7 @@ import {
   type GameState,
 } from '../games/bubbleBiologyLogic';
 
-interface BubbleBiologyGameProps {
-  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
-}
-
-const BubbleBiologyContent = memo(function BubbleBiologyContent({ saveProgress }: BubbleBiologyGameProps) {
+const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
   const lastTimeRef = useRef<number>(0);
@@ -67,7 +62,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent({ saveProgress }
   // Hooks
   const { playPop, playSuccess, playError, playCelebration: playCelebrationSound } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { completeGame } = useGameCompletion('bubble-biology');
+  const { completeGame, saveProgress } = useGameCompletion('bubble-biology');
   
   // isPlayingRef is kept in sync synchronously in handleStart / stopGame
   // (useEffect would be asynchronous and could miss the first animation frame)
@@ -519,11 +514,9 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent({ saveProgress }
 });
 
 export default function BubbleBiology() {
-  const { saveProgress } = useGameProgress('bubble-biology');
-
   return (
     <GameShell gameName="Bubble Biology" gameId="bubble-biology">
-      <BubbleBiologyContent saveProgress={saveProgress} />
+      <BubbleBiologyContent />
     </GameShell>
   );
 }

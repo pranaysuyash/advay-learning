@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import {
@@ -16,8 +15,7 @@ import {
 function ShadowMatchGame() {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('shadow-match');
-  const { saveProgress } = useGameProgress('shadow-match');
+  const { completeGame } = useGameCompletion('shadow-match');
 
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -71,8 +69,7 @@ function ShadowMatchGame() {
     if (round >= roundsPerSession) {
       playCelebration();
       const finalScore = score + (ok ? 20 : 0);
-      await saveProgress({ score: finalScore, completed: true, level: 1 });
-      await onGameComplete(finalScore);
+      await completeGame({ score: finalScore, level: 1 });
       setTimeout(() => {
         setActiveRound(null);
       }, 1100);
@@ -86,7 +83,7 @@ function ShadowMatchGame() {
 
   const handleFinish = async () => {
     playClick();
-    await onGameComplete(score);
+    await completeGame({ score });
     navigate('/games');
   };
 

@@ -11144,3 +11144,158 @@ Status updates:
 
 - 2026-03-13 **IN_PROGRESS** — indexing currently running with `BAAI/bge-m3`.
 - 2026-03-13 **IN_PROGRESS** — project-local `learning_for_kids/src` reindex is complete and validated; shared all-project reindex can be run separately in managed background mode when required.
+
+## TCK-20260313-007 :: RESEARCH – Gemini Embedding 2 + Mixedbread wholembed v3 SOTA survey and cross-project recommendation
+
+Type: IMPROVEMENT
+Owner: Codex (GPT-5)
+Created: 2026-03-13
+Status: **DONE**
+Priority: P1
+
+Prompt Trace:
+
+- Prompt(s) used: ad-hoc user request in chat (detailed SOTA research + documentation)
+- Lenses: model quality, availability, multimodal readiness, operational fit for multi-project workspace
+
+Scope contract:
+
+- In-scope: verify latest Gemini embedding and Mixedbread wholembed-v3 status from primary sources; document recommendations for EchoPanel/photo-search/model-lab + current workspace indexing.
+- Out-of-scope: immediate provider-adapter implementation changes in memsearch core.
+- Behavior change allowed: NO (documentation and decision guidance only).
+
+Targets:
+
+- `docs/research/EMBEDDING_MODELS_SOTA_RESEARCH_2026-03-13.md`
+- `docs/WORKLOG_ADDENDUM_v2.md`
+
+Acceptance Criteria:
+
+- [x] Primary-source verification captured with links
+- [x] Explicit status of `gemini-embedding-2-preview` and `mxbai-wholembed-v3`
+- [x] Project-wise recommendation for EchoPanel, photo-search, model-lab, shared workspace memory
+- [x] Existing research/documentation coverage check included
+
+Execution log:
+
+- 2026-03-13 IST: Verified Gemini embedding docs and pricing pages on `ai.google.dev` (model status + free tier/payed tier listing).
+- 2026-03-13 IST: Verified Mixedbread wholembed-v3 launch note on official Mixedbread engineering blog; extracted "internal evaluation / available soon" status.
+- 2026-03-13 IST: Verified open-source baseline model cards (`BAAI/bge-m3`, `Qwen/Qwen3-Embedding-8B`, `mixedbread-ai/mxbai-embed-large-v1`).
+- 2026-03-13 IST: Authored consolidated research doc with Observed/Inferred status and project-specific recommendations.
+
+Status updates:
+
+- 2026-03-13 **DONE** — detailed SOTA embedding research documented with source links and decision recommendations.
+
+## TCK-20260314-001 :: OPS/RESEARCH – Projects-level instruction lock + hosted embedding provider path (google/openai/voyage)
+
+Type: IMPROVEMENT
+Owner: Codex (GPT-5)
+Created: 2026-03-14
+Status: **DONE**
+Priority: P1
+
+Prompt Trace:
+
+- Prompt(s) used: ad-hoc user request in chat (save instruction globally + implement feasible provider support + document research)
+- Lenses: execution discipline, hosted/open-source optionality, cross-project memory operations
+
+Scope contract:
+
+- In-scope:
+  - Persist user instruction at Projects level (communication/implementation policy).
+  - Implement small/feasible provider support updates for Projects memory wrapper and agent-start.
+  - Document current provider/model research (OpenAI, Gemini, Mixedbread, HF-backed open models).
+- Out-of-scope:
+  - Memsearch core package changes.
+  - Immediate migration of all project collections to hosted defaults.
+- Behavior change allowed: YES (agent/runtime provider resolution + docs).
+
+Targets:
+
+- `/Users/pranay/Projects/AGENTS.md`
+- `/Users/pranay/Projects/workspace_memory/scripts/projects_memsearch.sh`
+- `/Users/pranay/Projects/agent-start`
+- `/Users/pranay/Projects/PROJECTS_AGENT_MEMORY_COMMANDS.md`
+- `/Users/pranay/Projects/workspace_memory/docs/WORKSPACE_MEMORY_RUNBOOK.md`
+- `/Users/pranay/Projects/MEMSEARCH_SETUP.md`
+- `docs/research/EMBEDDING_PROVIDER_RESEARCH_MATRIX_2026-03-14.md`
+
+Acceptance Criteria:
+
+- [x] Projects-level instruction added and persisted in Projects `AGENTS.md`
+- [x] `projects-memory` supports google/voyage provider auth + model candidate envs + updated auto-order docs
+- [x] `agent-start` auto-provider logic supports google/voyage and validates required API keys
+- [x] New research matrix document added with source links (OpenAI, Gemini, Mixedbread, HF model cards)
+- [x] Shell syntax checks pass for updated scripts
+
+Execution log:
+
+- 2026-03-14 IST: Added global workspace rule in `/Users/pranay/Projects/AGENTS.md` to avoid framing solvable gaps as hard limitations; require capability/current-state/implementation-path framing.
+- 2026-03-14 IST: Updated `projects_memsearch.sh` with provider candidates + auth support for `google` and `voyage`.
+- 2026-03-14 IST: Updated auto-provider resolution order to `local -> ollama -> google -> openai -> voyage`.
+- 2026-03-14 IST: Added `MEMSEARCH_GOOGLE_MODEL_CANDIDATES` and `MEMSEARCH_VOYAGE_MODEL_CANDIDATES` support and usage docs.
+- 2026-03-14 IST: Updated `agent-start` to support `google`/`voyage` auto resolution and key validation.
+- 2026-03-14 IST: Updated Projects-level docs (`PROJECTS_AGENT_MEMORY_COMMANDS.md`, `WORKSPACE_MEMORY_RUNBOOK.md`, `MEMSEARCH_SETUP.md`) with google/openai/voyage usage.
+- 2026-03-14 IST: Added research artifact `docs/research/EMBEDDING_PROVIDER_RESEARCH_MATRIX_2026-03-14.md`.
+
+Status updates:
+
+- 2026-03-14 **DONE** — instruction persisted globally, feasible provider support implemented, and latest embedding provider research documented.
+
+## TCK-20260314-002 :: OPS/RESEARCH – Embedding A/B execution + global Chrome DevTools MCP install
+
+Type: IMPROVEMENT
+Owner: Codex (GPT-5)
+Created: 2026-03-14
+Status: **DONE**
+Priority: P1
+
+Prompt Trace:
+
+- Prompt(s) used: ad-hoc user request in chat (run A/B now + install global chrome-devtools MCP + document results)
+- Lenses: practical execution, measurable retrieval evidence, global agent tooling availability
+
+Scope contract:
+
+- In-scope:
+  - Run embedding A/B with open-source models available now.
+  - Record benchmark and retrieval sanity results in repo docs.
+  - Install Chrome DevTools MCP globally via Codex MCP config.
+- Out-of-scope:
+  - Memsearch core package changes.
+  - Provider key provisioning/rotation.
+- Behavior change allowed: YES (global MCP availability + new research artifacts/docs).
+
+Targets:
+
+- `docs/research/EMBEDDING_AB_RESULTS_2026-03-14.md`
+- `docs/research/embedding_eval_2026-03-14.csv`
+- `docs/research/embedding_eval_2026-03-14.stderr.log`
+- `/Users/pranay/Projects/PROJECTS_AGENT_MEMORY_COMMANDS.md`
+- Codex global MCP registry (`codex mcp list`)
+
+Acceptance Criteria:
+
+- [x] A/B benchmark executed and persisted in repo
+- [x] Retrieval sanity check executed on project corpus for at least two models
+- [x] Global MCP server entry for `chrome-devtools` installed and verified
+- [x] Research/result documentation updated
+
+Execution log:
+
+- 2026-03-14 IST: Ran eval benchmark for `BAAI/bge-m3`, `mixedbread-ai/mxbai-embed-large-v1`, `intfloat/multilingual-e5-base`; saved raw outputs to `docs/research/embedding_eval_2026-03-14.csv` and `docs/research/embedding_eval_2026-03-14.stderr.log`.
+- 2026-03-14 IST: Built two model-specific eval collections:
+  - `eval_lfk_bge_m3_20260314`
+  - `eval_lfk_mxbai_large_v1_20260314`
+- 2026-03-14 IST: Query test (`"Profile Photo Routes Not Registered"`) returned expected top hit (`API_AUDIT_REPORT.md`) at rank 1 for both models.
+- 2026-03-14 IST: Installed global MCP server:
+  - `codex mcp add chrome-devtools npx -y chrome-devtools-mcp@latest`
+- 2026-03-14 IST: Verified MCP registration with:
+  - `codex mcp list`
+  - `codex mcp get chrome-devtools`
+- 2026-03-14 IST: Added Projects-level command doc section for global chrome-devtools MCP installation/use.
+
+Status updates:
+
+- 2026-03-14 **DONE** — A/B execution completed with saved artifacts and Chrome DevTools MCP installed globally.

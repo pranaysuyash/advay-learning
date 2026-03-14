@@ -39,6 +39,8 @@ Outputs:
 - If sources conflict, the agent must cite concrete file paths and ask before proceeding.
 - If `.agent` files are missing or stale, run `/Users/pranay/Projects/agent-start --skip-index` before planning changes.
 - Do not start implementation until `.agent/AGENT_KICKOFF_PROMPT.txt` and `.agent/SESSION_CONTEXT.md` are loaded.
+- **Copilot-style agents:** This repo maintains a companion quick-start guide at `.github/copilot-instructions.md`. Keep it aligned with this document; changes to core workflow or gating rules should be reflected in both.
+- When editing this file, remember to check `.github/copilot-instructions.md` for matching guidance.
 
 ### Nested agent metadata directories
 - Some directories (for example `/Users/pranay/Projects/learning_for_kids/src/frontend/src/frontend/`) exist solely to hold nested `.agent/` metadata (see `/Users/pranay/Projects/learning_for_kids/src/frontend/src/frontend/.agent/AGENT_KICKOFF_PROMPT.txt`). The actual runtime frontend code lives in `src/frontend/src`. Remove or refactor these folders only as part of a documented automation cleanup, otherwise the localized prompt order described in each `AGENT_KICKOFF_PROMPT.txt` will fail for agents entering that subtree.
@@ -178,7 +180,7 @@ This document governs how AI agents (including myself and others) work on the Ad
 **Branch discipline:**
 
 - Do not create long-lived branch trees (`feature/*`, `fix/*`, `hotfix/*`) unless user explicitly asks.
-- Keep one active WIP branch per scoped task where possible.
+- **One branch until merged.** A "task" = all work until the branch is merged to `main`. Do NOT create multiple WIP branches while previous ones are still unmerged. Reuse the existing WIP branch for all pending work. Delete stale/empty branches immediately.
 - If a user-created feature branch already exists, continue there and still use PR review before merge.
 
 **🚫 NEVER delete or revert files with unrecognized changes.**

@@ -1,7 +1,9 @@
-import React, { useRef, useEffect } from 'react';
-import { render, screen, act } from '@testing-library/react';
+import React, { useRef } from 'react';
+import { render, act } from '@testing-library/react';
 import { vi } from 'vitest';
 import useGameHandTracking, { resolveHandTrackingRuntimeMode } from '../useGameHandTracking';
+
+const initializeSpy = vi.fn(async () => {});
 
 // mocks (same as before)
 vi.mock('../useHandTracking', () => ({
@@ -10,7 +12,8 @@ vi.mock('../useHandTracking', () => ({
     isLoading: false,
     error: null,
     isReady: true,
-    initialize: vi.fn(async () => {}),
+    activeDelegate: 'CPU',
+    initialize: initializeSpy,
     reset: vi.fn(async () => {}),
   }),
 }));
@@ -51,11 +54,19 @@ describe('useGameHandTracking', () => {
       await result.startTracking();
     });
 
+    const updatedResult = (window as any).hookResult;
+    expect(['idle', 'starting', 'running', 'stopped']).toContain(updatedResult.lifecycleState);
+    expect(updatedResult.lifecycleState).not.toBe('error');
+    expect(['CPU', null]).toContain(updatedResult.activeDelegate);
+    expect(initializeSpy).toHaveBeenCalledTimes(0);
+
     act(() => {
-      result.stopTracking();
+      updatedResult.stopTracking();
     });
 
-    expect(result.isTracking).not.toBeDefined();
+    const stoppedResult = (window as any).hookResult;
+    expect(stoppedResult.isTracking).not.toBeDefined();
+    expect(stoppedResult.lifecycleState).toBe('stopped');
   });
 
   it('resolveHandTrackingRuntimeMode logic', () => {

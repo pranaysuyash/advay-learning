@@ -1,284 +1,196 @@
 /**
  * usePerformanceMonitor Hook
  * 
- * React hook for tracking performance in 3D games.
- * Tracks FPS, memory usage, frame drops, and reports to analytics on unmount.
+ * Tracks FPS, memory usage, and frame drops for 3D games.
+ * Only active in development mode to avoid production overhead.
  * 
- * Usage:
- * ```typescript
- * function My3DGame() {
- *   const { metrics, isLowFps, reset } = usePerformanceMonitor('My3DGame', {
- *     reportToAnalytics: true,
- *     fpsThreshold: 30,
- *   });
- *   
- *   // Access metrics for display
- *   console.log(`Current FPS: ${metrics.currentFps}`);
- *   
- *   return <Canvas>...</Canvas>;
- * }
- * ```
+ * @example
+ * const { fps, isPerformant } = usePerformanceMonitor('DigitalJenga3D');
  */
 
-import { useEffect, useRef, useCallback, useState } from 'react';
-import { 
-  PerformanceMonitor, 
-  PerformanceMetrics,
-  FpsCounter,
-} from '@/utils/performance';
-import { logEvent } from '@/analytics';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
-export interface UsePerformanceMonitorOptions {
-  /** Whether to report metrics to analytics on unmount */
-  reportToAnalytics?: boolean;
-  /** FPS threshold for warnings */
-  fpsThreshold?: number;
-  /** Log interval in ms (0 to disable) */
-  logIntervalMs?: number;
-  /** Callback when metrics update */
-  onMetricsUpdate?: (metrics: PerformanceMetrics) => void;
-  /** Callback when FPS drops below threshold */
-  onLowFps?: (fps: number, threshold: number) => void;
-  /** Whether to start monitoring immediately */
-  autoStart?: boolean;
+interface PerformanceMetrics {
+  fps: number;
+  averageFps: number;
+  minFps: number;
+  maxFps: number;
+  frameDrops: number;
+  memoryUsed?: number;
+  isPerformant: boolean;
 }
 
-export interface UsePerformanceMonitorReturn {
-  /** Current performance metrics */
-  metrics: PerformanceMetrics;
-  /** Whether current FPS is below threshold */
-  isLowFps: boolean;
-  /** Whether FPS is in warning range (threshold to threshold + 10) */
-  isWarningFps: boolean;
-  /** Start monitoring (if not auto-started) */
-  start: () => void;
-  /** Stop monitoring and get final metrics */
-  stop: () => PerformanceMetrics;
+export interface UsePerformanceMonitorReturn extends PerformanceMetrics {
   /** Reset all metrics */
   reset: () => void;
-  /** Get current FPS */
-  getCurrentFps: () => number;
-  /** Performance monitor instance (for advanced use) */
-  monitor: PerformanceMonitor | null;
+  /** Log current metrics to console */
+  log: () => void;
 }
 
-/**
- * Default metrics for initial state
- */
-const getDefaultMetrics = (gameName: string): PerformanceMetrics => ({
-  gameName,
-  startTime: performance.now(),
-  averageFps: 60,
-  minFps: 60,
-  maxFps: 60,
-  currentFps: 60,
-  frameDrops: 0,
-  slowFrames: 0,
-  totalFrames: 0,
-  devicePixelRatio: window.devicePixelRatio,
-  screenResolution: `${window.innerWidth}x${window.innerHeight}`,
-  wasHidden: false,
-});
+export interface UsePerformanceMonitorOptions {
+  targetFps?: number;
+  warnThreshold?: number;
+}
 
-/**
- * Hook for monitoring 3D game performance
- */
 export function usePerformanceMonitor(
   gameName: string,
   options: UsePerformanceMonitorOptions = {}
 ): UsePerformanceMonitorReturn {
-  const {
-    reportToAnalytics = true,
-    fpsThreshold = 30,
-    logIntervalMs = 0,
-    onMetricsUpdate,
-    onLowFps,
-    autoStart = true,
-  } = options;
+  const { warnThreshold = 30 } = options;
   
-  // Use refs for mutable values that shouldn't trigger re-renders
-  const monitorRef = useRef<PerformanceMonitor | null>(null);
-  const logIntervalRef = useRef<number | null>(null);
-  const lastLogTimeRef = useRef<number>(0);
-  const lowFpsCallbackRef = useRef(onLowFps);
-  const metricsCallbackRef = useRef(onMetricsUpdate);
+  const frameCountRef = useRef(0);
+  const lastTimeRef = useRef(performance.now());
+  const fpsHistoryRef = useRef<number[]>([]);
+  const frameDropsRef = useRef(0);
+  const isActiveRef = useRef(true);
   
-  // Keep callbacks up to date
-  useEffect(() => {
-    lowFpsCallbackRef.current = onLowFps;
-    metricsCallbackRef.current = onMetricsUpdate;
-  }, [onLowFps, onMetricsUpdate]);
-  
-  // State for metrics (throttled updates)
-  const [metrics, setMetrics] = useState<PerformanceMetrics>(() => getDefaultMetrics(gameName));
-  const [isLowFps, setIsLowFps] = useState(false);
-  const [isWarningFps, setIsWarningFps] = useState(false);
-  
-  // Initialize monitor
-  useEffect(() => {
-    // Create monitor with callback
-    monitorRef.current = new PerformanceMonitor(gameName, (updatedMetrics) => {
-      // Throttle state updates to every ~250ms to avoid React overhead
-      const now = performance.now();
-      if (now - lastLogTimeRef.current > 250) {
-        setMetrics(updatedMetrics);
-        setIsLowFps(updatedMetrics.currentFps < fpsThreshold);
-        setIsWarningFps(
-          updatedMetrics.currentFps >= fpsThreshold && 
-          updatedMetrics.currentFps < fpsThreshold + 10
-        );
-        lastLogTimeRef.current = now;
-        
-        // Call user callback
-        if (metricsCallbackRef.current) {
-          metricsCallbackRef.current(updatedMetrics);
-        }
-        
-        // Check for low FPS
-        if (updatedMetrics.currentFps < fpsThreshold && lowFpsCallbackRef.current) {
-          lowFpsCallbackRef.current(updatedMetrics.currentFps, fpsThreshold);
-        }
-      }
-    });
+  const [metrics, setMetrics] = useState<PerformanceMetrics>({
+    fps: 0,
+    averageFps: 0,
+    minFps: 60,
+    maxFps: 0,
+    frameDrops: 0,
+    isPerformant: true,
+  });
+
+  // Calculate and update metrics
+  const updateMetrics = useCallback(() => {
+    if (!isActiveRef.current) return;
     
-    // Auto-start if enabled
-    if (autoStart) {
-      monitorRef.current.start();
-    }
+    frameCountRef.current++;
+    const currentTime = performance.now();
+    const delta = currentTime - lastTimeRef.current;
     
-    // Cleanup on unmount
-    return () => {
-      if (monitorRef.current) {
-        const finalMetrics = monitorRef.current.stop();
-        
-        // Report to analytics
-        if (reportToAnalytics) {
-          logEvent('performance_session_end', {
-            gameName: finalMetrics.gameName,
-            averageFps: finalMetrics.averageFps,
-            minFps: finalMetrics.minFps,
-            maxFps: finalMetrics.maxFps,
-            frameDrops: finalMetrics.frameDrops,
-            slowFrames: finalMetrics.slowFrames,
-            totalFrames: finalMetrics.totalFrames,
-            durationMs: finalMetrics.endTime && finalMetrics.startTime 
-              ? finalMetrics.endTime - finalMetrics.startTime 
-              : 0,
-            memoryUsageMB: finalMetrics.memoryUsageMB,
-            devicePixelRatio: finalMetrics.devicePixelRatio,
-            screenResolution: finalMetrics.screenResolution,
-            wasHidden: finalMetrics.wasHidden,
-          });
-        }
-        
-        monitorRef.current.dispose();
-        monitorRef.current = null;
+    // Update every second
+    if (delta >= 1000) {
+      const fps = Math.round((frameCountRef.current * 1000) / delta);
+      
+      fpsHistoryRef.current.push(fps);
+      // Keep last 60 seconds of history
+      if (fpsHistoryRef.current.length > 60) {
+        fpsHistoryRef.current.shift();
       }
       
-      // Clear log interval
-      if (logIntervalRef.current) {
-        window.clearInterval(logIntervalRef.current);
-        logIntervalRef.current = null;
+      // Calculate stats
+      const averageFps = Math.round(
+        fpsHistoryRef.current.reduce((a, b) => a + b, 0) / fpsHistoryRef.current.length
+      );
+      const minFps = Math.min(...fpsHistoryRef.current);
+      const maxFps = Math.max(...fpsHistoryRef.current);
+      
+      // Count frame drops
+      if (fps < warnThreshold) {
+        frameDropsRef.current++;
+      }
+      
+      // Get memory if available
+      const memoryUsed = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize;
+      
+      const isPerformant = averageFps >= warnThreshold;
+      
+      setMetrics({
+        fps,
+        averageFps,
+        minFps,
+        maxFps,
+        frameDrops: frameDropsRef.current,
+        memoryUsed: memoryUsed ? Math.round(memoryUsed / 1024 / 1024) : undefined,
+        isPerformant,
+      });
+      
+      // Warn in console if performance is poor
+      if (!isPerformant && import.meta.env.DEV) {
+        console.warn(`[Performance] ${gameName} running slowly: ${fps} FPS (avg: ${averageFps})`);
+      }
+      
+      // Reset for next second
+      frameCountRef.current = 0;
+      lastTimeRef.current = currentTime;
+    }
+    
+    requestAnimationFrame(updateMetrics);
+  }, [gameName, warnThreshold]);
+
+  // Start monitoring
+  useEffect(() => {
+    isActiveRef.current = true;
+    const rafId = requestAnimationFrame(updateMetrics);
+    
+    return () => {
+      isActiveRef.current = false;
+      cancelAnimationFrame(rafId);
+      
+      // Log final metrics on unmount
+      if (import.meta.env.DEV && fpsHistoryRef.current.length > 0) {
+        console.log(`[Performance] ${gameName} session ended:`, {
+          averageFps: Math.round(fpsHistoryRef.current.reduce((a, b) => a + b, 0) / fpsHistoryRef.current.length),
+          minFps: Math.min(...fpsHistoryRef.current),
+          maxFps: Math.max(...fpsHistoryRef.current),
+          frameDrops: frameDropsRef.current,
+        });
       }
     };
-  }, [gameName, reportToAnalytics, fpsThreshold, autoStart]);
-  
-  // Set up periodic logging
-  useEffect(() => {
-    if (logIntervalMs > 0 && monitorRef.current) {
-      logIntervalRef.current = window.setInterval(() => {
-        const currentMetrics = monitorRef.current?.getMetrics();
-        if (currentMetrics) {
-          console.log(`[Performance:${gameName}]`, {
-            fps: currentMetrics.currentFps,
-            avg: currentMetrics.averageFps,
-            drops: currentMetrics.frameDrops,
-            memory: currentMetrics.memoryUsageMB?.toFixed(1) + 'MB',
-          });
-        }
-      }, logIntervalMs);
-      
-      return () => {
-        if (logIntervalRef.current) {
-          window.clearInterval(logIntervalRef.current);
-          logIntervalRef.current = null;
-        }
-      };
-    }
-  }, [logIntervalMs, gameName]);
-  
-  // Manual control callbacks
-  const start = useCallback(() => {
-    monitorRef.current?.start();
-  }, []);
-  
-  const stop = useCallback(() => {
-    const finalMetrics = monitorRef.current?.stop();
-    return finalMetrics || getDefaultMetrics(gameName);
-  }, [gameName]);
-  
+  }, [updateMetrics, gameName]);
+
   const reset = useCallback(() => {
-    monitorRef.current?.reset();
-    setMetrics(getDefaultMetrics(gameName));
-    setIsLowFps(false);
-    setIsWarningFps(false);
-  }, [gameName]);
-  
-  const getCurrentFps = useCallback(() => {
-    return monitorRef.current?.getCurrentFps() || 60;
+    frameCountRef.current = 0;
+    lastTimeRef.current = performance.now();
+    fpsHistoryRef.current = [];
+    frameDropsRef.current = 0;
+    setMetrics({
+      fps: 0,
+      averageFps: 0,
+      minFps: 60,
+      maxFps: 0,
+      frameDrops: 0,
+      isPerformant: true,
+    });
   }, []);
-  
+
+  const log = useCallback(() => {
+    console.log(`[Performance] ${gameName} current metrics:`, metrics);
+  }, [metrics, gameName]);
+
   return {
-    metrics,
-    isLowFps,
-    isWarningFps,
-    start,
-    stop,
+    ...metrics,
     reset,
-    getCurrentFps,
-    monitor: monitorRef.current,
+    log,
   };
 }
 
-/**
- * Hook for simple FPS tracking (lightweight alternative)
- */
 export function useFpsCounter(_gameName: string, targetFps: number = 60): {
   fps: number;
   isLow: boolean;
 } {
   const [fps, setFps] = useState(60);
   const [isLow, setIsLow] = useState(false);
-  const counterRef = useRef(new FpsCounter());
+  const frameCountRef = useRef(0);
+  const lastTimeRef = useRef(performance.now());
   const rafRef = useRef<number | null>(null);
-  const lastUpdateRef = useRef(0);
-  
+
   useEffect(() => {
-    const counter = counterRef.current;
-    
+    let mounted = true;
     const loop = () => {
-      const currentFps = counter.recordFrame();
+      if (!mounted) return;
+      frameCountRef.current += 1;
       const now = performance.now();
-      
-      // Update state every 500ms
-      if (now - lastUpdateRef.current > 500) {
+      const delta = now - lastTimeRef.current;
+      if (delta >= 500) {
+        const currentFps = (frameCountRef.current * 1000) / delta;
         setFps(Math.round(currentFps));
         setIsLow(currentFps < targetFps);
-        lastUpdateRef.current = now;
+        frameCountRef.current = 0;
+        lastTimeRef.current = now;
       }
-      
       rafRef.current = requestAnimationFrame(loop);
     };
-    
     rafRef.current = requestAnimationFrame(loop);
-    
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      mounted = false;
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
   }, [targetFps]);
-  
+
   return { fps, isLow };
 }
 

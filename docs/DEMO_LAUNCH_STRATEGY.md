@@ -110,19 +110,22 @@
 
 ---
 
-### Option 2: Live Demo URL (Vercel + Railway) 🌐 RECOMMENDED
+### Option 2: Live Demo URL (Cloudflare Pages + Railway) 🌐 RECOMMENDED
 
 **Time**: 4-5 hours
-**Cost**: Free (Vercel Free Tier + Railway Free Tier)
+**Cost**: Free (Cloudflare Pages free tier + Railway Free Tier)
 
 **Steps:**
 
-**Frontend (Vercel):**
+**Frontend (Cloudflare Pages):**
 
 ```bash
 cd src/frontend
-vercel login
-vercel deploy --prod
+npm run build
+# Deploy the built site to Cloudflare Pages (example):
+# 1) Install Wrangler if needed: npm install -g @cloudflare/wrangler
+# 2) Log in: wrangler login
+# 3) Deploy: wrangler pages publish dist --project-name=<YOUR_PROJECT_NAME> --branch=main
 ```
 
 **Backend (Railway):**
@@ -137,7 +140,7 @@ railway up
 **Post-Deployment:**
 
 1. Update frontend API_URL to Railway backend URL
-2. Configure CORS in backend (add Vercel domain to ALLOWED_ORIGINS)
+2. Configure CORS in backend (add Cloudflare Pages domain to ALLOWED_ORIGINS)
 3. Test end-to-end flow (register → play → progress)
 4. Record demo video of live site
 5. Post to LinkedIn/X with live demo link
@@ -152,7 +155,7 @@ railway up
 **Cons:**
 
 - 4-5 hours setup time
-- Requires free tier accounts (Vercel + Railway)
+- Requires free tier accounts (Cloudflare Pages + Railway)
 - Backend limits (Railway free tier: 512MB RAM, 500hrs/month)
 
 **Recommended for**: Maximum credibility, user testing, recruiting/funding pitch
@@ -206,7 +209,7 @@ ngrok http 5173
 
 ---
 
-## CHOSEN LAUNCH OPTION: **Option 2 - Vercel + Railway**
+## CHOSEN LAUNCH OPTION: **Option 2 - Cloudflare Pages + Railway**
 
 **Rationale:**
 
@@ -262,7 +265,7 @@ I'm 6 months in. Core functionality works (4 playable games, authentication, pro
 
 Still in early beta. Building in public, feedback welcome.
 
-Demo: [Vercel URL once deployed]
+Demo: [Cloudflare Pages URL once deployed]
 Code: github.com/pranay/learning_for_kids
 
 What do you think? Would you try this with your kids?
@@ -290,7 +293,7 @@ Features:
 • Real-time hand tracking
 • Works for kids 2-6 years old
 
-Demo: [Vercel URL]
+Demo: [Cloudflare Pages URL]
 Code: github.com/pranay/learning_for_kids
 
 Early beta, feedback welcome! 👋
@@ -373,7 +376,7 @@ Early beta, feedback welcome! 👋
 
 **Text Overlay:**
 
-- "Demo: [Vercel URL]"
+- "Demo: [Cloudflare Pages URL]"
 - "Code: github.com/pranay/learning_for_kids"
 - "Feedback: @pranay" (or email)
 
@@ -385,7 +388,7 @@ Early beta, feedback welcome! 👋
 
 **Morning:**
 
-- [ ] Deploy frontend to Vercel (2 hours)
+- [ ] Deploy frontend to Cloudflare Pages (2 hours)
 - [ ] Deploy backend to Railway (2 hours)
 - [ ] Test end-to-end flow (30 minutes)
 - [ ] Record 60-second demo video (1 hour)
@@ -441,7 +444,7 @@ Early beta, feedback welcome! 👋
   - Quick Win 1: [specific fix/improvement]
   - Quick Win 2: [specific fix/improvement]
 - [ ] Test fixes locally
-- [ ] Deploy fixes to Vercel/Railway
+- [ ] Deploy fixes to Cloudflare Pages/Railway
 
 **Day 6:**
 
@@ -481,8 +484,8 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 
 - In-scope:
   - Demo readiness assessment (core functionality verification)
-  - Choose and execute launch option (Vercel + Railway selected)
-  - Deploy frontend to Vercel (Free Tier)
+  - Choose and execute launch option (Cloudflare Pages + Railway selected)
+  - Deploy frontend to Cloudflare Pages (Free Tier)
   - Deploy backend to Railway (Free Tier)
   - Record 60-second demo video with gameplay highlights
   - Write 3 versions of LinkedIn/X post copy
@@ -504,11 +507,11 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 - Repo: learning_for_kids
 - File(s):
   - docs/DEMO_LAUNCH_STRATEGY.md (this document)
-  - src/frontend/ (deploy to Vercel)
+  - src/frontend/ (deploy to Cloudflare Pages)
   - src/backend/ (deploy to Railway)
   - GitHub README.md (update with demo link)
 - External:
-  - Vercel account (frontend hosting)
+  - Cloudflare Pages account (frontend hosting)
   - Railway account (backend hosting)
   - LinkedIn profile (post target)
   - X (Twitter) profile (post target)
@@ -517,10 +520,10 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 **Acceptance Criteria:**
 
 - [x] Demo readiness assessment complete (4/4 core functionality working)
-- [x] Launch option selected (Option 2: Vercel + Railway)
+- [x] Launch option selected (Option 2: Cloudflare Pages + Railway)
 - [x] 3 versions of post copy written (technical, entrepreneur, general)
 - [x] 60-second demo video recorded (intro + gameplay + outro)
-- [ ] Frontend deployed to Vercel with HTTPS
+- [ ] Frontend deployed to Cloudflare Pages with HTTPS
 - [ ] Backend deployed to Railway with HTTPS
 - [ ] End-to-end flow tested (register → play → progress)
 - [ ] Posted to LinkedIn (Version 2: entrepreneur audience)
@@ -540,7 +543,7 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 - [2026-01-31 23:15 UTC] Assessment: Core functionality 4/4 working | Evidence: Tested 4 games, auth, DB
 - [2026-01-31 23:30 UTC] Verdict: DEMO READY (production not ready) | Evidence: Decision matrix shows 4/4 core, 0/5 production
 - [2026-01-31 23:45 UTC] Created demo launch strategy document | Evidence: docs/DEMO_LAUNCH_STRATEGY.md created
-- [2026-01-31 23:50 UTC] Chose Option 2 (Vercel + Railway) | Rationale: Maximum credibility, free SSL, live demo URL
+- [2026-01-31 23:50 UTC] Chose Option 2 (Cloudflare Pages + Railway) | Rationale: Maximum credibility, free SSL, live demo URL
 - [2026-01-31 23:55 UTC] Wrote 3 versions of post copy | Evidence: Technical, entrepreneur, general versions ready
 - [2026-01-31 23:59 UTC] Scripted 60-second demo video | Evidence: Intro (0:00-0:15), Gameplay (0:15-0:45), Outro (0:45-1:00)
 
@@ -555,14 +558,14 @@ Launch demo version of Advay Vision Learning as portfolio showcase on LinkedIn/X
 **Status Updates:**
 
 - [2026-01-31 23:45 UTC] **IN_PROGRESS** — Strategy complete, ready to execute deployment
-- [ ] **TODO**: Deploy to Vercel + Railway
+- [ ] **TODO**: Deploy to Cloudflare Pages + Railway
 - [ ] **TODO**: Record demo video
 - [ ] **TODO**: Post to LinkedIn/X
 - [ ] **DONE**: Mark ticket DONE when all acceptance criteria met
 
 **Next Actions:**
 
-1. Deploy frontend to Vercel (2 hours)
+1. Deploy frontend to Cloudflare Pages (2 hours)
 2. Deploy backend to Railway (2 hours)
 3. Record 60-second demo video (1 hour)
 4. Post to LinkedIn/X (30 minutes)

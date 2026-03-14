@@ -11,8 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -39,8 +38,7 @@ function TasteMatchGame() {
   
   const { playSuccess, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('taste-match');
-  const { saveProgress } = useGameProgress('taste-match');
+  const { completeGame } = useGameCompletion('taste-match');
 
   useGameSessionProgress({
     gameName: 'Taste Match',
@@ -91,8 +89,7 @@ function TasteMatchGame() {
         setGameState('complete');
         playCelebration();
         (async () => {
-          await saveProgress({ score: calculateScore(newMatched), completed: true, level: 1 });
-          onGameComplete(calculateStars(newMatched));
+          await completeGame({ score: calculateScore(newMatched), level: 1 });
         })();
         speakText('Great job! You matched all the tastes!');
       } else {
@@ -110,7 +107,7 @@ function TasteMatchGame() {
     }
     
     setTimeout(() => setShowFeedback(null), 800);
-  }, [gameState, currentFood, matched, availableFoods, playSuccess, playClick, playCelebration, onGameComplete, speakText]);
+  }, [gameState, currentFood, matched, availableFoods, playSuccess, playClick, playCelebration, completeGame, speakText]);
 
   const handlePlayAgain = () => {
     startGame();

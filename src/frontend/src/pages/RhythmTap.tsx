@@ -4,8 +4,7 @@ import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, createPattern, checkPattern } from '../games/rhythmTapLogic';
@@ -29,8 +28,7 @@ function RhythmTapContent() {
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('rhythm-tap');
-  const { saveProgress } = useGameProgress('rhythm-tap');
+  const { completeGame } = useGameCompletion('rhythm-tap');
 
   useGameSessionProgress({
     gameName: 'Rhythm Tap',
@@ -123,10 +121,9 @@ function RhythmTapContent() {
 
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score: correct, completed: true, level: currentLevel });
-    await onGameComplete(correct);
+    await completeGame({ score: correct, level: currentLevel });
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [correct, navigate, playClick, completeGame, currentLevel]);
 
   return (
     <GameContainer

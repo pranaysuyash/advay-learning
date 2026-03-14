@@ -53,6 +53,18 @@ interface AuthState {
   clearGuestSession: () => void;
 }
 
+function restoreGuestSessionAfterHydration(state: AuthState) {
+  const hasGuestSession = Boolean(state.isGuest && state.guestSession && state.user);
+
+  if (!hasGuestSession) {
+    return;
+  }
+
+  state.isAuthenticated = true;
+  state.isLoading = false;
+  state.error = null;
+}
+
 // Helper to extract error message from various error formats
 // REFACTOR-2026-03-07: Now delegates to centralized errorUtils
 // See: docs/audit/CODEBASE_CONSOLIDATION_AUDIT.md CONSOL-004
@@ -221,6 +233,7 @@ export const useAuthStore = create<AuthState>()(
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
+          restoreGuestSessionAfterHydration(state);
           state.isLoading = false;
         }
       },

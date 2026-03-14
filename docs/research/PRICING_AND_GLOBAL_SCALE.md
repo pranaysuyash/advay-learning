@@ -26,11 +26,11 @@ This means you never pay for idle capacity anywhere in the world. You only pay f
 
 Let's look at the exact pricing of the Serverless Stack we outlined in `ARCHITECTURE_DEPLOYMENT_SCALE.md`. Because we offload all heavy video/AI processing to the client's browser (WASM) and WebRTC, our backend ONLY handles tiny text JSON payloads (login auth, saving XP, fetching high scores).
 
-### A. Frontend CDN & Media Delivery (Vercel or Cloudflare Pages)
+### A. Frontend CDN & Media Delivery (Cloudflare Pages)
 *   **What it does:** Serves the React app, MediaPipe WASM models, and images.
 *   **Pricing:** 
-    *   **Cloudflare Pages:** Unbelievably, it is effectively $0. They offer Unlimited bandwidth and Unlimited requests for static assets.
-    *   **Vercel:** Free tier allows 100GB bandwidth/month. Pro plan is $20/month for 1TB bandwidth.
+    *   **Cloudflare Pages:** Effectively $0 for most usage; Cloudflare’s CDN provides free global caching for static assets.
+    *   **Netlify / Static hosts:** Also offer generous free tiers and similar workflow, but this repo standardizes on Cloudflare.
 *   **Our Cost Estimate:** $0 - $20 / month.
 
 ### B. Serverless Backend Compute (Google Cloud Run)
@@ -61,21 +61,21 @@ Let's look at the exact pricing of the Serverless Stack we outlined in `ARCHITEC
 Assuming a highly optimized codebase where saving progress happens once every few minutes (not every second):
 
 ### Tier 1: The Beta (1,000 Monthly Active Users)
-*   **Vercel/Cloudflare (CDN)**: $0 
+*   **Cloudflare CDN**: $0 
 *   **Google Cloud Run (API)**: $0 (Well within 2 million free requests)
 *   **Neon DB**: $19 (Launch Tier for reliability)
 *   **WebRTC Signaling**: $5 (Tiny custom WebSocket server)
 *   **Total Monthly Infrastructure Cost: \~$24.00**
 
 ### Tier 2: The Traction (10,000 Monthly Active Users)
-*   **Vercel/Cloudflare (CDN)**: $20 (Vercel Pro to handle higher bandwidth of WASM files)
+*   **Cloudflare CDN**: $0 - $20 (depending on bandwidth and added features)
 *   **Google Cloud Run (API)**: ~$5 - $10 (Slightly exceeding free tier)
 *   **Neon DB**: $69 (Scale Tier to handle concurrent evening spikes)
 *   **WebRTC Signaling**: $29 (Managed Pusher for reliability)
 *   **Total Monthly Infrastructure Cost: \~$128.00**
 
 ### Tier 3: The Scale (100,000 Monthly Active Users)
-*   **Vercel/Cloudflare (CDN)**: ~$50 - $100 (Bandwidth overages or Custom Enterprise caching)
+*   **Cloudflare CDN**: ~$50 - $100 (Bandwidth overages or Custom Enterprise caching)
 *   **Google Cloud Run (API)**: ~$80 - $150 (Millions of requests per day)
 *   **Neon DB / Dedicated Cloud SQL**: ~$200 - $400 (Highly available, multi-region read replicas)
 *   **WebRTC Signaling**: ~$100 (Scaled websocket cluster)

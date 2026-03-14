@@ -66,6 +66,11 @@ export function useVisionWorkerRuntime(
 
   const isWorkerSupported = useMemo(() => supportsWorkerRuntime(), []);
   const transferMode = workerConfig?.transferMode ?? 'bitmap';
+  const workerEnabled = Boolean(workerConfig?.enabled && isWorkerSupported);
+  const pinchStartThreshold = pinchOptions?.startThreshold ?? 0.05;
+  const pinchReleaseThreshold = pinchOptions?.releaseThreshold ?? 0.07;
+  const pinchLandmarkA = pinchOptions?.landmarks?.[0] ?? 4;
+  const pinchLandmarkB = pinchOptions?.landmarks?.[1] ?? 8;
 
   const workerRef = useRef<Worker | null>(null);
   const initializingRef = useRef(false);  // Guard to prevent race condition
@@ -79,10 +84,33 @@ export function useVisionWorkerRuntime(
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const onFrameRef = useRef(onFrame);
+  const onNoVideoFrameRef = useRef(onNoVideoFrame);
+  const onErrorRef = useRef(onError);
+  const onRuntimeFallbackRef = useRef(onRuntimeFallback);
+
+  useEffect(() => {
+    onFrameRef.current = onFrame;
+    onNoVideoFrameRef.current = onNoVideoFrame;
+    onErrorRef.current = onError;
+    onRuntimeFallbackRef.current = onRuntimeFallback;
+  }, [onError, onFrame, onNoVideoFrame, onRuntimeFallback]);
+
+  useEffect(() => {
+    if (workerEnabled) {
+      return;
+    }
+
+    initializingRef.current = false;
+    inFlightRef.current = false;
+    pendingMetaRef.current.clear();
+    setIsReady(false);
+    setIsLoading(false);
+  }, [workerEnabled]);
 
   useEffect(() => {
     // Guard against race condition - prevent multiple simultaneous initializations
-    if (!workerConfig?.enabled || !isWorkerSupported || workerRef.current || initializingRef.current) {
+    if (!workerEnabled || workerRef.current || initializingRef.current) {
       return;
     }
 
@@ -102,7 +130,7 @@ export function useVisionWorkerRuntime(
         if (!event.data.ok) {
           const initError = new Error(event.data.message ?? 'Failed to initialize vision worker');
           setError(initError);
-          onRuntimeFallback?.('worker-init-failed');
+          onRuntimeFallbackRef.current?.('worker-init-failed');
         }
         return;
       }
@@ -116,8 +144,8 @@ export function useVisionWorkerRuntime(
         if (!event.data.ok) {
           const frameError = new Error(event.data.error ?? 'Vision worker frame failed');
           setError(frameError);
-          onError?.(frameError);
-          onRuntimeFallback?.('worker-frame-failed');
+          onErrorRef.current?.(frameError);
+          onRuntimeFallbackRef.current?.('worker-frame-failed');
           return;
         }
 
@@ -125,7 +153,7 @@ export function useVisionWorkerRuntime(
           return;
         }
 
-        onFrame(event.data.frame, {
+        onFrameRef.current(event.data.frame, {
           ...meta,
           video,
         });
@@ -136,8 +164,8 @@ export function useVisionWorkerRuntime(
         const workerError = new Error(event.data.error);
         setError(workerError);
         setIsReady(false);
-        onError?.(workerError);
-        onRuntimeFallback?.('worker-runtime-error');
+        onErrorRef.current?.(workerError);
+        onRuntimeFallbackRef.current?.('worker-runtime-error');
       }
     };
 
@@ -146,8 +174,8 @@ export function useVisionWorkerRuntime(
       setError(workerError);
       setIsReady(false);
       setIsLoading(false);
-      onError?.(workerError);
-      onRuntimeFallback?.('worker-uncaught-error');
+      onErrorRef.current?.(workerError);
+      onRuntimeFallbackRef.current?.('worker-uncaught-error');
     };
 
     worker.addEventListener('message', handleMessage);
@@ -163,7 +191,11 @@ export function useVisionWorkerRuntime(
       delegate: handTracking?.delegate ?? 'GPU',
       modelAssetPath: cdn.model,
       wasmBasePath: cdn.wasm,
-      pinchOptions,
+      pinchOptions: {
+        startThreshold: pinchStartThreshold,
+        releaseThreshold: pinchReleaseThreshold,
+        landmarks: [pinchLandmarkA, pinchLandmarkB],
+      },
       resetPinchOnNoHand,
     });
 
@@ -176,8 +208,6 @@ export function useVisionWorkerRuntime(
       workerRef.current = null;
       inFlightRef.current = false;
       pendingMetaRef.current.clear();
-      setIsReady(false);
-      setIsLoading(false);
     };
   }, [
     handTracking?.delegate,
@@ -185,27 +215,28 @@ export function useVisionWorkerRuntime(
     handTracking?.minHandPresenceConfidence,
     handTracking?.minTrackingConfidence,
     handTracking?.numHands,
-    isWorkerSupported,
-    onError,
-    onFrame,
-    onRuntimeFallback,
-    pinchOptions,
+    pinchLandmarkA,
+    pinchLandmarkB,
+    pinchReleaseThreshold,
+    pinchStartThreshold,
     resetPinchOnNoHand,
-    webcamRef,
-    workerConfig?.enabled,
+    workerEnabled,
   ]);
+
+  // Canvas cache for fallback path - avoid reallocation
+  const canvasSizeRef = useRef<{ width: number; height: number } | null>(null);
 
   const postFrameToWorker = useCallback(
     async (meta: Omit<HandTrackingRuntimeMeta, 'video'>) => {
       const video = webcamRef.current?.video;
       const worker = workerRef.current;
       if (!video || !worker || !isReady) {
-        onNoVideoFrame?.();
+        onNoVideoFrameRef.current?.();
         return;
       }
 
       if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
-        onNoVideoFrame?.();
+        onNoVideoFrameRef.current?.();
         return;
       }
 
@@ -220,32 +251,50 @@ export function useVisionWorkerRuntime(
       try {
         let request: WorkerFrameRequest;
 
+        // PREFERRED: Use zero-copy ImageBitmap transfer with downscaling for performance
         if (transferMode === 'bitmap' && typeof createImageBitmap === 'function') {
-          const bitmap = await createImageBitmap(video);
-          request = {
-            type: 'frame',
-            id: frameId,
-            sentAt: performance.now(),
-            transferMode: 'bitmap',
-            frame: bitmap,
-          };
-          worker.postMessage(request, [bitmap]);
-          return;
+          try {
+            // Downscale to 640x480 for faster inference (reduces processing by ~75% for HD video)
+            const bitmap = await createImageBitmap(video, {
+              resizeWidth: 640,
+              resizeHeight: 480,
+              resizeQuality: 'medium',
+            });
+            request = {
+              type: 'frame',
+              id: frameId,
+              sentAt: performance.now(),
+              transferMode: 'bitmap',
+              frame: bitmap,
+            };
+            worker.postMessage(request, [bitmap]); // Zero-copy transfer!
+            return;
+          } catch (bitmapError) {
+            // Log but continue to fallback
+            console.warn('[useVisionWorkerRuntime] createImageBitmap failed, falling back to canvas:', bitmapError);
+          }
         }
 
+        // FALLBACK: Optimized canvas path with minimal copying
         if (!canvasRef.current) {
           canvasRef.current = document.createElement('canvas');
+          // Cache dimensions to avoid reallocation
+          canvasRef.current.width = 640;
+          canvasRef.current.height = 480;
+          canvasSizeRef.current = { width: 640, height: 480 };
         }
 
         const canvas = canvasRef.current;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d', {
+          willReadFrequently: true,
+          alpha: false, // Disable alpha channel for faster copies (~25% speedup)
+        });
 
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) {
           throw new Error('Could not create 2D context for worker frame transfer');
         }
 
+        // Draw with scaling to reduce data size (640x480 = 1.2MB vs 1920x1080 = 8.3MB)
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -256,17 +305,18 @@ export function useVisionWorkerRuntime(
           transferMode: 'imageData',
           frame: imageData,
         };
-        worker.postMessage(request);
+        // Transfer ownership of the buffer to avoid copy
+        worker.postMessage(request, [imageData.data.buffer]);
       } catch (postError) {
         inFlightRef.current = false;
         pendingMetaRef.current.delete(frameId);
         const err = postError instanceof Error ? postError : new Error('Failed to post frame to worker');
         setError(err);
-        onError?.(err);
-        onRuntimeFallback?.('worker-post-frame-failed');
+        onErrorRef.current?.(err);
+        onRuntimeFallbackRef.current?.('worker-post-frame-failed');
       }
     },
-    [isReady, onError, onNoVideoFrame, onRuntimeFallback, transferMode, webcamRef],
+    [isReady, transferMode, webcamRef],
   );
 
   useGameLoop({

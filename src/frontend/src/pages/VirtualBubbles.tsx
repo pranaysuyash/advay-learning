@@ -6,12 +6,12 @@ import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useProgressStore } from '../store';
 import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -38,8 +38,7 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('virtual-bubbles');
   const { currentProfile } = useProgressStore();
-  const { onGameComplete } = useGameDrops('virtual-bubbles');
-  const { saveProgress } = useGameProgress('virtual-bubbles');
+  const { completeGame } = useGameCompletion('virtual-bubbles');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -145,18 +144,16 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
       if (!currentProfile) return;
 
       try {
-        await saveProgress({
+        await completeGame({
           score: finalScore,
-          completed: true,
           level: currentLevel,
         });
-        onGameComplete(finalScore);
       } catch (err) {
         console.error('Failed to save progress:', err);
         setError(err as Error);
       }
     },
-    [currentProfile, currentLevel, poppedCount, levelConfig, onGameComplete, saveProgress],
+    [currentProfile, currentLevel, completeGame],
   );
 
   useGameSessionProgress({

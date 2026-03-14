@@ -16,8 +16,7 @@ import {
 } from '../components/game/DragDropSystem';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic } from '../utils/haptics';
@@ -52,8 +51,7 @@ function TemperatureSortGame() {
 
   const { playSuccess, playCelebration, playClick, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('temperature-sort');
-  const { saveProgress } = useGameProgress('temperature-sort');
+  const { completeGame } = useGameCompletion('temperature-sort');
 
   useGameSessionProgress({
     gameName: 'Temperature Sort',
@@ -161,14 +159,13 @@ function TemperatureSortGame() {
       setGameState('complete');
       playCelebration();
       (async () => {
-        await saveProgress({ score: finalScore, completed: true, level: 1 });
-        onGameComplete(calculateStars(finalScore, ITEMS_TO_SORT));
+        await completeGame({ score: finalScore, level: 1 });
       })();
       speakText('Great job sorting all the temperatures!');
     } else {
       speakText('Good! Keep going!');
     }
-  }, [sortedItems, playSuccess, playCelebration, speakText, onGameComplete]);
+  }, [sortedItems, playSuccess, playCelebration, speakText, completeGame]);
 
   const handleItemDroppedOutside = useCallback((_item: DraggableItem) => {
     playClick();

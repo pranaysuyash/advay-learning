@@ -45,12 +45,12 @@ When deploying Advay Vision, we have three main paths outside of the massive ent
 
 Given that Advay Vision relies heavily on **Frontend WASM (MediaPipe)** and very lightweight backend database calls, here is the optimal strategy using "Alt Clouds":
 
-### The "Golden Mean" Architecture (Vercel + Railway)
+### The "Golden Mean" Architecture (Cloudflare Pages + Railway)
 
 Instead of using Google Cloud Run or AWS, we can use the incredibly popular "Indie Hacker" stack:
 
-1.  **Frontend & WASM Models -> Vercel (or Cloudflare)**
-    *   *Why?* You still MUST use Vercel or Cloudflare for the frontend. Serving 10MB WASM binaries from a Hetzner server in Germany to a kid in India will be slow. Vercel/Cloudflare caches it physically in Mumbai for free.
+1.  **Frontend & WASM Models -> Cloudflare Pages (or other edge CDN)**
+    *   *Why?* You still need an edge CDN for the frontend. Serving 10MB WASM binaries from a single VPS in Germany to a kid in India will be slow. Cloudflare caches it physically in Mumbai for free.
 2.  **FastAPI Backend & Postgres Database -> Railway**
     *   *Why?* Railway is the absolute king of "ease of doing." 
     *   You connect your GitHub repo. It detects it's a Python app. It deploys.
@@ -65,7 +65,7 @@ While Hetzner is cheaper per compute-cycle, **your time as a founder is the most
 If you want to avoid Google/AWS completely (which is a very smart move for keeping architectures simple and costs predictable), the definitive stack is:
 
 *   **DNS & DDoS Protection:** Cloudflare (Free)
-*   **Frontend (React/WASM):** Vercel (Free/Pro)
+*   **Frontend (React/WASM):** Cloudflare Pages (Free/Pro)
 *   **Backend (FastAPI):** Railway ($5-$15/mo depending on traffic)
 *   **Database (Postgres):** Railway (Included in usage) or Neon (generous free tier)
 

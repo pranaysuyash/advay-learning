@@ -183,7 +183,7 @@ Agent tends toward "affordable/accessible" positioning over "premium/valuable." 
 
 ### Week 2: Soft Launch
 
-- [ ] Deploy MVP on Vercel free tier
+- [ ] Deploy MVP on Cloudflare Pages free tier
 - [ ] Announce to 20 friends/family with ₹2,999 friend pricing
 - [ ] Gather first 10-20 trial signups
 - [ ] Track: Camera permission rate, session length, trial-to-paid conversion

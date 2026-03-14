@@ -5,8 +5,7 @@ import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -41,8 +40,7 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
     const [isLoading, setIsLoading] = useState(true);
     const imagesRef = useRef<Record<string, HTMLImageElement>>({});
 
-    const { onGameComplete } = useGameDrops('spelling-run');
-    const { saveProgress } = useGameProgress('spelling-run');
+    const { completeGame } = useGameCompletion('spelling-run');
     const { playError, playCelebration } = useAudio();
     const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -126,8 +124,7 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
                     if (next.status === 'complete') {
                         playCelebration();
                         (async () => {
-                          await saveProgress({ score: next.score, completed: true, level: 1 });
-                          onGameComplete(next.score);
+                          await completeGame({ score: next.score, level: 1 });
                         })();
                     } else if (next.status === 'failed') {
                         playError();
@@ -141,7 +138,7 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
         };
         const handle = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(handle);
-    }, [onGameComplete, playCelebration, playError]);
+    }, [completeGame, playCelebration, playError]);
 
     // Draw
     useEffect(() => {

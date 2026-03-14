@@ -21,6 +21,23 @@
   - `mediapipe`: Face mesh for face tracking
 - **NumPy**: Numerical operations for image processing
 
+### 3D Graphics & Physics (Games)
+
+**Primary Stack for 3D Games:**
+- **Three.js**: 3D rendering engine
+- **React Three Fiber**: React renderer for Three.js
+- **Rapier Physics** (`@dimforge/rapier3d-compat`): Modern WASM-based 3D physics
+- **@react-three/drei**: Helper components for R3F
+
+**Alternative Physics (Legacy):**
+- **@react-three/cannon**: Cannon.js physics (older games, being phased out)
+
+**2D Game Frameworks:**
+- **Phaser**: Complete 2D game engine (for dedicated 2D games)
+- **PixiJS**: 2D rendering (for high-performance 2D)
+
+See [GAME_ENGINES_AND_PHYSICS.md](GAME_ENGINES_AND_PHYSICS.md) for full comparison.
+
 ### UI Framework (Decision Pending)
 
 Option A: **PyQt6**
@@ -186,3 +203,9 @@ Camera Feed
 - **ONNX Runtime**: For custom models if MediaPipe is insufficient
 - **TensorFlow Lite**: Edge ML for specific learning modules
 - **Web Version**: Pyodide or separate web app using TensorFlow.js
+- **Game Engines**: See [GAME_ENGINES_AND_PHYSICS.md](GAME_ENGINES_AND_PHYSICS.md) for research on Babylon.js, Unity WebGL alternatives, and physics engine options
+
+## Related Documents
+
+- [GAME_ENGINES_AND_PHYSICS.md](GAME_ENGINES_AND_PHYSICS.md) - Complete physics engine comparison
+- [PHYSICS_ENGINES_GAME_FRAMEWORKS_RESEARCH.md](../research/PHYSICS_ENGINES_GAME_FRAMEWORKS_RESEARCH.md) - Research document

@@ -17,8 +17,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useProgressStore } from '../store';
 import WellnessTimer from '../components/WellnessTimer';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
@@ -43,8 +42,7 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('free-draw');
   const { currentProfile } = useProgressStore();
-  const { onGameComplete } = useGameDrops('free-draw');
-  const { saveProgress } = useGameProgress('free-draw');
+  const { completeGame } = useGameCompletion('free-draw');
 
   const { playClick } = useAudio();
   const [gameState, setGameState] = useState<GameState>(initializeGame());
@@ -103,16 +101,14 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
       if (!currentProfile) return;
 
       try {
-        await saveProgress({
+        await completeGame({
           score: finalScore,
-          completed: true,
           level: 1,
           metadata: {
             strokesCreated: gameState.canvas.strokes.length,
             brushType: gameState.currentBrush.type,
           },
         });
-        onGameComplete(finalScore);
       } catch (err) {
         console.error('Failed to save progress:', err);
         setError(err as Error);
@@ -120,8 +116,7 @@ const FreeDrawGame = memo(function FreeDrawComponent() {
     },
     [
       currentProfile,
-      saveProgress,
-      onGameComplete,
+      completeGame,
       // explicitly derive primitive dependencies to keep callback stable
       gameState.canvas.strokes.length,
       gameState.currentBrush.type,

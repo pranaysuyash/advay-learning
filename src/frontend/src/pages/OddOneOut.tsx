@@ -11,9 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import { GameShell } from '../components/GameShell';
 import { GameHUD } from '../components/game/GameHUD';
 import { GameContainer } from '../components/GameContainer';
-import { useGameProgress } from '../hooks/useGameProgress';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
   LEVELS,
@@ -25,10 +24,10 @@ import { triggerHaptic } from '../utils/haptics';
 
 // Inner game component
 interface OddOneOutGameProps {
-  saveProgress: (data: { score: number; completed: boolean; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
+  completeGame: (data: { score: number; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
 }
 
-const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: OddOneOutGameProps) {
+const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: completeGameProp }: OddOneOutGameProps) {
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentRound, setCurrentRound] = useState<OddOneOutRound | null>(null);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -50,7 +49,6 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
 
   const navigate = useNavigate();
   const { playClick, playSuccess, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('odd-one-out');
 
   const levelConfig = useMemo(() => LEVELS.find((l) => l.level === currentLevel) ?? LEVELS[0], [currentLevel]);
 
@@ -144,21 +142,19 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
     playClick();
     const finalScore = Math.round(score / levelConfig.roundCount);
     try {
-      await saveProgress({
+      await completeGameProp({
         score: finalScore,
-        completed: true,
         level: currentLevel,
         metadata: {
           correct: correctCount,
           total: levelConfig.roundCount,
         },
       });
-      await onGameComplete(finalScore);
     } catch (err) {
       console.error('Failed to save progress:', err);
     }
     navigate('/games');
-  }, [score, levelConfig, currentLevel, correctCount, saveProgress, onGameComplete, navigate, playClick]);
+  }, [score, levelConfig, currentLevel, correctCount, completeGameProp, navigate, playClick]);
 
   const handleRestart = () => {
     playClick();
@@ -316,7 +312,7 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ saveProgress }: Odd
 
 // Main export wrapped with GameShell
 export const OddOneOut = memo(function OddOneOutComponent() {
-  const { saveProgress } = useGameProgress('odd-one-out');
+  const { completeGame: completeGameHook } = useGameCompletion('odd-one-out');
 
   return (
     <GameShell
@@ -325,7 +321,7 @@ export const OddOneOut = memo(function OddOneOutComponent() {
       showWellnessTimer={true}
       enableErrorBoundary={true}
     >
-      <OddOneOutGame saveProgress={saveProgress} />
+      <OddOneOutGame completeGame={completeGameHook} />
     </GameShell>
   );
 });

@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateQuestion, calculateScore, type CompareQuestion } from '../games/moreOrLessLogic';
@@ -31,8 +30,7 @@ function MoreOrLessContent() {
   const [feedback, setFeedback] = useState('');
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('more-or-less');
-  const { saveProgress } = useGameProgress('more-or-less');
+  const { completeGame } = useGameCompletion('more-or-less');
 
   useGameSessionProgress({
     gameName: 'More or Less',
@@ -104,10 +102,9 @@ function MoreOrLessContent() {
   const handleFinish = useCallback(async () => {
     playClick();
     const finalScore = Math.round(score / 20);
-    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
-    await onGameComplete(finalScore);
+    await completeGame({ score: finalScore, level: currentLevel });
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [score, completeGame, navigate, playClick, currentLevel]);
 
   const renderGroup = (emoji: string, count: number, side: 'left' | 'right') => {
     const correctSide = question ? getCorrectSide(question) : null;

@@ -1,4 +1,4 @@
-const SW_VERSION = "v1";
+const SW_VERSION = "v2";
 const STATIC_CACHE = `advay-static-${SW_VERSION}`;
 const RUNTIME_CACHE = `advay-runtime-${SW_VERSION}`;
 const MODEL_CACHE = `advay-models-${SW_VERSION}`;

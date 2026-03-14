@@ -300,8 +300,7 @@ export default function ObstacleCourse3D() {
   
   // Performance monitoring
   usePerformanceMonitor('ObstacleCourse3D', {
-    reportToAnalytics: true,
-    fpsThreshold: 30,
+    warnThreshold: 30,
   });
   const [isMuted, setIsMuted] = useState(false);
   const [score, setScore] = useState(0);

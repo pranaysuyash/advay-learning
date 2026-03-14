@@ -1,10 +1,10 @@
 /**
- * Target Practice Game
+ * Target Practice Game - CV-Enhanced Version
  *
  * Hit the targets as fast as you can!
- * A high-energy targeting game for hand-eye coordination.
+ * Now with hand tracking support for aim + pinch to shoot!
  *
- * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
+ * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007, TCK-20260314-005
  */
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
@@ -13,18 +13,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import type { TrackedHandFrame } from '../types/tracking';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { GameHUD } from '../components/game/GameHUD';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { KenneyHandCursor } from '../components/game/KenneyHandCursor';
+import type { Point } from '../types/tracking';
 import {
   pickSpacedPoints,
   type TargetPoint,
 } from '../games/targetPracticeLogic';
 import { isPointInCircle } from '../utils/geometry';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import Webcam from 'react-webcam';
 
 // Difficulty configuration matching spec
 interface DifficultyConfig {
@@ -88,22 +92,28 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
   const [hitEffects, setHitEffects] = useState<HitEffect[]>([]);
   const [bestCombo, setBestCombo] = useState(0);
 
+  // CV Hand tracking state
+  const [, setCursor] = useState<Point | null>(null);
+  const [cursorPx, setCursorPx] = useState<Point | null>(null);
+  const [isPinching, setIsPinching] = useState(false);
+  const [handDetected, setHandDetected] = useState(false);
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const pinchTimeoutRef = useRef<number | null>(null);
+
   // Streak tracking from hook
   const {
     streak,
-    maxStreak,
     showMilestone,
     incrementStreak,
     resetStreak,
   } = useStreakTracking();
 
-  const gameAreaRef = useRef<HTMLDivElement>(null);
   const hitEffectIdRef = useRef(0);
   const timerRef = useRef<number | null>(null);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('target-practice');
-  const { saveProgress } = useGameProgress('target-practice');
+  const { completeGame } = useGameCompletion('target-practice');
 
   // Progress tracking
   useGameSessionProgress({
@@ -112,6 +122,67 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
     level: difficulty.level,
     isPlaying: gameState === 'playing',
     metaData: { hits, bestCombo, timeLeft },
+  });
+
+  // Handle hand tracking frame
+  const handleFrame = useCallback(
+    (frame: TrackedHandFrame) => {
+      if (!gameAreaRef.current) return;
+
+      const rect = gameAreaRef.current.getBoundingClientRect();
+
+      if (frame.indexTip) {
+        const tip = frame.indexTip;
+        setHandDetected(true);
+        setCursor(tip);
+        setCursorPx({
+          x: rect.left + tip.x * rect.width,
+          y: rect.top + tip.y * rect.height,
+        });
+
+        // Handle pinch for shooting
+        if (frame.pinch.state.isPinching && !isPinching) {
+          setIsPinching(true);
+          // Shoot at current position
+          const clickPoint = {
+            x: tip.x,
+            y: tip.y,
+          };
+          handleCVShot(clickPoint, rect);
+
+          // Reset pinch after cooldown
+          if (pinchTimeoutRef.current) {
+            window.clearTimeout(pinchTimeoutRef.current);
+          }
+          pinchTimeoutRef.current = window.setTimeout(() => {
+            setIsPinching(false);
+          }, 300);
+        } else if (!frame.pinch.state.isPinching) {
+          setIsPinching(false);
+        }
+      } else {
+        setHandDetected(false);
+        setCursor(null);
+        setCursorPx(null);
+      }
+    },
+    [isPinching],
+  );
+
+  // Setup hand tracking
+  useGameHandTracking({
+    gameName: 'Target Practice',
+    webcamRef,
+    isRunning: gameState === 'playing',
+    onFrame: handleFrame,
+    pinch: {
+      startThreshold: 0.05,
+      releaseThreshold: 0.07,
+    },
+    smoothing: {
+      minCutoff: 1.0,
+      beta: 0.3,
+    },
   });
 
   // Generate new targets
@@ -185,6 +256,40 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
     if (currentStreak >= 3) return 5;
     return 0;
   }, []);
+
+  // Handle CV shot
+  const handleCVShot = useCallback(
+    (clickPoint: Point, rect: DOMRect) => {
+      if (gameState !== 'playing') return;
+
+      const clickX = clickPoint.x * rect.width;
+      const clickY = clickPoint.y * rect.height;
+
+      // Check if click hit any target
+      let hitAny = false;
+      for (const target of targets) {
+        if (
+          isPointInCircle(
+            clickPoint,
+            target.position,
+            difficulty.targetRadius,
+          )
+        ) {
+          hitAny = true;
+          handleTargetHit(target.id, clickX, clickY);
+          break;
+        }
+      }
+
+      // If no target was hit, it's a miss
+      if (!hitAny) {
+        resetStreak();
+        playError();
+        triggerHaptic('error');
+      }
+    },
+    [gameState, targets, difficulty, resetStreak, playError],
+  );
 
   // Handle target hit
   const handleTargetHit = useCallback(
@@ -281,7 +386,7 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
     ],
   );
 
-  // Handle game area click (for misses)
+  // Handle game area click (for mouse fallback)
   const handleGameAreaClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (gameState !== 'playing') return;
@@ -332,10 +437,9 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
   // Handle finish
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score, completed: true, level: difficulty.level });
-    await onGameComplete(score);
+    await completeGame({ score, level: difficulty.level });
     navigate('/games');
-  }, [playClick, onGameComplete, score, navigate, saveProgress, difficulty.level]);
+  }, [playClick, completeGame, score, navigate, difficulty.level]);
 
   // Handle play again
   const handlePlayAgain = useCallback(() => {
@@ -352,6 +456,27 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
       onHome={() => navigate('/games')}
       reportSession={false}
     >
+      {/* Hidden webcam for hand tracking */}
+      <Webcam
+        ref={webcamRef}
+        className="hidden"
+        videoConstraints={{ width: 640, height: 480, facingMode: 'user' }}
+        audio={false}
+      />
+
+      {/* Hand cursor overlay */}
+      {cursorPx && (
+        <KenneyHandCursor
+          position={cursorPx}
+          coordinateSpace="viewport"
+          state={isPinching ? 'pinch' : 'point'}
+          isPinching={isPinching}
+          isHandDetected={handDetected}
+          size={48}
+          color="orange"
+        />
+      )}
+
       <div className="flex flex-col items-center gap-4 p-4 h-full overflow-auto">
         {/* Level Selection */}
         {gameState === 'start' && (
@@ -361,8 +486,11 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
               <h2 className="text-3xl font-black text-slate-900 mb-2">
                 Target Practice!
               </h2>
-              <p className="text-lg text-slate-600 mb-6">
+              <p className="text-lg text-slate-600 mb-2">
                 Hit the targets as fast as you can!
+              </p>
+              <p className="text-sm text-slate-500">
+                👆 Use your hand to aim, pinch to shoot! 🖱️ Or use your mouse
               </p>
             </div>
 
@@ -437,6 +565,20 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
               }
             />
 
+            {/* Hand tracking indicator */}
+            <div className="flex items-center gap-2 text-sm">
+              {handDetected ? (
+                <span className="flex items-center gap-1 text-green-600 font-bold">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  Hand detected! Pinch to shoot 👌
+                </span>
+              ) : (
+                <span className="text-slate-500">
+                  Show your hand or use mouse 🖱️
+                </span>
+              )}
+            </div>
+
             {/* Streak Milestone Overlay */}
             <AnimatePresence>
               {showMilestone && (
@@ -507,84 +649,66 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
                   </motion.div>
                 ))}
               </AnimatePresence>
-
-              {/* Combo indicator */}
-              {streak >= 3 && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-2 rounded-full font-black shadow-lg">
-                  {streak >= 10
-                    ? 'EPIC COMBO!'
-                    : streak >= 5
-                      ? 'SUPER COMBO!'
-                      : 'COMBO!'}
-                </div>
-              )}
             </div>
 
             {/* Instructions */}
-            <p className="text-slate-500 font-bold text-center">
-              Click the 🎯 targets to score points!
+            <p className="text-center text-sm text-slate-500">
+              👆 Move your hand to aim • 👌 Pinch to shoot • 🖱️ Click with mouse
             </p>
           </div>
         )}
 
         {/* Complete State */}
         {gameState === 'complete' && (
-          <div className="flex flex-col items-center gap-6 max-w-md w-full">
+          <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               className="text-center"
             >
-              <div className="text-6xl mb-4">🎉</div>
+              <div className="text-6xl mb-4">🏆</div>
               <h2 className="text-3xl font-black text-slate-900 mb-2">
-                Time's Up!
+                Great Shooting!
               </h2>
-              <p className="text-lg text-slate-600">Great targeting!</p>
+              <p className="text-lg text-slate-600">
+                You hit {hits} targets!
+              </p>
             </motion.div>
 
-            {/* Results */}
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 text-center">
-                <p className="text-sm font-bold text-amber-600 uppercase tracking-wide">
-                  Final Score
-                </p>
-                <p className="text-4xl font-black text-amber-700">{score}</p>
-              </div>
-              <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 text-center">
-                <p className="text-sm font-bold text-orange-600 uppercase tracking-wide">
-                  Best Streak
-                </p>
-                <p className="text-4xl font-black text-orange-700">
-                  {maxStreak}
-                </p>
+            {/* Stats */}
+            <div className="bg-white rounded-2xl border-2 border-[#F2CC8F] p-6 text-center shadow-[0_4px_0_#E5B86E] w-full max-w-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="block text-3xl font-black text-amber-600">
+                    {score}
+                  </span>
+                  <span className="text-slate-500">Total Score</span>
+                </div>
+                <div>
+                  <span className="block text-3xl font-black text-amber-600">
+                    {bestCombo}
+                  </span>
+                  <span className="text-slate-500">Best Streak</span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 w-full text-center">
-              <p className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-1">
-                Targets Hit
-              </p>
-              <p className="text-2xl font-black text-slate-700">{hits}</p>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 type="button"
                 onClick={handlePlayAgain}
                 className="px-8 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-xl shadow-[0_4px_0_#D97706] active:translate-y-1 active:shadow-none transition-all"
               >
-                Play Again
+                Play Again 🎯
               </button>
               <button
                 type="button"
-                onClick={handleFinish}
+                onClick={() => void handleFinish()}
                 className="px-8 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-black text-xl transition-all"
               >
-                Finish
+                Done ✓
               </button>
             </div>
-
           </div>
         )}
       </div>
@@ -592,14 +716,13 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
   );
 });
 
-// Main export wrapped with GameShell
-export const TargetPractice = memo(function TargetPracticeComponent() {
+export const TargetPractice = memo(function TargetPracticePage() {
   return (
     <GameShell
       gameId="target-practice"
       gameName="Target Practice"
-      showWellnessTimer={true}
-      enableErrorBoundary={true}
+      showWellnessTimer
+      enableErrorBoundary
     >
       <TargetPracticeGame />
     </GameShell>

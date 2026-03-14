@@ -342,7 +342,7 @@ python start.py --production --port 8001 --host 0.0.0.0
 
 ### 8.2 Frontend Deployment
 
-- **Static Hosting**: AWS S3 + CloudFront, Vercel, or Netlify
+- **Static Hosting**: AWS S3 + CloudFront, Cloudflare Pages, or Netlify
 - **Build Output**: `src/frontend/dist/`
 - **API Base URL**: Must be configured in production `.env`
 

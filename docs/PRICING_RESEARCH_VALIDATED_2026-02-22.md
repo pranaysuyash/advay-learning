@@ -21,7 +21,7 @@ This document represents comprehensive independent research to validate (or corr
 
 **Key Findings:**
 
-- Vercel + Railway + Neon free tiers cover first ~1,000 users with **zero monthly costs**
+- Cloudflare Pages + Railway + Neon free tiers cover first ~1,000 users with **zero monthly costs**
 - UPI payments via Cashfree can be **0% MDR** (merchant discount rate) for India domestic
 - Bootstrapped SaaS typically takes 6-12 months to reach first 100 **paying** customers
 - Trial-to-paid conversion benchmarks: 2.5-8% median (education apps track lower end)
@@ -62,7 +62,7 @@ This document represents comprehensive independent research to validate (or corr
 
 **Primary Sources (2026 data):**
 
-- Vercel pricing calculator (temps.dev research, Jan 2026)
+- Cloudflare Pages pricing calculator (temps.dev research, Jan 2026)
 - Railway pricing calculator & CheckThat.ai analysis (2026)
 - Neon serverless PostgreSQL pricing review (Vela Team, Dec 2025)
 - Razorpay official pricing breakdown (priceunlock.in, Feb 2026)
@@ -100,7 +100,7 @@ All assumptions are explicitly stated upfront with confidence levels:
 
 ### 2.1 Actual Platform Pricing (2026)
 
-#### **Frontend Hosting: Vercel**
+#### **Frontend Hosting: Cloudflare Pages**
 
 **Free Tier (Hobby):**
 
@@ -125,7 +125,7 @@ All assumptions are explicitly stated upfront with confidence levels:
 
 - 1TB = 1,000GB ÷ 120MB = ~8,333 users
 
-**Source**: Temps.dev Vercel cost calculator (Jan 2026), Vercel official pricing
+**Source**: Cloudflare Pages pricing (Jan 2026), Cloudflare official pricing
 
 ---
 
@@ -235,10 +235,10 @@ All assumptions are explicitly stated upfront with confidence levels:
 
 | Users      | Platform                                | Monthly Cost      | Annual Cost          | Notes                                 |
 | ---------- | --------------------------------------- | ----------------- | -------------------- | ------------------------------------- |
-| **100**    | Vercel Free + Railway Trial + Neon Free | **₹0-₹100**       | **₹500-₹1,200**      | All on free tiers; domain + misc only |
-| **1,000**  | Vercel Free + Railway Hobby + Neon Free | **₹500-₹900**     | **₹6,000-₹11,000**   | Railway $5/mo main cost               |
-| **5,000**  | Vercel Pro + Railway Pro + Neon Launch  | **₹4,500-₹6,000** | **₹54,000-₹72,000**  | Neon compute becomes significant      |
-| **10,000** | Vercel Pro + Railway Pro + Neon Scale   | **₹6,500-₹9,000** | **₹78,000-₹108,000** | Need to optimize or migrate           |
+| **100**    | Cloudflare Pages Free + Railway Trial + Neon Free | **₹0-₹100**       | **₹500-₹1,200**      | All on free tiers; domain + misc only |
+| **1,000**  | Cloudflare Pages Free + Railway Hobby + Neon Free | **₹500-₹900**     | **₹6,000-₹11,000**   | Railway $5/mo main cost               |
+| **5,000**  | Cloudflare Pages Pro + Railway Pro + Neon Launch  | **₹4,500-₹6,000** | **₹54,000-₹72,000**  | Neon compute becomes significant      |
+| **10,000** | Cloudflare Pages Pro + Railway Pro + Neon Scale   | **₹6,500-₹9,000** | **₹78,000-₹108,000** | Need to optimize or migrate           |
 
 **Conversion rate used**: $1 = ₹84 (Feb 2026)
 
@@ -1171,7 +1171,7 @@ LTV:CAC = 1.97:1 ✅ (healthy without needing 24-month retention)
 
 **Infrastructure:**
 
-- [ ] Deploy frontend on Vercel (free tier)
+- [ ] Deploy frontend on Cloudflare Pages (free tier)
 - [ ] Deploy FastAPI backend on Railway (Trial $5 credit)
 - [ ] Set up Neon PostgreSQL (free tier)
 - [ ] Configure CDN for MediaPipe WASM (jsDelivr)
@@ -1367,7 +1367,7 @@ LTV:CAC = 1.97:1 ✅ (healthy without needing 24-month retention)
 
 ### 12.1 Infrastructure Costs
 
-1. **Vercel Pricing**: Temps.dev Next.js cost calculator (Jan 2026) - https://temps.dev/vercel-pricing-calculator
+1. **Cloudflare Pages Pricing**: Temps.dev Cloudflare Pages cost calculator (Jan 2026) - https://temps.dev/vercel-pricing-calculator
 2. **Railway Pricing**: CheckThat.ai Railway pricing analysis (2026) - https://checkthat.ai/brands/railway/pricing
 3. **Railway Calculator**: Railway official pricing calculator - https://railway.app/pricing
 4. **Neon Pricing**: Vela Team Neon pricing breakdown (Dec 2025) - https://www.vela.dev/blog/neon-pricing

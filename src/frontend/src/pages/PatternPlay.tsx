@@ -7,8 +7,7 @@ import { GameContainer } from '../components/GameContainer';
 import { GameHUD } from '../components/game/GameHUD';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, generatePattern, generateOptions, type PatternItem } from '../games/patternPlayLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
@@ -32,8 +31,7 @@ export function PatternPlayContent() {
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playSuccess, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('pattern-play');
-  const { saveProgress } = useGameProgress('pattern-play');
+  const { completeGame } = useGameCompletion('pattern-play');
 
   useGameSessionProgress({ gameName: 'Pattern Play', score, level: currentLevel, isPlaying: true, metaData: { correct, round } });
 
@@ -105,7 +103,7 @@ export function PatternPlayContent() {
   };
 
   const handleStart = () => { playClick(); startGame(); };
-  const handleFinish = useCallback(async () => { playClick(); await saveProgress({ score: correct, completed: true, level: currentLevel }); await onGameComplete(correct); navigate('/games'); }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  const handleFinish = useCallback(async () => { playClick(); await completeGame({ score: correct, level: currentLevel }); navigate('/games'); }, [correct, completeGame, navigate, playClick, currentLevel]);
 
   return (
     <GameContainer title="Pattern Play" onHome={() => navigate('/games')} reportSession={false}>

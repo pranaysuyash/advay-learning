@@ -18,8 +18,7 @@ import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -55,8 +54,7 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
   const [feedback, setFeedback] = useState<{ message: string; emoji: string } | null>(null);
   const [isLoading] = useState(false);
   
-  const { onGameComplete } = useGameDrops('math-jumpers');
-  const { saveProgress } = useGameProgress('math-jumpers');
+  const { completeGame } = useGameCompletion('math-jumpers');
   const { playSuccess, playError, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   
@@ -160,8 +158,7 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
               playCelebration();
               const finalScore = calculateFinalScore(next);
               (async () => {
-                await saveProgress({ score: finalScore.total, completed: true, level: 1 });
-                onGameComplete(finalScore.total);
+                await completeGame({ score: finalScore.total, level: 1 });
               })();
             }
             return next;
@@ -192,7 +189,7 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
       
       setGameState(newState);
     }
-  }, [gameState.player.onPlatform, gameState.status, difficulty, playSuccess, playError, playCelebration, speak, ttsEnabled, onGameComplete]);
+  }, [gameState.player.onPlatform, gameState.status, difficulty, playSuccess, playError, playCelebration, speak, ttsEnabled, completeGame]);
   
   // Draw canvas
   useEffect(() => {
@@ -269,9 +266,9 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
   
   const handleGameComplete = useCallback(() => {
     const finalScore = calculateFinalScore(gameState);
-    onGameComplete(finalScore.total);
+    void completeGame({ score: finalScore.total, level: 1 });
     navigate('/games');
-  }, [gameState, onGameComplete, navigate]);
+  }, [gameState, completeGame, navigate]);
   
   return (
     <GameContainer

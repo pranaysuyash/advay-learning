@@ -728,7 +728,7 @@ Net: ₹2,999
 
 1. Configure subscription product in Cashfree
 2. Test payment flow end-to-end in sandbox
-3. Deploy to production (Vercel free tier + Railway free trial + Neon free tier)
+3. Deploy to production (Cloudflare Pages free tier + Railway free trial + Neon free tier)
 4. Soft launch to 20 friends/family
 
 **Medium-term** (Months 2-6):

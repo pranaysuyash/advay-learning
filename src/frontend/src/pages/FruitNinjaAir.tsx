@@ -10,8 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
@@ -44,8 +43,7 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
   const fruitIdRef = useRef(0);
 
   const { playClick, playPop, playCelebration } = useAudio();
-  const { onGameComplete } = useGameDrops('fruit-ninja-air');
-  const { saveProgress } = useGameProgress('fruit-ninja-air');
+  const { completeGame } = useGameCompletion('fruit-ninja-air');
   const levelConfig = LEVELS[currentLevel - 1];
 
   useGameSessionProgress({
@@ -256,10 +254,9 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
   const handleFinish = useCallback(async () => {
     playClick();
     const finalScore = Math.round(score / 10);
-    await saveProgress({ score: finalScore, completed: true, level: currentLevel });
-    await onGameComplete(finalScore);
+    await completeGame({ score: finalScore, level: currentLevel });
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [score, completeGame, navigate, playClick, currentLevel]);
 
   return (
     <GameContainer title="Fruit Ninja Air" onHome={() => navigate('/games')} reportSession={false}>

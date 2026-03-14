@@ -10,8 +10,7 @@ import type { GameControl } from '../components/GameControls';
 import { GameShell } from '../components/GameShell';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
@@ -110,6 +109,7 @@ const ShapePopContent = memo(function ShapePopComponent() {
   const textIdRef = useRef(0);
 
   const { playPop, playError, playFanfare: playCelebration } = useAudio();
+  const { completeGame, triggerEasterEgg } = useGameCompletion('shape-pop');
 
   // Visual feedback helpers - Unit 2
   const spawnParticles = useCallback((x: number, y: number, count: number, color: string) => {
@@ -189,8 +189,6 @@ const ShapePopContent = memo(function ShapePopComponent() {
     return () => clearTimeout(timer);
   }, [screenShake]);
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('shape-pop');
-  useGameProgress('shape-pop');
   const popWindowRef = useRef<number[]>([]);
 
   useEffect(() => {
@@ -396,7 +394,7 @@ const ShapePopContent = memo(function ShapePopComponent() {
   };
 
   const resetGame = () => {
-    onGameComplete();
+    completeGame({ score });
     setIsPlaying(false);
     setCursor(null);
     setShowMenu(true);

@@ -15,8 +15,7 @@ import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
@@ -49,8 +48,7 @@ export const MazeRunnerContent = memo(function MazeRunnerGame() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
 
-  const { onGameComplete } = useGameDrops('maze-runner');
-  const { saveProgress } = useGameProgress('maze-runner');
+  const { completeGame } = useGameCompletion('maze-runner');
   const { playSuccess, playError, playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
@@ -208,13 +206,12 @@ export const MazeRunnerContent = memo(function MazeRunnerGame() {
         triggerHaptic('celebration');
         playCelebration();
         const scores = calculateFinalScore(newState);
-        await saveProgress({ score: scores.total, completed: true, level: 1 });
-        onGameComplete(scores.total);
+        await completeGame({ score: scores.total, level: 1 });
         setShowCelebration(true);
         if (ttsEnabled) speak('Maze complete! Great job!');
       }
     },
-    [playSuccess, playError, playCelebration, speak, ttsEnabled, onGameComplete, saveProgress]
+    [playSuccess, playError, playCelebration, speak, ttsEnabled, completeGame]
   );
 
   const { handVisible } = useGameHandTracking({

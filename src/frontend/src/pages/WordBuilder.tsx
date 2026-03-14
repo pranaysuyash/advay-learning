@@ -9,9 +9,8 @@ import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { GameHUD } from '../components/game/GameHUD';
 import { GameShell } from '../components/GameShell';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameProgress } from '../hooks/useGameProgress';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useTTS } from '../hooks/useTTS';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -110,8 +109,7 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
 
   const { playPop, playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete, triggerEasterEgg } = useGameDrops('word-builder');
-  const { saveProgress } = useGameProgress('word-builder');
+  const { completeGame, triggerEasterEgg } = useGameCompletion('word-builder');
 
   // Sync volatile game state to refs for use inside callbacks
   useEffect(() => {
@@ -283,8 +281,7 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
 
       if (mode === 'explore') {
         if (levelRef.current >= MAX_LEVEL) {
-          onGameComplete();
-          await saveProgress({ score: scoreRef.current, completed: true, level: levelRef.current });
+          await completeGame({ score: scoreRef.current, level: levelRef.current });
           setGameCompleted(true);
           setIsPlaying(false);
         } else {
@@ -316,7 +313,7 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
 
       levelTimeoutRef.current = null;
     }, 3000);
-  }, [playCelebration, onGameComplete, startNewWord, ttsEnabled, speak, saveProgress]);
+  }, [playCelebration, completeGame, startNewWord, ttsEnabled, speak]);
 
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {

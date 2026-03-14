@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateBubbles, calculateScore, type Bubble } from '../games/numberBubblePopLogic';
@@ -30,8 +29,7 @@ function NumberBubblePopContent() {
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
 
   const { playClick, playSuccess, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('number-bubble-pop');
-  const { saveProgress } = useGameProgress('number-bubble-pop');
+  const { completeGame } = useGameCompletion('number-bubble-pop');
 
   useGameSessionProgress({ gameName: 'Number Bubble Pop', score, level: currentLevel, isPlaying: true, metaData: { correct, round } });
 
@@ -92,10 +90,9 @@ function NumberBubblePopContent() {
   const handleStart = () => { playClick(); startGame(); };
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score: correct, completed: true, level: currentLevel });
-    await onGameComplete(correct);
+    await completeGame({ score: correct, level: currentLevel });
     navigate('/games');
-  }, [correct, onGameComplete, navigate, playClick, saveProgress, currentLevel]);
+  }, [correct, completeGame, navigate, playClick, currentLevel]);
 
   return (
     <GameContainer title="Number Bubble Pop" onHome={() => navigate('/games')} reportSession={false}>

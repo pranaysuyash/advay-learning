@@ -8,9 +8,8 @@ import { GameContainer } from '../components/GameContainer';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { GameShell } from '../components/GameShell';
-import { useGameDrops } from '../hooks/useGameDrops';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import { useGameProgress } from '../hooks/useGameProgress';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
@@ -94,8 +93,7 @@ export const ShapeSequenceContent = memo(function ShapeSequenceComponent() {
     playPop: playStart,
   } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
-  const { onGameComplete } = useGameDrops('shape-sequence');
-  useGameProgress('shape-sequence');
+  const { completeGame } = useGameCompletion('shape-sequence');
 
   useEffect(() => {
     targetsRef.current = targets;
@@ -156,7 +154,7 @@ export const ShapeSequenceContent = memo(function ShapeSequenceComponent() {
     levelTimeoutRef.current = setTimeout(() => {
       setShowCelebration(false);
       if (levelRef.current >= MAX_LEVEL) {
-        onGameComplete();
+        completeGame({ score: score + 30 + timeLeftRef.current * 2, level: levelRef.current });
         setGameCompleted(true);
         setIsPlaying(false);
         if (ttsEnabled) {

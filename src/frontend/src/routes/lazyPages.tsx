@@ -143,7 +143,7 @@ export const FeedTheMonster = lazyNamed(() => import('../pages/FeedTheMonster'),
 export const ShapeStacker = lazyNamed(() => import('../pages/ShapeStacker'), 'ShapeStacker');
 export const SizeSorting = lazyNamed(() => import('../pages/SizeSorting'), 'SizeSorting');
 export const NumberBubblePop = lazyNamed(() => import('../pages/NumberBubblePop'), 'NumberBubblePop');
-export const DigitalJenga = lazyNamed(() => import('../pages/DigitalJenga'), 'DigitalJenga');
+
 export const WeatherMatch = lazyNamed(() => import('../pages/WeatherMatch'), 'WeatherMatch');
 export const FractionPizza = lazyNamed(() => import('../pages/FractionPizza'), 'FractionPizza');
 export const TimeTell = lazyNamed(() => import('../pages/TimeTell'), 'TimeTell');
@@ -196,6 +196,7 @@ export const DigitalJenga3D = lazy(() =>
     default: module.default,
   }))),
 );
+export const DigitalJenga = DigitalJenga3D;
 export const DressForWeather3D = lazy(() =>
   loadThreeDPage(() => import('../pages/three/DressForWeather3D').then((module) => ({
     default: module.default,
@@ -213,6 +214,28 @@ export const FeedTheMonster3D = lazy(() =>
 );
 export const VirtualBubbles3D = lazy(() =>
   loadThreeDPage(() => import('../pages/three/VirtualBubbles3D').then((module) => ({
+    default: module.default,
+  }))),
+);
+
+// Additional 3D Games
+export const CuttingPractice3D = lazy(() =>
+  loadThreeDPage(() => import("../pages/three/CuttingPractice3D").then((module) => ({
+    default: module.default,
+  }))),
+);
+export const ShapePop3D = lazy(() =>
+  loadThreeDPage(() => import("../pages/three/ShapePop3D").then((module) => ({
+    default: module.default,
+  }))),
+);
+export const CountingCollectathon3D = lazy(() =>
+  loadThreeDPage(() => import("../pages/three/CountingCollectathon3D").then((module) => ({
+    default: module.default,
+  }))),
+);
+export const ISSDocking3D = lazy(() =>
+  loadThreeDPage(() => import("../pages/three/ISSDocking3D").then((module) => ({
     default: module.default,
   }))),
 );

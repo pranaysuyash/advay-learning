@@ -1,9 +1,9 @@
 /**
  * useGameProgress Hook
- * 
+ *
  * Standardized progress tracking for games.
  * Ensures consistent progress saving across all games.
- * 
+ *
  * @see docs/audit/GAME_QUALITY_REMEDIATION_PLAN.md
  * @ticket GQ-003
  */
@@ -25,10 +25,10 @@ export interface GameProgressData {
 }
 
 export interface UseGameProgressReturn {
-  /** Save game progress */
+  /** Save game progress (throws on failure) */
   saveProgress: (data: GameProgressData) => Promise<void>;
-  /** Save game completion */
-  saveCompletion: (score: number) => Promise<void>;
+  /** Save game completion (convenience wrapper) */
+  saveCompletion: (score: number, level?: number) => Promise<void>;
   /** Whether progress can be saved (has profile) */
   canSave: boolean;
   /** Current profile ID */
@@ -39,80 +39,76 @@ export interface UseGameProgressReturn {
 
 /**
  * Track and save game progress
- * 
+ *
  * @example
  * ```tsx
  * function MyGame() {
  *   const { saveProgress, saveCompletion, canSave } = useGameProgress('my-game');
- *   
+ *
  *   const handleGameComplete = async (score: number) => {
- *     if (canSave) {
- *       await saveCompletion(score);
- *     }
+ *     await saveCompletion(score);
  *   };
- *   
+ *
  *   return <Game onComplete={handleGameComplete} />;
  * }
  * ```
  */
 export function useGameProgress(gameId: string): UseGameProgressReturn {
   const { currentProfile } = useProgressStore();
-  
+
   const canSave = useMemo(() => {
     return currentProfile !== null;
   }, [currentProfile]);
-  
+
   const profileId = useMemo(() => {
     return currentProfile?.id ?? null;
   }, [currentProfile]);
-  
+
   const saveProgress = useCallback(async (data: GameProgressData) => {
     if (!currentProfile) {
-      console.warn(`[useGameProgress] Cannot save progress: no profile selected`);
-      return;
+      const error = new Error('No profile selected');
+      console.warn('[useGameProgress] Cannot save progress: no profile selected');
+      throw error;
     }
-    
-    try {
-      const enqueueResult = progressQueue.add({
-        profileId: currentProfile.id,
+
+    const enqueueResult = progressQueue.add({
+      profileId: currentProfile.id,
+      gameId,
+      score: data.score,
+      completed: data.completed,
+      duration_seconds: undefined,
+      metadata: {
+        ...data.metadata,
+        ...(data.level !== undefined ? { level: data.level } : {}),
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    if (enqueueResult.success) {
+      trackLaunchEvent('progress_queued', {
         gameId,
+        profileId: currentProfile.id,
         score: data.score,
         completed: data.completed,
-        metadata: {
-          ...data.metadata,
-          ...(data.level !== undefined ? { level: data.level } : {}),
-        },
-        timestamp: new Date().toISOString(),
       });
-      if (enqueueResult.success) {
-        trackLaunchEvent('progress_queued', {
-          gameId,
-          profileId: currentProfile.id,
-          score: data.score,
-          completed: data.completed,
-        });
-      } else {
-        trackLaunchEvent('progress_queue_failed', {
-          gameId,
-          profileId: currentProfile.id,
-          reason: enqueueResult.error ?? 'unknown',
-        });
-      }
-    } catch (error) {
-      console.error(`[useGameProgress] Failed to save progress:`, error);
+    } else {
       trackLaunchEvent('progress_queue_failed', {
         gameId,
         profileId: currentProfile.id,
-        reason: error instanceof Error ? error.message : 'unknown',
+        reason: enqueueResult.error ?? 'unknown',
       });
-      // Don't throw - progress queue handles retry
+      throw new Error(enqueueResult.error ?? 'Failed to queue progress');
     }
   }, [currentProfile, gameId]);
-  
-  const saveCompletion = useCallback(async (score: number) => {
-    await saveProgress({ score, completed: true });
+
+  const saveCompletion = useCallback(async (score: number, level?: number) => {
+    await saveProgress({
+      score,
+      completed: true,
+      ...(level !== undefined ? { level } : {}),
+    });
   }, [saveProgress]);
-  
+
   return {
     saveProgress,
     saveCompletion,

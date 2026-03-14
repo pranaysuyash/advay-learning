@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
-import { useGameDrops } from '../hooks/useGameDrops';
-import { useGameProgress } from '../hooks/useGameProgress';
+import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
@@ -54,8 +53,7 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
 
   const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
   const { playClick, playSuccess, playError } = useAudio();
-  const { onGameComplete } = useGameDrops('platformer-runner');
-  const { saveProgress } = useGameProgress('platformer-runner');
+  const { completeGame } = useGameCompletion('platformer-runner');
 
   const webcamRef = useRef<Webcam>(null);
   const [isHandDetected, setIsHandDetected] = useState(false);
@@ -381,10 +379,9 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
 
   const handleFinish = useCallback(async () => {
     playClick();
-    await saveProgress({ score: Math.round(score / 10), completed: true, level: 1 });
-    await onGameComplete(Math.round(score / 10));
+    await completeGame({ score: Math.round(score / 10), level: 1 });
     navigate('/games');
-  }, [score, onGameComplete, navigate, playClick, saveProgress]);
+  }, [score, navigate, playClick, completeGame]);
 
   return (
     <GameContainer title="Platform Runner" onHome={() => navigate('/games')} reportSession={false}>

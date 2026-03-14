@@ -1,0 +1,155 @@
+/* Digital Jenga 3D - Main Page Styles */
+
+.jenga-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.jenga-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  cursor: crosshair;
+}
+
+/* Loading Screen */
+.jenga-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: white;
+}
+
+.loading-spinner {
+  font-size: 48px;
+  animation: bounce 1s ease infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.jenga-loading p {
+  font-size: 16px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Mode Selector */
+.mode-selector {
+  position: absolute;
+  top: 16px;
+  right: 64px;
+  display: flex;
+  gap: 8px;
+  z-index: 50;
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.mode-btn:hover {
+  background: rgba(51, 65, 85, 0.95);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border-color: #22c55e;
+}
+
+/* Controls Hint */
+.controls-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 20px;
+  font-size: 12px;
+  color: #94a3b8;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 50;
+}
+
+/* HUD Overrides for embedded mode */
+.jenga-hud {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 280px;
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.95);
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 100;
+}
+
+/* Scrollbar */
+.jenga-hud::-webkit-scrollbar {
+  width: 4px;
+}
+
+.jenga-hud::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.jenga-hud::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .jenga-hud {
+    width: calc(100% - 32px);
+    max-height: 40vh;
+  }
+  
+  .mode-selector {
+    top: auto;
+    bottom: 64px;
+    right: 50%;
+    transform: translateX(50%);
+  }
+  
+  .mode-btn span {
+    display: none;
+  }
+  
+  .controls-hint {
+    display: none;
+  }
+}

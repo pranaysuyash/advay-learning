@@ -68,6 +68,8 @@ export interface UseHandTrackingReturn {
   error: Error | null;
   /** Whether the landmarker is ready to use */
   isReady: boolean;
+  /** Delegate that succeeded for the current session, if any */
+  activeDelegate: 'GPU' | 'CPU' | null;
   /** Initialize the hand landmarker */
   initialize: () => Promise<void>;
   /** Reset/error recovery */

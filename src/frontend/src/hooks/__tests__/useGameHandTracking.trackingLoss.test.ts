@@ -20,6 +20,7 @@ vi.mock('../useHandTracking', () => ({
     isLoading: false,
     error: null,
     isReady: true,
+    activeDelegate: 'CPU',
     initialize: vi.fn().mockResolvedValue(undefined),
     reset: vi.fn(),
   }),
