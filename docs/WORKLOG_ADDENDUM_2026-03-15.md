@@ -57,3 +57,4 @@ Execution log:
 - 2026-03-16T00:35: Restored progressQueue.ts from origin/main
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
