@@ -81,7 +81,11 @@ export interface LegacyProgressItem {
 }
 
 export interface ApiClient {
-  post(url: string, data: unknown): Promise<{ status: number; data?: unknown }>;
+  post(
+    url: string,
+    data: unknown,
+    config?: { params?: Record<string, unknown> },
+  ): Promise<{ status: number; data?: unknown }>;
 }
 
 type Subscriber = () => void;
@@ -224,9 +228,13 @@ export function createProgressQueue(repo: ProgressRepository) {
       if (now - lastAt < ENQUEUE_RATE_LIMIT_MS) {
         console.warn(
           `[ProgressQueue] Rate-limited (per-profile): ${item.profile_id} — ` +
-          `${now - lastAt}ms since last enqueue (min: ${ENQUEUE_RATE_LIMIT_MS}ms)`,
+            `${now - lastAt}ms since last enqueue (min: ${ENQUEUE_RATE_LIMIT_MS}ms)`,
         );
-        return { success: false, item, error: 'rate-limited: too many enqueue calls from this profile' };
+        return {
+          success: false,
+          item,
+          error: 'rate-limited: too many enqueue calls from this profile',
+        };
       }
 
       // Global sliding-window circuit-breaker
@@ -237,9 +245,13 @@ export function createProgressQueue(repo: ProgressRepository) {
       if (_enqueueWindowCount >= MAX_ENQUEUE_PER_MINUTE) {
         console.warn(
           `[ProgressQueue] Circuit-breaker tripped: ${_enqueueWindowCount} enqueues in last minute ` +
-          `(max: ${MAX_ENQUEUE_PER_MINUTE})`,
+            `(max: ${MAX_ENQUEUE_PER_MINUTE})`,
         );
-        return { success: false, item, error: 'rate-limited: global enqueue circuit-breaker' };
+        return {
+          success: false,
+          item,
+          error: 'rate-limited: global enqueue circuit-breaker',
+        };
       }
 
       // Validation
@@ -295,7 +307,11 @@ export function createProgressQueue(repo: ProgressRepository) {
         repo.save(itemWithStatus);
       } catch (e) {
         console.error('[ProgressQueue] Failed to save item:', e);
-        return { success: false, item, error: 'Storage error: failed to persist item' };
+        return {
+          success: false,
+          item,
+          error: 'Storage error: failed to persist item',
+        };
       }
       _knownIds.add(item.idempotency_key);
       // Record successful enqueue for rate-limiting tracking
@@ -375,7 +391,10 @@ export function createProgressQueue(repo: ProgressRepository) {
       try {
         item = repo.findById(idempotency_key);
       } catch (e) {
-        console.error('[ProgressQueue] Failed to find item for dead letter:', e);
+        console.error(
+          '[ProgressQueue] Failed to find item for dead letter:',
+          e,
+        );
         return false;
       }
       if (!item) return false;
@@ -497,27 +516,32 @@ export function createProgressQueue(repo: ProgressRepository) {
       item: ProgressItem,
       apiClient: ApiClient,
     ): Promise<{ success: boolean; shouldRetry: boolean; error?: string }> {
-      const retryCount = item.retryCount || 0;
+       const retryCount = item.retryCount || 0;
 
-      // Check if item is still in backoff period
-      if (item.nextRetryAt && Date.now() < new Date(item.nextRetryAt).getTime()) {
-        return { success: false, shouldRetry: false, error: 'Still in backoff period' };
-      }
+       // Check if item is still in backoff period
+       if (
+         item.nextRetryAt &&
+         Date.now() < new Date(item.nextRetryAt).getTime()
+       ) {
+         return { success: false, shouldRetry: false, error: 'Still in backoff period' };
+       }
 
-      try {
-        await apiClient.post('/api/v1/progress/', item);
-        return { success: true, shouldRetry: false };
-      } catch (error: unknown) {
-        const err = error as {
-          response?: { status?: number; data?: { error?: { message?: string }; detail?: string } };
-          message?: string;
-        };
-        const errorMessage =
-          err?.response?.data?.error?.message ||
-          err?.response?.data?.detail ||
-          err?.message ||
-          'Unknown error';
-        const statusCode = err?.response?.status;
+       try {
+         await apiClient.post('/progress/', item, {
+           params: { profile_id: item.profile_id },
+         });
+         return { success: true, shouldRetry: false };
+       } catch (error: unknown) {
+         const err = error as {
+           response?: { status?: number; data?: { error?: { message?: string }; detail?: string } };
+           message?: string;
+         };
+         const errorMessage =
+           err?.response?.data?.error?.message ||
+           err?.response?.data?.detail ||
+           err?.message ||
+           'Unknown error';
+         const statusCode = err?.response?.status;
 
         // Don't retry 4xx errors (client errors are permanent)
         if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {

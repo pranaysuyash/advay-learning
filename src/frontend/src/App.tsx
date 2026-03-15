@@ -80,6 +80,7 @@ const {
   SyllableClap,
   SightWordFlash,
   MazeRunner,
+  MidlineViolator,
   PathFollowing,
   RhythmTap,
   AnimalSounds,
@@ -918,6 +919,13 @@ const appRoutes: AppRoute[] = [
     protected: true,
     cameraSafe: true,
     gameName: 'Maze Runner',
+  },
+  {
+    path: '/games/midline-violator',
+    element: <MidlineViolator />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Midline Violator',
   },
   {
     path: '/games/bubble-pop',

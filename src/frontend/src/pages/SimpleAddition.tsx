@@ -195,6 +195,21 @@ export const SimpleAdditionContent = memo(function SimpleAdditionGame() {
     setGameState(createInitialState());
   }, [resetAutoCompletion]);
 
+  // Auto-start game on mount (skip pre-game menu for instant play)
+  // Uses ref to prevent re-triggering which breaks the menu
+  const autoStartedRef = useRef(false);
+  const handleStartRef = useRef(handleStart);
+  handleStartRef.current = handleStart;
+  useEffect(() => {
+    if (gameState.status === 'idle' && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      const timer = setTimeout(() => {
+        handleStartRef.current();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.status]);
+
   // Render visual representations
   const renderVisuals = (count: number, emoji: string) => {
     return (
@@ -402,9 +417,9 @@ export const SimpleAdditionContent = memo(function SimpleAdditionGame() {
                   </button>
                   <button
                     onClick={() => navigate('/games')}
-                    className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-xl"
+                    className="px-6 py-3 bg-[#10B981] hover:bg-emerald-600 text-white font-bold rounded-xl"
                   >
-                    Exit
+                    More Games 🎮
                   </button>
                 </div>
               </motion.div>

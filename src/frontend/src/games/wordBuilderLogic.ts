@@ -69,9 +69,17 @@ import curriculum from './wordbank/curriculum.json';
 
 export interface WordEntry {
   word: string;
+  length?: number;
   pronunciation?: string;
   meaning?: string;
   difficulty?: number;
+  tags?: {
+    pattern?: string[];
+    difficulty?: number;
+    is_sight?: boolean;
+    semantic?: string[];
+    safety?: string;
+  };
 }
 
 export interface WordBank {
@@ -115,6 +123,11 @@ export interface Curriculum {
 const typedWordBank = wordBank as unknown as WordBank;
 const typedCurriculum = curriculum as unknown as Curriculum;
 
+// Helper to get difficulty from word entry (supports both top-level and tags.difficulty)
+function getDifficulty(w: WordEntry): number {
+  return w.difficulty ?? w.tags?.difficulty ?? 1;
+}
+
 // Cache for tag computations
 const tagCache = new Map<string, WordBank>();
 const curriculumCache = new Map<string, Curriculum>();
@@ -146,7 +159,7 @@ export function loadWordLists(): string[][] {
   // Group words by difficulty for old API compatibility
   const lists: string[][] = [[], [], [], []];
   for (const w of typedWordBank.words) {
-    const d = (w.difficulty ?? 1) - 1;
+    const d = getDifficulty(w) - 1;
     if (d >= 0 && d < 4) {
       lists[d].push(w.word.toUpperCase());
     }
@@ -211,6 +224,60 @@ export function createLetterTargets(
   }
   
   return targets;
+}
+
+/**
+ * Layout targets in a grid pattern within the game area.
+ * Spreads targets evenly so they don't overlap.
+ * Uses TARGET_SIZE (120px) to calculate optimal grid dimensions.
+ */
+export function layoutTargets(
+  targets: LetterTarget[],
+  random: () => number = Math.random
+): LetterTarget[] {
+  if (targets.length === 0) return targets;
+
+  // Shuffle targets so correct letters aren't always first
+  const shuffled = [...targets].sort(() => random() - 0.5);
+
+  // Calculate grid dimensions based on TARGET_SIZE (120px)
+  const count = shuffled.length;
+
+  // Playable area margins (avoid edges and top HUD area)
+  const marginX = 0.12;
+
+  // Assume typical screen width, calculate how many columns fit with TARGET_SIZE
+  // This ensures targets are approximately 120px in diameter
+  const assumedScreenWidth = 1920;
+  const usableWidthPx = (1 - marginX * 2) * assumedScreenWidth; // ~1460px for 1920px screen
+  const maxCols = Math.floor(usableWidthPx / TARGET_SIZE);
+
+  // Calculate columns: respect maxCols but don't force too many columns for few targets
+  const sqrtCols = Math.ceil(Math.sqrt(count));
+  const cols = Math.min(sqrtCols, maxCols);
+  const rows = Math.ceil(count / cols);
+  const marginTop = 0.35; // below HUD, word display, and feedback
+  const marginBottom = 0.08;
+  const usableWidth = 1 - marginX * 2;
+  const usableHeight = 1 - marginTop - marginBottom;
+
+  const cellWidth = usableWidth / cols;
+  const cellHeight = usableHeight / rows;
+
+  return shuffled.map((target, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    // Center within cell with small random jitter for organic feel
+    const jitterX = (random() - 0.5) * cellWidth * 0.3;
+    const jitterY = (random() - 0.5) * cellHeight * 0.3;
+    return {
+      ...target,
+      position: {
+        x: marginX + cellWidth * (col + 0.5) + jitterX,
+        y: marginTop + cellHeight * (row + 0.5) + jitterY,
+      },
+    };
+  });
 }
 
 // Pre-compute word tags for efficient filtering
@@ -354,16 +421,16 @@ export function pickWord(
   
   // Explore mode: use difficulty ladder
   const wordList = typedWordBank.words.filter(w => {
-    const d = w.difficulty ?? 1;
+    const d = getDifficulty(w);
     return d <= effectiveMaxDifficulty && !usedWords.has(w.word.toUpperCase());
   });
-  
+
   if (wordList.length === 0) return null;
-  
+
   const selected = wordList[Math.floor(random() * wordList.length)];
   return {
     word: selected.word.toUpperCase(),
-    difficulty: selected.difficulty ?? 1,
+    difficulty: getDifficulty(selected),
     letters: selected.word.toUpperCase().split(''),
   };
 }
@@ -389,7 +456,7 @@ function pickWordForStage(
   const selected = candidates[Math.floor(random() * candidates.length)];
   return {
     word: selected.word.toUpperCase(),
-    difficulty: selected.difficulty ?? 1,
+    difficulty: getDifficulty(selected),
     letters: selected.word.toUpperCase().split(''),
   };
 }
@@ -412,7 +479,7 @@ function pickWordByCriteria(
   const selected = candidates[Math.floor(random() * candidates.length)];
   return {
     word: selected.word.toUpperCase(),
-    difficulty: selected.difficulty ?? 1,
+    difficulty: getDifficulty(selected),
     letters: selected.word.toUpperCase().split(''),
   };
 }

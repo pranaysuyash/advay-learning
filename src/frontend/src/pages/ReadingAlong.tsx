@@ -12,7 +12,7 @@
  * @juice-score-target 7/10 (from 3/10)
  */
 
-import { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -27,6 +27,11 @@ import { Mascot } from '../components/Mascot';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { triggerHaptic } from '../utils/haptics';
 import { trackEvent } from '../analytics/launch';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { type Point } from '../types/tracking';
+import { type TrackedHandFrame } from '../utils/handTrackingFrame';
+import { type HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 import {
   createReadingAlongRound,
@@ -50,12 +55,19 @@ function ReadingAlongGame() {
   const { speak, isSpeaking, isEnabled: ttsEnabled } = useTTS();
   const { completeGame } = useGameCompletion('reading-along');
 
+  // Hand tracking state
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
+
   // Game state
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(0);
   const [usedIds, setUsedIds] = useState<string[]>([]);
-  const [activeRound, setActiveRound] = useState<ReadingAlongRound | null>(null);
+  const [activeRound, setActiveRound] = useState<ReadingAlongRound | null>(
+    null,
+  );
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState('Tap the highlighted word.');
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -66,7 +78,9 @@ function ReadingAlongGame() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationOrigin, setCelebrationOrigin] = useState({ x: 0, y: 0 });
   const [pageDirection, setPageDirection] = useState<'in' | 'out'>('in');
-  const [mascotState, setMascotState] = useState<'idle' | 'happy' | 'celebrating'>('idle');
+  const [mascotState, setMascotState] = useState<
+    'idle' | 'happy' | 'celebrating'
+  >('idle');
   const [mascotMessage, setMascotMessage] = useState<string>('');
   const [streak, setStreak] = useState(0);
 
@@ -93,21 +107,24 @@ function ReadingAlongGame() {
     metaData: { round, correct, roundsPerSession, streak },
   });
 
-  const showMascotFeedback = useCallback((type: 'correct' | 'streak' | 'complete') => {
-    const messages = {
-      correct: ['Great job!', 'You got it!', 'Amazing reading!', 'Perfect!'],
-      streak: ['On fire! 🔥', 'Keep going!', 'Unstoppable!', 'Wow!'],
-      complete: ['You did it!', 'Super reader! 🌟', 'All done!'],
-    };
-    const msgs = messages[type];
-    const msg = msgs[Math.floor(Math.random() * msgs.length)];
-    setMascotMessage(msg);
-    setMascotState(type === 'complete' ? 'celebrating' : 'happy');
-    setTimeout(() => {
-      setMascotState('idle');
-      setMascotMessage('');
-    }, 3000);
-  }, []);
+  const showMascotFeedback = useCallback(
+    (type: 'correct' | 'streak' | 'complete') => {
+      const messages = {
+        correct: ['Great job!', 'You got it!', 'Amazing reading!', 'Perfect!'],
+        streak: ['On fire! 🔥', 'Keep going!', 'Unstoppable!', 'Wow!'],
+        complete: ['You did it!', 'Super reader! 🌟', 'All done!'],
+      };
+      const msgs = messages[type];
+      const msg = msgs[Math.floor(Math.random() * msgs.length)];
+      setMascotMessage(msg);
+      setMascotState(type === 'complete' ? 'celebrating' : 'happy');
+      setTimeout(() => {
+        setMascotState('idle');
+        setMascotMessage('');
+      }, 3000);
+    },
+    [],
+  );
 
   const readSentence = useCallback(async () => {
     if (!activeRound || !ttsEnabled || isReading) return;
@@ -132,10 +149,13 @@ function ReadingAlongGame() {
     }
 
     // Reset highlighting after reading
-    setTimeout(() => {
-      setHighlightedWordIndex(-1);
-      setIsReading(false);
-    }, words.length * WORD_TIMING_MS + 500);
+    setTimeout(
+      () => {
+        setHighlightedWordIndex(-1);
+        setIsReading(false);
+      },
+      words.length * WORD_TIMING_MS + 500,
+    );
   }, [activeRound, ttsEnabled, isReading, speak, round]);
 
   const startRound = useCallback(() => {
@@ -164,82 +184,110 @@ function ReadingAlongGame() {
     startRound();
   }, [playClick, startRound]);
 
-  const handlePick = useCallback(async (
-    word: string,
-    event?: React.MouseEvent | React.TouchEvent,
-  ) => {
-    if (!activeRound || showResult) return;
+  const handlePick = useCallback(
+    async (word: string, event?: React.MouseEvent | React.TouchEvent) => {
+      if (!activeRound || showResult) return;
 
-    playClick();
-    setShowResult(true);
+      playClick();
+      setShowResult(true);
 
-    // Get click position for celebration origin
-    if (event) {
-      const clientX = 'touches' in event ? event.touches[0]?.clientX : (event as React.MouseEvent).clientX;
-      const clientY = 'touches' in event ? event.touches[0]?.clientY : (event as React.MouseEvent).clientY;
-      setCelebrationOrigin({ x: clientX ?? window.innerWidth / 2, y: clientY ?? window.innerHeight / 2 });
-    }
-
-    const ok = isReadingAlongAnswerCorrect(activeRound, word);
-    setIsCorrect(ok);
-
-    if (ok) {
-      playSuccess();
-      playCelebration();
-      triggerHaptic('success');
-      setShowCelebration(true);
-      setCorrect((prev) => prev + 1);
-      setStreak((prev) => prev + 1);
-      setScore((prev) => prev + 20 + streak * 5);
-      setFeedback('Great reading! You found it! 🎉');
-      showMascotFeedback(streak >= 2 ? 'streak' : 'correct');
-
-      trackEvent('reading_along_correct', {
-        sentence_id: activeRound.sentence.id,
-        round,
-        streak: streak + 1,
-      });
-
-      setTimeout(() => setShowCelebration(false), CELEBRATION_DURATION);
-    } else {
-      playError();
-      triggerHaptic('error');
-      setStreak(0);
-      setFeedback(`Good try! The word was "${activeRound.sentence.targetWord}". 📖`);
-      setMascotMessage('Keep trying!');
-      setMascotState('happy');
-      setTimeout(() => {
-        setMascotState('idle');
-        setMascotMessage('');
-      }, 2000);
-
-      trackEvent('reading_along_incorrect', {
-        sentence_id: activeRound.sentence.id,
-        selected: word,
-        correct: activeRound.sentence.targetWord,
-      });
-    }
-
-    if (round >= roundsPerSession) {
-      setTimeout(async () => {
-        playCelebration();
-        showMascotFeedback('complete');
-        const finalScore = score + (ok ? 20 + streak * 5 : 0);
-        await completeGame({ score: finalScore, level: 1 });
-        trackEvent('reading_along_complete', {
-          score: finalScore,
-          correct: correct + (ok ? 1 : 0),
-          total_rounds: roundsPerSession,
+      // Get click position for celebration origin
+      if (event) {
+        const clientX =
+          'touches' in event
+            ? event.touches[0]?.clientX
+            : (event as React.MouseEvent).clientX;
+        const clientY =
+          'touches' in event
+            ? event.touches[0]?.clientY
+            : (event as React.MouseEvent).clientY;
+        setCelebrationOrigin({
+          x: clientX ?? window.innerWidth / 2,
+          y: clientY ?? window.innerHeight / 2,
         });
-        setTimeout(() => setActiveRound(null), 1500);
-      }, 1200);
-      return;
-    }
+      }
 
-    setTimeout(() => {
-      startRound();
-    }, ok ? 1800 : 2500);
-  }, [activeRound, showResult, playClick, playSuccess, playCelebration, playError, streak, score, correct, round, showMascotFeedback, startRound, completeGame]);
+      const ok = isReadingAlongAnswerCorrect(activeRound, word);
+      setIsCorrect(ok);
+
+      if (ok) {
+        playSuccess();
+        playCelebration();
+        triggerHaptic('success');
+        setShowCelebration(true);
+        setCorrect((prev) => prev + 1);
+        setStreak((prev) => prev + 1);
+        setScore((prev) => prev + 20 + streak * 5);
+        setFeedback('Great reading! You found it! 🎉');
+        showMascotFeedback(streak >= 2 ? 'streak' : 'correct');
+
+        trackEvent('reading_along_correct', {
+          sentence_id: activeRound.sentence.id,
+          round,
+          streak: streak + 1,
+        });
+
+        setTimeout(() => setShowCelebration(false), CELEBRATION_DURATION);
+      } else {
+        playError();
+        triggerHaptic('error');
+        setStreak(0);
+        setFeedback(
+          `Good try! The word was "${activeRound.sentence.targetWord}". 📖`,
+        );
+        setMascotMessage('Keep trying!');
+        setMascotState('happy');
+        setTimeout(() => {
+          setMascotState('idle');
+          setMascotMessage('');
+        }, 2000);
+
+        trackEvent('reading_along_incorrect', {
+          sentence_id: activeRound.sentence.id,
+          selected: word,
+          correct: activeRound.sentence.targetWord,
+        });
+      }
+
+      if (round >= roundsPerSession) {
+        setTimeout(async () => {
+          playCelebration();
+          showMascotFeedback('complete');
+          const finalScore = score + (ok ? 20 + streak * 5 : 0);
+          await completeGame({ score: finalScore, level: 1 });
+          trackEvent('reading_along_complete', {
+            score: finalScore,
+            correct: correct + (ok ? 1 : 0),
+            total_rounds: roundsPerSession,
+          });
+          setTimeout(() => setActiveRound(null), 1500);
+        }, 1200);
+        return;
+      }
+
+      setTimeout(
+        () => {
+          startRound();
+        },
+        ok ? 1800 : 2500,
+      );
+    },
+    [
+      activeRound,
+      showResult,
+      playClick,
+      playSuccess,
+      playCelebration,
+      playError,
+      streak,
+      score,
+      correct,
+      round,
+      showMascotFeedback,
+      startRound,
+      completeGame,
+    ],
+  );
 
   const handleFinish = useCallback(async () => {
     playClick();
@@ -253,9 +301,41 @@ function ReadingAlongGame() {
     return sentenceWords.map((word, index) => ({
       index,
       word,
-      isTarget: word.toLowerCase().replace(/[^a-z]/g, '') === activeRound?.sentence.targetWord.toLowerCase(),
+      isTarget:
+        word.toLowerCase().replace(/[^a-z]/g, '') ===
+        activeRound?.sentence.targetWord.toLowerCase(),
     }));
   }, [sentenceWords, activeRound]);
+
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      if (!frame.indexTip) {
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+      setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+      setIsHandTrackingActive(true);
+    },
+    [],
+  );
+
+  const {
+    webcamRef: _webcamRef,
+    isReady: isHandTrackingReady,
+    startTracking,
+  } = useGameHandTracking({
+    gameName: 'ReadingAlong',
+    targetFps: 24,
+    onFrame: handleHandTrackingFrame,
+  });
+
+  // Start hand tracking when game is active
+  useEffect(() => {
+    if (activeRound && isHandTrackingReady) {
+      startTracking().catch(console.error);
+    }
+  }, [activeRound, isHandTrackingReady, startTracking]);
 
   return (
     <GameContainer
@@ -265,6 +345,9 @@ function ReadingAlongGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={_webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={Boolean(activeRound)}
     >
       {/* Celebration Effects */}
       <CelebrationEffects
@@ -277,7 +360,7 @@ function ReadingAlongGame() {
       />
 
       {/* Mascot Feedback */}
-      <div className="fixed bottom-4 left-4 z-40">
+      <div className='fixed bottom-4 left-4 z-40'>
         <Mascot
           state={mascotState}
           message={mascotMessage}
@@ -298,7 +381,13 @@ function ReadingAlongGame() {
         </motion.div>
       )}
 
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div className='h-full overflow-auto p-4 md:p-6' ref={gameAreaRef}>
+        <CursorEmbodiment
+          position={cursor ?? { x: 0.5, y: 0.5 }}
+          coordinateSpace='normalized'
+          isHandDetected={isHandTrackingActive}
+        />
+
         <div className='max-w-4xl mx-auto space-y-4'>
           <AnimatePresence mode='wait'>
             {!activeRound ? (
@@ -311,10 +400,18 @@ function ReadingAlongGame() {
                 className='rounded-3xl border-4 border-[#F2CC8F] bg-white p-8 text-center shadow-[0_8px_0_#E5B86E] space-y-5'
               >
                 <div className='flex justify-center mb-4'>
-                  <Mascot state='happy' responsiveSize='md' speakMessage={false} />
+                  <Mascot
+                    state='happy'
+                    responsiveSize='md'
+                    speakMessage={false}
+                  />
                 </div>
-                <p className='text-sm font-black uppercase tracking-widest text-[#0EA5E9]'>Literacy</p>
-                <h2 className='text-4xl font-black text-slate-900'>Reading Along</h2>
+                <p className='text-sm font-black uppercase tracking-widest text-[#0EA5E9]'>
+                  Literacy
+                </p>
+                <h2 className='text-4xl font-black text-slate-900'>
+                  Reading Along
+                </h2>
                 <p className='text-lg font-bold text-slate-600'>
                   Listen to the sentence, then tap the target word!
                 </p>
@@ -335,7 +432,10 @@ function ReadingAlongGame() {
               // Game Screen
               <motion.div
                 key='game'
-                initial={{ opacity: pageDirection === 'in' ? 0 : 1, x: pageDirection === 'in' ? 50 : 0 }}
+                initial={{
+                  opacity: pageDirection === 'in' ? 0 : 1,
+                  x: pageDirection === 'in' ? 50 : 0,
+                }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
@@ -356,7 +456,9 @@ function ReadingAlongGame() {
                     <motion.div
                       className='h-full bg-gradient-to-r from-[#0EA5E9] to-[#22C55E]'
                       initial={{ width: 0 }}
-                      animate={{ width: `${(round / roundsPerSession) * 100}%` }}
+                      animate={{
+                        width: `${(round / roundsPerSession) * 100}%`,
+                      }}
                       transition={{ duration: 0.5 }}
                     />
                   </div>
@@ -421,7 +523,10 @@ function ReadingAlongGame() {
 
                   {/* Target Word Hint (subtle) */}
                   <p className='text-center mt-4 text-sm font-bold text-slate-500'>
-                    Find the word: <span className='text-[#0EA5E9] text-lg'>"{activeRound.sentence.targetWord}"</span>
+                    Find the word:{' '}
+                    <span className='text-[#0EA5E9] text-lg'>
+                      "{activeRound.sentence.targetWord}"
+                    </span>
                   </p>
                 </div>
 
@@ -498,7 +603,12 @@ function ReadingAlongGame() {
 
 export const ReadingAlong = memo(function ReadingAlongPage() {
   return (
-    <GameShell gameId='reading-along' gameName='Reading Along' showWellnessTimer enableErrorBoundary>
+    <GameShell
+      gameId='reading-along'
+      gameName='Reading Along'
+      showWellnessTimer
+      enableErrorBoundary
+    >
       <ReadingAlongGame />
     </GameShell>
   );

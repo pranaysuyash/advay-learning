@@ -4,7 +4,7 @@
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
@@ -14,6 +14,11 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, getWordsForLevel, checkAnswer, type BlendWord } from '../games/blendBuilderLogic';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
   const navigate = useNavigate();
@@ -33,6 +38,32 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { completeGame } = useGameCompletion('blend-builder');
+
+  // Hand tracking state
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+
+  const isPlaying = gameState === 'playing';
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
+    gameName: 'BlendBuilder',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isPlaying, isHandTrackingReady, isModelLoading, startTracking]);
 
   useGameSessionProgress({
     gameName: 'Blend Builder',
@@ -114,8 +145,11 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6 relative'>
         <div className='max-w-2xl mx-auto space-y-4'>
 
           {/* Level selector */}
@@ -303,6 +337,17 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
           )}
         </div>
       </div>
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace='normalized'
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color='#22C55E'
+        />
+      )}
     </GameContainer>
   );
 });

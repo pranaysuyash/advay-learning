@@ -13,8 +13,6 @@ import {
 import type { LLMProviderAdapter } from './LLMProvider';
 import { MockLLMProvider } from './providers/MockLLMProvider';
 
-
-
 // runtime utility functions (avoids duplication of environment logic)
 import { selectLLMRuntimePlan } from '../../../utils/runtimeUtils';
 
@@ -147,12 +145,11 @@ function buildDefaultRuntimeConfigFromEnv(
   envOverride?: Record<string, any>,
 ): LLMRuntimeConfig {
   const env = envOverride ?? (import.meta as any).env ?? {};
-  const betaLocalAiEnabled = parseBoolean(env.VITE_BETA_LOCAL_AI_ENABLED, false);
   const llmFlag = parseBoolean(env.VITE_FEATURE_AI_LLM_RESPONSES_V1, false);
   const explicitEnabled = parseBoolean(env.VITE_AI_LLM_ENABLED, false);
 
   return {
-    enabled: betaLocalAiEnabled && (llmFlag || explicitEnabled),
+    enabled: llmFlag || explicitEnabled,
     provider: parseProvider(env.VITE_AI_LLM_PROVIDER, 'mock'),
     model: parseModel(env.VITE_AI_LLM_MODEL, 'qwen3.5-1.5b-instruct'),
     fallbackModel: parseModel(
@@ -160,7 +157,10 @@ function buildDefaultRuntimeConfigFromEnv(
       'qwen3.5-0.5b-instruct',
     ),
     maxResponseLength: parsePositiveInt(env.VITE_AI_MAX_RESPONSE_LENGTH, 220),
-    cloudFallbackEnabled: parseBoolean(env.VITE_AI_CLOUD_FALLBACK_ENABLED, false),
+    cloudFallbackEnabled: parseBoolean(
+      env.VITE_AI_CLOUD_FALLBACK_ENABLED,
+      false,
+    ),
     parentConsent: parseBoolean(env.VITE_AI_PARENT_CONSENT, false),
   };
 }
@@ -363,7 +363,9 @@ export class LLMService {
         this.config.provider === 'hf-inference' &&
         (!this.config.cloudFallbackEnabled || !this.config.parentConsent)
       ) {
-        throw new Error('Cloud fallback blocked: parent consent or flag missing.');
+        throw new Error(
+          'Cloud fallback blocked: parent consent or flag missing.',
+        );
       }
 
       const provider = await this.getProvider(

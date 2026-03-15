@@ -1,5 +1,11 @@
-import { memo, useState } from 'react';
+import { memo, useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
@@ -23,12 +29,52 @@ function LetterSoundMatchGame() {
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(0);
   const [usedLetters, setUsedLetters] = useState<string[]>([]);
-  const [activeRound, setActiveRound] = useState<LetterSoundMatchRound | null>(null);
+  const [activeRound, setActiveRound] = useState<LetterSoundMatchRound | null>(
+    null,
+  );
   const [showResult, setShowResult] = useState(false);
-  const [feedback, setFeedback] = useState('Pick the sound that matches the letter.');
+  const [feedback, setFeedback] = useState(
+    'Pick the sound that matches the letter.',
+  );
 
   // Streak tracking
   const { streak, incrementStreak, resetStreak } = useStreakTracking();
+
+  // Hand tracking state
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const isPlaying = Boolean(activeRound);
+
+  const handleFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const tip = frame.indexTip;
+      if (!tip) {
+        setCursor(null);
+        return;
+      }
+      setCursor(tip);
+    },
+    [],
+  );
+
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef,
+  } = useGameHandTracking({
+    gameName: 'LetterSoundMatch',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isPlaying, isHandTrackingReady, isModelLoading, startTracking]);
 
   const roundsPerSession = 8;
 
@@ -72,7 +118,9 @@ function LetterSoundMatchGame() {
     } else {
       resetStreak();
       playError();
-      setFeedback(`Try again next round. Correct sound: ${activeRound.target.sound}.`);
+      setFeedback(
+        `Try again next round. Correct sound: ${activeRound.target.sound}.`,
+      );
     }
 
     if (round >= roundsPerSession) {
@@ -102,14 +150,23 @@ function LetterSoundMatchGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-4xl mx-auto space-y-4'>
           {!activeRound ? (
             <div className='rounded-3xl border-3 border-[#F2CC8F] bg-white p-8 text-center shadow-[0_6px_0_#E5B86E] space-y-5'>
-              <p className='text-sm font-black uppercase tracking-widest text-[#7C3AED]'>Phonics</p>
-              <h2 className='text-4xl font-black text-slate-900'>Letter Sound Match</h2>
-              <p className='text-lg font-bold text-slate-600'>Match each letter with its sound.</p>
+              <p className='text-sm font-black uppercase tracking-widest text-[#7C3AED]'>
+                Phonics
+              </p>
+              <h2 className='text-4xl font-black text-slate-900'>
+                Letter Sound Match
+              </h2>
+              <p className='text-lg font-bold text-slate-600'>
+                Match each letter with its sound.
+              </p>
               <button
                 type='button'
                 onClick={startGame}
@@ -129,8 +186,12 @@ function LetterSoundMatchGame() {
                 showHearts={true}
               />
               <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4 shadow-[0_4px_0_#E5B86E]'>
-                <p className='text-base font-bold text-slate-500 mt-1'>Which sound matches this letter?</p>
-                <p className='text-7xl font-black text-[#7C3AED] text-center mt-2'>{activeRound.target.letter}</p>
+                <p className='text-base font-bold text-slate-500 mt-1'>
+                  Which sound matches this letter?
+                </p>
+                <p className='text-7xl font-black text-[#7C3AED] text-center mt-2'>
+                  {activeRound.target.letter}
+                </p>
               </div>
 
               <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4'>
@@ -166,6 +227,17 @@ function LetterSoundMatchGame() {
             </>
           )}
         </div>
+        {cursor && isPlaying && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={true}
+            size={64}
+            color='#7C3AED'
+          />
+        )}
       </div>
     </GameContainer>
   );

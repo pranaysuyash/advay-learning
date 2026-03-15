@@ -4,18 +4,23 @@
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { LEVELS, generateItems, calculateScore, type ColorItem } from '../games/colorSortGameLogic';
 import { triggerHaptic } from '../utils/haptics';
 import { GameHUD } from '../components/game/GameHUD';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
   { type: 'image', src: '/assets/kenney/platformer/collectibles/star.png', priority: 'critical' },
@@ -23,6 +28,8 @@ const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
 
 const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [items, setItems] = useState<ColorItem[]>([]);
@@ -46,6 +53,38 @@ const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
   const { completeGame } = useGameCompletion('color-sort');
 
   useGameSessionProgress({ gameName: 'Color Sort', score, level: currentLevel, isPlaying: true, metaData: { correct } });
+
+  // Hand tracking
+  const handleFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const tip = frame.indexTip;
+      if (!tip) {
+        setCursor(null);
+        return;
+      }
+      setCursor(tip);
+    },
+    [],
+  );
+
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef,
+  } = useGameHandTracking({
+    gameName: 'ColorSortGame',
+    targetFps: 30,
+    isRunning: gameState === 'playing',
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (gameState === 'playing' && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [gameState, isHandTrackingReady, isModelLoading, startTracking]);
 
   const startGame = () => {
     const { items: newItems, targets: newTargets } = generateItems(currentLevel);
@@ -117,8 +156,15 @@ const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
   }
 
   return (
-    <GameContainer title="Color Sort" onHome={() => navigate('/games')} reportSession={false}>
-      <div className="flex flex-col items-center gap-4 p-4">
+    <GameContainer
+      title="Color Sort"
+      onHome={() => navigate('/games')}
+      reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={gameState === 'playing'}
+    >
+      <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 h-full">
         <div className="flex gap-2">
           {LEVELS.map((l) => (
             <button type="button" key={l.level} onClick={() => { playClick(); setCurrentLevel(l.level); }}
@@ -244,6 +290,19 @@ const ColorSortGameGame = memo(function ColorSortGameGameComponent() {
             <button type="button" onClick={handleStart} className="px-6 py-3 bg-cyan-500 text-white rounded-xl font-bold mr-4 hover:scale-105 transition-transform">Play Again</button>
             <button type="button" onClick={handleFinish} className="px-6 py-3 bg-gray-200 rounded-xl font-bold hover:bg-gray-300 transition-colors">Finish</button>
           </div>
+        )}
+
+        {/* Hand tracking cursor */}
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={true}
+            size={64}
+            color='#06b6d4'
+          />
         )}
       </div>
     </GameContainer>

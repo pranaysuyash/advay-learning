@@ -23,6 +23,7 @@ interface GameCardProps {
     onPlay?: () => void;
     buttonText?: string;
     reducedMotion?: boolean;
+    simpleMode?: boolean; // NEW: When true, hide metadata for kid-friendly view
     badge?: {
         icon: string;
         label: string;
@@ -74,6 +75,7 @@ export const GameCard = memo(function GameCard({
     onPlay,
     buttonText = 'Play Game',
     reducedMotion = false,
+    simpleMode = true, // Default to kid-friendly simplified view
     badge,
 }: GameCardProps) {
     const categoryColor = CATEGORY_COLORS[category] || CATEGORY_COLORS.default;
@@ -252,38 +254,42 @@ export const GameCard = memo(function GameCard({
                         {description}
                     </p>
 
-                    <div className="flex flex-wrap gap-2 mb-6">
-                        <span className="text-xs font-bold px-3 py-1 bg-slate-100 text-advay-slate rounded-lg border-2 border-[#F2CC8F]">
-                            {ageRange}
-                        </span>
-                        <span className={`text-xs font-bold px-3 py-1 rounded-lg border-2 ${diffColor.bg} ${diffColor.text} ${diffColor.border}`}>
-                            {difficulty}
-                        </span>
-                    </div>
-
-                    {/* Progress bar (if progress provided) */}
-                    {progress !== undefined && (
-                        <div className="mb-5">
-                            <div className="flex justify-between text-xs font-bold text-text-secondary mb-2 uppercase tracking-wider">
-                                <span>Progress</span>
-                                <span>{progress}%</span>
+                    {!simpleMode && (
+                        <>
+                            <div className="flex flex-wrap gap-2 mb-6">
+                                <span className="text-xs font-bold px-3 py-1 bg-slate-100 text-advay-slate rounded-lg border-2 border-[#F2CC8F]">
+                                    {ageRange}
+                                </span>
+                                <span className={`text-xs font-bold px-3 py-1 rounded-lg border-2 ${diffColor.bg} ${diffColor.text} ${diffColor.border}`}>
+                                    {difficulty}
+                                </span>
                             </div>
-                            <div className="h-3 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]">
-                                <motion.div
-                                    initial={reducedMotion ? false : { width: 0 }}
-                                    animate={{ width: `${progress}%` }}
-                                    transition={reducedMotion ? { duration: 0.01 } : { delay: animationDelay + 0.3, duration: 0.5 }}
-                                    className="h-full bg-green-500 rounded-full"
-                                />
-                            </div>
-                        </div>
-                    )}
 
-                    {/* Play count */}
-                    {playCount !== undefined && playCount > 0 && (
-                        <div className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">
-                            Played {playCount} time{playCount !== 1 ? 's' : ''}
-                        </div>
+                            {/* Progress bar (if progress provided) */}
+                            {progress !== undefined && (
+                                <div className="mb-5">
+                                    <div className="flex justify-between text-xs font-bold text-text-secondary mb-2 uppercase tracking-wider">
+                                        <span>Progress</span>
+                                        <span>{progress}%</span>
+                                    </div>
+                                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden border-2 border-[#F2CC8F]">
+                                        <motion.div
+                                            initial={reducedMotion ? false : { width: 0 }}
+                                            animate={{ width: `${progress}%` }}
+                                            transition={reducedMotion ? { duration: 0.01 } : { delay: animationDelay + 0.3, duration: 0.5 }}
+                                            className="h-full bg-green-500 rounded-full"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Play count */}
+                            {playCount !== undefined && playCount > 0 && (
+                                <div className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">
+                                    Played {playCount} time{playCount !== 1 ? 's' : ''}
+                                </div>
+                            )}
+                        </>
                     )}
 
                     {/* Action button */}

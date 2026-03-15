@@ -2,14 +2,21 @@ import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { LEVELS, generateBubbles, checkPop, calculateScore, type NumberBubble } from '../games/popTheNumberLogic';
 import { triggerHaptic } from '../utils/haptics';
+import type { Point } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 function PopTheNumberContent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const handleBubbleClickRef = useRef<(bubbleId: number) => void>(() => {});
   const [currentLevel, _setCurrentLevel] = useState(1);
   const [bubbles, setBubbles] = useState<NumberBubble[]>([]);
   const [score, setScore] = useState(0);
@@ -22,6 +29,8 @@ function PopTheNumberContent() {
   const [maxConsecutive, setMaxConsecutive] = useState(0);
   const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
   const [showMilestone, setShowMilestone] = useState(false);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   
   const timerRef = useRef<number | null>(null);
   const levelRef = useRef(LEVELS[0]);
@@ -118,6 +127,63 @@ function PopTheNumberContent() {
     navigate('/games');
   }, [navigate]);
 
+  // Update ref for hand tracking
+  useEffect(() => {
+    handleBubbleClickRef.current = handleBubbleClick;
+  }, [handleBubbleClick]);
+
+  // Hand tracking frame handler
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const hand = frame;
+      if (!hand || !hand.indexTip) {
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+
+      // indexTip is already normalized (0-1), use directly
+      const newCursor: Point = { x: hand.indexTip.x, y: hand.indexTip.y };
+      setCursor(newCursor);
+      setIsHandTrackingActive(true);
+
+      if (gameState !== 'playing') return;
+
+      // Use normalized bounds check (0-1) instead of pixel bounds
+      const isOverGameArea =
+        newCursor.x >= 0 && newCursor.x <= 1 &&
+        newCursor.y >= 0 && newCursor.y <= 1;
+
+      if (!isOverGameArea) return;
+
+      // Use pinch state instead of transition for continuous detection
+      if (!frame.pinch?.state?.isPinching) return;
+
+      // Convert normalized (0-1) to percentage (0-100) for bubble comparison
+      const relX = newCursor.x * 100;
+      const relY = newCursor.y * 100;
+
+      const bubbleRadius = 4;
+      for (const bubble of bubbles) {
+        if (bubble.popped) continue;
+        const dx = Math.abs(relX - bubble.x);
+        const dy = Math.abs(relY - bubble.y);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < bubbleRadius + 2) {
+          handleBubbleClickRef.current(bubble.id);
+          break;
+        }
+      }
+    },
+    [gameState, bubbles],
+  );
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({
+    gameName: 'PopTheNumber',
+    targetFps: 24,
+    onFrame: handleHandTrackingFrame,
+  });
+
   useEffect(() => {
     if (gameState === 'playing') {
       timerRef.current = window.setInterval(() => {
@@ -144,8 +210,12 @@ function PopTheNumberContent() {
   }, [gameState, score, playSuccess, completeGame, currentLevel]);
 
   return (
-    <GameContainer title="Pop the Number" onHome={handleBack} reportSession={false}>
-      <div className="relative w-full h-full bg-gradient-to-b from-sky-100 to-blue-200 rounded-lg overflow-hidden">
+    <GameContainer title="Pop the Number" onHome={handleBack} reportSession={false} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={gameState === 'playing'}>
+      <div ref={gameAreaRef} className="relative w-full h-full bg-gradient-to-b from-sky-100 to-blue-200 rounded-lg overflow-hidden">
+        {/* Hand cursor */}
+        {cursor && isHandTrackingActive && (
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
+        )}
         {gameState === 'start' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
             <h2 className="text-4xl font-bold text-blue-600 mb-4">Pop the Number!</h2>

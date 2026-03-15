@@ -328,6 +328,7 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
   return (
     <GameContainer
       title="Shadow Portal"
+      onHome={() => navigate('/games')}
       score={gameState.score}
       isPlaying={gameState.status === 'playing'}
       isHandDetected={handVisible}

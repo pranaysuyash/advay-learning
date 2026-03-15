@@ -18,7 +18,8 @@ export function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState('');
-  const [showChildFields, setShowChildFields] = useState(true);
+  // Child profile fields are optional - collapsed by default for simpler sign-up
+  const [showChildFields, setShowChildFields] = useState(false);
   const [childName, setChildName] = useState('');
   const [childAge, setChildAge] = useState(5);
   const [childLanguage, setChildLanguage] = useState('en');

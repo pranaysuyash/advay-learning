@@ -6,13 +6,15 @@
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameShell } from '../components/GameShell';
 import { GameHUD } from '../components/game/GameHUD';
 import { GameContainer } from '../components/GameContainer';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
   LEVELS,
@@ -21,6 +23,9 @@ import {
   type OddOneOutRound,
 } from '../games/oddOneOutLogic';
 import { triggerHaptic } from '../utils/haptics';
+import type { Point } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 // Inner game component
 interface OddOneOutGameProps {
@@ -28,6 +33,7 @@ interface OddOneOutGameProps {
 }
 
 const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: completeGameProp }: OddOneOutGameProps) {
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentRound, setCurrentRound] = useState<OddOneOutRound | null>(null);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -38,6 +44,8 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
   const [gameState, setGameState] = useState<'playing' | 'complete'>('playing');
   const [usedCategories, setUsedCategories] = useState<string[]>([]);
   const [feedback, setFeedback] = useState('Tap the one that does NOT belong!');
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   const {
     streak,
     maxStreak,
@@ -49,6 +57,35 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
 
   const navigate = useNavigate();
   const { playClick, playSuccess, playError } = useAudio();
+
+  // Hand tracking frame handler
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const hand = frame;
+      if (!hand || !hand.indexTip) {
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+
+      const newCursor: Point = {
+        x: hand.indexTip.x,
+        y: hand.indexTip.y,
+      };
+      setCursor(newCursor);
+      setIsHandTrackingActive(true);
+    },
+    [],
+  );
+
+  const {
+    webcamRef: _webcamRef,
+  } = useGameHandTracking({
+    gameName: 'OddOneOut',
+    targetFps: 24,
+    isRunning: gameState === 'playing',
+    onFrame: handleHandTrackingFrame,
+  });
 
   const levelConfig = useMemo(() => LEVELS.find((l) => l.level === currentLevel) ?? LEVELS[0], [currentLevel]);
 
@@ -175,8 +212,15 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
       title="Odd One Out"
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={_webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={gameState === 'playing'}
     >
-      <div className="flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto">
+      <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto relative">
+        {/* Hand cursor */}
+        {cursor && isHandTrackingActive && (
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
+        )}
         <div className="flex gap-2">
           {LEVELS.map((level) => (
             <button

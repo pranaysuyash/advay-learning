@@ -42,6 +42,11 @@ import { triggerHaptic } from '../utils/haptics';
 import { HandDetectionProvider } from '../components/game/HandDetectionProvider';
 import { useHandDetection } from '../components/game/useHandDetection';
 import { useWindowSize } from '../hooks/useWindowSize';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { type Point } from '../types/tracking';
+import { type TrackedHandFrame } from '../utils/handTrackingFrame';
+import { type HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 interface Bubble {
   id: string;
@@ -84,6 +89,10 @@ function BubblePopSymphonyGame() {
   const [isPinching, setIsPinching] = useState(false);
   const [isHandDetected, setIsHandDetected] = useState(false);
   const screenDims = useWindowSize();
+
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [handCursor, setHandCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
 
   // when cursor changes we derive hand detection and pixel position
   const { cursor, pinch, webcamRef: _webcamRef } = useHandDetection();
@@ -346,9 +355,24 @@ function BubblePopSymphonyGame() {
     speak('Pop the bubbles by pinching them! Each one makes a musical note!');
   }, [speak]);
 
+  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    if (!frame.indexTip) { setHandCursor(null); setIsHandTrackingActive(false); return; }
+    setHandCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+    setIsHandTrackingActive(true);
+  }, []);
+
+  const { webcamRef: _webcamRefNew, startTracking } = useGameHandTracking({ gameName: 'BubblePopSymphony', targetFps: 24, onFrame: handleHandTrackingFrame });
+
+  // Start hand tracking when game begins
+  useEffect(() => {
+    if (gameStarted) {
+      startTracking();
+    }
+  }, [gameStarted, startTracking]);
+
   return (
     <HandDetectionProvider gameName='BubblePopSymphony' isPlaying={gameStarted}>
-      <div className='w-screen h-screen overflow-hidden bg-discovery-cream relative'>
+      <div ref={gameAreaRef} className='w-screen h-screen overflow-hidden bg-discovery-cream relative'>
         <CameraThumbnail
           isHandDetected={isHandDetected}
           visible={gameStarted}
@@ -438,6 +462,10 @@ function BubblePopSymphonyGame() {
             highContrast={true}
             icon='pointer'
           />
+        )}
+
+        {handCursor && isHandTrackingActive && (
+          <CursorEmbodiment position={handCursor} isPinching={isPinching} />
         )}
 
         <SuccessAnimation

@@ -1,6 +1,6 @@
 /**
  * Letter Hunt Game
- * 
+ *
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
@@ -25,7 +25,10 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { AssetPreloader } from '../components/AssetPreloader';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import {
+  STREAK_MILESTONE_INTERVAL,
+  STREAK_MILESTONE_DURATION_MS,
+} from '../games/constants';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { hitTestRects } from '../utils/hitTest';
@@ -67,10 +70,19 @@ const getLetterColorClass = (color?: string) =>
   (color ? LETTER_COLOR_CLASS_MAP[color.toLowerCase()] : undefined) ??
   'text-pip-orange';
 
-const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
-];
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
+  [
+    {
+      type: 'image',
+      src: '/assets/kenney/platformer/hud/hud_heart.png',
+      priority: 'critical',
+    },
+    {
+      type: 'image',
+      src: '/assets/kenney/platformer/hud/hud_heart_empty.png',
+      priority: 'critical',
+    },
+  ];
 
 const LetterHuntGame = memo(function LetterHuntComponent() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
@@ -230,27 +242,30 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
         // Build streak
         const newStreak = streak + 1;
         setStreak(newStreak);
-        
+
         // Calculate score with streak bonus
         const basePoints = timeLeft * 5;
         const streakBonus = Math.min(newStreak * 3, 15);
         const totalPoints = basePoints + streakBonus;
         setScore((prev) => prev + totalPoints);
-        
+
         // Show score popup
         setScorePopup({ points: totalPoints });
         setTimeout(() => setScorePopup(null), 700);
-        
+
         // Haptics
         triggerHaptic('success');
-        
+
         // Milestone every 5
         if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
           setShowStreakMilestone(true);
           triggerHaptic('celebration');
-          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+          setTimeout(
+            () => setShowStreakMilestone(false),
+            STREAK_MILESTONE_DURATION_MS,
+          );
         }
-        
+
         foundCountRef.current += 1;
         // Easter egg for finding 8 letters - handled by game completion system
         setFeedback({ message: 'Correct! Great job!', type: 'success' });
@@ -263,7 +278,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
         setStreak(0);
         setShowStreakMilestone(false);
         triggerHaptic('error');
-        
+
         playError();
         setFeedback({
           message: `Oops! That was ${option.char}, not ${targetLetter}`,
@@ -352,6 +367,16 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
     navigate('/dashboard');
   };
 
+  // Auto-start game on mount (skip pre-game menu for instant play)
+  useEffect(() => {
+    if (!gameStarted && !gameCompleted && assetsLoaded) {
+      const timer = setTimeout(() => {
+        startGame();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [gameStarted, gameCompleted, assetsLoaded]);
+
   const handleTrackingFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
       const container = cameraAreaRef.current;
@@ -399,26 +424,32 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
     [cursor, hoveredOptionIndex, isPinching, options, handleSelectOption],
   );
 
-  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } =
-    useGameHandTracking({
-      gameName: 'LetterHunt',
-      isRunning:
-        gameStarted &&
-        !gameCompleted &&
-        !feedback &&
-        !useMouseFallback,
-      webcamRef,
-      targetFps: 30,
-      onFrame: handleTrackingFrame,
-      onNoVideoFrame: () => {
-        if (cursor !== null) setCursor(null);
-        if (hoveredOptionIndex !== null) setHoveredOptionIndex(null);
-        if (isPinching) setIsPinching(false);
-      },
-    });
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+  } = useGameHandTracking({
+    gameName: 'LetterHunt',
+    isRunning: gameStarted && !gameCompleted && !feedback && !useMouseFallback,
+    webcamRef,
+    targetFps: 30,
+    onFrame: handleTrackingFrame,
+    onNoVideoFrame: () => {
+      if (cursor !== null) setCursor(null);
+      if (hoveredOptionIndex !== null) setHoveredOptionIndex(null);
+      if (isPinching) setIsPinching(false);
+    },
+  });
 
   useEffect(() => {
-    if (gameStarted && !gameCompleted && !useMouseFallback && !feedback && !isHandTrackingReady && !isModelLoading) {
+    if (
+      gameStarted &&
+      !gameCompleted &&
+      !useMouseFallback &&
+      !feedback &&
+      !isHandTrackingReady &&
+      !isModelLoading
+    ) {
       void startTracking();
     }
   }, [
@@ -445,9 +476,9 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
   const cursorViewport =
     cursor && cameraAreaRef.current
       ? {
-        x: cameraAreaRef.current.getBoundingClientRect().left + cursor.x,
-        y: cameraAreaRef.current.getBoundingClientRect().top + cursor.y,
-      }
+          x: cameraAreaRef.current.getBoundingClientRect().left + cursor.x,
+          y: cameraAreaRef.current.getBoundingClientRect().top + cursor.y,
+        }
       : null;
 
   // Menu controls
@@ -526,6 +557,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
           onHome={goToHome}
           isHandDetected={isHandTrackingReady}
           isPlaying={gameStarted && !gameCompleted}
+          webcamRef={webcamRef}
         >
           <div className='relative w-full h-full bg-[#FFF8F0]'>
             {/* Camera Area */}
@@ -547,13 +579,21 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
 
               <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
-              {/* Target Letter Display (Adjusted position) */}
-              <div className='absolute top-24 left-6 p-6 z-10 pointer-events-none'>
-                <div className='bg-white/95 backdrop-blur-sm px-6 py-4 rounded-[1.5rem] border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
-                  <div className='text-xs font-bold text-slate-400 uppercase tracking-widest mb-1'>Find this letter</div>
-                  <div className='flex items-baseline gap-3'>
+              {/* Target Letter Display - centered at top */}
+              <motion.div
+                className='absolute top-24 left-1/2 -translate-x-1/2 z-10 pointer-events-none'
+                key={targetLetter}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              >
+                <div className='bg-white/95 backdrop-blur-sm px-8 py-4 rounded-[2rem] border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-center'>
+                  <div className='text-xs font-bold text-slate-400 uppercase tracking-widest mb-1'>
+                    Find this letter
+                  </div>
+                  <div className='flex items-baseline gap-3 justify-center'>
                     <div
-                      className={`text-5xl font-black tracking-tight ${targetLetterColorClass}`}
+                      className={`text-6xl font-black tracking-tight ${targetLetterColorClass}`}
                     >
                       {targetLetter}
                     </div>
@@ -562,7 +602,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Score Popup Animation */}
               {scorePopup && (
@@ -570,9 +610,9 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                   initial={{ opacity: 0, y: 0, scale: 0.5 }}
                   animate={{ opacity: 1, y: -40, scale: 1.2 }}
                   exit={{ opacity: 0 }}
-                  className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+                  className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50'
                 >
-                  <div className="text-5xl font-black text-green-500 drop-shadow-lg">
+                  <div className='text-5xl font-black text-green-500 drop-shadow-lg'>
                     +{scorePopup.points}
                   </div>
                 </motion.div>
@@ -584,10 +624,12 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                   initial={{ scale: 0, rotate: -20 }}
                   animate={{ scale: 1.2, rotate: 0 }}
                   exit={{ scale: 0 }}
-                  className="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50"
+                  className='fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none z-50'
                 >
-                  <div className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl">
-                    <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak!</div>
+                  <div className='bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 px-6 py-3 rounded-2xl shadow-xl text-white font-black text-2xl'>
+                    <div className='flex items-center justify-center gap-2'>
+                      <KenneyIcon type='heart' size={20} /> {streak} Streak!
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -642,10 +684,11 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                               ? () => handleSelectOption(option)
                               : undefined
                           }
-                          className={`flex-1 min-w-0 rounded-[1.5rem] px-4 py-6 border-3 text-center transition-all min-h-[56px] ${hoveredOptionIndex === idx
-                            ? `border-[#10B981] bg-emerald-50 scale-105 shadow-[0_4px_0_#E5B86E]`
-                            : `border-[#F2CC8F] bg-white hover:bg-slate-50 hover:scale-105 shadow-[0_4px_0_#E5B86E]`
-                            }`}
+                          className={`flex-1 min-w-0 rounded-[1.5rem] px-4 py-6 border-3 text-center transition-all min-h-[56px] ${
+                            hoveredOptionIndex === idx
+                              ? `border-[#10B981] bg-emerald-50 scale-105 shadow-[0_4px_0_#E5B86E]`
+                              : `border-[#F2CC8F] bg-white hover:bg-slate-50 hover:scale-105 shadow-[0_4px_0_#E5B86E]`
+                          }`}
                         >
                           <div
                             className={`text-[3rem] tracking-tight font-black leading-none mb-2 ${optionColorClass}`}
@@ -667,10 +710,11 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-8 py-4 text-center font-bold text-xl pointer-events-none z-40 border-3 shadow-[0_4px_0_#E5B86E] ${feedback.type === 'success'
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                    : 'bg-red-50 border-red-200 text-red-700'
-                    }`}
+                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-8 py-4 text-center font-bold text-xl pointer-events-none z-40 border-3 shadow-[0_4px_0_#E5B86E] ${
+                    feedback.type === 'success'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                      : 'bg-red-50 border-red-200 text-red-700'
+                  }`}
                 >
                   {feedback.message}
                 </motion.div>
@@ -708,7 +752,9 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
             {/* Header */}
             <header className='flex justify-between items-center mb-10'>
               <div>
-                <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight'>Letter Hunt</h1>
+                <h1 className='text-4xl md:text-5xl font-black text-advay-slate tracking-tight'>
+                  Letter Hunt
+                </h1>
                 <p className='text-text-secondary font-bold text-lg mt-2'>
                   Find the target letter among the options!
                 </p>
@@ -741,8 +787,12 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                       className='w-full h-full object-contain'
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
-                        e.currentTarget.parentElement!.innerText = '🔎';
-                        e.currentTarget.parentElement!.className = 'w-32 h-32 mx-auto mb-8 bg-blue-50 border-3 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          parent.innerText = '🔎';
+                          parent.className =
+                            'w-32 h-32 mx-auto mb-8 bg-blue-50 border-3 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform';
+                        }
                       }}
                     />
                   </div>
@@ -778,13 +828,32 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                 /* Game Completed Screen */
                 <div className='flex flex-col items-center justify-center py-8'>
                   <div className='w-32 h-32 mx-auto mb-8 bg-amber-50 border-3 border-amber-100 rounded-[2rem] p-6 flex items-center justify-center drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform text-amber-500'>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      width='64'
+                      height='64'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth='2'
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                    >
+                      <path d='M6 9H4.5a2.5 2.5 0 0 1 0-5H6' />
+                      <path d='M18 9h1.5a2.5 2.5 0 0 0 0-5H18' />
+                      <path d='M4 22h16' />
+                      <path d='M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22' />
+                      <path d='M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22' />
+                      <path d='M18 2H6v7a6 6 0 0 0 12 0V2Z' />
+                    </svg>
                   </div>
 
                   <h2 className='text-4xl font-black text-[#10B981] tracking-tight mb-3'>
                     Congratulations!
                   </h2>
-                  <p className='text-xl font-bold text-text-secondary mb-8'>You completed all levels!</p>
+                  <p className='text-xl font-bold text-text-secondary mb-8'>
+                    You completed all levels!
+                  </p>
                   <div className='text-3xl font-black text-amber-500 mb-10 bg-amber-50 px-8 py-4 rounded-full border-3 border-amber-100'>
                     Final Score: {score}
                   </div>
@@ -804,11 +873,26 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                 How to Play
               </h2>
               <ul className='space-y-3 text-advay-slate font-bold'>
-                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> A target letter appears on the camera screen</li>
-                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Move your index finger to control the cursor</li>
-                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Pinch (thumb + index) while hovering a tile to select it</li>
-                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> You have 30 seconds per round — faster answers score more</li>
-                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Complete all 10 rounds to advance to the next level</li>
+                <li className='flex items-center gap-3'>
+                  <span className='text-blue-500 text-lg'>•</span> A target
+                  letter appears on the camera screen
+                </li>
+                <li className='flex items-center gap-3'>
+                  <span className='text-blue-500 text-lg'>•</span> Move your
+                  index finger to control the cursor
+                </li>
+                <li className='flex items-center gap-3'>
+                  <span className='text-blue-500 text-lg'>•</span> Pinch (thumb
+                  + index) while hovering a tile to select it
+                </li>
+                <li className='flex items-center gap-3'>
+                  <span className='text-blue-500 text-lg'>•</span> You have 30
+                  seconds per round — faster answers score more
+                </li>
+                <li className='flex items-center gap-3'>
+                  <span className='text-blue-500 text-lg'>•</span> Complete all
+                  10 rounds to advance to the next level
+                </li>
               </ul>
             </div>
           </motion.div>

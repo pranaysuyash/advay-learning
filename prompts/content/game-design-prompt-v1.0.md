@@ -4,6 +4,20 @@
 
 ---
 
+## 🎯 MANDATORY: Vision-First Design
+
+**This is a multi-modal vision platform.** Every game MUST use at least one camera-based CV control mode:
+- **Hand tracking** (index finger pointing, pinch-to-grab, gestures)
+- **Face tracking** (head tilt, facial expressions)
+- **Pose tracking** (full body movements, jumping, arm positions)
+- **Voice input** (speech recognition for voice-controlled games)
+
+CV integration is **Step 1** of game design, not an afterthought. The `cv: [...]` field in the game registry MUST accurately reflect which modes the game uses.
+
+Reference: `docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md`
+
+---
+
 ## Input Parameters
 
 When requesting a new game design, provide:
@@ -18,61 +32,79 @@ When requesting a new game design, provide:
 
 ## Core Game Patterns (Choose One or Combine)
 
+> **CRITICAL**: Every pattern MUST specify which CV modes it uses. The `cv: [...]` field in the game registry must match.
+
 ### Pattern 1: Touch Targets
 
 **Interaction**: Touch appearing targets with fingertip/body part
 **Best for**: Recognition, speed, reaction time
-**MediaPipe**: Hand Landmarker
+**CV Modes**: `hand` (primary), `pose` (body touch), `face` (head touch variants)
+**Hook**: `useGameHandTracking` for index finger, `useGamePoseTracking` for body
 **Difficulty knobs**: Target size, speed, distractors, required order
 
 ### Pattern 2: Drag & Drop (Pinch Grab)
 
 **Interaction**: Pick item with pinch, move, drop into zones
 **Best for**: Categorization, sorting, spatial reasoning
-**MediaPipe**: Hand Landmarker
+**CV Modes**: `hand` (pinch detection)
+**Hook**: `useGameHandTracking` with pinch callback
 **Difficulty knobs**: Number of categories, moving targets, wrong-drop penalty
 
 ### Pattern 3: Trace Paths
 
 **Interaction**: Follow outline or maze with fingertip
 **Best for**: Pre-writing, letter formation, control
-**MediaPipe**: Hand Landmarker
+**CV Modes**: `hand` (index finger tracking)
+**Hook**: `useGameHandTracking` with landmark 8 (index tip)
 **Difficulty knobs**: Tolerance, stroke order strictness, path complexity
 
 ### Pattern 4: Hold Still
 
 **Interaction**: Keep pose/fingertip in position for N seconds
 **Best for**: Balance, control, patience
-**MediaPipe**: Hand/Pose Landmarker
+**CV Modes**: `hand`, `pose`, or `face` depending on game
+**Hook**: Appropriate tracking hook based on mode
 **Difficulty knobs**: Duration, movement tolerance, distractions
 
 ### Pattern 5: Match Pose/Expression
 
 **Interaction**: Mirror target pose shown on screen
 **Best for**: Body awareness, following instructions, gross motor
-**MediaPipe**: Pose/Face Landmarker
+**CV Modes**: `pose` (body poses), `face` (facial expressions), `hand` (hand poses)
+**Hook**: `useGamePoseTracking` and/or `useGameFaceTracking`
 **Difficulty knobs**: Angle tolerance, hold time, multi-step sequences
 
 ### Pattern 6: Sequence Memory
 
 **Interaction**: Do actions in order
 **Best for**: Working memory, pattern recognition
-**MediaPipe**: Hand/Pose Landmarker
+**CV Modes**: `hand`, `pose` — supports mixed modalities
+**Hook**: Multiple hooks for multi-modal sequences
 **Difficulty knobs**: Sequence length, speed, mixed modalities
 
 ### Pattern 7: Catch & Avoid
 
 **Interaction**: Catch correct items, avoid incorrect ones
 **Best for**: Reaction time, categorization under pressure
-**MediaPipe**: Hand Landmarker
+**CV Modes**: `hand` (primary), `pose` (body catchers)
+**Hook**: `useGameHandTracking` or `useGamePoseTracking`
 **Difficulty knobs**: Spawn rate, item speed, distractor ratio
 
 ### Pattern 8: Scavenger Hunt
 
 **Interaction**: Show real-world objects/colors to camera
 **Best for**: Real-world learning, exploration
-**MediaPipe**: Segmentation/Object Detection
+**CV Modes**: `hand` (pointing), segmentation/object detection
+**Hook**: `useGameHandTracking` + object detection
 **Difficulty knobs**: Hint strength, time limit, categories
+
+### Pattern 9: Voice-Controlled
+
+**Interaction**: Speak commands, answers, or sounds
+**Best for**: Language learning, phonics, vocabulary
+**CV Modes**: `voice` (primary)
+**Hook**: Voice recognition APIs
+**Difficulty knobs**: Vocabulary complexity, response time, accents
 
 ---
 
@@ -87,6 +119,17 @@ For each game idea, provide:
 **Learning Domain**: [e.g., Math - Addition, Language - Vocabulary]
 **Target Age**: [e.g., 4-6 years]
 **Languages**: [e.g., All supported, or specific]
+
+## 🎯 CV MODES (REQUIRED)
+
+**Registry `cv` field**: `['hand']` or `['pose']` or `['face']` or `['voice']` or `['hand', 'face']` etc.
+**Hooks to use**:
+- Hand: `useGameHandTracking` — specify which landmarks (8=index tip, etc.)
+- Pose: `useGamePoseTracking` — specify which joints (0=nose, 15/16=wrists, etc.)
+- Face: `useGameFaceTracking` — specify roll/pitch/yaw usage
+- Voice: voice recognition APIs — specify commands/grammar, confidence thresholds
+
+**Camera behavior**: [What does the camera preview show? Visual feedback?]
 
 **Description**: 
 [2-3 sentence description of gameplay]
@@ -105,9 +148,11 @@ For each game idea, provide:
 - Feedback: [Immediate feedback mechanism]
 - Difficulty scaling: [How it gets harder/easier]
 
-**MediaPipe Features**:
-- [e.g., Hand Landmarker - index fingertip tracking]
-- [e.g., Pinch detection for grab]
+**CV Implementation Details**:
+- [e.g., Hand Landmarker - index fingertip tracking for touch targets]
+- [e.g., Pinch detection for grab/drag operations]
+- [e.g., Pose tracking for full-body movements]
+- [e.g., Face tracking for head tilt steering]
 
 **Visual & Audio Design**:
 - Theme: [e.g., Space, Jungle, Underwater]
@@ -116,12 +161,14 @@ For each game idea, provide:
 
 **Accessibility Considerations**:
 - [How it works for different abilities]
+- [Hand tracking vs pose tracking alternatives]
 
 **Estimated Development Effort**:
 - [Small/Medium/Large] - [reasoning]
 
 **Dependencies**:
 - [Any required assets, features, or prior games]
+- [CV hooks required]
 ```
 
 ---
@@ -225,9 +272,11 @@ When generating multiple games:
 
 Before finalizing a game idea, verify:
 
+- [ ] **CV MODES DEFINED**: `cv: [...]` field specified with correct modes
+- [ ] **HOOKS SPECIFIED**: Which tracking hooks will be used
 - [ ] Learning objective is clear and measurable
 - [ ] Appropriate for target age (not too hard/easy)
-[ ] Uses MediaPipe capabilities efficiently
+- [ ] Uses MediaPipe capabilities efficiently
 - [ ] Can be implemented with existing or planned patterns
 - [ ] Privacy-safe (no stored frames, no biometric ID)
 - [ ] Fun factor: Would a child want to play this 3+ times?

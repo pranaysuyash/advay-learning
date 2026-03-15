@@ -6,6 +6,7 @@
  */
 
 import { memo, useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
@@ -29,6 +30,7 @@ import {
 const TIMER_INTERVAL = 1000;
 
 function LanguagePuppetContent() {
+  const navigate = useNavigate();
   const { playClick } = useAudio();
   const { speak } = useTTS();
   const [state, setState] = useState<GameState>(createInitialState());
@@ -127,7 +129,7 @@ function LanguagePuppetContent() {
 
   return (
     <GameShell gameId='language-puppet' gameName='Language Puppet'>
-      <GameContainer>
+      <GameContainer onHome={() => navigate('/games')}>
         <AnimatePresence mode='wait'>
           {state.status === 'menu' && (
             <motion.div

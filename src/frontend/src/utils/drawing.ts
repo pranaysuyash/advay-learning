@@ -185,7 +185,7 @@ export function drawLetterHint(
   letter: string,
   canvasWidth: number,
   canvasHeight: number,
-  opacity: number = 0.25
+  opacity: number = 0.35
 ): void {
   const fontSize = Math.min(canvasWidth, canvasHeight) * 0.6;
   
@@ -193,12 +193,16 @@ export function drawLetterHint(
   ctx.font = `bold ${fontSize}px sans-serif`;
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
-  ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
-  ctx.lineWidth = Math.max(2, Math.round(fontSize * 0.02));
-  // Outline-only hint (less visually blocking than filled text)
-  // Keep the letter readable while allowing the camera feed + strokes to be primary.
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  
+  // Subtle fill for better visibility against camera feed
+  ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.3})`;
+  ctx.fillText(letter, canvasWidth / 2, canvasHeight / 2);
+  
+  // Outline stroke
+  ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+  ctx.lineWidth = Math.max(3, Math.round(fontSize * 0.025));
   ctx.strokeText(letter, canvasWidth / 2, canvasHeight / 2);
   
   // Draw guide circle

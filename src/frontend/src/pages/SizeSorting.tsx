@@ -1,9 +1,11 @@
-import { memo, useState } from 'react';
+import { memo, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -14,15 +16,21 @@ import {
   type SizeSortingRound,
 } from '../games/sizeSortingLogic';
 import { triggerHaptic } from '../utils/haptics';
+import type { Point } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 function SizeSortingGame() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { completeGame } = useGameCompletion('size-sorting');
 
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(0);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   const {
     streak,
     maxStreak,
@@ -48,6 +56,35 @@ function SizeSortingGame() {
       correct,
       roundsPerSession,
     },
+  });
+
+  // Hand tracking frame handler
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const hand = frame;
+      if (!hand || !hand.indexTip) {
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+
+      const newCursor: Point = {
+        x: hand.indexTip.x,
+        y: hand.indexTip.y,
+      };
+      setCursor(newCursor);
+      setIsHandTrackingActive(true);
+    },
+    [],
+  );
+
+  const {
+    webcamRef: _webcamRef,
+  } = useGameHandTracking({
+    gameName: 'SizeSorting',
+    targetFps: 24,
+    isRunning: Boolean(activeRound),
+    onFrame: handleHandTrackingFrame,
   });
 
   const startRound = () => {
@@ -139,8 +176,15 @@ function SizeSortingGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={_webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={Boolean(activeRound)}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6 relative'>
+        {/* Hand cursor */}
+        {cursor && isHandTrackingActive && activeRound && (
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
+        )}
         <div className='max-w-4xl mx-auto space-y-4'>
           {!activeRound ? (
             <div className='rounded-3xl border-3 border-[#F2CC8F] bg-white p-8 text-center shadow-[0_6px_0_#E5B86E] space-y-5'>

@@ -4,18 +4,23 @@
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameHUD } from '../components/game/GameHUD';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { LEVELS, generateCountingScene, calculateScore, type CountingScene } from '../games/countingObjectsLogic';
 import { triggerHaptic } from '../utils/haptics';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
   { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
@@ -24,6 +29,8 @@ const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
 
 const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [scene, setScene] = useState<CountingScene | null>(null);
@@ -110,6 +117,38 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
     navigate('/games');
   }, [score, navigate, playClick, completeGame, currentLevel]);
 
+  // Hand tracking
+  const handleFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const tip = frame.indexTip;
+      if (!tip) {
+        setCursor(null);
+        return;
+      }
+      setCursor(tip);
+    },
+    [],
+  );
+
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef,
+  } = useGameHandTracking({
+    gameName: 'CountingObjects',
+    targetFps: 30,
+    isRunning: scene !== null,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (scene && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [scene, isHandTrackingReady, isModelLoading, startTracking]);
+
   const answerOptions = scene
     ? [...new Set([scene.answer, scene.answer + 1, scene.answer - 1, scene.answer + 2])]
       .filter((n) => n > 0)
@@ -130,14 +169,13 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
   return (
     <GameContainer
       title='Counting Objects'
-      score={score}
-      level={currentLevel}
-      showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={scene !== null}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
-        <div className='max-w-2xl mx-auto space-y-4'>
+      <div ref={gameAreaRef} className='h-full flex flex-col items-center justify-center p-4'>
 
           {/* Level selector */}
           <div className='flex gap-2 justify-center'>
@@ -281,8 +319,20 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
               </div>
             </>
           )}
+
+          {/* Hand tracking cursor */}
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace='normalized'
+              containerRef={gameAreaRef}
+              isPinching={false}
+              isHandDetected={true}
+              size={64}
+              color='#f97316'
+            />
+          )}
         </div>
-      </div>
     </GameContainer>
   );
 });

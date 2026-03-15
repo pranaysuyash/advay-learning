@@ -1,22 +1,31 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateBubbles, calculateScore, type Bubble } from '../games/numberBubblePopLogic';
 import { triggerHaptic } from '../utils/haptics';
+import type { Point } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 function NumberBubblePopContent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const handleBubbleClickRef = useRef<(bubble: Bubble) => void>(() => {});
   const [currentLevel, setCurrentLevel] = useState(1);
   const [targetNumber, setTargetNumber] = useState(1);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(0);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   const {
     streak,
     maxStreak,
@@ -44,6 +53,16 @@ function NumberBubblePopContent() {
     resetStreak();
     setGameState('playing');
   };
+
+  // Auto-start game on mount (skip pre-game menu for instant play)
+  useEffect(() => {
+    if (gameState === 'start') {
+      const timer = setTimeout(() => {
+        startGame();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState]);
 
   const handleBubbleClick = (bubble: Bubble) => {
     if (gameState !== 'playing') return;
@@ -94,9 +113,73 @@ function NumberBubblePopContent() {
     navigate('/games');
   }, [correct, completeGame, navigate, playClick, currentLevel]);
 
+  // Update ref for hand tracking
+  useEffect(() => {
+    handleBubbleClickRef.current = handleBubbleClick;
+  }, [handleBubbleClick]);
+
+  // Hand tracking frame handler
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const hand = frame;
+      if (!hand || !hand.indexTip) {
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+
+      // indexTip is already normalized (0-1), use directly
+      const newCursor: Point = { x: hand.indexTip.x, y: hand.indexTip.y };
+      setCursor(newCursor);
+      setIsHandTrackingActive(true);
+
+      if (gameState !== 'playing') return;
+
+      // Use normalized bounds check (0-1) instead of pixel bounds
+      const isOverGameArea =
+        newCursor.x >= 0 && newCursor.x <= 1 &&
+        newCursor.y >= 0 && newCursor.y <= 1;
+
+      if (!isOverGameArea) return;
+
+      // Use pinch state instead of transition for continuous detection
+      if (!frame.pinch?.state?.isPinching) return;
+
+      // Convert normalized (0-1) to pixel space (game area is 320x320)
+      // Bubbles are positioned in pixel coordinates (x: 20-300, y: 50-250)
+      const GAME_SIZE = 320;
+      const pixelX = newCursor.x * GAME_SIZE;
+      const pixelY = newCursor.y * GAME_SIZE;
+
+      const bubbleRadius = 7;
+      for (const bubble of bubbles) {
+        const dx = Math.abs(pixelX - bubble.x);
+        const dy = Math.abs(pixelY - bubble.y);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < bubbleRadius + 3) {
+          handleBubbleClickRef.current(bubble);
+          break;
+        }
+      }
+    },
+    [gameState, bubbles],
+  );
+
+  const {
+    webcamRef: _webcamRef,
+  } = useGameHandTracking({
+    gameName: 'NumberBubblePop',
+    targetFps: 24,
+    onFrame: handleHandTrackingFrame,
+  });
+
   return (
-    <GameContainer title="Number Bubble Pop" onHome={() => navigate('/games')} reportSession={false}>
-      <div className="flex flex-col items-center gap-4 p-4">
+    <GameContainer title="Number Bubble Pop" onHome={() => navigate('/games')} reportSession={false} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={gameState === 'playing'}>
+      <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 relative">
+        {/* Hand cursor */}
+        {cursor && isHandTrackingActive && (
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
+        )}
         <div className="flex gap-2">
           {LEVELS.map((l) => (
             <button type="button" key={l.level} onClick={() => { playClick(); setCurrentLevel(l.level); }}

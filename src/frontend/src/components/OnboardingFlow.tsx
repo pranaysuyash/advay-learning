@@ -9,7 +9,7 @@ interface OnboardingFlowProps {
   onSkip?: () => void;
 }
 
-type Step = 'welcome' | 'camera' | 'gesture';
+type Step = 'welcome' | 'magicVision' | 'gesture';
 
 export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
   const { hydrated, onboardingCompleted, updateSettings } = useSettingsStore();
@@ -21,7 +21,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const steps: Step[] = ['welcome', 'camera', 'gesture'];
+  const steps: Step[] = ['welcome', 'magicVision', 'gesture'];
   const currentIndex = steps.indexOf(currentStep);
 
   const cleanup = useCallback(() => {
@@ -70,7 +70,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
   }, [updateSettings]);
 
   useEffect(() => {
-    if (currentStep === 'camera' && cameraStatus === 'pending') {
+    if (currentStep === 'magicVision' && cameraStatus === 'pending') {
       testCamera();
     }
   }, [currentStep, cameraStatus, testCamera]);
@@ -127,8 +127,8 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
             {currentStep === 'welcome' && (
               <WelcomeStep onNext={handleNext} onSkip={handleSkip} />
             )}
-            {currentStep === 'camera' && (
-              <CameraStep
+            {currentStep === 'magicVision' && (
+              <MagicVisionStep
                 status={cameraStatus}
                 videoRef={videoRef}
                 onRetry={testCamera}
@@ -184,7 +184,7 @@ function WelcomeStep({
   );
 }
 
-function CameraStep({
+function MagicVisionStep({
   status,
   videoRef,
   onRetry,
@@ -199,23 +199,23 @@ function CameraStep({
 }) {
   return (
     <>
-      <div className="w-20 h-20 bg-blue-100 rounded-[1.5rem] flex items-center justify-center text-4xl mx-auto mb-6 shadow-[0_4px_0_#E5B86E] border-2 border-white">
-        📷
+      <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-[1.5rem] flex items-center justify-center text-4xl mx-auto mb-6 shadow-[0_4px_0_#E5B86E] border-2 border-white">
+        🪄
       </div>
-      <h2 className='text-3xl font-black text-advay-slate tracking-tight mb-4'>Camera Setup</h2>
+      <h2 className='text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 tracking-tight mb-4'>Activate Magic Vision!</h2>
       <p className='text-text-secondary font-bold text-lg mb-8'>
-        We need camera access to see your hand movements. Don't worry—your
-        video stays entirely on your device!
+        Get ready to draw in the air, pop bubbles with gestures, and control games with your hands! ✨
       </p>
 
       <div className='relative w-full aspect-video bg-slate-100 rounded-[2rem] overflow-hidden mb-8 border-3 border-[#F2CC8F] shadow-inner'>
         {status === 'pending' && (
           <div className='absolute inset-0 flex items-center justify-center'>
             <motion.div
-              className='w-16 h-16 border-3 border-[#3B82F6] border-t-transparent rounded-full'
+              className='w-16 h-16 border-3 border-[#9333EA] border-t-transparent rounded-full'
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
             />
+            <p className="absolute mt-24 text-purple-600 font-bold text-sm">Awakening Magic...</p>
           </div>
         )}
         {status === 'success' && (
@@ -230,7 +230,7 @@ function CameraStep({
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className='absolute top-4 right-4 bg-green-500 text-white rounded-full p-2 border-2 border-white shadow-[0_4px_0_#E5B86E]'
+              className='absolute top-4 right-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full p-2 border-2 border-white shadow-[0_4px_0_#E5B86E]'
             >
               <svg
                 className='w-6 h-6'
@@ -246,17 +246,23 @@ function CameraStep({
                 />
               </svg>
             </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-200 shadow-lg"
+            >
+              <p className="text-purple-700 font-black text-sm text-center">✨ Magic Vision Activated! You can see yourself!</p>
+            </motion.div>
           </>
         )}
         {status === 'error' && (
-          <div className='absolute inset-0 flex flex-col items-center justify-center p-6 bg-red-50 text-center text-balance'>
-            <div className='text-red-500 text-5xl mb-4'>🔒</div>
-            <p className='text-red-600 font-black text-xl mb-2'>
-              Camera access denied
+          <div className='absolute inset-0 flex flex-col items-center justify-center p-6 bg-orange-50 text-center text-balance'>
+            <div className='text-orange-500 text-5xl mb-4'>🔒</div>
+            <p className='text-orange-600 font-black text-xl mb-2'>
+              Magic Vision needs permission
             </p>
-            <p className='text-red-500/80 font-bold text-sm'>
-              Please allow camera access in your browser settings to use hand
-              tracking.
+            <p className='text-orange-500/80 font-bold text-sm'>
+              Please allow camera access to activate gestures!
             </p>
           </div>
         )}
@@ -270,7 +276,7 @@ function CameraStep({
             size="lg"
             fullWidth
           >
-            Camera Works! Next →
+            Magic is Ready! Next →
           </Button>
         )}
         {status === 'error' && (
@@ -279,14 +285,14 @@ function CameraStep({
             size="lg"
             fullWidth
           >
-            Try Again
+            Try Again 🪄
           </Button>
         )}
         <button
           onClick={onSkip}
           className='w-full px-6 py-4 text-slate-400 hover:text-advay-slate font-bold tracking-widest uppercase transition-colors'
         >
-          {status === 'error' ? 'Continue Without Camera' : 'Skip Setup'}
+          {status === 'error' ? 'Continue Without Magic' : 'Skip for Now'}
         </button>
       </div>
     </>

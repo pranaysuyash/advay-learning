@@ -6,7 +6,7 @@
  * @ticket TCK-20260310-012
  */
 
-import { memo, useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -15,10 +15,12 @@ import {
   type DropZone,
 } from '../components/game/DragDropSystem';
 import { GameShell } from '../components/GameShell';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import {
@@ -30,6 +32,9 @@ import {
   calculateStars,
 } from '../games/temperatureSortLogic';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
+import type { Point } from '../types/tracking';
+import { type TrackedHandFrame } from '../utils/handTrackingFrame';
+import { type HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 const ITEMS_TO_SORT = 6;
 
@@ -45,6 +50,10 @@ function TemperatureSortGame() {
     cold: [],
   });
   const [score, setScore] = useState(0);
+  
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({ x: 0, y: 0 });
   const [isPinching, setIsPinching] = useState(false);
@@ -201,9 +210,18 @@ function TemperatureSortGame() {
   const totalSorted = Object.values(sortedItems).flat().length;
   const stars = calculateStars(score, ITEMS_TO_SORT);
 
+  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
+    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+    setIsHandTrackingActive(true);
+  }, []);
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'TemperatureSort', targetFps: 24, onFrame: handleHandTrackingFrame });
+
   return (
     <div 
       className="fixed inset-0 overflow-hidden"
+      ref={gameAreaRef}
       role="application"
       aria-label="Temperature Sort Game"
       style={{
@@ -213,6 +231,7 @@ function TemperatureSortGame() {
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
     >
+      <CursorEmbodiment position={cursor ?? { x: 0, y: 0 }} isHandDetected={isHandTrackingActive} />
       {/* Start Screen */}
       {gameState === 'start' && (
         <div className="flex flex-col items-center justify-center h-full p-4">

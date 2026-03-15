@@ -59,28 +59,37 @@ Focus: Movement, balance, and listening.
 | Simon Says | `SimonSays.tsx` | [ ] | - | Pending. |
 | Musical Chairs | `MusicalChairs.tsx` | [ ] | - | Pending. |
 
-### 4. Creative & Arts
-- [ ] Music Pinch Beat
-- [ ] Music Conductor
-- [ ] Color Match Garden
-- [ ] Color Potions/Mixing/Splash
-- [ ] Color By Number
-- [ ] Kaleidoscope Hands
-- [ ] Light Painter
-- [ ] Free Draw
-- [ ] Mirror Draw
-- [ ] Finger Painting Madness
+### 4. Creative & Arts [AUDITED]
+Focus: Expression, music, and colors.
 
-### 5. Science & Discovery
-- [ ] Virtual Chemistry Lab
-- [ ] Bubble Biology
-- [ ] Planet Sandbox
-- [ ] Earth Time Machine
-- [ ] ISS Docking (2D/3D)
-- [ ] Weather Lab/Match
-- [ ] Nasa Sky Hunt
-- [ ] Dinosaur Dig
-- [ ] Texture Explorer
+| Game | File | Status | Juice | Key Findings |
+| :--- | :--- | :--- | :--- | :--- |
+| Emoji Match | `EmojiMatch.tsx` | [x] | 9.5/10 | Gold standard. Diverse feedback layers. |
+| Music Conductor | `MusicConductor.tsx` | [x] | 9/10 | Great CV interaction. Needs "magical" note effects. |
+| Music Pinch Beat | `MusicPinchBeat.tsx` | [x] | 8.5/10 | Solid audio/haptics. Needs `GameHUD` standardization. |
+| Color Match Garden | `ColorMatchGarden.tsx` | [x] | 9/10 | Excellent particle use and hand tracking. |
+| Color Potions | `ColorPotions.tsx` | [x] | 9/10 | Great use of `framer-motion` and audio. |
+| Color By Number | `ColorByNumber.tsx` | [x] | 8.5/10 | Good logic and heart-streak HUD. Needs `GameHUD`. |
+| Mirror Draw | `MirrorDraw.tsx` | [x] | 9/10 | Deep juice (audio layers, haptics, TTS). High quality. |
+| Kaleidoscope Hands | `KaleidoscopeHands.tsx` | [x] | 7/10 | Beautiful drawing, but missing game loop/standard HUD. |
+| Free Draw | `FreeDraw.tsx` | [x] | 7.5/10 | Uses standard HUD. Lacks drawing sound layers. |
+| Light Painter | `LightPainter.tsx` | [x] | 5.5/10 | Great visual logic, but a "Juice Desert" (no sfx/music). |
+| Finger Painting Madness| `FingerPaintingMadness.tsx` | [x] | 5/10 | Basic tools. No haptics, little audio depth. |
+
+### 5. Science & Discovery [AUDITED]
+Focus: Inquiry, space, biology, and chemistry.
+
+| Game | File | Status | Juice | Key Findings |
+| :--- | :--- | :--- | :--- | :--- |
+| Virtual Chemistry Lab| `VirtualChemistryLab.tsx` | [x] | 8.5/10 | Great bubble/mix effects. Needs `GameHUD`. |
+| Bubble Biology | `BubbleBiology.tsx` | [x] | 8.5/10 | Interactive jars and cell emojis. High audio polish. |
+| Planet Sandbox | `PlanetSandbox.tsx` | [x] | 5.5/10 | Functional but a "Juice Desert". Basic UI. |
+| Earth Time Machine | `EarthTimeMachine.tsx` | [x] | 6.5/10 | Good Lottie use. Lacks audio/haptic depth. |
+| Weather Lab | `WeatherLab.tsx` | [x] | 7/10 | Cool API use. Simulation feels "raw". |
+| Weather Match | `WeatherMatch.tsx` | [x] | 8.5/10 | Very juicy streaks and hearts. Needs `GameHUD`. |
+| NASA Sky Hunt | `NasaSkyHunt.tsx` | [x] | 7.5/10 | Great APOD image use. Needs more physical juice. |
+| Dinosaur Dig | `DinosaurDig.tsx` | [x] | 9/10 | High physical juice (digging/assembly). Deep loop. |
+| Texture Explorer | `TextureExplorer.tsx` | [x] | 7.5/10 | Solid feedback. Needs audio/tactile depth. |
 
 ### 6. Fine Motor & 3D Interaction
 - [ ] Connect The Dots
@@ -146,14 +155,23 @@ Focus: Movement, balance, and listening.
 - **Weaknesses:** Missing live commentary from characters ("Great pose!", "Almost there!").
 - **Priority Fix:** Add more "encouragement" audio triggers to the pose detection loops.
 
-### Batch 4: Creative & Arts [PARTIAL]
-Focus: Expression, music, and colors.
+### Batch 4: Creative & Arts
+**Average Juice Score:** 8.0/10
 
-| Game | File | Status | Juice | Key Findings |
-| :--- | :--- | :--- | :--- | :--- |
-| Emoji Match | `EmojiMatch.tsx` | [x] | 9.5/10 | Gold standard. Diverse feedback layers. |
-| Mirror Draw | `MirrorDraw.tsx` | [ ] | - | Pending. |
-| Color Match Garden| `ColorMatchGarden.tsx` | [ ] | - | Pending. |
+#### 🎨 Visual Feedback Findings
+- **Strengths:** Excellent use of particle effects in `Color Match Garden` and layered drawing in `Mirror Draw`.
+- **Weaknesses:** Artistic "playgrounds" (`Light Painter`, `Finger Painting`) lack polish and feel like technical demos rather than games.
+- **Priority Fix:** Standardize "Magical Brush" effects (trails, glows) across all creative games.
+
+#### 🔊 Auditory Feedback Findings
+- **Strengths:** Music games have solid rhythmic feedback.
+- **Weaknesses:** Drawing games are strangely silent. No "swish" or "paint" sounds.
+- **Priority Fix:** Add a global `useDrawingAudio` hook that plays sounds based on hand velocity.
+
+#### 🕹️ Interaction Feedback Findings
+- **Strengths:** Pinch tracking is very responsive in `Mirror Draw`.
+- **Weaknesses:** `Light Painter` and `Madness` lack haptic feedback entirely.
+- **Priority Fix:** Implement "Vibrating Canvas" — subtle haptics while drawing.
 
 ---
 

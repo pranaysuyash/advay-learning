@@ -77,8 +77,8 @@ describe('Dashboard page', () => {
       </MemoryRouter>,
     );
 
-    const pendingBadge = await screen.findByText(/Pending/i);
-    const failedBadge = await screen.findByText(/Failed/i);
+    const pendingBadge = await screen.findByText(/To Sync/i);
+    const failedBadge = await screen.findByText(/Needs Retry/i);
     expect(pendingBadge).toBeInTheDocument();
     expect(failedBadge).toBeInTheDocument();
 

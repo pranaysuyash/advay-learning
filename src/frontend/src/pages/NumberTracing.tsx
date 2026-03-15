@@ -3,7 +3,7 @@
  *
  * Trace numbers by following dotted guides.
  * Demonstrates GameShell integration pattern.
- * 
+ *
  * @ticket GQ-002 - Subscription check
  * @ticket GQ-003 - Progress tracking
  * @ticket GQ-004 - Error handling
@@ -16,10 +16,15 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { triggerHaptic } from '../utils/haptics';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import type { Point } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   buildScore,
   calculateTraceCoverage,
@@ -34,13 +39,20 @@ const TOTAL_DIGITS = 10;
 
 // Inner game component
 interface NumberTracingGameProps {
-  completeGame: (data: { score: number; level?: number; metadata?: Record<string, unknown> }) => Promise<void>;
+  completeGame: (data: {
+    score: number;
+    level?: number;
+    metadata?: Record<string, unknown>;
+  }) => Promise<void>;
 }
 
-const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGame: completeGameProp }: NumberTracingGameProps) {
+const NumberTracingGame = memo(function NumberTracingGameComponent({
+  completeGame: completeGameProp,
+}: NumberTracingGameProps) {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const reducedMotion = useReducedMotion();
+  const wasPinchingRef = useRef(false);
 
   const [currentDigit, setCurrentDigit] = useState(0);
   const [strokePoints, setStrokePoints] = useState<TracePoint[]>([]);
@@ -48,14 +60,158 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
   const [lastAccuracy, setLastAccuracy] = useState(0);
   const [score, setScore] = useState(0);
   const [hintsUsed, setHintsUsed] = useState(0);
-  const [feedback, setFeedback] = useState('Trace the number by following the dotted guide.');
+  const [feedback, setFeedback] = useState(
+    'Trace the number by following the dotted guide.',
+  );
   const [showCelebration, setShowCelebration] = useState(false);
   const [completedDigits, setCompletedDigits] = useState<number[]>([]);
   const [streak, setStreak] = useState(0);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
-  const currentTemplate = useMemo(() => getTemplateForDigit(currentDigit), [currentDigit]);
+  const currentTemplate = useMemo(
+    () => getTemplateForDigit(currentDigit),
+    [currentDigit],
+  );
+
+  // Check stroke completion - used by both pointer-up and hand-tracking pinch-release
+  const checkStrokeCompletion = useCallback(async () => {
+    setIsDrawing(false);
+
+    try {
+      // Calculate accuracy
+      const accuracy = calculateTraceCoverage(
+        strokePoints,
+        currentTemplate?.guidePoints ?? [],
+      );
+      setLastAccuracy(accuracy);
+
+      if (accuracy >= 60) {
+        // Success!
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+
+        playSuccess();
+        triggerHaptic('success');
+        const points =
+          buildScore(accuracy, hintsUsed) + Math.min(newStreak * 3, 20);
+        const newScore = score + points;
+        setScore(newScore);
+        setCompletedDigits((prev) => [...prev, currentDigit]);
+        setFeedback(`Great job! ${points} points!`);
+
+        // Milestone every 5
+        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+          setShowStreakMilestone(true);
+          triggerHaptic('celebration');
+          setTimeout(() => setShowStreakMilestone(false), 1500);
+        }
+
+        // Check if all digits complete
+        if (completedDigits.length + 1 >= TOTAL_DIGITS) {
+          playCelebration();
+          setShowCelebration(true);
+          await completeGameProp({
+            score: newScore,
+            metadata: {
+              completed_digits: [...completedDigits, currentDigit],
+              total_accuracy: accuracy,
+            },
+          });
+        } else {
+          // Next digit after delay
+          setCurrentDigit(nextDigit(currentDigit));
+          setStrokePoints([]);
+          setFeedback('Trace the next number!');
+        }
+      } else {
+        // Try again
+        playError();
+        setFeedback('Keep trying! Follow the dots more closely.');
+        setTimeout(
+          () => {
+            setStrokePoints([]);
+          },
+          reducedMotion ? 300 : 1000,
+        );
+      }
+    } catch (err) {
+      console.error('Trace evaluation error:', err);
+      setFeedback('Oops! Try again.');
+    }
+  }, [strokePoints, currentTemplate, streak, hintsUsed, score, currentDigit, completedDigits, playSuccess, playError, playCelebration, triggerHaptic, completeGameProp, reducedMotion]);
+
+  // Hand tracking frame handler
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const hand = frame;
+      if (!hand || !hand.indexTip) {
+        if (wasPinchingRef.current) {
+          // Pinch release - trigger completion check
+          void checkStrokeCompletion();
+          setIsDrawing(false);
+          wasPinchingRef.current = false;
+        }
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+
+      // indexTip is already normalized (0-1), use directly
+      const newCursor: Point = { x: hand.indexTip.x, y: hand.indexTip.y };
+      setCursor(newCursor);
+      setIsHandTrackingActive(true);
+
+      // Use normalized bounds check (0-1) instead of pixel bounds
+      const isOverCanvas =
+        newCursor.x >= 0 &&
+        newCursor.x <= 1 &&
+        newCursor.y >= 0 &&
+        newCursor.y <= 1;
+
+      if (!isOverCanvas) {
+        if (wasPinchingRef.current) {
+          // Pinch release - trigger completion check
+          void checkStrokeCompletion();
+          setIsDrawing(false);
+          wasPinchingRef.current = false;
+        }
+        return;
+      }
+
+      // Already normalized, no conversion needed
+      const point: TracePoint = {
+        x: Math.max(0, Math.min(1, newCursor.x)),
+        y: Math.max(0, Math.min(1, newCursor.y)),
+      };
+
+      // Use pinch state instead of transition for continuous detection
+      const isPinching = frame.pinch?.state?.isPinching ?? false;
+
+      if (isPinching && !wasPinchingRef.current) {
+        playClick();
+        setIsDrawing(true);
+        setStrokePoints([point]);
+      } else if (isPinching && wasPinchingRef.current) {
+        setStrokePoints((prev) => [...prev, point]);
+      } else if (!isPinching && wasPinchingRef.current) {
+        // Pinch release - trigger completion check
+        void checkStrokeCompletion();
+        setIsDrawing(false);
+      }
+
+      wasPinchingRef.current = isPinching;
+    },
+    [playClick, checkStrokeCompletion],
+  );
+
+  const { webcamRef } = useGameHandTracking({
+    gameName: 'NumberTracing',
+    targetFps: 24,
+    onFrame: handleHandTrackingFrame,
+  });
 
   // Draw canvas
   useEffect(() => {
@@ -73,7 +229,13 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
       context.fillStyle = '#94A3B8';
       currentTemplate.guidePoints.forEach((point) => {
         context.beginPath();
-        context.arc(point.x * CANVAS_SIZE, point.y * CANVAS_SIZE, 7, 0, Math.PI * 2);
+        context.arc(
+          point.x * CANVAS_SIZE,
+          point.y * CANVAS_SIZE,
+          7,
+          0,
+          Math.PI * 2,
+        );
         context.fill();
       });
 
@@ -85,9 +247,15 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
 
       if (strokePoints.length > 0) {
         context.beginPath();
-        context.moveTo(strokePoints[0].x * CANVAS_SIZE, strokePoints[0].y * CANVAS_SIZE);
+        context.moveTo(
+          strokePoints[0].x * CANVAS_SIZE,
+          strokePoints[0].y * CANVAS_SIZE,
+        );
         for (let i = 1; i < strokePoints.length; i += 1) {
-          context.lineTo(strokePoints[i].x * CANVAS_SIZE, strokePoints[i].y * CANVAS_SIZE);
+          context.lineTo(
+            strokePoints[i].x * CANVAS_SIZE,
+            strokePoints[i].y * CANVAS_SIZE,
+          );
         }
         context.stroke();
       }
@@ -96,7 +264,9 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
     }
   }, [currentTemplate, strokePoints]);
 
-  const getPointFromEvent = (event: React.PointerEvent<HTMLCanvasElement>): TracePoint => {
+  const getPointFromEvent = (
+    event: React.PointerEvent<HTMLCanvasElement>,
+  ): TracePoint => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width;
     const y = (event.clientY - rect.top) / rect.height;
@@ -117,73 +287,13 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
     setStrokePoints((prev) => [...prev, getPointFromEvent(event)]);
   };
 
-  const handlePointerUp = useCallback(() => {
-    setIsDrawing(false);
-
-    try {
-      // Calculate accuracy
-      const accuracy = calculateTraceCoverage(
-        strokePoints,
-        currentTemplate?.guidePoints ?? [],
-      );
-      setLastAccuracy(accuracy);
-
-      if (accuracy >= 60) {
-        // Success!
-        const newStreak = streak + 1;
-        setStreak(newStreak);
-        
-        playSuccess();
-        triggerHaptic('success');
-        const points = buildScore(accuracy, hintsUsed) + Math.min(newStreak * 3, 20);
-        const newScore = score + points;
-        setScore(newScore);
-        setCompletedDigits(prev => [...prev, currentDigit]);
-        setFeedback(`Great job! ${points} points!`);
-        
-        // Milestone every 5
-        if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-          setShowStreakMilestone(true);
-          triggerHaptic('celebration');
-          setTimeout(() => setShowStreakMilestone(false), 1500);
-        }
-
-        // Check if all digits complete
-        if (completedDigits.length + 1 >= TOTAL_DIGITS) {
-          playCelebration();
-          setShowCelebration(true);
-          void completeGameProp({
-            score: newScore,
-            metadata: {
-              completed_digits: [...completedDigits, currentDigit],
-              total_accuracy: accuracy,
-            },
-          });
-        } else {
-          // Next digit after delay
-          setTimeout(() => {
-            setCurrentDigit(nextDigit(currentDigit));
-            setStrokePoints([]);
-            setFeedback('Trace the next number!');
-          }, reducedMotion ? 500 : 1500);
-        }
-      } else {
-        // Try again
-        playError();
-        setFeedback('Keep trying! Follow the dots more closely.');
-        setTimeout(() => {
-          setStrokePoints([]);
-        }, reducedMotion ? 300 : 1000);
-      }
-    } catch (err) {
-      console.error('Trace evaluation error:', err);
-      setFeedback('Oops! Try again.');
-    }
-  }, [isDrawing, strokePoints, currentTemplate, hintsUsed, score, currentDigit, completedDigits, playSuccess, playError, reducedMotion, completeGameProp]);
+  const handlePointerUp = () => {
+    void checkStrokeCompletion();
+  };
 
   const handleUseHint = () => {
     playClick();
-    setHintsUsed(prev => prev + 1);
+    setHintsUsed((prev) => prev + 1);
     setFeedback('Follow the dotted line with your finger!');
   };
 
@@ -202,13 +312,21 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
 
   return (
     <GameContainer
-      title="Number Tracing"
+      title='Number Tracing'
       score={score}
       level={currentDigit + 1}
       onHome={() => navigate('/games')}
       showScore={true}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={true}
     >
-      <div className="relative w-full h-full flex flex-col items-center justify-center p-4 bg-[#FFF8F0]">
+      <div className='relative w-full h-full flex flex-col items-center justify-center p-4 bg-[#FFF8F0]'>
+        {/* Hand cursor */}
+        {cursor && isHandTrackingActive && (
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" isPinching={isDrawing} />
+        )}
+
         {/* Streak Milestone Overlay */}
         {showStreakMilestone && (
           <motion.div
@@ -224,20 +342,22 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
         )}
 
         {/* Instructions */}
-        <div className="bg-white rounded-2xl px-6 py-4 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] mb-4 max-w-md text-center">
-          <p className="text-lg font-bold text-advay-slate">{feedback}</p>
-          <div className="flex items-center justify-center gap-4 mt-1">
-            <p className="text-sm text-text-secondary">
+        <div className='bg-white rounded-2xl px-6 py-4 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] mb-4 max-w-md text-center'>
+          <p className='text-lg font-bold text-advay-slate'>{feedback}</p>
+          <div className='flex items-center justify-center gap-4 mt-1'>
+            <p className='text-sm text-text-secondary'>
               Number {currentDigit + 1} of {TOTAL_DIGITS}
             </p>
             {streak > 0 && (
-              <span className="text-orange-500 font-bold text-sm">🔥 {streak}</span>
+              <span className='text-orange-500 font-bold text-sm'>
+                🔥 {streak}
+              </span>
             )}
           </div>
         </div>
 
         {/* Canvas */}
-        <div className="relative bg-white rounded-3xl p-4 border-4 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]">
+        <div className='relative bg-white rounded-3xl p-4 border-4 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
           <canvas
             ref={canvasRef}
             width={CANVAS_SIZE}
@@ -246,7 +366,7 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerUp}
-            className="touch-none cursor-crosshair rounded-2xl"
+            className='touch-none cursor-crosshair rounded-2xl'
             style={{ width: '300px', height: '300px' }}
           />
 
@@ -255,18 +375,20 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
             <motion.div
               initial={reducedMotion ? {} : { opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="absolute -top-3 -right-3 bg-emerald-500 text-white rounded-full w-16 h-16 flex items-center justify-center border-4 border-white shadow-lg"
+              className='absolute -top-3 -right-3 bg-emerald-500 text-white rounded-full w-16 h-16 flex items-center justify-center border-4 border-white shadow-lg'
             >
-              <span className="font-black text-lg">{Math.round(lastAccuracy * 100)}%</span>
+              <span className='font-black text-lg'>
+                {Math.round(lastAccuracy * 100)}%
+              </span>
             </motion.div>
           )}
         </div>
 
         {/* Controls */}
-        <div className="flex gap-4 mt-6">
+        <div className='flex gap-4 mt-6'>
           <button
             onClick={handleUseHint}
-            className="px-6 py-3 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-[1.5rem] font-black border-3 border-amber-300 shadow-[0_4px_0_#FCD34D] transition-all"
+            className='px-6 py-3 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-[1.5rem] font-black border-3 border-amber-300 shadow-[0_4px_0_#FCD34D] transition-all'
           >
             💡 Hint
           </button>
@@ -275,14 +397,14 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
               setStrokePoints([]);
               setFeedback('Try again! Follow the dots.');
             }}
-            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-[1.5rem] font-black border-3 border-slate-300 shadow-[0_4px_0_#CBD5E1] transition-all"
+            className='px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-[1.5rem] font-black border-3 border-slate-300 shadow-[0_4px_0_#CBD5E1] transition-all'
           >
             🔄 Clear
           </button>
         </div>
 
         {/* Progress */}
-        <div className="flex gap-2 mt-4">
+        <div className='flex gap-2 mt-4'>
           {Array.from({ length: TOTAL_DIGITS }).map((_, i) => (
             <div
               key={i}
@@ -290,8 +412,8 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
                 completedDigits.includes(i)
                   ? 'bg-emerald-500 text-white'
                   : i === currentDigit
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-slate-200 text-slate-400'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-slate-200 text-slate-400'
               }`}
             >
               {i}
@@ -316,12 +438,13 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
 
 // Main export wrapped with GameShell
 export const NumberTracing = memo(function NumberTracingComponent() {
-  const { completeGame: completeGameHook } = useGameCompletion('number-tracing');
+  const { completeGame: completeGameHook } =
+    useGameCompletion('number-tracing');
 
   return (
     <GameShell
-      gameId="number-tracing"
-      gameName="Number Tracing"
+      gameId='number-tracing'
+      gameName='Number Tracing'
       showWellnessTimer={true}
       enableErrorBoundary={true}
     >

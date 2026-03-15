@@ -62,7 +62,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'brainy',
     ageRange: '4-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'book-blue', chance: 0.2 },
@@ -161,7 +161,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'brainy',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'book-blue', chance: 0.15 },
@@ -180,7 +180,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'brainy',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'letter-a', chance: 0.16 },
@@ -217,7 +217,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'puzzle',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'shape-circle', chance: 0.15 },
@@ -235,7 +235,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'puzzle',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'shape-circle', chance: 0.15 },
@@ -298,35 +298,6 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     easterEggs: [],
   },
   {
-    id: 'shadow-portal',
-    name: 'Shadow Portal',
-    tagline: 'Use your shadow to guide magical lights into portals! ✨',
-    path: '/games/shadow-portal',
-    icon: 'sparkles',
-    worldId: 'creative-corner',
-    vibe: 'creative',
-    ageRange: '3-6',
-    isNew: true,
-    cv: ['pose', 'hand'],
-    listed: true,
-    drops: [
-      { itemId: 'material-crystal', chance: 0.2 },
-      { itemId: 'color-rainbow', chance: 0.15 },
-      { itemId: 'element-un', chance: 0.05, minScore: 90 },
-    ],
-    easterEggs: [
-      {
-        id: 'egg-shadow-master',
-        name: 'Shadow Master',
-        description: 'Complete all 3 levels without missing a single particle!',
-        trigger: 'perfect-level',
-        reward: { itemId: 'element-un', quantity: 1 },
-        hint: 'Perfect control reveals true mastery...',
-        difficulty: 'hard',
-      },
-    ],
-  },
-  {
     id: 'air-guitar-hero',
     name: 'Air Guitar Hero',
     tagline: 'Strum and rock like a superstar! 🎸',
@@ -372,7 +343,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'number-one', chance: 0.2 },
@@ -390,7 +361,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'math-plus', chance: 0.2 },
@@ -408,7 +379,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '4-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'number-one', chance: 0.2 },
@@ -426,7 +397,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '4-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'letter-a', chance: 0.2 },
@@ -444,7 +415,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'music-note', chance: 0.2 },
@@ -481,7 +452,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '4-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'book-blue', chance: 0.2 },
@@ -528,7 +499,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'focus',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'path-star', chance: 0.2 },
@@ -546,7 +517,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'musical',
     ageRange: '3-8',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'music-note', chance: 0.2 },
@@ -564,7 +535,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '2-5',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'animal-cat', chance: 0.2 },
@@ -582,7 +553,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '2-5',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'body-heart', chance: 0.2 },
@@ -600,7 +571,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'relaxed',
     ageRange: '3-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'book-blue', chance: 0.2 },
@@ -618,7 +589,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '4-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'book-blue', chance: 0.18 },
@@ -655,7 +626,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'puzzle',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'color-rainbow', chance: 0.2 },
@@ -673,7 +644,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'letter-a', chance: 0.2 },
@@ -691,7 +662,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '3-5',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'number-one', chance: 0.2 },
@@ -709,7 +680,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [],
     easterEggs: [],
@@ -724,7 +695,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'creative',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [],
     easterEggs: [],
@@ -739,7 +710,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '4-8',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [],
     easterEggs: [],
@@ -754,7 +725,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'relaxed',
     ageRange: '3-5',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [],
     easterEggs: [],
@@ -769,7 +740,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [],
     easterEggs: [],
@@ -784,7 +755,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'puzzle',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [],
     easterEggs: [],
@@ -799,7 +770,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'puzzle',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'shape-circle', chance: 0.18 },
@@ -818,7 +789,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'clothing-umbrella', chance: 0.2 },
@@ -836,7 +807,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '5-8',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'food-pizza', chance: 0.2 },
@@ -854,7 +825,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '5-8',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'tool-clock', chance: 0.2 },
@@ -872,7 +843,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '5-8',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'coin-gold', chance: 0.2 },
@@ -890,7 +861,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'puzzle',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'pattern-star', chance: 0.2 },

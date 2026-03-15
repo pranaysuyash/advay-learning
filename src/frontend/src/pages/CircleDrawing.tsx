@@ -155,9 +155,9 @@ const CircleDrawingContent = memo(function CircleDrawingContent() {
                     <svg className="w-full h-full">
                         {/* Ghost Path */}
                         <circle
-                            cx={`${circlePath.current.center.x * 100}%`}
-                            cy={`${circlePath.current.center.y * 100}%`}
-                            r={`${circlePath.current.radius * 100}%`}
+                            cx={`${(circlePath.current?.center?.x ?? 0.5) * 100}%`}
+                            cy={`${(circlePath.current?.center?.y ?? 0.5) * 100}%`}
+                            r={`${(circlePath.current?.radius ?? 0.3) * 100}%`}
                             fill="none"
                             stroke="white"
                             strokeWidth="4"
@@ -167,9 +167,9 @@ const CircleDrawingContent = memo(function CircleDrawingContent() {
 
                         {/* Trace Path (Visual Progress) */}
                         <motion.circle
-                            cx={`${circlePath.current.center.x * 100}%`}
-                            cy={`${circlePath.current.center.y * 100}%`}
-                            r={`${circlePath.current.radius * 100}%`}
+                            cx={`${(circlePath.current?.center?.x ?? 0.5) * 100}%`}
+                            cy={`${(circlePath.current?.center?.y ?? 0.5) * 100}%`}
+                            r={`${(circlePath.current?.radius ?? 0.3) * 100}%`}
                             fill="none"
                             stroke={isTooFast ? "#EF4444" : "#10B981"}
                             strokeWidth="8"

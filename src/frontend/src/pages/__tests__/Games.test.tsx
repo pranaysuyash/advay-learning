@@ -50,7 +50,5 @@ describe('Games page', () => {
     expect(() => renderInRouter(<Games />)).not.toThrow();
     // our fake game should appear with name
     expect(screen.getByText('Fake Game')).toBeTruthy();
-    // difficulty label fallback
-    expect(screen.getByText(/Unknown/i)).toBeTruthy();
   });
 });

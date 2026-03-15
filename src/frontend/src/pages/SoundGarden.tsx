@@ -22,6 +22,11 @@ import {
   calculateScore,
   calculateStars,
 } from '../games/soundGardenLogic';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const NOTES_TO_PLAY = 15;
 
@@ -38,6 +43,32 @@ function SoundGardenGame() {
   const { playCelebration } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { completeGame } = useGameCompletion('sound-garden');
+
+  // Hand tracking state
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+
+  const isPlaying = gameState === 'playing';
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef: _webcamRef } = useGameHandTracking({
+    gameName: 'SoundGarden',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isPlaying, isHandTrackingReady, isModelLoading, startTracking]);
 
   useGameSessionProgress({
     gameName: 'Sound Garden',
@@ -136,13 +167,20 @@ function SoundGardenGame() {
 
   return (
     <div 
-      className="fixed inset-0 overflow-hidden"
+      ref={gameAreaRef}
+      className="fixed inset-0 overflow-hidden relative"
       role="application"
       aria-label="Sound Garden Game"
       style={{
         background: 'linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 50%, #81C784 100%)',
       }}
     >
+      {/* Hand tracking indicator */}
+      {isHandTrackingReady && (
+        <div className="absolute top-4 right-4 px-3 py-1 bg-green-500/20 text-green-700 text-xs font-bold rounded-full border border-green-300 z-50">
+          Hand tracking ready
+        </div>
+      )}
       {/* Note popup */}
       <AnimatePresence>
         {showNotePopup && (
@@ -349,6 +387,19 @@ function SoundGardenGame() {
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* Hand tracking cursor */}
+      {cursor && isHandTrackingReady && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace='normalized'
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color='#22C55E'
+        />
       )}
     </div>
   );

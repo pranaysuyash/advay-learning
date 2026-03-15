@@ -32,9 +32,9 @@ describe('Home landing', () => {
       </MemoryRouter>,
     );
     expect(
-      screen.getAllByRole('button', { name: /Create (a|Child) Profile/i }).length,
+      screen.getAllByRole('button', { name: /Start Free/i }).length,
     ).toBeGreaterThan(0);
-    expect(screen.getByRole('button', { name: /Try The Magic/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Try Demo/i })).toBeDefined();
   });
 
   it('clicking Try The Magic creates a guest demo session and does not request camera permission', async () => {
@@ -54,14 +54,18 @@ describe('Home landing', () => {
       </MemoryRouter>,
     );
 
-    const btn = screen.getByRole('button', { name: /Try The Magic/i });
+    const btn = screen.getByRole('button', {
+      name: /Try Demo — No Account Needed/i,
+    });
     fireEvent.click(btn);
 
     // demo mode should be enabled in the settings store
     expect(useSettingsStore.getState().demoMode).toBe(true);
     expect(useAuthStore.getState().isGuest).toBe(true);
     expect(useAuthStore.getState().guestSession).not.toBeNull();
-    expect(screen.getByTestId('location-display').textContent).toBe('/dashboard');
+    expect(screen.getByTestId('location-display').textContent).toBe(
+      '/dashboard',
+    );
 
     // and camera should NOT have been requested
     expect(mockGetUserMedia).not.toHaveBeenCalled();
@@ -74,8 +78,8 @@ describe('Home landing', () => {
       </MemoryRouter>,
     );
 
-    const featuresHeading = Array.from(container.querySelectorAll('h2')).find((el) =>
-      /Digital Magic, Physical Reality/i.test(el.textContent ?? ''),
+    const featuresHeading = Array.from(container.querySelectorAll('h2')).find(
+      (el) => /Digital Magic, Physical Reality/i.test(el.textContent ?? ''),
     );
     expect(featuresHeading).toBeTruthy();
   });
@@ -89,7 +93,9 @@ describe('Home landing', () => {
 
     expect(screen.getByText(/Shared by a parent/i)).toBeDefined();
 
-    fireEvent.click(screen.getByRole('button', { name: /Try The Magic/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /Try Demo — No Account Needed/i }),
+    );
 
     const events = getGrowthEvents();
     expect(events.some((event) => event.name === 'shared_visit_landed')).toBe(

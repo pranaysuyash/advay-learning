@@ -24,57 +24,82 @@ import type { IconName } from '../components/ui/Icon';
 import { AddChildModal } from '../components/dashboard/AddChildModal';
 import { EditProfileModal } from '../components/dashboard/EditProfileModal';
 import { UnifiedActivityFeed } from '../components/dashboard/UnifiedActivityFeed';
-import { AvatarWithBadge, AvatarPickerModal, type AvatarConfig } from '../components/avatar';
-import { dataRightsApi, subscriptionApi, type SubscriptionStatus, progressApi } from '../services/api';
-import { getGameRecommendationsForProfile, type GameRecommendation } from '../services/gameRecommendations';
-import { getPlanLabel, getPlanRenewalMessage, isFullAccessPlan, isQuarterlyPack } from '../services/subscriptionPlan';
+import {
+  AvatarWithBadge,
+  AvatarPickerModal,
+  type AvatarConfig,
+} from '../components/avatar';
+import {
+  dataRightsApi,
+  subscriptionApi,
+  type SubscriptionStatus,
+  progressApi,
+} from '../services/api';
+import {
+  getGameRecommendationsForProfile,
+  type GameRecommendation,
+} from '../services/gameRecommendations';
+import {
+  getPlanLabel,
+  getPlanRenewalMessage,
+  isFullAccessPlan,
+  isQuarterlyPack,
+} from '../services/subscriptionPlan';
 import { useGameStatsMapForProfile } from '../hooks/useGameStats';
 import type { ProgressItem } from '../types/progress';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 
-function PendingBadge({ 
-  count, 
-  profileId: _profileId, 
-  onNavigate 
-}: { 
-  count: number; 
-  profileId: string; 
+function PendingBadge({
+  count,
+  profileId: _profileId,
+  onNavigate,
+}: {
+  count: number;
+  profileId: string;
   onNavigate: () => void;
 }) {
   const { t } = useTranslation(['dashboard', 'common']);
   const raw = t('dashboard:badges.pendingCount', { count });
-  const label = raw && raw.indexOf('dashboard:') === -1 ? raw : `Pending (${count})`;
+  const label =
+    raw && raw.indexOf('dashboard:') === -1 ? raw : `To Sync (${count})`;
   return (
-    <div
+    <button
+      type='button'
       onClick={onNavigate}
-      className='bg-yellow-100 border border-yellow-300 px-3 py-1 rounded-full text-yellow-800 font-medium cursor-pointer hover:bg-yellow-200 transition ml-2'
+      className='bg-blue-100 border border-blue-300 px-3 py-1 rounded-full text-blue-800 font-medium cursor-pointer hover:bg-blue-200 transition ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400'
       title={t('dashboard:badges.pending')}
+      aria-label={t('dashboard:badges.pending') || label}
     >
+      <span className='mr-1'>🔄</span>
       {label}
-    </div>
+    </button>
   );
 }
 
-function DeadLetterBadge({ 
-  count, 
-  profileId: _profileId, 
-  onNavigate 
-}: { 
-  count: number; 
-  profileId: string; 
+function DeadLetterBadge({
+  count,
+  profileId: _profileId,
+  onNavigate,
+}: {
+  count: number;
+  profileId: string;
   onNavigate: () => void;
 }) {
   const { t } = useTranslation(['dashboard', 'common']);
   const raw = t('dashboard:badges.failedCount', { count });
-  const label = raw && raw.indexOf('dashboard:') === -1 ? raw : `Failed (${count})`;
+  const label =
+    raw && raw.indexOf('dashboard:') === -1 ? raw : `Needs Retry (${count})`;
   return (
-    <div
+    <button
+      type='button'
       onClick={onNavigate}
-      className='bg-red-100 border border-red-300 px-3 py-1 rounded-full text-red-800 font-medium cursor-pointer hover:bg-red-200 transition ml-2'
+      className='bg-orange-100 border border-orange-300 px-3 py-1 rounded-full text-orange-800 font-medium cursor-pointer hover:bg-orange-200 transition ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400'
       title={t('dashboard:badges.failed')}
+      aria-label={t('dashboard:badges.failed') || label}
     >
+      <span className='mr-1'>💡</span>
       {label}
-    </div>
+    </button>
   );
 }
 
@@ -131,14 +156,20 @@ const RECOMMENDED_GAMES = [
     category: 'Science',
     difficulty: 'Easy',
     isNew: true,
-  }
+  },
 ];
 
 export const Dashboard = memo(function Dashboard() {
   const { t } = useTranslation(['dashboard', 'common']);
   const navigate = useNavigate();
   const { isGuest, guestSession } = useAuthStore();
-  const { profiles, currentProfile, setCurrentProfile, fetchProfiles, createProfile } = useProfileStore();
+  const {
+    profiles,
+    currentProfile,
+    setCurrentProfile,
+    fetchProfiles,
+    createProfile,
+  } = useProfileStore();
   const { letterProgress, gameHistory } = useProgressStore();
   const { demoMode, setDemoMode } = useSettingsStore();
   const { showToast } = useToast();
@@ -158,14 +189,20 @@ export const Dashboard = memo(function Dashboard() {
 
   // Edit Profile Modal State
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingProfile, setEditingProfile] = useState<typeof currentProfile>(null);
+  const [editingProfile, setEditingProfile] =
+    useState<typeof currentProfile>(null);
   const [editName, setEditName] = useState('');
   const [editLanguage, setEditLanguage] = useState('en');
-  const [editAvatarConfig, setEditAvatarConfig] = useState<AvatarConfig | null>(null);
+  const [editAvatarConfig, setEditAvatarConfig] = useState<AvatarConfig | null>(
+    null,
+  );
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [showConsentFlow, setShowConsentFlow] = useState(false);
-  const [pendingConsentProfile, setPendingConsentProfile] = useState<Profile | null>(null);
+  const [pendingConsentProfile, setPendingConsentProfile] =
+    useState<Profile | null>(null);
+  // Adventure Map - hidden by default for kid-friendly experience
+  const [showAdventureMap, setShowAdventureMap] = useState(false);
 
   useEffect(() => {
     if (!isGuest) {
@@ -213,7 +250,7 @@ export const Dashboard = memo(function Dashboard() {
   // Fetch progress for game recommendations
   useEffect(() => {
     if (!defaultProfile?.id || isGuest) return;
-    
+
     const fetchProgress = async () => {
       try {
         const res = await progressApi.getProgress(defaultProfile.id);
@@ -222,7 +259,7 @@ export const Dashboard = memo(function Dashboard() {
         console.error('Failed to fetch progress:', err);
       }
     };
-    
+
     fetchProgress();
   }, [defaultProfile?.id, isGuest]);
 
@@ -237,9 +274,15 @@ export const Dashboard = memo(function Dashboard() {
     let baseStars = profiles ? profiles.length * 50 : 0;
 
     if (letterProgress) {
-      baseStars += Object.values(letterProgress).reduce((acc, itemArr) =>
-        acc + itemArr.reduce((sum, item) => sum + (item.bestAccuracy > 0 ? 10 : 0), 0)
-        , 0);
+      baseStars += Object.values(letterProgress).reduce(
+        (acc, itemArr) =>
+          acc +
+          itemArr.reduce(
+            (sum, item) => sum + (item.bestAccuracy > 0 ? 10 : 0),
+            0,
+          ),
+        0,
+      );
     }
 
     return baseStars;
@@ -250,16 +293,16 @@ export const Dashboard = memo(function Dashboard() {
   // Dynamic game recommendations based on profile and play history
   const gameRecommendations: GameRecommendation[] = useMemo(() => {
     if (!defaultProfile) return [];
-    
+
     // Extract played game IDs from progress
     const playedGameIds = progress
-      .filter(p => p.activity_type === 'game')
-      .map(p => p.content_id);
-    
+      .filter((p) => p.activity_type === 'game')
+      .map((p) => p.content_id);
+
     return getGameRecommendationsForProfile(
       defaultProfile.age,
       playedGameIds,
-      Object.fromEntries(statsMap)
+      Object.fromEntries(statsMap),
     );
   }, [defaultProfile, progress, statsMap]);
 
@@ -288,7 +331,10 @@ export const Dashboard = memo(function Dashboard() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      trackLaunchEvent('export_downloaded', { source: 'dashboard', format: 'json' });
+      trackLaunchEvent('export_downloaded', {
+        source: 'dashboard',
+        format: 'json',
+      });
     } finally {
       setExporting(false);
     }
@@ -337,7 +383,9 @@ export const Dashboard = memo(function Dashboard() {
     setEditingProfile(profile);
     setEditName(profile.name);
     setEditLanguage(profile.preferred_language);
-    setEditAvatarConfig((profile.settings?.avatar_config as AvatarConfig) || null);
+    setEditAvatarConfig(
+      (profile.settings?.avatar_config as AvatarConfig) || null,
+    );
     setShowEditModal(true);
   };
 
@@ -378,19 +426,27 @@ export const Dashboard = memo(function Dashboard() {
       {demoMode && !hasBasicCameraSupport() && (
         <DemoInterface
           onComplete={() => showToast(t('dashboard:demo.completed'), 'success')}
-          onExit={() => { setDemoMode(false); navigate('/'); }}
+          onExit={() => {
+            setDemoMode(false);
+            navigate('/');
+          }}
         />
       )}
 
       {/* HEADER AREA */}
       <header className='px-6 py-6 lg:px-12 lg:py-8 flex justify-between items-start z-10 relative'>
         <div className='flex items-center gap-4'>
-          <Mascot state='happy' responsiveSize='sm' hideOnMobile={false} className="hidden sm:block" />
+          <Mascot
+            state='happy'
+            responsiveSize='sm'
+            hideOnMobile={false}
+            className='hidden sm:block'
+          />
           <div>
             <h1 className='text-3xl sm:text-4xl font-extrabold text-[#1E293B]'>
-              {greeting}, {defaultProfile?.name
-                ? defaultProfile.name
-                : 'Explorer'}! <span className="text-yellow-400">★</span>
+              {greeting},{' '}
+              {defaultProfile?.name ? defaultProfile.name : 'Explorer'}!{' '}
+              <span className='text-yellow-400'>★</span>
             </h1>
             <p className='text-lg font-medium text-slate-500 mt-1'>
               {t('dashboard:welcome.subtitle')}
@@ -410,7 +466,9 @@ export const Dashboard = memo(function Dashboard() {
               count={pendingCount}
               profileId={defaultProfile.id}
               onNavigate={() => {
-                navigate('/progress', { state: { profileId: defaultProfile.id } });
+                navigate('/progress', {
+                  state: { profileId: defaultProfile.id },
+                });
                 trackLaunchEvent('pending_badge_clicked', {
                   profileId: defaultProfile.id,
                   count: pendingCount,
@@ -423,7 +481,9 @@ export const Dashboard = memo(function Dashboard() {
               count={deadLetterCount}
               profileId={defaultProfile.id}
               onNavigate={() => {
-                navigate('/progress', { state: { profileId: defaultProfile.id } });
+                navigate('/progress', {
+                  state: { profileId: defaultProfile.id },
+                });
                 trackLaunchEvent('failed_badge_clicked', {
                   profileId: defaultProfile.id,
                   count: deadLetterCount,
@@ -457,7 +517,7 @@ export const Dashboard = memo(function Dashboard() {
       {!isGuest && (
         <div className='px-6 lg:px-12 mb-8'>
           <div className='inline-flex items-center gap-3 bg-white p-2 rounded-full border-2 border-slate-100 shadow-sm'>
-            {profiles.map(p => (
+            {profiles.map((p) => (
               <button
                 key={p.id}
                 onClick={() => {
@@ -471,20 +531,23 @@ export const Dashboard = memo(function Dashboard() {
                   e.preventDefault();
                   handleEditProfile(p);
                 }}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition ${p.id === currentProfile?.id
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition ${
+                  p.id === currentProfile?.id
                     ? 'bg-[#3B82F6] text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-50'
-                  }`}
+                }`}
                 title={`${p.name}${p.age ? ` (${p.age} years)` : ''} - Right-click to edit`}
               >
                 <AvatarWithBadge
-                  config={p.settings?.avatar_config as AvatarConfig | null | undefined}
+                  config={
+                    p.settings?.avatar_config as AvatarConfig | null | undefined
+                  }
                   fallbackName={p.name}
                   age={p.age}
-                  size="sm"
+                  size='sm'
                   showAnimation={p.id === currentProfile?.id}
                 />
-                <span className="text-sm font-bold">{p.name}</span>
+                <span className='text-sm font-bold'>{p.name}</span>
               </button>
             ))}
             {/* ADD CHILD BUTTON */}
@@ -494,10 +557,12 @@ export const Dashboard = memo(function Dashboard() {
               title={t('dashboard:profile.addChild', 'Add Child')}
             >
               <span>+</span>
-              <span className='hidden sm:inline'>{t('dashboard:profile.addChild', 'Add')}</span>
+              <span className='hidden sm:inline'>
+                {t('dashboard:profile.addChild', 'Add')}
+              </span>
             </button>
           </div>
-          <p className="text-xs text-slate-400 mt-2 ml-2">
+          <p className='text-xs text-slate-400 mt-2 ml-2'>
             Tip: Right-click a profile to edit
           </p>
         </div>
@@ -508,13 +573,15 @@ export const Dashboard = memo(function Dashboard() {
 
       {/* CORE ACTION AREA: GAME GRID */}
       <main className='px-6 lg:px-12 space-y-12 max-w-[1600px] mx-auto'>
-
         <section>
           <div className='flex justify-between items-end mb-6'>
             <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
-              <span className="text-[#E85D04]">For You</span>
+              <span className='text-[#E85D04]'>For You</span>
             </h2>
-            <Link to="/games" className='text-lg font-bold text-[#3B82F6] hover:underline'>
+            <Link
+              to='/games'
+              className='text-lg font-bold text-[#3B82F6] hover:underline'
+            >
               {t('dashboard:featuredGames.seeAll')} →
             </Link>
           </div>
@@ -525,7 +592,11 @@ export const Dashboard = memo(function Dashboard() {
                 <div key={section.slot}>
                   <h3 className='text-lg font-bold text-slate-700 mb-3 flex items-center gap-2'>
                     {section.title}
-                    {section.slot === 'new' && <span className='bg-green-500 text-white text-xs px-2 py-0.5 rounded-full'>NEW</span>}
+                    {section.slot === 'new' && (
+                      <span className='bg-green-500 text-white text-xs px-2 py-0.5 rounded-full'>
+                        NEW
+                      </span>
+                    )}
                   </h3>
                   <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
                     {section.games.slice(0, 4).map((game, idx) => (
@@ -544,7 +615,11 @@ export const Dashboard = memo(function Dashboard() {
                         isNew={game.isNew}
                         badge={game.badge}
                         buttonText={t('dashboard:featuredGames.playNow')}
-                        onPlay={() => navigate(game.path, { state: { profileId: defaultProfile?.id } })}
+                        onPlay={() =>
+                          navigate(game.path, {
+                            state: { profileId: defaultProfile?.id },
+                          })
+                        }
                         reducedMotion={false}
                       />
                     ))}
@@ -561,7 +636,11 @@ export const Dashboard = memo(function Dashboard() {
                   animationDelay={idx * 0.1}
                   isNew={game.isNew}
                   buttonText={t('dashboard:featuredGames.playNow')}
-                  onPlay={() => navigate(game.path, { state: { profileId: defaultProfile?.id } })}
+                  onPlay={() =>
+                    navigate(game.path, {
+                      state: { profileId: defaultProfile?.id },
+                    })
+                  }
                   reducedMotion={false}
                 />
               ))}
@@ -582,25 +661,61 @@ export const Dashboard = memo(function Dashboard() {
         )}
 
         {/* SECONDARY AREA: ADVENTURE MAP (Keep logic, style to match V1) */}
-        <section className='bg-white rounded-3xl border-2 border-slate-200 shadow-sm p-8 relative overflow-hidden'>
-          <div className='absolute -right-10 -bottom-10 opacity-10 pointer-events-none'>
-            <Mascot state='idle' responsiveSize='lg' />
-          </div>
-
-          <div className='flex items-center justify-between mb-8 relative z-10'>
-            <div>
-              <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
-                {t('dashboard:learningMap.title')} 🗺️
-              </h2>
-              <p className='text-slate-500 font-medium'>{t('dashboard:learningMap.subtitle')}</p>
+        {/* Collapsed by default for kid-friendly experience - expandable for parents */}
+        {showAdventureMap ? (
+          <section className='bg-white rounded-3xl border-2 border-slate-200 shadow-sm p-8 relative overflow-hidden'>
+            <div className='absolute -right-10 -bottom-10 opacity-10 pointer-events-none'>
+              <Mascot state='idle' responsiveSize='lg' />
             </div>
-          </div>
 
-          <div className='relative z-10'>
-            <AdventureMap />
-          </div>
-        </section>
+            <div className='flex items-center justify-between mb-8 relative z-10'>
+              <div>
+                <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
+                  {t('dashboard:learningMap.title')} 🗺️
+                </h2>
+                <p className='text-slate-500 font-medium'>
+                  {t('dashboard:learningMap.subtitle')}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAdventureMap(false)}
+                className='text-slate-400 hover:text-slate-600 transition-colors'
+                aria-label='Hide adventure map'
+              >
+                <UIIcon name='x' size={24} />
+              </button>
+            </div>
 
+            <div className='relative z-10'>
+              <AdventureMap />
+            </div>
+          </section>
+        ) : (
+          <section className='bg-white rounded-3xl border-2 border-slate-200 shadow-sm p-6 relative overflow-hidden'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-3'>
+                <div className='w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center'>
+                  <span className='text-2xl'>🗺️</span>
+                </div>
+                <div>
+                  <h2 className='text-lg font-bold text-slate-800'>
+                    {t('dashboard:learningMap.title')}
+                  </h2>
+                  <p className='text-sm text-slate-500'>
+                    {t('dashboard:learningMap.subtitle')}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAdventureMap(true)}
+                className='px-4 py-2 bg-amber-50 text-amber-600 rounded-full text-sm font-bold hover:bg-amber-100 transition-colors flex items-center gap-2'
+              >
+                <UIIcon name='chevron-down' size={16} />
+                Show Map
+              </button>
+            </div>
+          </section>
+        )}
       </main>
 
       {/* ADD CHILD MODAL */}
@@ -640,7 +755,13 @@ export const Dashboard = memo(function Dashboard() {
       <AvatarPickerModal
         isOpen={showAvatarPicker}
         onClose={() => setShowAvatarPicker(false)}
-        currentConfig={editAvatarConfig || (editingProfile?.settings?.avatar_config as AvatarConfig | null | undefined)}
+        currentConfig={
+          editAvatarConfig ||
+          (editingProfile?.settings?.avatar_config as
+            | AvatarConfig
+            | null
+            | undefined)
+        }
         onSelect={(config) => {
           setEditAvatarConfig(config);
           setShowAvatarPicker(false);
@@ -666,7 +787,10 @@ export const Dashboard = memo(function Dashboard() {
             onConsentComplete={(_consent: ConsentData) => {
               setShowConsentFlow(false);
               setPendingConsentProfile(null);
-              showToast('Parental consent verified for this profile.', 'success');
+              showToast(
+                'Parental consent verified for this profile.',
+                'success',
+              );
             }}
           />
         </div>
@@ -677,11 +801,14 @@ export const Dashboard = memo(function Dashboard() {
 
 // Subscription Card Component
 function SubscriptionCard() {
-  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    subscriptionApi.getCurrent()
+    subscriptionApi
+      .getCurrent()
       .then((res) => setSubscription(res.data))
       .catch(() => setSubscription(null))
       .finally(() => setLoading(false));
@@ -689,23 +816,27 @@ function SubscriptionCard() {
 
   if (loading) {
     return (
-      <div className="px-6 lg:px-12">
-        <div className="animate-pulse bg-white rounded-xl h-24 border-2 border-slate-100"></div>
+      <div className='px-6 lg:px-12'>
+        <div className='animate-pulse bg-white rounded-xl h-24 border-2 border-slate-100'></div>
       </div>
     );
   }
 
-  if (BETA_FREE_ACCESS && (!subscription?.has_active || !subscription.subscription)) {
+  if (
+    BETA_FREE_ACCESS &&
+    (!subscription?.has_active || !subscription.subscription)
+  ) {
     return (
-      <div className="px-6 lg:px-12 mb-6">
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-6 text-white">
-          <h3 className="text-xl font-bold mb-2">Public Beta Access Is On</h3>
-          <p className="text-emerald-50 mb-4">
-            All shipped games are free during beta through {BETA_END_DATE}. You can still review future plans for after beta.
+      <div className='px-6 lg:px-12 mb-6'>
+        <div className='bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-6 text-white'>
+          <h3 className='text-xl font-bold mb-2'>Public Beta Access Is On</h3>
+          <p className='text-emerald-50 mb-4'>
+            All shipped games are free during beta through {BETA_END_DATE}. You
+            can still review future plans for after beta.
           </p>
           <Link
-            to="/pricing"
-            className="inline-block bg-white text-emerald-700 px-6 py-2 rounded-lg font-semibold hover:bg-emerald-50"
+            to='/pricing'
+            className='inline-block bg-white text-emerald-700 px-6 py-2 rounded-lg font-semibold hover:bg-emerald-50'
           >
             See future plans
           </Link>
@@ -716,13 +847,15 @@ function SubscriptionCard() {
 
   if (!subscription?.has_active || !subscription.subscription) {
     return (
-      <div className="px-6 lg:px-12 mb-6">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <h3 className="text-xl font-bold mb-2">Unlock More Games!</h3>
-          <p className="text-blue-100 mb-4">Get access to 5, 10, or all games with a subscription.</p>
+      <div className='px-6 lg:px-12 mb-6'>
+        <div className='bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white'>
+          <h3 className='text-xl font-bold mb-2'>Unlock More Games!</h3>
+          <p className='text-blue-100 mb-4'>
+            Get access to 5, 10, or all games with a subscription.
+          </p>
           <Link
-            to="/pricing"
-            className="inline-block bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50"
+            to='/pricing'
+            className='inline-block bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50'
           >
             View Plans
           </Link>
@@ -733,75 +866,96 @@ function SubscriptionCard() {
 
   const sub = subscription.subscription;
   const planName = getPlanLabel(sub.plan_type);
-  const isExpiringSoon = subscription.days_remaining !== null && subscription.days_remaining <= 14;
+  const isExpiringSoon =
+    subscription.days_remaining !== null && subscription.days_remaining <= 14;
   const isAnnual = isFullAccessPlan(sub.plan_type);
-  const renewalMessage = subscription.available_games?.renewal_prompt || getPlanRenewalMessage(sub.plan_type);
+  const renewalMessage =
+    subscription.available_games?.renewal_prompt ||
+    getPlanRenewalMessage(sub.plan_type);
 
   return (
-    <div className="px-6 lg:px-12 mb-6">
-      <div className={`rounded-xl p-6 border-2 ${isExpiringSoon ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-slate-100'}`}>
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className='px-6 lg:px-12 mb-6'>
+      <div
+        className={`rounded-xl p-6 border-2 ${isExpiringSoon ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-slate-100'}`}
+      >
+        <div className='flex flex-wrap items-center justify-between gap-4'>
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-2xl">🎮</span>
+            <div className='flex items-center gap-3 mb-2'>
+              <span className='text-2xl'>🎮</span>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">{planName}</h3>
-                <span className={`text-sm ${sub.status === 'active' ? 'text-green-600' : 'text-slate-500'}`}>
+                <h3 className='text-lg font-bold text-slate-900'>{planName}</h3>
+                <span
+                  className={`text-sm ${sub.status === 'active' ? 'text-green-600' : 'text-slate-500'}`}
+                >
                   {sub.status === 'active' ? 'Active' : sub.status}
                 </span>
               </div>
             </div>
 
             {subscription.days_remaining !== null && (
-              <p className={`text-sm ${isExpiringSoon ? 'text-yellow-700 font-semibold' : 'text-slate-500'}`}>
-                {isExpiringSoon ? '⚠️ ' : ''}{subscription.days_remaining} days remaining
+              <p
+                className={`text-sm ${isExpiringSoon ? 'text-yellow-700 font-semibold' : 'text-slate-500'}`}
+              >
+                {isExpiringSoon ? '⚠️ ' : ''}
+                {subscription.days_remaining} days remaining
               </p>
             )}
             {renewalMessage && (
-              <p className="mt-1 text-sm text-slate-500">{renewalMessage}</p>
+              <p className='mt-1 text-sm text-slate-500'>{renewalMessage}</p>
             )}
-            {isQuarterlyPack(sub.plan_type) && subscription.available_games?.refresh_window_label && (
-              <p className="mt-1 text-sm text-blue-600">
-                {subscription.available_games.refresh_window_label}
-                {subscription.available_games.refresh_available
-                  ? ' • Refresh available now'
-                  : subscription.available_games.next_refresh_at
-                  ? ` • Next refresh opens ${new Date(subscription.available_games.next_refresh_at).toLocaleDateString()}`
-                  : ' • Final monthly set is active'}
-              </p>
-            )}
+            {isQuarterlyPack(sub.plan_type) &&
+              subscription.available_games?.refresh_window_label && (
+                <p className='mt-1 text-sm text-blue-600'>
+                  {subscription.available_games.refresh_window_label}
+                  {subscription.available_games.refresh_available
+                    ? ' • Refresh available now'
+                    : subscription.available_games.next_refresh_at
+                      ? ` • Next refresh opens ${new Date(subscription.available_games.next_refresh_at).toLocaleDateString()}`
+                      : ' • Final monthly set is active'}
+                </p>
+              )}
           </div>
 
-          <div className="flex gap-3">
+          <div className='flex gap-3'>
             {!isAnnual && (
               <Link
-                to="/game-selection"
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600"
+                to='/game-selection'
+                className='px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600'
               >
                 Change Games
               </Link>
             )}
             <Link
-              to="/pricing"
-              className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200"
+              to='/pricing'
+              className='px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200'
             >
-              {subscription.days_remaining !== null && subscription.days_remaining <= 30 ? 'Renew' : 'Upgrade'}
+              {subscription.days_remaining !== null &&
+              subscription.days_remaining <= 30
+                ? 'Renew'
+                : 'Upgrade'}
             </Link>
           </div>
         </div>
 
         {/* Selected Games (for packs) */}
         {!isAnnual && sub.game_selections && sub.game_selections.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-slate-100">
-            <p className="text-sm text-slate-500 mb-2">Selected games ({sub.game_selections.length}):</p>
-            <div className="flex flex-wrap gap-2">
+          <div className='mt-4 pt-4 border-t border-slate-100'>
+            <p className='text-sm text-slate-500 mb-2'>
+              Selected games ({sub.game_selections.length}):
+            </p>
+            <div className='flex flex-wrap gap-2'>
               {sub.game_selections.slice(0, 5).map((game: any) => (
-                <span key={game.game_id} className="text-xs bg-slate-100 px-2 py-1 rounded">
+                <span
+                  key={game.game_id}
+                  className='text-xs bg-slate-100 px-2 py-1 rounded'
+                >
                   {game.game_id}
                 </span>
               ))}
               {sub.game_selections.length > 5 && (
-                <span className="text-xs text-slate-400">+{sub.game_selections.length - 5} more</span>
+                <span className='text-xs text-slate-400'>
+                  +{sub.game_selections.length - 5} more
+                </span>
               )}
             </div>
           </div>
