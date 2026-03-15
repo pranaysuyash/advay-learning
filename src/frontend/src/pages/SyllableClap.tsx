@@ -1,6 +1,13 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -28,6 +35,31 @@ function SyllableClapContent() {
 
   const { playClick, playError, playCelebration } = useAudio();
   const { completeGame } = useGameCompletion('syllable-clap');
+
+  // Hand tracking state
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const isPlaying = gameState === 'playing';
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
+    gameName: 'SyllableClap',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isPlaying, isHandTrackingReady, isModelLoading, startTracking]);
 
   useGameSessionProgress({
     gameName: 'Syllable Clap',
@@ -128,8 +160,11 @@ function SyllableClapContent() {
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-2xl mx-auto space-y-4'>
 
           {/* Level selector */}
@@ -324,6 +359,17 @@ function SyllableClapContent() {
             </div>
           )}
         </div>
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={true}
+            size={64}
+            color='#3B82F6'
+          />
+        )}
       </div>
     </GameContainer>
   );
