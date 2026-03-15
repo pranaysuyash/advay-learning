@@ -103,13 +103,44 @@ for g in games:
     if not cv_list:
         gap_missing_cv.append(g)
         continue
-    # Check file exists
+    # Check file exists - normalize path relative to project root
     file_path = g['file']
-    if not file_path or not os.path.exists(file_path):
-        # try to construct path from component name
-        pass
+    if not file_path:
+        gap_missing_cv.append(g)
+        continue
+
+    # Try to find the file relative to project root
+    # The audit may contain absolute paths, so extract relative path
+    if os.path.isabs(file_path):
+        # Try to find the relative path by checking against common roots
+        # Look for src/frontend/src/ in the path
+        if 'src/frontend/src/' in file_path:
+            rel_path = file_path[file_path.index('src/frontend/src/'):]
+        elif 'src/' in file_path:
+            rel_path = file_path[file_path.index('src/'):]
+        else:
+            rel_path = os.path.basename(file_path)
     else:
-        with open(file_path, 'r') as f:
+        rel_path = file_path
+
+    # Try multiple possible locations
+    possible_paths = [
+        rel_path,  # As-is relative path
+        os.path.join('src/frontend', rel_path),  # Under src/frontend
+        os.path.basename(file_path),  # Just filename
+    ]
+
+    found_path = None
+    for test_path in possible_paths:
+        if os.path.exists(test_path):
+            found_path = test_path
+            break
+
+    if not found_path:
+        gap_missing_cv.append(g)
+        continue
+
+    with open(found_path, 'r') as f:
             content = f.read()
         missing_hooks = []
         for mode in cv_list:

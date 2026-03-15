@@ -147,3 +147,31 @@ const { webcamRef, cursor, handDetected, isPinching } = useGameHandTracking({
   - Fixed midlineViolatorLogic.ts unused variables
   - Added MidlineViolator to App.tsx imports
   - Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+
+### TCK-20260315-013 :: PR Review Thread Fixes
+
+Type: REVIEW_FIX
+Owner: Pranay
+Created: 2026-03-15
+Status: **IN_PROGRESS**
+
+Scope contract:
+- In-scope: Fix open PR review threads on PR #50
+- Out-of-scope: Major refactors
+- Behavior change allowed: NO
+
+Targets:
+- Repo: advay-learning
+- File(s): Multiple game pages, hooks, tools
+- Branch/PR: codex/wip-gamecontainer-remediation -> main
+
+Execution log:
+- 2026-03-15T13:15:20Z Fixed normalized coordinate issues in 5 game pages
+- 2026-03-15T13:15:20Z Fixed tool scripts (cv_gap_analysis, cv_hook_scan, find_missing_previews)
+- 2026-03-15T13:15:20Z Fixed debug script ESM/Chromium issues
+- 2026-03-15T13:15:20Z All 7266 tests pass
+
+Status updates:
+- 2026-03-15T13:15:20Z **IN_PROGRESS** - Working on PR thread resolution
+

@@ -411,7 +411,7 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
 
       {/* Game Content */}
       <div ref={gameAreaRef} className="relative w-full h-full flex flex-col items-center justify-center p-4">
-        {cursor && isHandTrackingActive && <CursorEmbodiment position={cursor} isPinching={false} />}
+        {cursor && isHandTrackingActive && <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />}
         {/* Menu Screen */}
         {showMenu && (
           <motion.div

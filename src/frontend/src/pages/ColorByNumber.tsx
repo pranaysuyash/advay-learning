@@ -244,7 +244,7 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ completeGam
       <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6 relative'>
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && view === 'play' && (
-          <CursorEmbodiment position={cursor} isPinching={false} />
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
         )}
         <div className='max-w-6xl mx-auto space-y-4 md:space-y-6'>
           <section className='bg-white rounded-2xl border-2 border-[#F2CC8F] p-4 shadow-[0_4px_0_#E5B86E]'>

@@ -11,7 +11,8 @@ import { registerServiceWorker } from './pwa/registerServiceWorker';
 
 // Suppress MediaPipe internal SVG rendering errors that occur during tracking transitions
 // These errors happen when MediaPipe's internal visualization receives undefined landmark data
-if (typeof window !== 'undefined') {
+// Only apply in development to avoid hiding real errors in production
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   const originalError = window.console.error;
   window.console.error = function (...args: unknown[]) {
     const message = args[0];

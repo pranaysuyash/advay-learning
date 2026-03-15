@@ -128,28 +128,26 @@ function NumberBubblePopContent() {
         return;
       }
 
+      // indexTip is already normalized (0-1), use directly
       const newCursor: Point = { x: hand.indexTip.x, y: hand.indexTip.y };
       setCursor(newCursor);
       setIsHandTrackingActive(true);
 
       if (gameState !== 'playing') return;
 
-      const gameArea = gameAreaRef.current;
-      if (!gameArea) return;
-
-      const gameAreaRect = gameArea.getBoundingClientRect();
+      // Use normalized bounds check (0-1) instead of pixel bounds
       const isOverGameArea =
-        newCursor.x >= gameAreaRect.left &&
-        newCursor.x <= gameAreaRect.right &&
-        newCursor.y >= gameAreaRect.top &&
-        newCursor.y <= gameAreaRect.bottom;
+        newCursor.x >= 0 && newCursor.x <= 1 &&
+        newCursor.y >= 0 && newCursor.y <= 1;
 
       if (!isOverGameArea) return;
 
-      if (frame.pinch.transition !== 'start') return;
+      // Use pinch state instead of transition for continuous detection
+      if (!frame.pinch?.state?.isPinching) return;
 
-      const relX = (newCursor.x - gameAreaRect.left) / gameAreaRect.width * 100;
-      const relY = (newCursor.y - gameAreaRect.top) / gameAreaRect.height * 100;
+      // Convert normalized (0-1) to percentage (0-100) for bubble comparison
+      const relX = newCursor.x * 100;
+      const relY = newCursor.y * 100;
 
       const bubbleRadius = 7;
       for (const bubble of bubbles) {
@@ -178,7 +176,7 @@ function NumberBubblePopContent() {
       <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 relative">
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && (
-          <CursorEmbodiment position={cursor} isPinching={false} />
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
         )}
         <div className="flex gap-2">
           {LEVELS.map((l) => (
