@@ -63,12 +63,19 @@ Execution log:
 - [2026-03-15 22:20] Fixed ShapeStacker.tsx - Added startTracking + coordinateSpace="normalized"
 - [2026-03-15 22:25] Fixed ReadingAlong.tsx - Added startTracking + coordinateSpace="normalized"
 - [2026-03-15 22:30] Tests verified: 7266 passed
-- [2026-03-15 22:45] Verified: 6 remaining threads are code scanning false positives (imports ARE used)
+- [2026-03-15 22:35] Fixed SpellingRun.tsx - RAF memory leak (track animationFrameId)
+- [2026-03-15 22:40] Fixed PackLunchbox.tsx - isPinching from frame + added Webcam element
+- [2026-03-15 22:45] Fixed SpellPainter.tsx - normalized to canvas pixel conversion
+- [2026-03-15 22:50] Fixed ColorMixing.tsx - hoveredButtonId via ref for pinch gestures
+- [2026-03-15 22:55] Fixed ShadowPortal.tsx - skip inactive portals in collision loop
+- [2026-03-15 23:00] Fixed BalloonPopFitness.tsx - capture final score/level before timeout
+- [2026-03-15 23:05] Fixed LetterSoundMatch.tsx - cursor only shows when isPlaying
+- [2026-03-15 23:10] Tests verified: 7266 passing (0 regressions)
 
 Status updates:
 
 - [2026-03-15 18:30] **IN_PROGRESS** — Starting P1 issue remediation
-- [2026-03-15 22:45] **READY_FOR_REVIEW** — All P1/P2 issues resolved, 6 false positive code scanning alerts remain
+- [2026-03-15 23:10] **IN_PROGRESS** — 28 fixes complete, ~59 threads remaining (mostly P2/P3)
 
 ## Resolution Summary
 

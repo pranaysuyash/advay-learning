@@ -151,6 +151,12 @@ function ColorMixingGame() {
     navigate('/games');
   };
 
+  // Keep hoveredButtonId ref in sync for use in handleFrame
+  const hoveredButtonIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    hoveredButtonIdRef.current = hoveredButtonId;
+  }, [hoveredButtonId]);
+
   // Hand tracking frame handler
   const handleFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
@@ -166,17 +172,18 @@ function ColorMixingGame() {
       if (frame.pinch.transition !== 'start') return;
 
       // If we have a hovered button, trigger its click
-      if (hoveredButtonId) {
-        if (hoveredButtonId === 'start') {
+      const currentHoveredId = hoveredButtonIdRef.current;
+      if (currentHoveredId) {
+        if (currentHoveredId === 'start') {
           handleStart();
-        } else if (hoveredButtonId === 'finish') {
+        } else if (currentHoveredId === 'finish') {
           void handleFinish();
         } else {
-          handleSelectAnswer(hoveredButtonId);
+          handleSelectAnswer(currentHoveredId);
         }
       }
     },
-    [hoveredButtonId, handleStart, handleFinish, handleSelectAnswer],
+    [handleStart, handleFinish, handleSelectAnswer],
   );
 
   // Initialize hand tracking

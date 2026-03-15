@@ -170,6 +170,9 @@ export const ShadowPortal: React.FC = () => {
     const collectedIds: string[] = [];
     setPortals((prevPortals) => {
       const updated = prevPortals.map((portal) => {
+        // Skip inactive portals
+        if (!portal.isActive) return portal;
+
         let newProgress = portal.progress;
 
         particles.forEach((particle) => {

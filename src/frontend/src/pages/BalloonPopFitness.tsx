@@ -619,12 +619,15 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
       if (levelAdvanced) playCelebration();
 
       if (gameEnded && !showCelebration) {
+        // Capture final values before state update
+        const finalScore = nextState.score;
+        const finalLevel = nextState.level;
         setTimeout(async () => {
           setShowCelebration(true);
           playCelebration();
           await completeGame({
-            score: gameState?.score || 0,
-            level: gameState?.level || 1,
+            score: finalScore,
+            level: finalLevel,
           });
         }, 500);
       }

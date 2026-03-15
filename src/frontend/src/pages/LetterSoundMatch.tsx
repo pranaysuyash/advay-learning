@@ -227,7 +227,7 @@ function LetterSoundMatchGame() {
             </>
           )}
         </div>
-        {cursor && (
+        {cursor && isPlaying && (
           <GameCursor
             position={cursor}
             coordinateSpace='normalized'
