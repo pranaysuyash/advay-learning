@@ -161,7 +161,7 @@ const MidlineViolator: React.FC = () => {
       gameId="midline-violator"
       gameName="Midline Violator"
     >
-      <div ref={containerRef} className="relative w-full h-full bg-slate-900 overflow-hidden rounded-xl">
+      <div ref={containerRef} className="relative w-full h-full bg-[#FFF8F0] overflow-hidden rounded-xl">
         <Webcam
           ref={webcamRef}
           audio={false}

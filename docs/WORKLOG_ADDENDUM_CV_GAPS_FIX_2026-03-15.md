@@ -183,4 +183,13 @@ Status updates:
   - ColorByNumber.tsx: Added enabled property to start hand tracking during gameplay
   - ShadowPortal.tsx: Fixed state setter (_setPortals -> setPortals), added win condition check
   - All 7266 tests pass
+- 2026-03-15T22:00:00Z **IN_PROGRESS** - Lint fixes and merge gate prep:
+  - Backend: Fixed duplicate imports in profile_photos.py (ruff --fix)
+  - Frontend: Fixed bg-slate-900 -> bg-[#FFF8F0] in MidlineViolator.tsx for V1 light theme
+  - Dismissed 6 false positive code scanning alerts via GitHub API
+  - Restored auto-start feature with autoStartedRef guards (WordBuilder, SimpleAddition)
+  - Fixed wordBuilderLogic grid sizing to respect 120px TARGET_SIZE
+  - All 7266 tests pass
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
