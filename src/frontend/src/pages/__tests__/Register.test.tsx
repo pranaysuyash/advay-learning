@@ -40,11 +40,19 @@ describe('Register page', () => {
     fireEvent.change(screen.getByLabelText(/confirm password/i), {
       target: { value: 'TestPassword123' },
     });
+
+    // Expand child fields section first (collapsed by default)
+    // The child fields toggle is the only checkbox on the page
+    const childFieldsToggle = screen.getByRole('checkbox');
+    fireEvent.click(childFieldsToggle);
+
     fireEvent.change(screen.getByLabelText(/what's the explorer's name/i), {
       target: { value: 'Mira' },
     });
 
-    fireEvent.submit(screen.getByRole('button', { name: /create account/i }).closest('form')!);
+    fireEvent.submit(
+      screen.getByRole('button', { name: /create account/i }).closest('form')!,
+    );
 
     await waitFor(() => {
       expect(registerSpy).toHaveBeenCalledWith(

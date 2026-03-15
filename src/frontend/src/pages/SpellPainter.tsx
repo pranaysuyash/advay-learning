@@ -2,6 +2,12 @@ import { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -15,7 +21,6 @@ import {
   calculateScore,
   type LetterPosition,
 } from '../games/spellPainterLogic';
-import { useHandTracking } from '../hooks/useHandTracking';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { triggerHaptic } from '../utils/haptics';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
@@ -35,6 +40,11 @@ export function SpellPainterContent() {
   const startTimeRef = useRef<number>(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const currentLevelRef = useRef(1);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+
+  // Hand tracking state
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const isPlaying = gameState === 'playing';
 
   const { playClick, playSuccess } = useAudio();
   const { completeGame } = useGameCompletion('spell-painter');
@@ -42,114 +52,104 @@ export function SpellPainterContent() {
     gameName: 'Spell Painter',
     score,
     level: currentLevelRef.current,
-    isPlaying: gameState === 'playing',
+    isPlaying,
   });
-
-  const {
-    landmarker,
-    isReady,
-    initialize: initHandTracking,
-    reset: resetHandTracking,
-  } = useHandTracking();
 
   const level = LEVELS.find((l) => l.id === currentLevel) || LEVELS[0];
 
+  const handleComplete = useCallback(async () => {
+    setGameState('complete');
+    await completeGame({ score, level: currentLevelRef.current });
+    playSuccess();
+  }, [score, completeGame, playSuccess]);
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+
+    const canvas = canvasRef.current;
+    if (canvas && gameState === 'playing') {
+      setLetters((prev) => {
+        let changed = false;
+        const updated = prev.map((letter) => {
+          if (
+            !letter.painted &&
+            checkLetterPainted(letter, tip.x, tip.y)
+          ) {
+            changed = true;
+            playClick();
+            return { ...letter, painted: true };
+          }
+          return letter;
+        });
+
+        if (changed && isLevelComplete(updated)) {
+          playSuccess();
+          const timeMs = Date.now() - startTimeRef.current;
+          const levelScore = calculateScore(updated, timeMs);
+          
+          // Streak and scoring logic
+          const newStreak = streak + 1;
+          setStreak(newStreak);
+          const basePoints = levelScore;
+          const streakBonus = Math.min(newStreak * 2, 15);
+          const totalPoints = basePoints + streakBonus;
+          setScore((s) => s + totalPoints);
+          setScorePopup({ points: totalPoints, x: 50, y: 30 });
+          setTimeout(() => setScorePopup(null), 700);
+          triggerHaptic('success');
+          if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+            setShowStreakMilestone(true);
+            triggerHaptic('celebration');
+            setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+          }
+          
+          setShowCelebration(true);
+          setTimeout(() => {
+            setShowCelebration(false);
+            if (currentLevel < LEVELS.length) {
+              setCurrentLevel((l) => l + 1);
+              currentLevelRef.current = currentLevel + 1;
+              const nextLevel = LEVELS.find(
+                (lv) => lv.id === currentLevel + 1,
+              );
+              if (nextLevel && canvas) {
+                setLetters(
+                  generateLetterTargets(
+                    nextLevel.word,
+                    canvas.width,
+                    canvas.height,
+                  ),
+                );
+              }
+            } else {
+              handleComplete();
+            }
+          }, 2000);
+        }
+
+        return changed ? updated : prev;
+      });
+    }
+  }, [gameState, currentLevel, streak, playClick, playSuccess, handleComplete]);
+
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
+    gameName: 'SpellPainter',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
   useEffect(() => {
-    if (gameState === 'playing') {
-      initHandTracking();
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+    if (isPlaying) {
       startTimeRef.current = Date.now();
     }
-    return () => {
-      resetHandTracking();
-    };
-  }, [gameState, initHandTracking, resetHandTracking]);
-
-  useEffect(() => {
-    if (!landmarker || gameState !== 'playing' || !isReady) return;
-
-    let animationId: number;
-
-    const checkHands = () => {
-      const hands = landmarker.getHandLandmarks();
-      if (hands.length > 0) {
-        const canvas = canvasRef.current;
-        if (canvas) {
-          const canvasWidth = canvas.width;
-          const canvasHeight = canvas.height;
-          const hand = hands[0];
-          const indexTip = hand[8];
-          const x = indexTip.x * canvasWidth;
-          const y = (1 - indexTip.y) * canvasHeight;
-
-          setLetters((prev) => {
-            let changed = false;
-            const updated = prev.map((letter) => {
-              if (
-                !letter.painted &&
-                checkLetterPainted(letter, x / canvasWidth, y / canvasHeight)
-              ) {
-                changed = true;
-                playClick();
-                return { ...letter, painted: true };
-              }
-              return letter;
-            });
-
-            if (changed && isLevelComplete(updated)) {
-              playSuccess();
-              const timeMs = Date.now() - startTimeRef.current;
-              const levelScore = calculateScore(updated, timeMs);
-              
-              // Streak and scoring logic
-              const newStreak = streak + 1;
-              setStreak(newStreak);
-              const basePoints = levelScore;
-              const streakBonus = Math.min(newStreak * 2, 15);
-              const totalPoints = basePoints + streakBonus;
-              setScore((s) => s + totalPoints);
-              setScorePopup({ points: totalPoints, x: 50, y: 30 });
-              setTimeout(() => setScorePopup(null), 700);
-              triggerHaptic('success');
-              if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-                setShowStreakMilestone(true);
-                triggerHaptic('celebration');
-                setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
-              }
-              
-              setShowCelebration(true);
-              setTimeout(() => {
-                setShowCelebration(false);
-                if (currentLevel < LEVELS.length) {
-                  setCurrentLevel((l) => l + 1);
-                  currentLevelRef.current = currentLevel + 1;
-                  const nextLevel = LEVELS.find(
-                    (lv) => lv.id === currentLevel + 1,
-                  );
-                  if (nextLevel && canvas) {
-                    setLetters(
-                      generateLetterTargets(
-                        nextLevel.word,
-                        canvas.width,
-                        canvas.height,
-                      ),
-                    );
-                  }
-                } else {
-                  handleComplete();
-                }
-              }, 2000);
-            }
-
-            return changed ? updated : prev;
-          });
-        }
-      }
-      animationId = requestAnimationFrame(checkHands);
-    };
-
-    checkHands();
-    return () => cancelAnimationFrame(animationId);
-  }, [landmarker, isReady, gameState, currentLevel, playClick, playSuccess, streak]);
+  }, [isPlaying, isHandTrackingReady, isModelLoading, startTracking]);
 
   const handleStart = useCallback(() => {
     const canvas = canvasRef.current;
@@ -165,12 +165,6 @@ export function SpellPainterContent() {
     playClick();
   }, [level.word, playClick]);
 
-  const handleComplete = useCallback(async () => {
-    setGameState('complete');
-    await completeGame({ score, level: currentLevelRef.current });
-    playSuccess();
-  }, [score, completeGame, playSuccess]);
-
   const handleBack = useCallback(() => {
     navigate('/games');
   }, [navigate]);
@@ -180,8 +174,11 @@ export function SpellPainterContent() {
       title='Spell Painter'
       onHome={handleBack}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='relative w-full h-full'>
+      <div ref={gameAreaRef} className='relative w-full h-full'>
         {/* HUD - Streak Counter */}
         {gameState === 'playing' && (
           <div className='absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg'>
@@ -295,10 +292,22 @@ export function SpellPainterContent() {
           />
         )}
 
-        {!isReady && gameState === 'playing' && (
+        {!isHandTrackingReady && gameState === 'playing' && (
           <div className='absolute inset-0 flex items-center justify-center bg-black/50'>
             <p className='text-white text-xl'>Loading camera...</p>
           </div>
+        )}
+
+        {cursor && gameState === 'playing' && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={true}
+            size={64}
+            color='#8B5CF6'
+          />
         )}
       </div>
     </GameContainer>

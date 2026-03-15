@@ -197,7 +197,7 @@ export function RainbowBridgeContent() {
 
   if (gameState === 'start') {
     return (
-      <GameContainer title="Rainbow Bridge" webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
+      <GameContainer title="Rainbow Bridge" onHome={() => navigate('/games')} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
         <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
           <h2 className="text-3xl font-bold text-purple-600">Rainbow Bridge 🌈</h2>
           <p className="text-lg text-slate-700 text-center">
@@ -234,7 +234,7 @@ export function RainbowBridgeContent() {
 
   if (gameState === 'complete') {
     return (
-      <GameContainer title="Rainbow Bridge" webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
+      <GameContainer title="Rainbow Bridge" onHome={() => navigate('/games')} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
         <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
           <h2 className="text-4xl font-bold text-purple-600">Rainbow Complete! 🌈</h2>
           <p className="text-2xl font-bold text-slate-700">Score: {score}</p>
@@ -260,7 +260,7 @@ export function RainbowBridgeContent() {
   }
 
   return (
-    <GameContainer title="Rainbow Bridge" webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
+    <GameContainer title="Rainbow Bridge" onHome={() => navigate('/games')} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
       <div
         ref={gameAreaRef}
         className="relative w-full h-full"

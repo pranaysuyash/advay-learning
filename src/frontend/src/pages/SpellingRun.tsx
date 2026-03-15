@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 
 import { GameShell } from '../components/GameShell';
@@ -33,6 +34,7 @@ const ASSETS = {
 };
 
 export const SpellingRunContent = memo(function SpellingRunContent() {
+    const navigate = useNavigate();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const webcamRef = useRef<Webcam>(null);
     const [gameState, setGameState] = useState<GameState>(() => initializeGame(1));
@@ -204,6 +206,7 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
     return (
         <GameContainer
             title="Spelling Run"
+            onHome={() => navigate('/games')}
             score={gameState.score}
             showScore={gameState.status !== 'idle'}
             isPlaying={gameState.status === 'playing'}

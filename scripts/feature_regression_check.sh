@@ -76,7 +76,7 @@ Checks performed:
   - State management comparison
 
 Environment variables:
-  SKIP_FEATURE_CHECK=1         # Skip this check entirely
+  No bypass flags are supported.
   LOC_THRESHOLD=N              # Override net LOC threshold (default: 10)
   TOUCHED_LOC_THRESHOLD=N      # Override touched LOC threshold (default: 10)
   CCN_MAX_THRESHOLD=N          # Override max CCN threshold (default: 20)
@@ -108,10 +108,9 @@ if [[ -z "$MODE" ]]; then
   MODE="staged"
 fi
 
-# Allow override
-if [[ "${SKIP_FEATURE_CHECK:-}" == "1" ]]; then
-  log_info "Skipping feature regression check (SKIP_FEATURE_CHECK=1)"
-  exit 0
+if [[ -n "${SKIP_FEATURE_CHECK:-}" ]]; then
+  log_error "SKIP_FEATURE_CHECK is disabled by repo policy. Resolve regression findings instead of bypassing."
+  exit 2
 fi
 
 if [[ -n "${LOC_THRESHOLD:-}" ]]; then
@@ -449,8 +448,7 @@ check_feature_regression() {
     log_error "PRINCIPLE: Code should be ADDITIVE or IMPROVEMENT, never reductive."
     log_error "═══════════════════════════════════════════════════════════════"
     log_error ""
-    log_error "To bypass ONLY if you've verified thoroughly:"
-    log_error "   git commit --no-verify"
+    log_error "Bypass is disabled. Fix regressions before committing."
     log_error ""
     return 1
   else
@@ -617,8 +615,7 @@ main() {
   else
     log_error "❌ Potential regressions detected!"
     log_error ""
-    log_error "To bypass this check (if changes are intentional):"
-    log_error "  git commit --no-verify"
+    log_error "Bypass is disabled. Fix issues before committing."
     log_error ""
     log_error "To adjust threshold:"
     log_error "  LOC_THRESHOLD=20 git commit"

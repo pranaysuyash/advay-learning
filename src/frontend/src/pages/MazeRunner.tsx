@@ -336,6 +336,7 @@ export const MazeRunnerContent = memo(function MazeRunnerGame() {
   return (
     <GameContainer
       title="Maze Runner"
+      onHome={() => navigate('/games')}
       score={gameState.score}
       isPlaying={gameState.status === 'playing'}
       isHandDetected={handVisible}

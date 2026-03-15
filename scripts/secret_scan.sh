@@ -13,7 +13,7 @@ Purpose:
   - --range scans commit history over a git revision range.
 
 Environment:
-  SKIP_SECRET_SCAN=1   Skip this scanner (not recommended)
+  No bypass flags are supported.
 USAGE
 }
 
@@ -39,9 +39,8 @@ if [[ "$mode" == "--range" && -z "$arg" ]]; then
   exit 2
 fi
 
-if [[ "${SKIP_SECRET_SCAN:-}" == "1" ]]; then
-  log "Skipping secret scan (SKIP_SECRET_SCAN=1)"
-  exit 0
+if [[ -n "${SKIP_SECRET_SCAN:-}" ]]; then
+  die "SKIP_SECRET_SCAN is disabled by repo policy. Resolve findings instead of bypassing."
 fi
 
 repo_root="$(git rev-parse --show-toplevel)"

@@ -149,7 +149,10 @@ describe('LLMService', () => {
     service.setEnabled(true);
     expect(service.isEnabled()).toBe(true);
 
-    service.updateConfig({ maxResponseLength: 77, fallbackModel: 'qwen3.5-3b-instruct' });
+    service.updateConfig({
+      maxResponseLength: 77,
+      fallbackModel: 'qwen3.5-3b-instruct',
+    });
     const cfg = service.getConfig();
     expect(cfg.maxResponseLength).toBe(77);
     expect(cfg.fallbackModel).toBe('qwen3.5-3b-instruct');
@@ -273,7 +276,11 @@ describe('LLMService', () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce({ ok: true, json: async () => ({ models: [] }) })
-      .mockResolvedValueOnce({ ok: false, status: 500, json: async () => ({}) });
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+      });
     globalThis.fetch = fetchMock as any;
 
     const service = new LLMService({
@@ -291,9 +298,8 @@ describe('LLMService', () => {
   });
 
   it('uses HF inference provider when a ready adapter is available', async () => {
-    const { HFInferenceLLMProvider } = await import(
-      './providers/HFInferenceLLMProvider'
-    );
+    const { HFInferenceLLMProvider } =
+      await import('./providers/HFInferenceLLMProvider');
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -361,8 +367,7 @@ describe('LLMService', () => {
       VITE_FEATURE_AI_LLM_RESPONSES_V1: 'true',
       VITE_AI_LLM_ENABLED: 'false',
     });
-    // __BETA_LOCAL_AI_ENABLED__ is false in test env, so enabled is always false
-    expect(cfg.enabled).toBe(false);
+    expect(cfg.enabled).toBe(true);
   });
 
   it('parses env values and falls back for invalid provider/model/length', () => {
@@ -377,8 +382,7 @@ describe('LLMService', () => {
       VITE_AI_PARENT_CONSENT: 'invalid',
     });
 
-    // __BETA_LOCAL_AI_ENABLED__ is false in test env, so enabled is always false
-    expect(cfg.enabled).toBe(false);
+    expect(cfg.enabled).toBe(true);
     expect(cfg.provider).toBe('mock');
     expect(cfg.model).toBe('qwen3.5-1.5b-instruct');
     expect(cfg.fallbackModel).toBe('qwen3.5-0.5b-instruct');
@@ -398,8 +402,7 @@ describe('LLMService', () => {
       VITE_AI_PARENT_CONSENT: 'true',
     });
 
-    // __BETA_LOCAL_AI_ENABLED__ is false in test env, so enabled is always false
-    expect(cfg.enabled).toBe(false);
+    expect(cfg.enabled).toBe(true);
     expect(cfg.provider).toBe('ollama');
     expect(cfg.model).toBe('qwen3.5-7b-instruct');
     expect(cfg.fallbackModel).toBe('smollm3-3b-instruct');

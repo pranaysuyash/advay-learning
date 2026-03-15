@@ -70,6 +70,24 @@ const { webcamRef, cursor, handDetected, isPinching } = useGameHandTracking({
 - [x] **ColorPotions.tsx**: Hand tracking added, cursor visible
 - [x] **ColorSortGame.tsx**: Hand tracking added, cursor visible
 - [x] **StoryBuilder.tsx**: Hand tracking added, cursor visible
+- [x] **WeatherMatch.tsx**: Hand tracking added, cursor visible
+- [x] **CountingObjects.tsx**: Hand tracking added, cursor visible
+- [x] **EndingSounds.tsx**: Hand tracking added, cursor visible
+- [x] **BlendBuilder.tsx**: Hand tracking added, cursor visible
+- [x] **SightWordFlash.tsx**: Hand tracking added, cursor visible
+- [x] **SoundGarden.tsx**: Hand tracking added, cursor visible
+- [x] **TasteMatch.tsx**: Hand tracking added, cursor visible
+- [x] **TextureExplorer.tsx**: Hand tracking added, cursor visible
+- [x] **TidyUpTime.tsx**: Hand tracking added, cursor visible
+- [x] **MoreOrLess.tsx**: Hand tracking added, cursor visible
+- [x] **NumberSequence.tsx**: Hand tracking added, cursor visible
+- [x] **SameAndDifferent.tsx**: Hand tracking added, cursor visible
+- [x] **ShadowMatch.tsx**: Hand tracking added, cursor visible
+- [x] **WordSearch.tsx**: Hand tracking added, cursor visible
+- [x] **LetterSoundMatch.tsx**: Hand tracking added, cursor visible
+- [x] **SyllableClap.tsx**: Hand tracking added, cursor visible
+- [x] **SpellPainter.tsx**: Hand tracking added, cursor visible
+- [x] **PackLunchbox.tsx**: Hand tracking added, cursor visible
 - [x] All games preserve mouse/pointer fallback
 - [x] ESLint passes (no new errors in modified files)
 - [x] No new type errors in modified files
@@ -119,4 +137,13 @@ const { webcamRef, cursor, handDetected, isPinching } = useGameHandTracking({
   - Command: `git add -A` on branch
   - Files staged: 74 files (3434 insertions, 656 deletions)
   - Includes: CV gaps fix, UX audit, MidlineViolator game, ShadowPortal, preview images, game registry updates
+  - Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+- [2026-03-15 17:00] Pre-commit fixes: SimonSays CCN reduction, shared poseMatching utility, TypeScript fixes
+  - Created src/utils/poseMatching.ts for reusable pose matching logic
+  - Reduced SimonSays CCN from 61 to 41 by extracting helpers to shared module
+  - Fixed CursorEmbodiment prop names (cursor->position) in multiple game files
+  - Fixed bodyZone.ts duplicate easterEggs and missing property
+  - Fixed midlineViolatorLogic.ts unused variables
+  - Added MidlineViolator to App.tsx imports
   - Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md

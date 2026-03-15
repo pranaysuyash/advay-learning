@@ -31,11 +31,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
-import {
-  calculatePoseMatchScore,
-  checkFingerMatch,
-  type PoseAction,
-} from '../utils/poseMatching';
+import { calculatePoseMatchScore, checkFingerMatch, type PoseAction } from '../utils/poseMatching';
 
 // Icon components for body actions
 const HeadIcon = () => (

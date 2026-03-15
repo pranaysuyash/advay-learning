@@ -206,6 +206,7 @@ The app's unique value proposition is **camera-based, hands-free learning** for 
   - `priority/*`, `status/*`, `area/*`, `type/*`, `agent/*`
 - Automation sources of truth:
   - `.github/workflows/pr-link-gate.yml`
+  - `.github/workflows/pr-failure-narrative-gate.yml`
   - `.github/workflows/pr-path-labeler.yml`
   - `.github/workflows/project-and-issue-automation.yml`
 
@@ -258,8 +259,6 @@ The app's unique value proposition is **camera-based, hands-free learning** for 
 - Open a PR from `codex/wip-*` -> `main` for AI/human review.
 - Merge to `main` only after review findings are resolved.
 - Direct commits on `main` are blocked by default via `pre-commit`.
-  - Emergency override only with explicit user approval in current chat:
-    - `ALLOW_MAIN_COMMIT=1 git commit ...`
 
 **Branch discipline:**
 
@@ -326,8 +325,8 @@ The app's unique value proposition is **camera-based, hands-free learning** for 
 
 **Override policy:**
 
-- `ALLOW_REFACTORED_SIDE_CARS=1` for intentional temporary sidecar exceptions
-- Use only when the worklog documents why the sidecar must remain temporarily
+- No sidecar bypass override is permitted in local hooks.
+- Promote/refactor cleanly before committing.
 
 ### 6.2 Merge Quality Gate (Mandatory)
 
@@ -648,6 +647,7 @@ The audit-to-ticket gap exists because:
 - [ ] Ensure local workflow gate is enabled (`git config core.hooksPath .githooks`)
 - [ ] Find the correct prompt in prompts/README.md and follow it
 - [ ] Determine work type and select correct prompt
+- [ ] Re-check prompt/instruction alignment before implementation; if user asks for remediation, perform remediation (not cleanup-by-deletion)
 - [ ] Define scope contract (invariants, non-goals, acceptance criteria)
 - [ ] Create or update worklog ticket
 - [ ] Verify environment (Python 3.13+, Node 22+, uv installed)
@@ -666,6 +666,7 @@ The audit-to-ticket gap exists because:
 - [ ] Check for existing tests
 - [ ] Preserve uncommitted parallel work; do not drop unrecognized files/edits
 - [ ] Confirm scope contract is clear
+- [ ] For lint/type cleanup (unused variables/imports/functions), apply intent-first remediation and preserve behavior; only delete code when deadness is proven and documented
 - [ ] Stage changes using `git add -A` (unless user explicitly requests partial staging)
 ```
 
@@ -687,6 +688,7 @@ The audit-to-ticket gap exists because:
   - [ ] If functionality removed: document WHY and what replaces it, or RESTORE it
 - [ ] Run pre-commit checks locally: `./scripts/agent_gate.sh --staged`
 - [ ] If any gate/test/typecheck fails, fix failures completely, rerun checks, then retry commit (do not bypass unless user explicitly authorizes)
+- [ ] Do not use shorthand claims like “pre-existing/unrelated failures”; the agent who encounters the issue resolves it before commit/push
 - [ ] Ensure worklog addendum is updated for code changes
 - [ ] Write meaningful commit message explaining WHAT and WHY
 - [ ] **WAIT for explicit user approval before running `git commit` or `git push`** — never commit/push autonomously
@@ -973,13 +975,13 @@ chmod +x .githooks/* scripts/*.sh
 
 The pre-commit hook runs these checks in order:
 
-| Check                         | Script                                | Purpose                                                                  | Skip Flag                      |
-| ----------------------------- | ------------------------------------- | ------------------------------------------------------------------------ | ------------------------------ |
-| **1. Agent Gate**             | `scripts/agent_gate.sh`               | Worklog updates, audit artifacts, ticket evidence                        | -                              |
-| **2. Secret Scan**            | `scripts/secret_scan.sh`              | Block leaked credentials/API keys                                        | `SKIP_SECRET_SCAN=1`           |
-| **3. Static Maintainability** | `scripts/maintainability_guard.sh`    | Block oversized/high-complexity staged source files, including new files | `SKIP_MAINTAINABILITY_CHECK=1` |
-| **4. Feature Regression**     | `scripts/feature_regression_check.sh` | Detect removed functionality in large refactors                          | `SKIP_FEATURE_CHECK=1`         |
-| **5. Regression Tests**       | `scripts/regression_check.sh`         | Tests, export changes, TypeScript validation                             | `SKIP_REGRESSION_CHECK=1`      |
+| Check                         | Script                                | Purpose                                                                  | Skip Flag |
+| ----------------------------- | ------------------------------------- | ------------------------------------------------------------------------ | --------- |
+| **1. Agent Gate**             | `scripts/agent_gate.sh`               | Worklog updates, audit artifacts, ticket evidence                        | None      |
+| **2. Secret Scan**            | `scripts/secret_scan.sh`              | Block leaked credentials/API keys                                        | None      |
+| **3. Static Maintainability** | `scripts/maintainability_guard.sh`    | Block oversized/high-complexity staged source files, including new files | None      |
+| **4. Feature Regression**     | `scripts/feature_regression_check.sh` | Detect removed functionality in large refactors                          | None      |
+| **5. Regression Tests**       | `scripts/regression_check.sh`         | Tests, export changes, TypeScript validation                             | None      |
 
 #### 1. Agent Gate (`scripts/agent_gate.sh`)
 
@@ -1057,7 +1059,7 @@ The pre-commit hook runs these checks in order:
 
 **When This Check Triggers - AGENT MUST:**
 
-1. **DO NOT just bypass with `--no-verify`**
+1. **Do not bypass checks**
    - This check exists because agents (including you) have accidentally removed features
 
 2. **Manually compare old vs new versions:**
@@ -1130,20 +1132,12 @@ An agent seeing this should have:
 3. Realized users couldn't add children anymore
 4. Restored the functionality before committing
 
-**To bypass ONLY after verification:**
+**Bypass policy:**
 
-```bash
-git commit --no-verify
-# OR
-SKIP_FEATURE_CHECK=1 git commit
-```
-
-**Repo policy override (new):**
-
-- `--no-verify` is prohibited unless the user explicitly requests bypass in the current conversation.
-- Even if commit hooks are skipped, `pre-push` runs mandatory checks (typecheck + related tests for changed frontend files) unless explicit override is provided.
-- Emergency override for pre-push only:
-  - `ALLOW_BYPASS_CHECKS=1 BYPASS_REASON="<reason>" git push`
+- Gate bypass is disallowed for commit/push checks.
+- Only worklog curation flags are allowed:
+  - `ALLOW_WORKLOG_TICKETS_EDIT=1`
+  - `ALLOW_WORKLOG_REWRITE=1`
 
 #### 4. Regression Tests (`scripts/regression_check.sh`)
 
@@ -1311,13 +1305,15 @@ Pass if:
 9. **Never** run ad-hoc “process” work without curating it into repo prompts/docs (if it will be reused)
 10. **Never** delete other agents' work/artifacts (docs, audits, tickets, assets) unless the user explicitly asks or explicitly approves it in the active ticket (recorded with evidence)
 11. **Never** create one-off tools/scripts in `/tmp` or temporary locations—save reusable helpers to `tools/` with documentation and maintain them
-12. **Never** use `git commit --no-verify` or `SKIP_*` gate bypass flags unless the user explicitly authorizes bypass for the current task
+12. **Never** use `git commit --no-verify`, force-push, or non-worklog gate bypass flags
 13. **Never** claim failures are “unrelated/pre-existing” as a reason to bypass checks when user scope is full-project; either fix, or stop and report concrete blockers
 14. **Never** reclassify staged files as “out of scope” after running `git add -A`; staged changes must be carried through gate, PR, and merge workflow
 15. **Never** modify `.env`/`.env.*` files while remediating secret scans unless the user explicitly instructs it; fix hardcoded secrets in tracked code instead
 16. **Never** proceed to push after hook failures; first resolve failing checks, rerun them to green, then re-attempt commit/push
-17. **Never** commit directly on `main` unless the user explicitly approves `ALLOW_MAIN_COMMIT=1` for the current task
+17. **Never** commit directly on `main`
 18. **Never** commit or push changes without explicit user approval in the current conversation — even if all checks pass, always wait for the user to say "commit", "push", "merge", or equivalent
+19. **Never** resolve lint/type warnings by defaulting to deletion; prefer intent-first remediation and only delete when dead code is proven with evidence in worklog notes
+20. **Never** use “pre-existing/unrelated failures/tests” as a bypass narrative; if you encounter the issue, you resolve it
 
 ---
 

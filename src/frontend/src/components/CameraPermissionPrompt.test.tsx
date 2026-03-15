@@ -1,5 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { CameraPermissionPrompt, CameraPermissionWrapper } from './CameraPermissionPrompt';
+import {
+  CameraPermissionPrompt,
+  CameraPermissionWrapper,
+} from './CameraPermissionPrompt';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 describe('CameraPermissionPrompt', () => {
@@ -32,9 +35,11 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      expect(screen.getByText('Ready to Play?')).toBeInTheDocument();
       expect(
-        screen.getByText(/We'd love to see your hands move!/),
+        screen.getByRole('heading', { name: /Activate Magic Vision/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Wave your hands to draw in the air/i),
       ).toBeInTheDocument();
     });
 
@@ -68,8 +73,7 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      const svg = document.querySelector('svg');
-      expect(svg).toBeInTheDocument();
+      expect(screen.getByText('🪄')).toBeInTheDocument();
     });
 
     it('renders action buttons', () => {
@@ -83,8 +87,12 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      expect(screen.getByLabelText('Request camera permission')).toBeInTheDocument();
-      expect(screen.getByLabelText('Skip camera and play with touch')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Activate Magic Vision'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Play with touch instead'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -100,7 +108,7 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      const cameraButton = screen.getByLabelText('Request camera permission');
+      const cameraButton = screen.getByLabelText('Activate Magic Vision');
       fireEvent.click(cameraButton);
 
       await waitFor(() => {
@@ -125,7 +133,7 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      const cameraButton = screen.getByLabelText('Request camera permission');
+      const cameraButton = screen.getByLabelText('Activate Magic Vision');
       fireEvent.click(cameraButton);
 
       await waitFor(() => {
@@ -150,14 +158,12 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      const cameraButton = screen.getByLabelText('Request camera permission');
+      const cameraButton = screen.getByLabelText('Activate Magic Vision');
       fireEvent.click(cameraButton);
 
       await waitFor(
         () => {
-          expect(
-            screen.getByText(/Camera permission was denied/),
-          ).toBeInTheDocument();
+          expect(screen.getByText(/needs camera access/i)).toBeInTheDocument();
         },
         { timeout: 3000 },
       );
@@ -172,7 +178,7 @@ describe('CameraPermissionPrompt', () => {
       expect(screen.getByText(/Try Again/)).toBeInTheDocument();
 
       // User must explicitly click "Play with Touch" to dismiss
-      const touchButton = screen.getByLabelText('Skip camera and play with touch');
+      const touchButton = screen.getByLabelText('Play with touch instead');
       fireEvent.click(touchButton);
       expect(onDenied).toHaveBeenCalled();
     });
@@ -194,14 +200,12 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      const cameraButton = screen.getByLabelText('Request camera permission');
+      const cameraButton = screen.getByLabelText('Activate Magic Vision');
       fireEvent.click(cameraButton);
 
       await waitFor(
         () => {
-          expect(
-            screen.getByText(/No camera found on this device/),
-          ).toBeInTheDocument();
+          expect(screen.getByText(/No camera found/i)).toBeInTheDocument();
         },
         { timeout: 3000 },
       );
@@ -224,14 +228,12 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      const cameraButton = screen.getByLabelText('Request camera permission');
+      const cameraButton = screen.getByLabelText('Activate Magic Vision');
       fireEvent.click(cameraButton);
 
       await waitFor(
         () => {
-          expect(
-            screen.getByText(/Your camera is being used by another app/),
-          ).toBeInTheDocument();
+          expect(screen.getByText(/Camera is busy/i)).toBeInTheDocument();
         },
         { timeout: 3000 },
       );
@@ -248,7 +250,7 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      const skipButton = screen.getByLabelText('Skip camera and play with touch');
+      const skipButton = screen.getByLabelText('Play with touch instead');
       fireEvent.click(skipButton);
 
       expect(onDenied).toHaveBeenCalled();
@@ -277,7 +279,7 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      const cameraButton = screen.getByLabelText('Request camera permission');
+      const cameraButton = screen.getByLabelText('Activate Magic Vision');
       fireEvent.click(cameraButton);
 
       // Button should be disabled while loading
@@ -302,7 +304,7 @@ describe('CameraPermissionPrompt', () => {
         />,
       );
 
-      const cameraButton = screen.getByLabelText('Request camera permission');
+      const cameraButton = screen.getByLabelText('Activate Magic Vision');
       fireEvent.click(cameraButton);
 
       await waitFor(() => {
@@ -347,7 +349,9 @@ describe('CameraPermissionWrapper', () => {
       </CameraPermissionWrapper>,
     );
 
-    expect(screen.getByText('Ready to Play?')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Activate Magic Vision/i }),
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('game-content')).not.toBeInTheDocument();
   });
 
@@ -364,7 +368,7 @@ describe('CameraPermissionWrapper', () => {
       </CameraPermissionWrapper>,
     );
 
-    const cameraButton = screen.getByLabelText('Request camera permission');
+    const cameraButton = screen.getByLabelText('Activate Magic Vision');
     fireEvent.click(cameraButton);
 
     await waitFor(() => {
@@ -381,7 +385,7 @@ describe('CameraPermissionWrapper', () => {
 
     expect(screen.queryByTestId('game-content')).not.toBeInTheDocument();
 
-    const cameraButton = screen.getByLabelText('Request camera permission');
+    const cameraButton = screen.getByLabelText('Activate Magic Vision');
     fireEvent.click(cameraButton);
 
     await waitFor(() => {
@@ -402,7 +406,7 @@ describe('CameraPermissionWrapper', () => {
       </CameraPermissionWrapper>,
     );
 
-    const skipButton = screen.getByLabelText('Skip camera and play with touch');
+    const skipButton = screen.getByLabelText('Play with touch instead');
     fireEvent.click(skipButton);
 
     expect(onDenied).toHaveBeenCalled();

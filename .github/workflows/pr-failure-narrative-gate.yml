@@ -1,0 +1,144 @@
+name: PR Failure Narrative Gate
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created, edited]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+  pull_request_review_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  enforce-no-bypass-narrative:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block "pre-existing/unrelated failures" bypass narrative
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const getPullNumber = () => {
+              if (context.payload.pull_request?.number) return context.payload.pull_request.number;
+              if (context.payload.issue?.pull_request && context.payload.issue?.number) return context.payload.issue.number;
+              if (context.payload.review?.pull_request_url) {
+                const parts = context.payload.review.pull_request_url.split("/");
+                return Number(parts[parts.length - 1]);
+              }
+              if (context.payload.comment?.pull_request_url) {
+                const parts = context.payload.comment.pull_request_url.split("/");
+                return Number(parts[parts.length - 1]);
+              }
+              return null;
+            };
+
+            const pull_number = getPullNumber();
+            if (!pull_number || Number.isNaN(pull_number)) {
+              core.info("No pull request context found; skipping PR failure narrative gate.");
+              return;
+            }
+
+            const pr = await github.rest.pulls.get({ owner, repo, pull_number });
+            if (pr.data.draft) {
+              core.info("Draft PR; skipping gate.");
+              return;
+            }
+
+            const issueComments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: pull_number, per_page: 100 }
+            );
+            const reviewComments = await github.paginate(
+              github.rest.pulls.listReviewComments,
+              { owner, repo, pull_number, per_page: 100 }
+            );
+            const reviews = await github.paginate(
+              github.rest.pulls.listReviews,
+              { owner, repo, pull_number, per_page: 100 }
+            );
+
+            const entries = [];
+            entries.push({
+              source: "PR body",
+              author: pr.data.user?.login || "unknown",
+              text: `${pr.data.title || ""}\n${pr.data.body || ""}`.trim(),
+            });
+
+            for (const c of issueComments) {
+              entries.push({
+                source: `Issue comment #${c.id}`,
+                author: c.user?.login || "unknown",
+                text: c.body || "",
+              });
+            }
+
+            for (const c of reviewComments) {
+              entries.push({
+                source: `Review comment #${c.id}`,
+                author: c.user?.login || "unknown",
+                text: c.body || "",
+              });
+            }
+
+            for (const r of reviews) {
+              entries.push({
+                source: `Review summary #${r.id}`,
+                author: r.user?.login || "unknown",
+                text: r.body || "",
+              });
+            }
+
+            const patterns = [
+              {
+                name: "pre-existing failure/test narrative",
+                re: /\bpre[- ]?existing\b[\s\S]{0,120}\b(fail(?:ure|ing|ed|s)?|test(?:s)?|issue(?:s)?|error(?:s)?|gate(?:s)?|check(?:s)?|ci)\b/i,
+              },
+              {
+                name: "unrelated failure/test narrative",
+                re: /\bunrelated\b[\s\S]{0,120}\b(fail(?:ure|ing|ed|s)?|test(?:s)?|issue(?:s)?|error(?:s)?|gate(?:s)?|check(?:s)?|ci)\b/i,
+              },
+              {
+                name: "before my changes failure/test narrative",
+                re: /\bbefore my changes\b[\s\S]{0,120}\b(fail(?:ure|ing|ed|s)?|test(?:s)?|issue(?:s)?|error(?:s)?|gate(?:s)?|check(?:s)?|ci)\b/i,
+              },
+              {
+                name: "verified exist before changes narrative",
+                re: /\bverified\b[\s\S]{0,120}\b(exist|existed)\b[\s\S]{0,120}\bbefore my changes\b/i,
+              },
+            ];
+
+            const violations = [];
+            for (const entry of entries) {
+              const text = (entry.text || "").trim();
+              if (!text) continue;
+              for (const p of patterns) {
+                if (p.re.test(text)) {
+                  const snippet = text.replace(/\s+/g, " ").slice(0, 220);
+                  violations.push(`${entry.source} by @${entry.author} matched "${p.name}": "${snippet}"`);
+                  break;
+                }
+              }
+            }
+
+            if (violations.length > 0) {
+              core.setFailed(
+                [
+                  "Found prohibited failure-bypass narrative in PR discussion.",
+                  "Policy: the agent who encounters an issue resolves it before commit/push.",
+                  "Remove/update the matching text and provide resolution evidence instead.",
+                  "",
+                  ...violations.slice(0, 20),
+                ].join("\n")
+              );
+              return;
+            }
+
+            core.info("PR failure narrative gate passed.");

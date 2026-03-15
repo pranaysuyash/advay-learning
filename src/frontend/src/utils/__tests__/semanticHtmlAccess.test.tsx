@@ -285,7 +285,7 @@ describe('Semantic HTML Accessibility', () => {
         await flushPromises();
       });
       const checkButton = screen.getByRole('button', {
-        name: /check my tracing/i,
+        name: /done tracing - check my work/i,
       });
       await act(async () => {
         fireEvent.click(checkButton);

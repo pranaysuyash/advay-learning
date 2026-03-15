@@ -4,15 +4,36 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
+# Hard block local gate bypasses.
+# Only worklog-specific override flags are allowed.
+disallowed_overrides=(
+  "ALLOW_MAIN_COMMIT"
+  "ALLOW_REFACTORED_SIDE_CARS"
+  "ALLOW_BYPASS_CHECKS"
+  "SKIP_SECRET_SCAN"
+  "SKIP_DB_MIGRATION_CHECK"
+  "SKIP_MAINTAINABILITY_CHECK"
+  "SKIP_FEATURE_CHECK"
+  "SKIP_REGRESSION_CHECK"
+  "SKIP_REGRESSION_TESTS"
+  "SKIP_EXPORT_CHECK"
+)
+for var_name in "${disallowed_overrides[@]}"; do
+  if [[ -n "${!var_name:-}" ]]; then
+    echo "[pre-commit] $var_name is not allowed." >&2
+    echo "[pre-commit] Resolve failing checks instead of bypassing them." >&2
+    echo "[pre-commit] Only worklog overrides are permitted: ALLOW_WORKLOG_TICKETS_EDIT, ALLOW_WORKLOG_REWRITE." >&2
+    exit 1
+  fi
+done
+
 # Block direct commits on main to enforce PR-based review flow.
-# Emergency override only with explicit user approval per task.
 current_branch="$(git rev-parse --abbrev-ref HEAD)"
-if [[ "$current_branch" == "main" && "${ALLOW_MAIN_COMMIT:-}" != "1" ]]; then
+if [[ "$current_branch" == "main" ]]; then
   echo "[pre-commit] Direct commits on 'main' are blocked." >&2
   echo "[pre-commit] Create a short-lived branch and commit there for PR review:" >&2
   echo "[pre-commit]   ./scripts/start_wip_branch.sh <ticket-or-scope>" >&2
   echo "[pre-commit]   # or: git switch -c codex/wip-<ticket-or-scope>" >&2
-  echo "[pre-commit] Emergency override (user-approved only): ALLOW_MAIN_COMMIT=1 git commit ..." >&2
   exit 1
 fi
 
@@ -31,46 +52,21 @@ fi
 ./scripts/agent_gate.sh --staged
 
 # 2. Secret scan: block commits that include leaked credentials
-# Skip with SKIP_SECRET_SCAN=1 or --no-verify
-if [[ "${SKIP_SECRET_SCAN:-}" != "1" ]]; then
-  ./scripts/secret_scan.sh --staged
-else
-  echo "[pre-commit] Skipping secret scan (SKIP_SECRET_SCAN=1)"
-fi
+./scripts/secret_scan.sh --staged
 
 # 3. DB migration guard: block model-layer DB changes without Alembic migration
-# Skip with SKIP_DB_MIGRATION_CHECK=1 or --no-verify
-if [[ "${SKIP_DB_MIGRATION_CHECK:-}" != "1" ]]; then
-  ./scripts/db_migration_guard.sh --staged
-else
-  echo "[pre-commit] Skipping DB migration check (SKIP_DB_MIGRATION_CHECK=1)"
-fi
+./scripts/db_migration_guard.sh --staged
 
 # 4. Static maintainability guard: catch oversized/high-complexity source files
 # Checks staged blobs directly, including newly added files.
-# Skip with SKIP_MAINTAINABILITY_CHECK=1 or --no-verify
-if [[ "${SKIP_MAINTAINABILITY_CHECK:-}" != "1" ]]; then
-  ./scripts/maintainability_guard.sh --staged
-else
-  echo "[pre-commit] Skipping maintainability guard (SKIP_MAINTAINABILITY_CHECK=1)"
-fi
+./scripts/maintainability_guard.sh --staged
 
 # 5. Feature regression check: detect removed functionality in large refactors
 # Triggered when >10% LOC changed in existing files
-# Skip with SKIP_FEATURE_CHECK=1 or --no-verify
-if [[ "${SKIP_FEATURE_CHECK:-}" != "1" ]]; then
-  ./scripts/feature_regression_check.sh --staged
-else
-  echo "[pre-commit] Skipping feature regression check (SKIP_FEATURE_CHECK=1)"
-fi
+./scripts/feature_regression_check.sh --staged
 
 # 6. Regression check: tests + export comparison + TypeScript
-# Skip with SKIP_REGRESSION_CHECK=1 or --no-verify
-if [[ "${SKIP_REGRESSION_CHECK:-}" != "1" ]]; then
-  ./scripts/regression_check.sh --staged
-else
-  echo "[pre-commit] Skipping regression check (SKIP_REGRESSION_CHECK=1)"
-fi
+./scripts/regression_check.sh --staged
 
 # 7. Auto-push/PR threshold arming:
 # If staged file count crosses threshold, arm post-commit automation.

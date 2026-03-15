@@ -7,9 +7,16 @@
  * @ticket TCK-20260310-010
  */
 
-import { memo, useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+
 import {
   DragDropSystem,
   type DraggableItem,
@@ -44,6 +51,36 @@ function PackLunchboxGame() {
   
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({ x: 0, y: 0 });
   const [isPinching, setIsPinching] = useState(false);
+
+  // Hand tracking state
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const isPlaying = gameState === 'playing';
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+    // Convert normalized coordinates to screen coordinates
+    setCursorPosition({
+      x: tip.x * window.innerWidth,
+      y: tip.y * window.innerHeight,
+    });
+  }, []);
+
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'PackLunchbox',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isPlaying, isHandTrackingReady, isModelLoading, startTracking]);
 
   const { playSuccess, playCelebration, playClick, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -194,7 +231,8 @@ function PackLunchboxGame() {
   const lunchboxResult = evaluateLunchbox(lunchboxItems);
 
   return (
-    <div 
+    <div
+      ref={gameAreaRef}
       className="fixed inset-0 overflow-hidden"
       role="application"
       aria-label="Pack Lunchbox Game"
@@ -328,6 +366,19 @@ function PackLunchboxGame() {
               className="w-16 h-16 bg-yellow-400 rounded-full opacity-50"
             />
           </div>
+
+          {/* GameCursor for hand tracking */}
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace='normalized'
+              containerRef={gameAreaRef}
+              isPinching={isPinching}
+              isHandDetected={true}
+              size={64}
+              color='#4CAF50'
+            />
+          )}
         </div>
       )}
 

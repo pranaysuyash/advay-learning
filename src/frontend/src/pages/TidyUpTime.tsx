@@ -6,6 +6,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Home, Clock, Star, Trophy, RotateCcw, Sparkles } from 'lucide-react';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
@@ -30,6 +31,7 @@ import {
 } from '../games/tidyUpTimeLogic';
 
 function TidyUpTimeGameContent() {
+  const navigate = useNavigate();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('tidy-up-time');
   const { completeGame } = useGameCompletion('tidy-up-time');
@@ -184,7 +186,7 @@ function TidyUpTimeGameContent() {
   if (showMenu) {
     return (
       <GameShell gameId='tidy-up-time' gameName='Tidy Up Time'>
-        <GameContainer title='Tidy Up Time'>
+        <GameContainer title='Tidy Up Time' onHome={() => navigate('/games')}>
           <div className='flex flex-col items-center justify-center min-h-[60vh] gap-8'>
             <motion.div
               initial={{ scale: 0 }}
@@ -224,7 +226,7 @@ function TidyUpTimeGameContent() {
 
     return (
       <GameShell gameId='tidy-up-time' gameName='Tidy Up Time'>
-        <GameContainer title='Tidy Up Time'>
+        <GameContainer title='Tidy Up Time' onHome={() => navigate('/games')}>
           <div className='flex flex-col items-center justify-center min-h-[60vh] gap-6'>
             <motion.div
               initial={{ scale: 0, rotate: -180 }}

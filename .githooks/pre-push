@@ -12,6 +12,27 @@ echo ""
 # Check if we're in the backend directory context
 cd "$(git rev-parse --show-toplevel)"
 
+disallowed_overrides=(
+    "ALLOW_MAIN_COMMIT"
+    "ALLOW_REFACTORED_SIDE_CARS"
+    "ALLOW_BYPASS_CHECKS"
+    "SKIP_SECRET_SCAN"
+    "SKIP_DB_MIGRATION_CHECK"
+    "SKIP_MAINTAINABILITY_CHECK"
+    "SKIP_FEATURE_CHECK"
+    "SKIP_REGRESSION_CHECK"
+    "SKIP_REGRESSION_TESTS"
+    "SKIP_EXPORT_CHECK"
+)
+for var_name in "${disallowed_overrides[@]}"; do
+    if [[ -n "${!var_name:-}" ]]; then
+        echo "❌ pre-push blocked: $var_name is not allowed."
+        echo "Resolve checks instead of bypassing them."
+        echo "Only worklog overrides are permitted: ALLOW_WORKLOG_TICKETS_EDIT, ALLOW_WORKLOG_REWRITE."
+        exit 1
+    fi
+done
+
 # Scan commits being pushed for secrets so branch-history leaks are caught
 # locally before GitHub push protection rejects the ref update.
 had_refs=false
@@ -24,10 +45,23 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     fi
 
     if [[ -n "${remote_sha:-}" && ! "$remote_sha" =~ ^0+$ ]]; then
+        if ! git merge-base --is-ancestor "$remote_sha" "$local_sha"; then
+            echo ""
+            echo "❌ Non-fast-forward push detected for $local_ref -> $remote_ref."
+            echo "Force pushes are blocked. Rebase/merge and push a fast-forward update."
+            exit 1
+        fi
         range="${remote_sha}..${local_sha}"
     else
         range="${local_sha} --not --remotes"
     fi
+
+    # Enforce agent-gate on every pushed commit so --no-verify local commits
+    # cannot bypass required worklog/ticket policy checks.
+    while read -r commit_sha; do
+        [[ -z "${commit_sha:-}" ]] && continue
+        ./scripts/agent_gate.sh --commit "$commit_sha"
+    done < <(git rev-list --reverse $range)
 
     echo "🔐 Scanning pushed commit history for secrets..."
     if ! ./scripts/secret_scan.sh --range "$range"; then
@@ -40,6 +74,7 @@ done
 
 if [[ "$had_refs" != true ]]; then
     current_sha="$(git rev-parse HEAD)"
+    ./scripts/agent_gate.sh --commit "$current_sha"
     echo "🔐 Scanning local-only commit history for secrets..."
     if ! ./scripts/secret_scan.sh --range "${current_sha} --not --remotes"; then
         echo ""

@@ -39,6 +39,7 @@ This file is the _primary workspace instruction_ for GitHub Copilot (and related
 
 - All work should be driven by one of the repository prompts in `prompts/`.
 - Use `prompts/README.md` to pick the correct prompt for your task (audit, remediation, review, verification, etc.).
+- Re-check prompt + user intent before editing: remediation tasks should remediate behavior, not default to deleting code to silence warnings.
 
 ### ✅ Track work in the worklog
 
@@ -53,7 +54,14 @@ This file is the _primary workspace instruction_ for GitHub Copilot (and related
 ### ✅ Run the pre-commit gates
 
 - Commits are protected by pre-commit hooks (see `scripts/agent_gate.sh`).
-- Fix any failures; do **not** bypass with `--no-verify` unless explicitly approved.
+- Fix any failures; bypass/force-push is not permitted (except documented worklog curation overrides).
+- Do not classify failures as “pre-existing/unrelated” to proceed; the agent who encounters the issue resolves it.
+
+### ✅ Prefer intent-first remediation for lint/type fixes
+
+- For unused variables/imports/functions, do not auto-delete by default.
+- Preserve behavior and implementation intent; delete only when dead code is proven.
+- Record rationale/evidence in the linked worklog ticket.
 
 ### ✅ Wait for explicit approval before commit/push
 
