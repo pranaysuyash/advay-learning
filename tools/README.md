@@ -101,6 +101,98 @@ cd tools && python3 -m http.server 8080
 
 ---
 
+## 🔍 GitHub PR Review Thread Manager
+
+**Purpose:** Manage GitHub PR review threads - check unresolved threads, resolve bot reviews, and unblock merge gates.
+
+**File:** `tools/review_thread_manager.py`
+
+### Why This Tool Exists
+
+- **Bot Thread Resolution:** Quickly resolve review threads from cubic-dev-ai, coderabbitai, and other bots
+- **Gate Debugging:** Check which threads are blocking merge gates (pr-comment-gate, review-policy)
+- **Bulk Operations:** Resolve all threads from a specific bot in one command
+- **Pagination Handling:** Automatically handles GitHub's 100-item pagination limit
+
+### Usage
+
+```bash
+# Check all unresolved threads
+python3 tools/review_thread_manager.py check --pr 50
+
+# Check threads that would fail workflow gate (excludes bots)
+python3 tools/review_thread_manager.py check --pr 50 --filter-workflow
+
+# Check threads from specific author
+python3 tools/review_thread_manager.py check --pr 50 --author cubic-dev-ai
+
+# Resolve all threads from a bot
+python3 tools/review_thread_manager.py resolve --pr 50 --author cubic-dev-ai
+
+# Resolve specific thread by ID
+python3 tools/review_thread_manager.py resolve --id PRRT_kwDORGg-1850bRtg
+
+# Resolve all non-bot unresolved threads
+python3 tools/review_thread_manager.py resolve-all --pr 50
+```
+
+### Output Example
+
+```
+Total threads: 216
+Unresolved: 4
+Excluded by workflow (bot): 1
+Would fail workflow: 3
+
+Threads that would fail workflow:
+  PRRT_kwDORGg-1850bRtg - @cubic-dev-ai - src/pages/Game.tsx:123
+  PRRT_kwDORGg-1850bRti - @cubic-dev-ai - docs/tickets/TCK-xxx.md:78
+  PRRT_kwDORGg-1850bRtk - @cubic-dev-ai - src/pages/Other.tsx:301
+```
+
+### Bot Patterns Excluded by Default
+
+- `[bot]` - Any author containing "[bot]" suffix
+- `github-advanced-security` - GitHub's security scanning bot
+
+---
+
+## 📋 Quick Thread Utilities
+
+**Purpose:** Lightweight single-purpose scripts for common thread operations.
+
+### find_unresolved.py
+
+Quick check for unresolved threads with exit code for CI/scripting:
+
+```bash
+# Basic check (exit 0 if clean, exit 1 if unresolved non-bot threads)
+python3 tools/find_unresolved.py --pr 50
+
+# JSON output for piping
+python3 tools/find_unresolved.py --pr 50 --json
+```
+
+### resolve_threads.py
+
+Bulk resolve threads with filtering options:
+
+```bash
+# Resolve all threads from a bot
+python3 tools/resolve_threads.py --pr 50 --author cubic-dev-ai
+
+# Dry run first to see what would happen
+python3 tools/resolve_threads.py --pr 50 --author cubic-dev-ai --dry-run
+
+# Resolve specific thread IDs
+python3 tools/resolve_threads.py --ids PRRT_xxx PRRT_yyy PRRT_zzz
+
+# Resolve all non-bot unresolved threads
+python3 tools/resolve_threads.py --pr 50 --all
+```
+
+---
+
 ## Deprecated Tools
 
 ### Platformer-Specific Sync Tool

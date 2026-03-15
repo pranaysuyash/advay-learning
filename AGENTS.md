@@ -107,10 +107,9 @@ This document governs how AI agents (including myself and others) work on the Ad
 ### What This Means
 
 This app is a **multi-modal vision platform** where children interact with games using:
-
 - **Hand tracking** (index finger pointing, pinch-to-grab, hand gestures)
 - **Face tracking** (head tilt, facial expressions)
-- **Pose tracking** (full-body movements, arm positions, jumping)
+- **Pose tracking** (full body movements, arm positions, jumping)
 - **Voice input** (speech recognition for voice-controlled games)
 
 **Each game can require different combinations of these modes.** A game might need only hand tracking, or hand + face, or all three visual modes. The specific combination is determined by the game's design requirements.
@@ -134,7 +133,7 @@ This app is a **multi-modal vision platform** where children interact with games
 
 4. **The `cv` field in gameRegistry is authoritative**:
    - If `cv: ['hand']` — game MUST work with hand tracking
-   - If `cv: ['pose']` — game MUST work with pose tracking
+   - If `cv: ['pose']` — game MUST work with pose tracking  
    - If `cv: ['hand', 'face']` — game MUST work with BOTH
    - If `cv: []` or missing — this is a bug that needs fixing
 
@@ -153,14 +152,14 @@ This app is a **multi-modal vision platform** where children interact with games
 
 ### Key Files for Vision Implementation
 
-| File                                                  | Purpose                              |
-| ----------------------------------------------------- | ------------------------------------ |
-| `src/frontend/src/hooks/useGameHandTracking.ts`       | Hand tracking hook                   |
-| `src/frontend/src/hooks/useGamePoseTracking.ts`       | Pose tracking hook                   |
-| `src/frontend/src/hooks/useGameFaceTracking.ts`       | Face tracking hook                   |
-| `docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md` | Implementation guide                 |
-| `src/frontend/src/data/gameRegistry.ts`               | Game manifest with `cv: [...]` field |
-| `docs/audit/CONTROL_MODE_AUDIT_2026-03-12.md`         | Full audit of CV vs pointer status   |
+| File | Purpose |
+|------|---------|
+| `src/frontend/src/hooks/useGameHandTracking.ts` | Hand tracking hook |
+| `src/frontend/src/hooks/useGamePoseTracking.ts` | Pose tracking hook |
+| `src/frontend/src/hooks/useGameFaceTracking.ts` | Face tracking hook |
+| `docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md` | Implementation guide |
+| `src/frontend/src/data/gameRegistry.ts` | Game manifest with `cv: [...]` field |
+| `docs/audit/CONTROL_MODE_AUDIT_2026-03-12.md` | Full audit of CV vs pointer status |
 
 ### Why This Matters
 
@@ -416,7 +415,46 @@ EOF
 echo "Added to tools/README.md with usage examples"
 ```
 
-### 7.1 Kenney Asset Source Policy
+### 7.1 Saving Inline Utility Scripts
+
+**When creating helpful scripts during tasks** (e.g., checking GitHub threads, parsing logs, analyzing data), always save them to `tools/` even if they were created inline:
+
+```python
+# Example: You create a script inline to check PR review threads
+# Instead of leaving it as a one-off, save it:
+
+# 1. Save to tools/ with descriptive name
+#    tools/check_review_threads.py
+#    tools/resolve_github_threads.py
+#    tools/find_unresolved_pr_comments.py
+
+# 2. Update tools/README.md with:
+#    - Purpose
+#    - Usage examples
+#    - What patterns it excludes/handles
+
+# 3. Make it reusable with argparse for different inputs
+python3 tools/check_review_threads.py --pr 50 --filter-bot
+```
+
+**Common utility categories to save:**
+
+| Category | Example Filenames | Purpose |
+|----------|------------------|---------|
+| GitHub PR mgmt | `check_unresolved_threads.py`, `resolve_review_threads.py` | Thread resolution, gate debugging |
+| CI/CD debugging | `check_workflow_status.py`, `parse_ci_logs.py` | Analyze CI failures |
+| Code analysis | `count_exports.py`, `find_unused_imports.py` | Static analysis helpers |
+| Data parsing | `parse_test_results.py`, `extract_metrics.py` | Parse outputs for reporting |
+| Asset management | `validate_assets.py`, `check_image_sizes.py` | Asset pipeline helpers |
+
+**Why save even "temporary" scripts:**
+
+- Future agents face the same problems
+- GitHub API patterns (GraphQL pagination, thread resolution) are reusable
+- CI debugging patterns repeat across PRs
+- Builds institutional knowledge in `tools/` directory
+
+### 7.2 Kenney Asset Source Policy
 
 **Canonical local source for this repo:**
 
@@ -976,13 +1014,13 @@ chmod +x .githooks/* scripts/*.sh
 
 The pre-commit hook runs these checks in order:
 
-| Check                         | Script                                | Purpose                                                                  | Skip Flag |
-| ----------------------------- | ------------------------------------- | ------------------------------------------------------------------------ | --------- |
-| **1. Agent Gate**             | `scripts/agent_gate.sh`               | Worklog updates, audit artifacts, ticket evidence                        | None      |
-| **2. Secret Scan**            | `scripts/secret_scan.sh`              | Block leaked credentials/API keys                                        | None      |
-| **3. Static Maintainability** | `scripts/maintainability_guard.sh`    | Block oversized/high-complexity staged source files, including new files | None      |
-| **4. Feature Regression**     | `scripts/feature_regression_check.sh` | Detect removed functionality in large refactors                          | None      |
-| **5. Regression Tests**       | `scripts/regression_check.sh`         | Tests, export changes, TypeScript validation                             | None      |
+| Check                         | Script                                | Purpose                                                                  | Skip Flag                      |
+| ----------------------------- | ------------------------------------- | ------------------------------------------------------------------------ | ------------------------------ |
+| **1. Agent Gate**             | `scripts/agent_gate.sh`               | Worklog updates, audit artifacts, ticket evidence                        | -                              |
+| **2. Secret Scan**            | `scripts/secret_scan.sh`              | Block leaked credentials/API keys                                        | `SKIP_SECRET_SCAN=1`           |
+| **3. Static Maintainability** | `scripts/maintainability_guard.sh`    | Block oversized/high-complexity staged source files, including new files | `SKIP_MAINTAINABILITY_CHECK=1` |
+| **4. Feature Regression**     | `scripts/feature_regression_check.sh` | Detect removed functionality in large refactors                          | `SKIP_FEATURE_CHECK=1`         |
+| **5. Regression Tests**       | `scripts/regression_check.sh`         | Tests, export changes, TypeScript validation                             | `SKIP_REGRESSION_CHECK=1`      |
 
 #### 1. Agent Gate (`scripts/agent_gate.sh`)
 
@@ -1133,12 +1171,20 @@ An agent seeing this should have:
 3. Realized users couldn't add children anymore
 4. Restored the functionality before committing
 
-**Bypass policy:**
+**To bypass ONLY after verification:**
 
-- Gate bypass is disallowed for commit/push checks.
-- Only worklog curation flags are allowed:
-  - `ALLOW_WORKLOG_TICKETS_EDIT=1`
-  - `ALLOW_WORKLOG_REWRITE=1`
+```bash
+git commit --no-verify
+# OR
+SKIP_FEATURE_CHECK=1 git commit
+```
+
+**Repo policy override (new):**
+
+- `--no-verify` is prohibited unless the user explicitly requests bypass in the current conversation.
+- Even if commit hooks are skipped, `pre-push` runs mandatory checks (typecheck + related tests for changed frontend files) unless explicit override is provided.
+- Emergency override for pre-push only:
+  - `ALLOW_BYPASS_CHECKS=1 BYPASS_REASON="<reason>" git push`
 
 #### 4. Regression Tests (`scripts/regression_check.sh`)
 
