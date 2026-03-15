@@ -62,7 +62,7 @@ export const NUMBER_JUNGLE_GAMES: GameManifest[] = [
     vibe: 'chill',
     ageRange: '4-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'shape-circle', chance: 0.2 },

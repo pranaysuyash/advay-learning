@@ -169,12 +169,12 @@ export function CelebrationOverlay({
     '#3b82f6',
   ]);
 
-  // Auto-dismiss after animation completes
+  // Auto-dismiss after animation completes (reduced from 2.5s to 2s for snappier feel)
   useEffect(() => {
     if (show) {
       const timer = setTimeout(() => {
         onComplete();
-      }, 2500);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [show, onComplete]);
@@ -282,12 +282,12 @@ export function CelebrationOverlay({
 
             {/* Tap to continue hint */}
             <motion.p
-              className='text-slate-400 text-sm'
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5 }}
+              className='text-advay-slate font-bold text-base bg-white/80 px-6 py-2 rounded-full border-2 border-[#F2CC8F] shadow-md'
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
             >
-              Tap anywhere to continue
+              Tap to continue →
             </motion.p>
           </motion.div>
         </motion.div>

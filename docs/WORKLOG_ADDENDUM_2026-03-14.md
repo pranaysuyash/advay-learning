@@ -592,3 +592,32 @@ Status updates:
 - [2026-03-14 19:32] **DONE** — CI lint errors fixed, PR linked to issue #49
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+---
+
+## TCK-20260314-010 :: GameContainer Component Remediation
+
+Ticket Stamp: STAMP-20260314T125500Z-codex-gc1
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-03-14
+Status: **DONE**
+
+Scope contract:
+
+- In-scope: `src/frontend/src/components/GameContainer.tsx`, `src/frontend/src/components/__tests__/GameContainer.test.tsx`
+- Behavior change allowed: YES (onHome now required, icon fix)
+
+Execution log:
+
+- [2026-03-14 19:57] Audited GameContainer.tsx — 6 findings identified
+- [2026-03-14 19:58] F2: Made `onHome` required (was optional, would crash if undefined)
+- [2026-03-14 19:58] F3: Typed `webcamRef` as `React.RefObject<HTMLVideoElement>` (was `any`)
+- [2026-03-14 19:58] F4: Changed settings icon from `lock` to `settings`
+- [2026-03-14 19:58] F6: Added `max-w-[50%] truncate px-2` to title to prevent overlap
+- [2026-03-14 19:58] Added `aria-label='Exit Game'` to home button
+- [2026-03-14 19:59] F5: Created test suite with 14 tests covering all props and rendering paths
+- [2026-03-14 19:59] **Observed** — All 14 tests pass | Evidence: `node node_modules/.bin/vitest run src/components/__tests__/GameContainer.test.tsx`
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md

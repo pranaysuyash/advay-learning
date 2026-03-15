@@ -608,8 +608,8 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
       {
         id: 'check',
         icon: 'check',
-        label: 'Check',
-        ariaLabel: 'Check my tracing',
+        label: 'Done',
+        ariaLabel: 'Done tracing - check my work',
         onClick: checkProgress,
         variant: 'success',
       },

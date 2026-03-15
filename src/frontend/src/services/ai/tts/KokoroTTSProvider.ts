@@ -35,11 +35,18 @@ export class KokoroTTSProvider implements TTSProvider {
             // Dynamic import to avoid loading the heavy module at startup
             const { KokoroTTS } = await import('kokoro-js');
 
-            // Detect WebGPU support
-            const hasWebGPU =
-                typeof navigator !== 'undefined' &&
-                'gpu' in navigator &&
-                !!(await (navigator as any).gpu?.requestAdapter?.());
+            // Detect WebGPU support more reliably
+            let hasWebGPU = false;
+            if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
+                try {
+                    const adapter = await (navigator as any).gpu?.requestAdapter?.();
+                    hasWebGPU = adapter !== null && adapter !== undefined;
+                    // Release the adapter as we don't need it
+                    adapter?.destroy?.();
+                } catch {
+                    hasWebGPU = false;
+                }
+            }
 
             const device = hasWebGPU ? 'webgpu' : 'wasm';
             // Use fp32 for WebGPU (recommended), q8 for WASM (smaller/faster)

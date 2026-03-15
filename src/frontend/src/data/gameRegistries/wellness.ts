@@ -73,7 +73,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'creative',
     ageRange: '3-5',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'food-apple', chance: 0.3 },
@@ -103,7 +103,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '4-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'item-plate', chance: 0.4 },
@@ -122,7 +122,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '3-5',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'item-sun', chance: 0.3 },
@@ -141,7 +141,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'chill',
     ageRange: '4-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'item-seed', chance: 0.4 },
@@ -160,7 +160,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'creative',
     ageRange: '2-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'item-music-note', chance: 0.4 },
@@ -178,7 +178,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '4-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'food-candy', chance: 0.3 },
@@ -197,7 +197,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '2-5',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'item-apple', chance: 0.3 },
@@ -216,7 +216,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'educational',
     ageRange: '3-5',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'item-rock', chance: 0.3 },
@@ -235,7 +235,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'chill',
     ageRange: '4-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'item-dino-bone', chance: 0.4 },
@@ -254,7 +254,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'creative',
     ageRange: '4-7',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'item-star', chance: 0.4 },
@@ -272,7 +272,7 @@ export const WELLNESS_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '3-5',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'item-star', chance: 0.4 },

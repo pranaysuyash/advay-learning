@@ -185,7 +185,10 @@ export class TTSService {
     void this.ensureKokoroEngine().then((engine) => {
       if (!engine) return;
       engine.init().catch((err) => {
-        console.warn('[TTSService] Kokoro init failed, will use fallback:', err);
+        console.warn(
+          '[TTSService] Kokoro init failed, will use fallback:',
+          err,
+        );
       });
     });
   }
@@ -277,31 +280,38 @@ export class TTSService {
    * Try Kokoro, then Web Speech API
    */
   private speakWithFallback(text: string, options: TTSOptions): Promise<void> {
+    const kokoroStatus = this.kokoroEngine?.getStatus() ?? 'idle';
     const useKokoro =
-       this.enginePreference !== 'web-speech' &&
-       this.kokoroEngine?.isReady() === true;
+      this.enginePreference !== 'web-speech' && kokoroStatus === 'ready';
 
     if (useKokoro) {
       this._lastActiveEngine = 'kokoro';
       console.log('[TTSService] Engine: kokoro');
       const effectiveVolume = Math.min(options.volume ?? 1.0, this.volume);
-      return this.kokoroEngine!
-        .speak(text, effectiveVolume, options.kokoroVoice)
-        .catch((err) => {
-          console.warn(
-            '[TTSService] Kokoro failed, falling back to Web Speech:',
-            err,
-          );
-          this._lastActiveEngine = 'web-speech';
-          return this.webSpeechSpeak(text, options);
-        });
+      return this.kokoroEngine!.speak(
+        text,
+        effectiveVolume,
+        options.kokoroVoice,
+      ).catch((err) => {
+        console.warn(
+          '[TTSService] Kokoro failed, falling back to Web Speech:',
+          err,
+        );
+        this._lastActiveEngine = 'web-speech';
+        return this.webSpeechSpeak(text, options);
+      });
     } else if (
-       this.enginePreference !== 'web-speech' &&
-       this.kokoroEngine?.getStatus() === 'loading'
-     ) {
+      this.enginePreference !== 'web-speech' &&
+      kokoroStatus === 'loading'
+    ) {
       // We are still loading the Kokoro model, let's gracefully fall back to web speech for now
       console.log(
         '[TTSService] Kokoro is still loading, falling back to Web Speech temporarily',
+      );
+    } else if (kokoroStatus === 'error') {
+      // Kokoro failed to load - log but continue to fallback
+      console.log(
+        '[TTSService] Kokoro failed to load, falling back to Web Speech',
       );
     }
 

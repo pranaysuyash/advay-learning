@@ -526,6 +526,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
           onHome={goToHome}
           isHandDetected={isHandTrackingReady}
           isPlaying={gameStarted && !gameCompleted}
+          webcamRef={webcamRef}
         >
           <div className='relative w-full h-full bg-[#FFF8F0]'>
             {/* Camera Area */}
@@ -741,8 +742,11 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                       className='w-full h-full object-contain'
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
-                        e.currentTarget.parentElement!.innerText = '🔎';
-                        e.currentTarget.parentElement!.className = 'w-32 h-32 mx-auto mb-8 bg-blue-50 border-3 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          parent.innerText = '🔎';
+                          parent.className = 'w-32 h-32 mx-auto mb-8 bg-blue-50 border-3 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform';
+                        }
                       }}
                     />
                   </div>

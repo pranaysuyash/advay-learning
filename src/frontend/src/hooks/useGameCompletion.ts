@@ -34,7 +34,7 @@ export interface GameCompletionOptions {
  */
 export function useGameCompletion(gameId: string) {
   const { onGameComplete, triggerEasterEgg, isEggFound } = useGameDrops(gameId);
-  const { saveProgress } = useGameProgress(gameId);
+  const { saveProgress, canSave } = useGameProgress(gameId);
 
   /**
    * Complete the game with progress saving and drop completion.
@@ -65,5 +65,6 @@ export function useGameCompletion(gameId: string) {
     saveProgress,   // Exposed for backward compatibility
     triggerEasterEgg,
     isEggFound,
+    canSave,
   };
 }

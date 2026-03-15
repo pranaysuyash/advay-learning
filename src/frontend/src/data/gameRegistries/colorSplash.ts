@@ -35,7 +35,7 @@ export const COLOR_SPLASH_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'color-red', chance: 0.35 },
@@ -56,7 +56,7 @@ export const COLOR_SPLASH_GAMES: GameManifest[] = [
     vibe: 'creative',
     ageRange: '3-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'color-red', chance: 0.2 },
@@ -77,7 +77,7 @@ export const COLOR_SPLASH_GAMES: GameManifest[] = [
     vibe: 'creative',
     ageRange: '4-6',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'color-red', chance: 0.35 },
@@ -98,7 +98,7 @@ export const COLOR_SPLASH_GAMES: GameManifest[] = [
     vibe: 'brainy',
     ageRange: '4-8',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'color-red', chance: 0.3 },

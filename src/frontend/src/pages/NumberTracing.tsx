@@ -16,10 +16,15 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { triggerHaptic } from '../utils/haptics';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import type { Point } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   buildScore,
   calculateTraceCoverage,
@@ -41,6 +46,7 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const reducedMotion = useReducedMotion();
+  const wasPinchingRef = useRef(false);
 
   const [currentDigit, setCurrentDigit] = useState(0);
   const [strokePoints, setStrokePoints] = useState<TracePoint[]>([]);
@@ -53,9 +59,75 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
   const [completedDigits, setCompletedDigits] = useState<number[]>([]);
   const [streak, setStreak] = useState(0);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const currentTemplate = useMemo(() => getTemplateForDigit(currentDigit), [currentDigit]);
+
+  // Hand tracking frame handler
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const hand = frame;
+      if (!hand || !hand.indexTip) {
+        if (wasPinchingRef.current) {
+          setIsDrawing(false);
+          wasPinchingRef.current = false;
+        }
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+
+      const newCursor: Point = { x: hand.indexTip.x, y: hand.indexTip.y };
+      setCursor(newCursor);
+      setIsHandTrackingActive(true);
+
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const canvasRect = canvas.getBoundingClientRect();
+      const isOverCanvas =
+        newCursor.x >= canvasRect.left &&
+        newCursor.x <= canvasRect.right &&
+        newCursor.y >= canvasRect.top &&
+        newCursor.y <= canvasRect.bottom;
+
+      if (!isOverCanvas) {
+        if (wasPinchingRef.current) {
+          setIsDrawing(false);
+          wasPinchingRef.current = false;
+        }
+        return;
+      }
+
+      const point: TracePoint = {
+        x: Math.max(0, Math.min(1, (newCursor.x - canvasRect.left) / canvasRect.width)),
+        y: Math.max(0, Math.min(1, (newCursor.y - canvasRect.top) / canvasRect.height)),
+      };
+
+      const isPinching = frame.pinch?.transition === 'start';
+
+      if (isPinching && !wasPinchingRef.current) {
+        playClick();
+        setIsDrawing(true);
+        setStrokePoints([point]);
+      } else if (isPinching && wasPinchingRef.current) {
+        setStrokePoints(prev => [...prev, point]);
+      } else if (!isPinching && wasPinchingRef.current) {
+        setIsDrawing(false);
+      }
+
+      wasPinchingRef.current = isPinching;
+    },
+    [playClick],
+  );
+
+  const { webcamRef } = useGameHandTracking({
+    gameName: 'NumberTracing',
+    targetFps: 24,
+    onFrame: handleHandTrackingFrame,
+  });
 
   // Draw canvas
   useEffect(() => {
@@ -207,8 +279,16 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
       level={currentDigit + 1}
       onHome={() => navigate('/games')}
       showScore={true}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={true}
     >
       <div className="relative w-full h-full flex flex-col items-center justify-center p-4 bg-[#FFF8F0]">
+        {/* Hand cursor */}
+        {cursor && isHandTrackingActive && (
+          <CursorEmbodiment position={cursor} isPinching={isDrawing} />
+        )}
+
         {/* Streak Milestone Overlay */}
         {showStreakMilestone && (
           <motion.div

@@ -64,7 +64,7 @@ export function AnimatedHand({ className = '' }: AnimatedHandProps) {
         <motion.circle
           cx="40"
           cy="85"
-          r="15"
+          r={15}
           fill="none"
           stroke="#6B9BD2"
           strokeWidth="2"

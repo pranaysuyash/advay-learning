@@ -111,7 +111,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
   const [helperText, setHelperText] = useState(
     'Tap/drag OR pinch in the air to pour particles. Use 1-9 and 0 to switch materials.',
   );
-  const { savePartialProgress } = useGameCompletion('physics-playground');
+  const { savePartialProgress, canSave } = useGameCompletion('physics-playground');
 
   const { cursor, startTracking, stopTracking, isPinching, isReady } = useGameHandTracking({
     gameName: 'PhysicsPlayground',
@@ -126,7 +126,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
   }, [startTracking, stopTracking]);
 
   useEffect(() => {
-    if (particleCount <= 0) {
+    if (particleCount <= 0 || !canSave) {
       return;
     }
 
@@ -143,7 +143,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
     }, 1200);
 
     return () => window.clearTimeout(timeout);
-  }, [interactionMode, particleCount, savePartialProgress, selectedType]);
+  }, [interactionMode, particleCount, savePartialProgress, selectedType, canSave]);
 
   useEffect(() => {
     cursorRef.current = cursor;

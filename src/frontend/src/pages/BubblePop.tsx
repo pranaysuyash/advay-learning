@@ -15,6 +15,11 @@ import { AssetPreloader } from '../components/AssetPreloader';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
@@ -61,6 +66,9 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
   const reducedMotion = useReducedMotion();
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const { completeGame, saveProgress } = useGameCompletion('bubble-pop');
+
+  // Hand tracking state
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
 
   // Audio
   const { playClick } = useAudio();

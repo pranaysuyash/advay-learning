@@ -7,13 +7,17 @@
 **Purpose:** ensure any agent/LLM (Codex, Copilot, Claude Code, Qwen, GLM, etc.) starts aligned with the same workspace memory + project context.
 
 ### Step 0 (first time in this folder)
+
 Generate the per-project context pack:
+
 ```bash
 /Users/pranay/Projects/agent-start
 ```
 
 ### Step 1 (per shell)
+
 Load the shared defaults for this project session:
+
 ```bash
 source .agent/STEP1_ENV.sh
 # Or (no file read) print exports and eval:
@@ -21,20 +25,24 @@ source .agent/STEP1_ENV.sh
 ```
 
 ### Step 2 (generate aligned context pack)
+
 ```bash
 /Users/pranay/Projects/agent-start
 ```
 
 Outputs:
+
 - `.agent/SESSION_CONTEXT.md`
 - `.agent/AGENT_KICKOFF_PROMPT.txt`
 - `.agent/STEP1_ENV.sh`
 
 ### Automation (already configured)
+
 - Terminal auto-loads `.agent/STEP1_ENV.sh` when you `cd` into a project under `/Users/pranay/Projects` (zsh hook).
 - VS Code/Antigravity can run `agent-start --skip-index` on folder open via `.vscode/tasks.json`.
 
 ### How agents should use this
+
 - Provide `.agent/AGENT_KICKOFF_PROMPT.txt` and `.agent/SESSION_CONTEXT.md` as the first context for the agent.
 - If sources conflict, the agent must cite concrete file paths and ask before proceeding.
 - If `.agent` files are missing or stale, run `/Users/pranay/Projects/agent-start --skip-index` before planning changes.
@@ -43,29 +51,38 @@ Outputs:
 - When editing this file, remember to check `.github/copilot-instructions.md` for matching guidance.
 
 ### Nested agent metadata directories
+
 - Some directories (for example `/Users/pranay/Projects/learning_for_kids/src/frontend/src/frontend/`) exist solely to hold nested `.agent/` metadata (see `/Users/pranay/Projects/learning_for_kids/src/frontend/src/frontend/.agent/AGENT_KICKOFF_PROMPT.txt`). The actual runtime frontend code lives in `src/frontend/src`. Remove or refactor these folders only as part of a documented automation cleanup, otherwise the localized prompt order described in each `AGENT_KICKOFF_PROMPT.txt` will fail for agents entering that subtree.
 
 ### Optional commit safety net
+
 Install repo-local git pre-commit hooks that refresh and stage `.agent/*` before commit:
+
 ```bash
 python3 /Users/pranay/Projects/workspace_memory/scripts/install_git_precommit_agent_hook.py
 ```
 
 ### Shared Idea Pad Protocol (Required)
+
 - Canonical file: `/Users/pranay/Projects/idea_pad/IDEA_PAD.md`
 - Raw capture file: `/Users/pranay/Projects/idea_pad/IDEA_DUMP.md`
 - Do not create per-model primary copies of the idea pad.
 - Do not overwrite the whole file; use append/update workflow with validation.
 - Capture rough ideas in `IDEA_DUMP.md`, then promote high-signal items into `IDEA_PAD.md`.
 - Before edits:
+
 ```bash
 python3 /Users/pranay/Projects/idea_pad/scripts/idea_pad_tool.py validate
 ```
+
 - Add new ideas safely:
+
 ```bash
 python3 /Users/pranay/Projects/idea_pad/scripts/idea_pad_tool.py add --title "<title>" --owner "<agent>" --type build
 ```
+
 - After updates, refresh shared memory index:
+
 ```bash
 cd /Users/pranay/Projects
 ./projects-memory index
@@ -77,9 +94,76 @@ cd /Users/pranay/Projects
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
 
-**Version**: 1.9  
-**Last Updated**: 2026-03-12  
+**Version**: 2.0  
+**Last Updated**: 2026-03-15  
 **Applies To**: All AI agents working on this codebase
+
+---
+
+## 🎯 MULTI-MODAL VISION PLATFORM — TOP PRIORITY
+
+> **This is a vision-first learning platform. Every game uses camera-based computer vision as its primary interaction method. This is NOT optional — it is the core identity of the app.**
+
+### What This Means
+
+This app is a **multi-modal vision platform** where children interact with games using:
+- **Hand tracking** (index finger pointing, pinch-to-grab, hand gestures)
+- **Face tracking** (head tilt, facial expressions)
+- **Pose tracking** (full body movements, arm positions, jumping)
+- **Voice input** (speech recognition for voice-controlled games)
+
+**Each game can require different combinations of these modes.** A game might need only hand tracking, or hand + face, or all three visual modes. The specific combination is determined by the game's design requirements.
+
+### Mandatory Rules for ALL Agents
+
+1. **EVERY game MUST have at least one CV control mode** (`hand`, `face`, `pose`, or `voice`)
+   - This applies to ALL existing games and ALL new games
+   - No exceptions for "simple" games — even simple tap games should use hand tracking
+
+2. **When working on ANY game file**, first check what CV modes it uses:
+   - Look at `cv: [...]` in the game registry (`src/frontend/src/data/gameRegistry.ts`)
+   - Look at which tracking hooks are used in the game file
+   - If CV is missing or incomplete, it's a P0 bug to fix
+
+3. **When creating a new game**, CV integration is Step 1, not an afterthought:
+   - Design the game around its vision mode(s)
+   - Register the correct `cv: [...]` array in the game manifest
+   - Use the appropriate hooks: `useGameHandTracking`, `useGamePoseTracking`, `useGameFaceTracking`
+   - Reference: `docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md`
+
+4. **The `cv` field in gameRegistry is authoritative**:
+   - If `cv: ['hand']` — game MUST work with hand tracking
+   - If `cv: ['pose']` — game MUST work with pose tracking  
+   - If `cv: ['hand', 'face']` — game MUST work with BOTH
+   - If `cv: []` or missing — this is a bug that needs fixing
+
+5. **Camera gating matters**:
+   - Games with CV should be wrapped with `CameraSafeRoute` in App.tsx
+   - The camera preview should be visible and functional
+
+### Current State (as of 2026-03-15)
+
+- **114 total game routes** in App.tsx
+- **~49 games are pointer-only** (POINTER_PRIMARY) — these need CV integration
+- **~45 games have proper CV integration** (CV_PRIMARY_OR_INTENDED)
+- **~19 games are hybrid** (CV + pointer fallback)
+
+**Agents working on games should prioritize upgrading pointer-only games to have proper CV controls.**
+
+### Key Files for Vision Implementation
+
+| File | Purpose |
+|------|---------|
+| `src/frontend/src/hooks/useGameHandTracking.ts` | Hand tracking hook |
+| `src/frontend/src/hooks/useGamePoseTracking.ts` | Pose tracking hook |
+| `src/frontend/src/hooks/useGameFaceTracking.ts` | Face tracking hook |
+| `docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md` | Implementation guide |
+| `src/frontend/src/data/gameRegistry.ts` | Game manifest with `cv: [...]` field |
+| `docs/audit/CONTROL_MODE_AUDIT_2026-03-12.md` | Full audit of CV vs pointer status |
+
+### Why This Matters
+
+The app's unique value proposition is **camera-based, hands-free learning** for young children (ages 3-8). Kids this age can't use keyboards or mice reliably — that's why vision is the core interaction method. Every game that lacks CV controls is failing the core product promise.
 
 ---
 
@@ -313,6 +397,7 @@ Enforcement note:
 - Enables reuse across different codebases
 
 **Bad practice:**
+
 ```bash
 # Creating one-off scripts in /tmp or random locations
 cat > /tmp/quick_check.py << 'EOF'
@@ -322,6 +407,7 @@ python /tmp/quick_check.py  # Lost after reboot
 ```
 
 **Good practice:**
+
 ```bash
 # Save as a documented tool
 cat > tools/video_frame_analyzer.html << 'EOF'
@@ -367,6 +453,7 @@ For normal task execution in this repo, agents should follow this sequence by de
 8. Document (results/evidence)
 
 Interpretation rules:
+
 - This lifecycle is the normal path for any new task unless the user explicitly asks to skip/reorder.
 - “Document” steps must update the appropriate repo artifacts (for example worklog, audits, implementation reports) with Observed/Inferred/Unknown discipline.
 - Documentation should be persisted as soon as each meaningful phase output is ready; do not wait for a chat checkpoint before writing repo docs.
@@ -410,17 +497,17 @@ Before starting ANY work, determine:
 
 Based on work type, follow the appropriate prompt:
 
-| Work Type      | Prompt File                                    | Purpose                         |
-| -------------- | ---------------------------------------------- | ------------------------------- |
-| File Audit     | `prompts/audit/audit-v1.5.1.md`                | Comprehensive single-file audit |
-| Remediation    | `prompts/remediation/implementation-v1.6.1.md` | Fix audit findings              |
-| Hardening      | `prompts/hardening/hardening-v1.1.md`          | Production hardening            |
-| PR Review      | `prompts/review/pr-review-v1.6.1.md`           | Review existing PR              |
+| Work Type               | Prompt File                                      | Purpose                          |
+| ----------------------- | ------------------------------------------------ | -------------------------------- |
+| File Audit              | `prompts/audit/audit-v1.5.1.md`                  | Comprehensive single-file audit  |
+| Remediation             | `prompts/remediation/implementation-v1.6.1.md`   | Fix audit findings               |
+| Hardening               | `prompts/hardening/hardening-v1.1.md`            | Production hardening             |
+| PR Review               | `prompts/review/pr-review-v1.6.1.md`             | Review existing PR               |
 | Local pre-commit review | `prompts/review/local-pre-commit-review-v1.0.md` | Findings-first local commit gate |
-| Verification   | `prompts/verification/verification-v1.2.md`    | Verify remediation              |
-| Merge Conflict | `prompts/merge/merge-conflict-v1.2.md`         | Resolve conflicts               |
-| Post-Merge     | `prompts/merge/post-merge-v1.0.md`             | Validate after merge            |
-| Triage         | `prompts/triage/out-of-scope-v1.0.md`          | Queue next audits               |
+| Verification            | `prompts/verification/verification-v1.2.md`      | Verify remediation               |
+| Merge Conflict          | `prompts/merge/merge-conflict-v1.2.md`           | Resolve conflicts                |
+| Post-Merge              | `prompts/merge/post-merge-v1.0.md`               | Validate after merge             |
+| Triage                  | `prompts/triage/out-of-scope-v1.0.md`            | Queue next audits                |
 
 ### Phase 3: Documentation
 
@@ -566,6 +653,7 @@ The audit-to-ticket gap exists because:
 - [ ] Verify environment (Python 3.13+, Node 22+, uv installed)
 - [ ] Check existing venv (don't create duplicates)
 - [ ] Check running servers (frontend on 6173, backend on 8001)
+- [ ] **Resolve all console errors, warnings, and API failures found**: When encountering runtime errors (e.g., 422 API errors, uncaught exceptions), fix them immediately. Do not create separate issues - resolve them as part of the current task.
 - [ ] **Document every user inquiry or idea**: whenever a user asks for ideas, feedback, analysis, or requests, create or append an appropriate file under `docs/` (e.g. `BRAINSTORM_IDEAS.md`). Requests are a mandate, not optional.
 - [ ] **Translate brainstorms into tickets**: after recording ideas, create worklog ticket(s) in `docs/tickets/` and open corresponding GitHub issues; reference the brainstorm doc and update the living architecture.
 ```
@@ -884,15 +972,16 @@ chmod +x .githooks/* scripts/*.sh
 
 The pre-commit hook runs these checks in order:
 
-| Check | Script | Purpose | Skip Flag |
-|-------|--------|---------|-----------|
-| **1. Agent Gate** | `scripts/agent_gate.sh` | Worklog updates, audit artifacts, ticket evidence | - |
-| **2. Secret Scan** | `scripts/secret_scan.sh` | Block leaked credentials/API keys | `SKIP_SECRET_SCAN=1` |
-| **3. Static Maintainability** | `scripts/maintainability_guard.sh` | Block oversized/high-complexity staged source files, including new files | `SKIP_MAINTAINABILITY_CHECK=1` |
-| **4. Feature Regression** | `scripts/feature_regression_check.sh` | Detect removed functionality in large refactors | `SKIP_FEATURE_CHECK=1` |
-| **5. Regression Tests** | `scripts/regression_check.sh` | Tests, export changes, TypeScript validation | `SKIP_REGRESSION_CHECK=1` |
+| Check                         | Script                                | Purpose                                                                  | Skip Flag                      |
+| ----------------------------- | ------------------------------------- | ------------------------------------------------------------------------ | ------------------------------ |
+| **1. Agent Gate**             | `scripts/agent_gate.sh`               | Worklog updates, audit artifacts, ticket evidence                        | -                              |
+| **2. Secret Scan**            | `scripts/secret_scan.sh`              | Block leaked credentials/API keys                                        | `SKIP_SECRET_SCAN=1`           |
+| **3. Static Maintainability** | `scripts/maintainability_guard.sh`    | Block oversized/high-complexity staged source files, including new files | `SKIP_MAINTAINABILITY_CHECK=1` |
+| **4. Feature Regression**     | `scripts/feature_regression_check.sh` | Detect removed functionality in large refactors                          | `SKIP_FEATURE_CHECK=1`         |
+| **5. Regression Tests**       | `scripts/regression_check.sh`         | Tests, export changes, TypeScript validation                             | `SKIP_REGRESSION_CHECK=1`      |
 
 #### 1. Agent Gate (`scripts/agent_gate.sh`)
+
 - If staged changes touch `src/` or `docs/audit/`, you must also update `docs/WORKLOG_ADDENDUM_*.md`.
 - If staged changes touch `src/` or `docs/audit/`, the updated addendum must include `Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md`.
 - Any modified/added `docs/audit/*.md` must reference a `TCK-YYYYMMDD-###`.
@@ -903,18 +992,22 @@ The pre-commit hook runs these checks in order:
 - Completion claims for sidecar-based refactors are blocked while tracked `*Refactored.tsx` files still exist, unless the ticket explicitly declares `Sidecar Status: RETAINED`.
 
 #### 2. Secret Scan (`scripts/secret_scan.sh`)
+
 - Detects common secret patterns (API keys, passwords, tokens).
 - Fails if any potential secrets are found in staged files.
 
 #### 3. Static Maintainability Guard (`scripts/maintainability_guard.sh`)
+
 **Critical:** Blocks newly added oversized source files and existing files whose maintainability metrics get materially worse.
 
 **Checks staged blobs directly (including newly added files):**
+
 - New files fail immediately if they exceed `MAX_FILE_LOC` (default: 1000), `MAX_FILE_BYTES` (default: 60000), or `MAX_FILE_CCN` (default: 60)
 - Existing files fail when they cross a threshold from below
 - Existing files already above a threshold fail only if they get materially worse again (size grows further or max CCN increases)
 
 **Why this exists:**
+
 - Diff-based checks only see how much changed in the current commit
 - Very large files can keep passing when later commits touch only a few lines
 - This guard enforces a static ceiling so files like `wordBuilderLogic.ts` cannot silently remain unflagged once touched
@@ -925,6 +1018,7 @@ The pre-commit hook runs these checks in order:
    - Large files are a maintainability risk even when behavior is unchanged
 
 2. **Choose the right mitigation:**
+
    ```bash
    # Measure the file explicitly
    wc -l <file>
@@ -942,15 +1036,18 @@ The pre-commit hook runs these checks in order:
    - Use an explicit env override for that commit
 
 #### 4. Feature Regression Check (`scripts/feature_regression_check.sh`) ⭐ NEW
+
 **Critical:** Detects when large refactors remove functionality.
 
 **Triggers when:**
+
 - Existing file has >10% **net LOC delta** (threshold configurable via `LOC_THRESHOLD`)
 - Existing file has >10% **touched-line churn** (`added + deleted` vs old LOC; configurable via `TOUCHED_LOC_THRESHOLD`)
 - Large file + meaningful edits: old LOC >= 500 and touched lines >= 20
 - Complexity-risk edits: touched lines >= 20 and high complexity per analyzer (`lizard` max CCN / CCN delta; fallback heuristics only if analyzer unavailable)
 
 **Detects:**
+
 - Removed functions/methods
 - Removed exports
 - Removed component props
@@ -963,6 +1060,7 @@ The pre-commit hook runs these checks in order:
    - This check exists because agents (including you) have accidentally removed features
 
 2. **Manually compare old vs new versions:**
+
    ```bash
    git diff HEAD -- <file>
    ```
@@ -999,6 +1097,7 @@ The pre-commit hook runs these checks in order:
    - Better to verify than to regress
 
 **Manual refactor review basis (required):**
+
 - Surface/API: exports, route contracts, prop interfaces, side-effect entry points
 - State & lifecycle: removed/renamed state vars, reducer transitions, effect dependencies/cleanup
 - Behavior paths: happy path + error path + pause/recovery/edge-state path
@@ -1009,6 +1108,7 @@ The pre-commit hook runs these checks in order:
 
 **Example of what it catches:**
 The Dashboard.tsx refactor (commit 29900a6) removed `handleCreateProfile`, `showAddModal`, and 5 state variables - breaking the "Add Child" feature. This check would have flagged:
+
 ```
 ⚠️  POTENTIAL REGRESSION DETECTED in src/frontend/src/pages/Dashboard.tsx
   Functions removed: 4
@@ -1023,12 +1123,14 @@ The Dashboard.tsx refactor (commit 29900a6) removed `handleCreateProfile`, `show
 ```
 
 An agent seeing this should have:
+
 1. Compared versions and noticed `handleCreateProfile` was gone
 2. Checked if AddChildModal was still integrated (it wasn't)
 3. Realized users couldn't add children anymore
 4. Restored the functionality before committing
 
 **To bypass ONLY after verification:**
+
 ```bash
 git commit --no-verify
 # OR
@@ -1036,12 +1138,14 @@ SKIP_FEATURE_CHECK=1 git commit
 ```
 
 **Repo policy override (new):**
+
 - `--no-verify` is prohibited unless the user explicitly requests bypass in the current conversation.
 - Even if commit hooks are skipped, `pre-push` runs mandatory checks (typecheck + related tests for changed frontend files) unless explicit override is provided.
 - Emergency override for pre-push only:
   - `ALLOW_BYPASS_CHECKS=1 BYPASS_REASON="<reason>" git push`
 
 #### 4. Regression Tests (`scripts/regression_check.sh`)
+
 - Runs all frontend tests (or related tests for changed files).
 - Checks for removed exports (breaking changes).
 - Validates TypeScript compilation.
@@ -1108,6 +1212,7 @@ Example:
 
 ```markdown
 ## TCK-20260224-033 :: Enforce No-Bypass Validation
+
 Ticket Stamp: STAMP-20260224T180958Z-codex-2jxp
 ```
 
@@ -1302,6 +1407,7 @@ cd src/frontend && npm run lint
 
 ```markdown
 ## TCK-YYYYMMDD-### :: [Short Title]
+
 Ticket Stamp: STAMP-YYYYMMDDTHHMMSSZ-agent-abcd
 
 Type: [AUDIT|REMEDIATION|HARDENING|REVIEW|VERIFICATION|POST_MERGE|TRIAGE]
@@ -1310,6 +1416,7 @@ Created: [YYYY-MM-DD HH:MM TZ]
 Status: [OPEN|IN_PROGRESS|BLOCKED|DONE|DROPPED]
 
 # Generate a unique stamp:
+
 # scripts/new_ticket_stamp.sh <agent-name>
 
 Scope contract:
@@ -1357,15 +1464,16 @@ Risks/notes:
 
 ## Version History
 
-| Version | Date       | Changes                                                                                                            |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------ |
+| Version | Date       | Changes                                                                                                              |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| 2.0     | 2026-03-15 | Added Multi-Modal Vision Platform section as TOP PRIORITY; made CV control mandatory for all games                   |
 | 1.9     | 2026-03-12 | Added no-shortcut merge protocol metadata/wording alignment and clarified review-thread vs non-thread comment duties |
-| 1.7     | 2026-02-26 | Added strict secret-remediation scope: do not touch `.env*` by default; remove hardcoded secrets in code/config |
-| 1.6     | 2026-02-20 | Strengthened reusable-tool policy: mandatory `/tmp` migration to `tools/` and long-term maintenance requirement  |
-| 1.5     | 2026-02-20 | Added Core Principle #7: Create Reusable Tools; documented `tools/` directory; added prohibition #11              |
-| 1.2     | 2026-01-31 | Require `git add -A` by default; prohibit deletions without explicit user approval; prefer archive + pointer notes |
-| 1.1     | 2026-01-29 | Updated Python version to 3.13+, added mandatory checks for running servers on ports 6173 and 8001                 |
-| 1.0     | 2024-01-28 | Initial version                                                                                                    |
+| 1.7     | 2026-02-26 | Added strict secret-remediation scope: do not touch `.env*` by default; remove hardcoded secrets in code/config      |
+| 1.6     | 2026-02-20 | Strengthened reusable-tool policy: mandatory `/tmp` migration to `tools/` and long-term maintenance requirement      |
+| 1.5     | 2026-02-20 | Added Core Principle #7: Create Reusable Tools; documented `tools/` directory; added prohibition #11                 |
+| 1.2     | 2026-01-31 | Require `git add -A` by default; prohibit deletions without explicit user approval; prefer archive + pointer notes   |
+| 1.1     | 2026-01-29 | Updated Python version to 3.13+, added mandatory checks for running servers on ports 6173 and 8001                   |
+| 1.0     | 2024-01-28 | Initial version                                                                                                      |
 
 ---
 

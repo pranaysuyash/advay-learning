@@ -108,16 +108,29 @@ export function GamePlayArea({
             >
               Tracing Accuracy
             </label>
-            <span className={`font-black text-lg ${accuracyColorClass}`}>
-              {accuracy}%
-            </span>
+            <div className='flex items-center gap-3'>
+              <span className='text-xs font-bold text-slate-400'>
+                {accuracy >= 70 ? '🎉 Great!' : 'Goal: 70%'}
+              </span>
+              <span className={`font-black text-lg ${accuracyColorClass}`}>
+                {accuracy}%
+              </span>
+            </div>
           </div>
-          <progress
-            id='accuracy-progress'
-            value={accuracy}
-            max={100}
-            className='w-full h-4 rounded-full'
-          />
+          <div className='relative'>
+            <progress
+              id='accuracy-progress'
+              value={accuracy}
+              max={100}
+              className='w-full h-4 rounded-full'
+            />
+            {/* Success threshold marker at 70% */}
+            <div
+              className='absolute top-0 bottom-0 w-0.5 bg-amber-500 opacity-70'
+              style={{ left: '70%' }}
+              title='Success threshold (70%)'
+            />
+          </div>
         </motion.div>
         <GameLayout
           webcamRef={webcamRef}

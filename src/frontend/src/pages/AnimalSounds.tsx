@@ -76,6 +76,8 @@ function AnimalSoundsGame({
   const allowInteractionRef = useRef(true);
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
 
+  // Hand tracking (currently disabled)
+
   // Preload audio files (runs during loading, which is better UX)
   useEffect(() => {
     const extMap: Record<string, string> = {

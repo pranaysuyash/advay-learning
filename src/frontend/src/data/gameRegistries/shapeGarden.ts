@@ -63,7 +63,7 @@ export const SHAPE_GARDEN_GAMES: GameManifest[] = [
     vibe: 'brainy',
     ageRange: '4-8',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'shape-star', chance: 0.25 },

@@ -115,7 +115,7 @@ export const LAB_OF_WONDERS_GAMES: GameManifest[] = [
     vibe: 'brainy',
     ageRange: '6-12',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'star-gold', chance: 0.2 },
@@ -143,7 +143,7 @@ export const LAB_OF_WONDERS_GAMES: GameManifest[] = [
     vibe: 'creative',
     ageRange: '6-10',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'star-gold', chance: 0.15 },
@@ -171,7 +171,7 @@ export const LAB_OF_WONDERS_GAMES: GameManifest[] = [
       vibe: 'brainy',
       ageRange: '7-10',
       isNew: true,
-      cv: [],
+      cv: ['hand'],
       listed: true,
       drops: [
         { itemId: 'material-fossil', chance: 0.3 },
@@ -246,7 +246,7 @@ export const LAB_OF_WONDERS_GAMES: GameManifest[] = [
       vibe: 'brainy',
       ageRange: '7-12',
       isNew: true,
-      cv: [],
+      cv: ['hand'],
       listed: true,
       drops: [
         { itemId: 'star-gold', chance: 0.2 },
@@ -302,7 +302,7 @@ export const LAB_OF_WONDERS_GAMES: GameManifest[] = [
       vibe: 'brainy',
       ageRange: '6-12',
       isNew: true,
-      cv: [],
+      cv: ['hand'],
       listed: true,
       drops: [
         { itemId: 'star-silver', chance: 0.3 },
@@ -400,7 +400,7 @@ export const LAB_OF_WONDERS_GAMES: GameManifest[] = [
     vibe: 'musical',
     ageRange: '3-8',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [],
     easterEggs: [],
@@ -429,7 +429,7 @@ export const LAB_OF_WONDERS_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '4-10',
     isNew: true,
-    cv: [],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'target-bullseye', chance: 0.2 },

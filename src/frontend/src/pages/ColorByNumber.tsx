@@ -1,12 +1,14 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { GameBackground } from '../components/game/GameBackground';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import {
   COLOR_BY_NUMBER_TEMPLATES,
@@ -19,6 +21,9 @@ import {
   paintRegion,
   selectColorNumber,
 } from '../games/colorByNumberLogic';
+import type { Point } from '../types/tracking';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 const resultMessage: Record<string, string> = {
   correct: 'Nice! Region filled.',
@@ -40,9 +45,12 @@ interface ColorByNumberGameProps {
 
 const ColorByNumberGame = memo(function ColorByNumberGameComponent({ completeGame }: ColorByNumberGameProps) {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const [view, setView] = useState<'menu' | 'play'>('menu');
   const [assetsLoaded, setAssetsLoaded] = useState(false);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
 
   const [templateIndex, setTemplateIndex] = useState(0);
   const activeTemplate = useMemo(
@@ -66,6 +74,31 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ completeGam
       streak: gameState.maxStreak,
       completion_percent: getCompletionPercent(gameState),
     },
+  });
+
+  // Hand tracking frame handler
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const hand = frame;
+      if (!hand || !hand.indexTip) {
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+
+      const newCursor: Point = { x: hand.indexTip.x, y: hand.indexTip.y };
+      setCursor(newCursor);
+      setIsHandTrackingActive(true);
+    },
+    [],
+  );
+
+  const {
+    webcamRef: _webcamRef,
+  } = useGameHandTracking({
+    gameName: 'ColorByNumber',
+    targetFps: 24,
+    onFrame: handleHandTrackingFrame,
   });
 
   const startLevel = (nextIndex: number) => {
@@ -204,8 +237,15 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({ completeGam
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={_webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={view === 'play'}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6 relative'>
+        {/* Hand cursor */}
+        {cursor && isHandTrackingActive && view === 'play' && (
+          <CursorEmbodiment position={cursor} isPinching={false} />
+        )}
         <div className='max-w-6xl mx-auto space-y-4 md:space-y-6'>
           <section className='bg-white rounded-2xl border-2 border-[#F2CC8F] p-4 shadow-[0_4px_0_#E5B86E]'>
             <div className='flex flex-wrap gap-2 items-center justify-between'>

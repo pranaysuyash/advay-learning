@@ -200,8 +200,8 @@ function Bubble({ initialPosition, size, speed, onPop, playPopSound }: BubblePro
           ref={meshRef}
           position={initialPosition}
           onClick={handleClick}
-          onPointerOver={() => (document.body.style.cursor = 'pointer')}
-          onPointerOut={() => (document.body.style.cursor = 'default')}
+          onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+          onPointerOut={() => { document.body.style.cursor = 'default'; }}
         >
           <sphereGeometry args={[size, 32, 32]} />
           <shaderMaterial
@@ -390,6 +390,7 @@ export default function VirtualBubbles3D() {
       <div className="h-[600px] w-full rounded-xl overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800 relative">
         {/* Mute button */}
         <button
+          type="button"
           onClick={toggleMute}
           className="absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors"
           aria-label={isMuted ? 'Unmute' : 'Mute'}
@@ -398,6 +399,7 @@ export default function VirtualBubbles3D() {
         </button>
         {/* Background music toggle */}
         <button
+          type="button"
           onClick={toggleBgMusic}
           className={`absolute top-4 right-14 z-10 p-2 rounded-lg transition-colors ${
             bgMusicEnabled ? 'bg-blue-600/80 hover:bg-blue-500/80' : 'bg-slate-800/80 hover:bg-slate-700/80'
@@ -443,6 +445,7 @@ export default function VirtualBubbles3D() {
         </div>
 
         <button
+          type="button"
           onClick={resetGame}
           className="flex items-center gap-2 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-medium transition-colors"
         >

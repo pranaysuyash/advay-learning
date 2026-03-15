@@ -22,6 +22,7 @@ import {
   loadCurriculum,
   pickWord,
   createLetterTargets,
+  layoutTargets,
   type LetterTarget,
   HIT_RADIUS,
   MAX_LEVEL,
@@ -242,7 +243,8 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
     const base = mode === 'phonics' ? 2 : 2 + Math.floor(levelRef.current / 2);
     const distractors = Math.min(3, base);
 
-    setTargets(createLetterTargets(newWord.word, distractors, randomFloat01));
+    const rawTargets = createLetterTargets(newWord.word, distractors, randomFloat01);
+    setTargets(layoutTargets(rawTargets, randomFloat01));
     setFeedback(`Spell: ${newWord.word}`);
     if (ttsEnabled) {
       void speak(`Spell the word: ${newWord.word}!`);
@@ -537,17 +539,7 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
         role='main'
         aria-label='Word Builder spelling game with gesture-based letter selection'
       >
-        {/* Background layer for visual variety */}
-        <div
-          className='absolute inset-0 bg-cover bg-center opacity-8'
-          style={{
-            backgroundImage: `url(${WEATHER_BACKGROUNDS.rainy.url})`,
-          }}
-          aria-hidden='true'
-        />
-
         <div className='absolute inset-4 md:inset-8 lg:inset-12 bg-white rounded-[3rem] border-[8px] border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] overflow-hidden'>
-          <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
           {isPlaying && (
             <GameHUD
@@ -558,34 +550,36 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
             />
           )}
 
-          <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px] z-20'>
-            {feedback}
-          </div>
-
-          <div className='absolute top-24 right-8 px-6 py-3 rounded-[1.5rem] bg-white/95 border-3 border-[#F2CC8F] text-slate-400 font-bold text-xl shadow-[0_4px_0_#E5B86E] z-20'>
-            Take your time!
-          </div>
-
+          {/* Word Display - centered below HUD */}
           {word && (
-            <div className='absolute top-24 left-8 px-8 py-4 rounded-[2rem] bg-white border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] z-20'>
-              <span className='font-black tracking-widest text-3xl flex gap-2'>
-                {word.split('').map((letter, i) => (
-                  <span
-                    key={i}
-                    className={
-                      i < stepIndex
-                        ? 'text-[#10B981]'
-                        : i === stepIndex
-                          ? 'text-[#F59E0B] border-b-4 border-[#F59E0B] pb-1'
-                          : 'text-slate-300'
-                    }
-                  >
-                    {i < stepIndex ? letter : '_'}
-                  </span>
-                ))}
-              </span>
+            <div className='absolute top-24 left-1/2 -translate-x-1/2 z-20'>
+              <div className='inline-flex items-center gap-1 px-6 py-3 rounded-[2rem] bg-white border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
+                <span className='font-black tracking-[0.3em] text-4xl flex gap-1'>
+                  {word.split('').map((letter, i) => (
+                    <span
+                      key={i}
+                      className={
+                        i < stepIndex
+                          ? 'text-[#10B981]'
+                          : i === stepIndex
+                            ? 'text-[#F59E0B] border-b-4 border-[#F59E0B] pb-1'
+                            : 'text-slate-300'
+                      }
+                    >
+                      {i < stepIndex ? letter : '_'}
+                    </span>
+                  ))}
+                </span>
+              </div>
             </div>
           )}
+
+          {/* Feedback - centered below word display */}
+          <div className='absolute top-[130px] left-1/2 -translate-x-1/2 z-20'>
+            <div className='px-6 py-2 rounded-full bg-[#FFF8F0] border-2 border-[#F2CC8F] text-advay-slate font-bold text-base text-center whitespace-nowrap'>
+              {feedback}
+            </div>
+          </div>
 
           {/* Score Popup Animation */}
           {scorePopup && (

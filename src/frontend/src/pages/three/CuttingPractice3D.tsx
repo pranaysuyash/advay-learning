@@ -116,8 +116,8 @@ function FlyingFruit({ fruit, onSlice, onMiss }: FruitProps) {
     <group 
       position={position} 
       onClick={handleClick}
-      onPointerOver={() => document.body.style.cursor = 'crosshair'}
-      onPointerOut={() => document.body.style.cursor = 'default'}
+      onPointerOver={() => { document.body.style.cursor = 'crosshair'; }}
+      onPointerOut={() => { document.body.style.cursor = 'default'; }}
     >
       <primitive object={fruitScene} scale={0.5} rotation={[0, rotation, 0]} />
     </group>

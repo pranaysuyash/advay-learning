@@ -8,7 +8,8 @@ interface GameContainerProps {
   title?: string;
   score?: number;
   level?: number;
-  onHome?: () => void;
+  /** Home/exit callback — required for safe navigation */
+  onHome: () => void;
   onPause?: () => void;
   onSettings?: () => void;
   showScore?: boolean;
@@ -19,8 +20,8 @@ interface GameContainerProps {
   isPlaying?: boolean;
   /** Whether to report session progress (default: true). Set to false if using useGameSessionProgress hook */
   reportSession?: boolean;
-  /** Webcam ref mandatory for hand tracking to access video feed */
-  webcamRef?: any;
+  /** Webcam ref for hand tracking to access video feed */
+  webcamRef?: React.RefObject<HTMLVideoElement>;
 }
 
 /**
@@ -66,6 +67,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           onClick={onHome}
           className='flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] focus:outline-none focus:border-[#3B82F6]'
           type='button'
+          aria-label='Exit Game'
         >
           <UIIcon name='home' size={22} className='text-text-secondary' />
           <span className='hidden sm:inline text-sm font-bold uppercase tracking-wider'>
@@ -75,7 +77,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
 
         {/* Center: Title */}
         {title && (
-          <h1 className='text-advay-slate font-black text-xl sm:text-2xl absolute left-1/2 -translate-x-1/2 tracking-tight'>
+          <h1 className='text-advay-slate font-black text-xl sm:text-2xl absolute left-1/2 -translate-x-1/2 tracking-tight max-w-[50%] truncate px-2'>
             {title}
           </h1>
         )}
@@ -116,7 +118,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
               type='button'
               aria-label='Game Settings'
             >
-              <UIIcon name='lock' size={22} className='text-text-secondary' />
+              <UIIcon name='settings' size={22} className='text-text-secondary' />
             </button>
           )}
         </div>

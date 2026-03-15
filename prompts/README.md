@@ -2,6 +2,19 @@
 
 This folder contains the reusable prompts that govern how agents work on this repo.
 
+## 🎯 MANDATORY: Vision-First Development
+
+**This is a multi-modal vision platform.** Every game MUST use camera-based CV controls.
+See `AGENTS.md` → "🎯 MULTI-MODAL VISION PLATFORM" section for full requirements.
+
+- Hand tracking: `useGameHandTracking` hook
+- Pose tracking: `useGamePoseTracking` hook  
+- Face tracking: `useGameFaceTracking` hook
+- Implementation guide: `docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md`
+- Game registry: `src/frontend/src/data/gameRegistry.ts` (has `cv: [...]` field)
+
+---
+
 ## Start Here (Any Agent)
 
 1. Use: `prompts/workflow/agent-entrypoint-v1.0.md`
