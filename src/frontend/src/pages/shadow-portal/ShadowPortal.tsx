@@ -54,7 +54,7 @@ export const ShadowPortal: React.FC = () => {
   const { completeGame } = useGameCompletion('shadow-portal');
   useSettingsStore((state) => state.showHints);
 
-  const [isPlaying, _setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(SHADOW_PORTAL_CONFIG.gameDuration);
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -130,6 +130,7 @@ export const ShadowPortal: React.FC = () => {
     setScore(0);
     setTimeLeft(SHADOW_PORTAL_CONFIG.gameDuration);
     setGameStatus('playing');
+    setIsPlaying(true);
     setIsTutorialVisible(false);
   }, []);
 

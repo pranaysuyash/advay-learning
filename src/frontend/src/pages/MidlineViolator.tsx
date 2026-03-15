@@ -8,6 +8,7 @@ import {
   INITIAL_CONFIG
 } from '../games/midlineViolatorLogic';
 import { useAudio } from '../utils/hooks/useAudio';
+import Webcam from 'react-webcam';
 
 const MidlineViolator: React.FC = () => {
   const [state, setState] = useState<MidlineViolatorState>(initGameState());
@@ -161,6 +162,11 @@ const MidlineViolator: React.FC = () => {
       gameName="Midline Violator"
     >
       <div ref={containerRef} className="relative w-full h-full bg-slate-900 overflow-hidden rounded-xl">
+        <Webcam
+          ref={webcamRef}
+          audio={false}
+          className="absolute top-0 left-0 w-full h-full object-cover opacity-0 pointer-events-none"
+        />
         <canvas
           ref={canvasRef}
           className="absolute top-0 left-0 w-full h-full pointer-events-none"
