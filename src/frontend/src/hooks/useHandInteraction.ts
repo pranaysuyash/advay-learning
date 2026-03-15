@@ -45,38 +45,16 @@ export function useHandInteraction(options: UseHandInteractionOptions) {
 
   const [hovering, setHovering] = useState(false);
 
-  // Convert target element bounds to normalized space when containerRef is available
-  const isOverTargetNormalized = useMemo(() => {
-    if (!cursor || !targetRef.current) return null;
+  const cursorPoint = useMemo(() => {
+    if (!cursor) return null;
+    if (!containerRef?.current) return cursor;
 
-    const target = targetRef.current;
-    const targetRect = target.getBoundingClientRect();
-
-    if (containerRef?.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      // Convert cursor to viewport coords for comparison
-      const cursorViewport = {
-        x: containerRect.left + cursor.x * containerRect.width,
-        y: containerRect.top + cursor.y * containerRect.height,
-      };
-      return pointInRect(cursorViewport, targetRect);
-    } else {
-      // When no container, require caller to provide viewport coords or use normalized bounds
-      // Convert target bounds to normalized space (0-1 based on window size)
-      const targetNormalized = {
-        left: targetRect.left / window.innerWidth,
-        right: targetRect.right / window.innerWidth,
-        top: targetRect.top / window.innerHeight,
-        bottom: targetRect.bottom / window.innerHeight,
-      };
-      return (
-        cursor.x >= targetNormalized.left &&
-        cursor.x <= targetNormalized.right &&
-        cursor.y >= targetNormalized.top &&
-        cursor.y <= targetNormalized.bottom
-      );
-    }
-  }, [cursor, containerRef, targetRef]);
+    const rect = containerRef.current.getBoundingClientRect();
+    return {
+      x: rect.left + cursor.x * rect.width,
+      y: rect.top + cursor.y * rect.height,
+    };
+  }, [cursor, containerRef]);
 
   useEffect(() => {
     if (!enabled) {
@@ -87,18 +65,29 @@ export function useHandInteraction(options: UseHandInteractionOptions) {
       return;
     }
 
-    const isOver = isOverTargetNormalized ?? false;
+    const target = targetRef.current;
+    if (!target || !cursorPoint) {
+      if (hovering) {
+        setHovering(false);
+        onHoverChange?.(false);
+      }
+      return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    const isOver = pointInRect(cursorPoint, rect);
 
     if (isOver !== hovering) {
       setHovering(isOver);
       onHoverChange?.(isOver);
     }
 
-    if (isOver && isPinching && pinchTransition === 'start') {
+    if (isOver && pinchTransition === 'start') {
       onPinchStart?.();
     }
   }, [
-    isOverTargetNormalized,
+    cursorPoint,
+    targetRef,
     hovering,
     isPinching,
     pinchTransition,

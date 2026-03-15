@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useRef, useCallback, useEffect } from 'react';
+import { memo, useMemo, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
@@ -115,18 +115,13 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({
     [],
   );
 
-  const { webcamRef: _webcamRef, startTracking } = useGameHandTracking({
+  const {
+    webcamRef: _webcamRef,
+  } = useGameHandTracking({
     gameName: 'ColorByNumber',
     targetFps: 24,
     onFrame: handleHandTrackingFrame,
   });
-
-  // Start hand tracking when game begins
-  useEffect(() => {
-    if (view === 'play') {
-      startTracking();
-    }
-  }, [view, startTracking]);
 
   const startLevel = (nextIndex: number) => {
     const template = COLOR_BY_NUMBER_TEMPLATES[nextIndex];
@@ -303,18 +298,10 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({
       isHandDetected={isHandTrackingActive}
       isPlaying={view === 'play'}
     >
-      <div
-        ref={gameAreaRef}
-        className='h-full overflow-auto p-4 md:p-6 relative'
-      >
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6 relative'>
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && view === 'play' && (
-          <CursorEmbodiment
-            position={cursor}
-            coordinateSpace='normalized'
-            containerRef={gameAreaRef}
-            isPinching={false}
-          />
+          <CursorEmbodiment position={cursor} isPinching={false} />
         )}
         <div className='max-w-6xl mx-auto space-y-4 md:space-y-6'>
           <section className='bg-white rounded-2xl border-2 border-[#F2CC8F] p-4 shadow-[0_4px_0_#E5B86E]'>

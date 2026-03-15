@@ -790,8 +790,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                         const parent = e.currentTarget.parentElement;
                         if (parent) {
                           parent.innerText = '🔎';
-                          parent.className =
-                            'w-32 h-32 mx-auto mb-8 bg-blue-50 border-3 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform';
+                          parent.className = 'w-32 h-32 mx-auto mb-8 bg-blue-50 border-3 border-blue-100 rounded-[2rem] p-6 flex items-center justify-center text-[4rem] drop-shadow-[0_4px_0_#E5B86E] hover:scale-110 transition-transform';
                         }
                       }}
                     />

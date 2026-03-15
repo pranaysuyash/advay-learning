@@ -245,7 +245,7 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
 
     const rawTargets = createLetterTargets(newWord.word, distractors, randomFloat01);
     setTargets(layoutTargets(rawTargets, randomFloat01));
-    setFeedback(`🔤 Find the letter "${newWord.word[0]}"`);
+    setFeedback(`Spell: ${newWord.word}`);
     if (ttsEnabled) {
       void speak(`Spell the word ${newWord.word}! Find the letter ${newWord.word[0]}!`);
     }

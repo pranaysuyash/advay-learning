@@ -170,8 +170,7 @@ export function resolveHandTrackingRuntimeMode(params: {
   if (!VISION_WORKER_ENABLED_BY_ENV) return 'main-thread';
   if (params.workerConfig && !params.workerConfig.enabled) return 'main-thread';
   if (!params.workerSupported) return 'main-thread';
-  // Default to worker when supported and enabled (as documented)
-  return params.requestedMode ?? 'worker';
+  return params.requestedMode ?? 'main-thread';
 }
 
 /**

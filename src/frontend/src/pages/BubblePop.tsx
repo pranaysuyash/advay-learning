@@ -73,8 +73,6 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
   const { completeGame, saveProgress } = useGameCompletion('bubble-pop');
 
   // Hand tracking state
-  const gameAreaRef = useRef<HTMLDivElement>(null);
-  const [cursor, setCursor] = useState<Point | null>(null);
   const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
 
   // Audio

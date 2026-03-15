@@ -128,33 +128,33 @@ function NumberBubblePopContent() {
         return;
       }
 
-      // indexTip is already normalized (0-1), use directly
       const newCursor: Point = { x: hand.indexTip.x, y: hand.indexTip.y };
       setCursor(newCursor);
       setIsHandTrackingActive(true);
 
       if (gameState !== 'playing') return;
 
-      // Use normalized bounds check (0-1) instead of pixel bounds
+      const gameArea = gameAreaRef.current;
+      if (!gameArea) return;
+
+      const gameAreaRect = gameArea.getBoundingClientRect();
       const isOverGameArea =
-        newCursor.x >= 0 && newCursor.x <= 1 &&
-        newCursor.y >= 0 && newCursor.y <= 1;
+        newCursor.x >= gameAreaRect.left &&
+        newCursor.x <= gameAreaRect.right &&
+        newCursor.y >= gameAreaRect.top &&
+        newCursor.y <= gameAreaRect.bottom;
 
       if (!isOverGameArea) return;
 
-      // Use pinch state instead of transition for continuous detection
-      if (!frame.pinch?.state?.isPinching) return;
+      if (frame.pinch.transition !== 'start') return;
 
-      // Convert normalized (0-1) to pixel space (game area is 320x320)
-      // Bubbles are positioned in pixel coordinates (x: 20-300, y: 50-250)
-      const GAME_SIZE = 320;
-      const pixelX = newCursor.x * GAME_SIZE;
-      const pixelY = newCursor.y * GAME_SIZE;
+      const relX = (newCursor.x - gameAreaRect.left) / gameAreaRect.width * 100;
+      const relY = (newCursor.y - gameAreaRect.top) / gameAreaRect.height * 100;
 
       const bubbleRadius = 7;
       for (const bubble of bubbles) {
-        const dx = Math.abs(pixelX - bubble.x);
-        const dy = Math.abs(pixelY - bubble.y);
+        const dx = Math.abs(relX - bubble.x);
+        const dy = Math.abs(relY - bubble.y);
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (distance < bubbleRadius + 3) {
           handleBubbleClickRef.current(bubble);
@@ -178,7 +178,7 @@ function NumberBubblePopContent() {
       <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 relative">
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && (
-          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
+          <CursorEmbodiment position={cursor} isPinching={false} />
         )}
         <div className="flex gap-2">
           {LEVELS.map((l) => (
