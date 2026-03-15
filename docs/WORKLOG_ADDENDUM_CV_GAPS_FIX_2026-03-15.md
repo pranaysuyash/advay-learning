@@ -220,3 +220,6 @@ Status updates:
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
+- 2026-03-15T17:08:01Z **IN_PROGRESS** - Fixed review-policy workflow to exclude github-advanced-security threads
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
