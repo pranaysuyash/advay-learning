@@ -88,11 +88,16 @@ function EarthTimeMachineContent() {
     [],
   );
 
-  const { webcamRef: _webcamRef } = useGameHandTracking({
+  const { webcamRef: _webcamRef, startTracking } = useGameHandTracking({
     gameName: 'earth-time-machine',
     targetFps: 24,
     onFrame: handleFrame,
   });
+
+  // Start hand tracking when component mounts
+  useEffect(() => {
+    startTracking().catch(console.error);
+  }, [startTracking]);
 
   useEffect(() => {
     if (state.status !== 'playing') return;

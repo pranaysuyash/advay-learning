@@ -210,6 +210,13 @@ Status updates:
   - Restored auto-start feature with autoStartedRef guards (WordBuilder, SimpleAddition)
   - Fixed wordBuilderLogic grid sizing to respect 120px TARGET_SIZE
   - All 7266 tests pass
+- 2026-03-15T22:30:00Z **IN_PROGRESS** - Hand tracking start fixes and thread resolution:
+  - Added startTracking() calls to: BubblePop, BubblePopSymphony, EarthTimeMachine, ColorByNumber
+  - Fixed CV template to include voice mode
+  - Fixed CV guide to use handVisible instead of handDetected
+  - Resolved 34 review threads via GitHub API
+  - Remaining: 6 github-advanced-security (excluded from gate), 0 blocking
+  - All 7266 tests pass
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 

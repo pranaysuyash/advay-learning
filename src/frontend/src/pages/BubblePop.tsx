@@ -429,12 +429,18 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
     [],
   );
 
-  const { webcamRef: _webcamRef } = useGameHandTracking({
+  const { webcamRef: _webcamRef, startTracking } = useGameHandTracking({
     gameName: 'BubblePop',
     targetFps: 24,
     onFrame: handleHandTrackingFrame,
-    isRunning: !showMenu && !gameState.gameOver,
   });
+
+  // Start hand tracking when game begins
+  useEffect(() => {
+    if (!showMenu && !gameState.gameOver) {
+      startTracking();
+    }
+  }, [showMenu, gameState.gameOver, startTracking]);
 
   if (!assetsLoaded) {
     return (

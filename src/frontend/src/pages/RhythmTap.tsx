@@ -10,7 +10,10 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, createPattern, checkPattern } from '../games/rhythmTapLogic';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import {
+  STREAK_MILESTONE_INTERVAL,
+  STREAK_MILESTONE_DURATION_MS,
+} from '../games/constants';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { Point } from '../types/tracking';
 import { TrackedHandFrame } from '../utils/handTrackingFrame';
@@ -90,7 +93,7 @@ function RhythmTapContent() {
       if (isCorrect) {
         playSuccess();
         setCorrect((c) => c + 1);
-        
+
         // Streak and scoring
         const newStreak = streak + 1;
         setStreak(newStreak);
@@ -98,16 +101,19 @@ function RhythmTapContent() {
         const streakBonus = Math.min(newStreak * 3, 15);
         const totalPoints = basePoints + streakBonus;
         setScore((s) => s + totalPoints);
-        
+
         triggerHaptic('success');
-        
+
         // Milestone every 5
         if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
           setShowStreakMilestone(true);
           triggerHaptic('celebration');
-          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+          setTimeout(
+            () => setShowStreakMilestone(false),
+            STREAK_MILESTONE_DURATION_MS,
+          );
         }
-        
+
         setFeedback('Perfect rhythm!');
       } else {
         playError();
@@ -133,15 +139,27 @@ function RhythmTapContent() {
     navigate('/games');
   }, [correct, navigate, playClick, completeGame, currentLevel]);
 
-  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
-    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
-    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
-    setIsHandTrackingActive(true);
-  }, []);
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      if (!frame.indexTip) {
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+      setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+      setIsHandTrackingActive(true);
+    },
+    [],
+  );
 
   const isPlaying = gameState !== 'start' && gameState !== 'complete';
 
-  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'RhythmTap', targetFps: 24, onFrame: handleHandTrackingFrame });
+  const { webcamRef: _webcamRef } = useGameHandTracking({
+    gameName: 'RhythmTap',
+    targetFps: 24,
+    onFrame: handleHandTrackingFrame,
+    isRunning: isPlaying,
+  });
 
   return (
     <GameContainer
@@ -156,7 +174,11 @@ function RhythmTapContent() {
       isPlaying={isPlaying}
     >
       <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
-        <CursorEmbodiment position={cursor ?? { x: 0, y: 0 }} isHandDetected={isHandTrackingActive} />
+        <CursorEmbodiment
+          position={cursor ?? { x: 0, y: 0 }}
+          coordinateSpace='normalized'
+          isHandDetected={isHandTrackingActive}
+        />
         <div className='max-w-2xl mx-auto space-y-4'>
           {/* Level selector */}
           <div className='flex gap-2 justify-center'>
@@ -219,7 +241,10 @@ function RhythmTapContent() {
               className='fixed inset-0 flex items-center justify-center pointer-events-none z-50'
             >
               <div className='bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-lg'>
-                <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
+                <div className='flex items-center justify-center gap-2'>
+                  <KenneyIcon type='heart' size={20} /> {streak} Streak!{' '}
+                  <KenneyIcon type='heart' size={20} />
+                </div>
               </div>
             </motion.div>
           )}
@@ -232,7 +257,9 @@ function RhythmTapContent() {
                   Round {round + 1} of 5
                 </p>
                 {streak > 0 && (
-                  <span className='text-orange-500 font-bold flex items-center gap-1'><KenneyIcon type='heart' size={16} /> {streak}</span>
+                  <span className='text-orange-500 font-bold flex items-center gap-1'>
+                    <KenneyIcon type='heart' size={16} /> {streak}
+                  </span>
                 )}
               </div>
               <div className='text-5xl'>👂</div>
@@ -256,10 +283,12 @@ function RhythmTapContent() {
               {/* Streak Display */}
               {streak > 0 && (
                 <div className='bg-orange-100 px-4 py-2 rounded-full border-2 border-orange-200'>
-                  <span className='text-orange-600 font-bold flex items-center gap-1'><KenneyIcon type='heart' size={16} /> {streak} Streak</span>
+                  <span className='text-orange-600 font-bold flex items-center gap-1'>
+                    <KenneyIcon type='heart' size={16} /> {streak} Streak
+                  </span>
                 </div>
               )}
-              
+
               {/* Status */}
               {feedback && (
                 <div
@@ -321,7 +350,9 @@ function RhythmTapContent() {
           {/* Complete */}
           {gameState === 'complete' && (
             <div className='flex flex-col items-center gap-5 bg-white rounded-3xl border-3 border-[#F2CC8F] p-10 shadow-[0_6px_0_#E5B86E] text-center'>
-              <div className='flex justify-center'><KenneyIcon type='star' size={80} /></div>
+              <div className='flex justify-center'>
+                <KenneyIcon type='star' size={80} />
+              </div>
               <h2 className='text-4xl font-black text-slate-900'>
                 Rhythm Master!
               </h2>
@@ -369,8 +400,8 @@ function RhythmTapContent() {
 
 export const RhythmTap = () => (
   <GameShell
-    gameId="rhythm-tap"
-    gameName="Rhythm Tap"
+    gameId='rhythm-tap'
+    gameName='Rhythm Tap'
     showWellnessTimer={true}
     enableErrorBoundary={true}
   >

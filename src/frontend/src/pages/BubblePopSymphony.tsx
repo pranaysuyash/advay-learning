@@ -361,7 +361,14 @@ function BubblePopSymphonyGame() {
     setIsHandTrackingActive(true);
   }, []);
 
-  const { webcamRef: _webcamRefNew } = useGameHandTracking({ gameName: 'BubblePopSymphony', targetFps: 24, onFrame: handleHandTrackingFrame });
+  const { webcamRef: _webcamRefNew, startTracking } = useGameHandTracking({ gameName: 'BubblePopSymphony', targetFps: 24, onFrame: handleHandTrackingFrame });
+
+  // Start hand tracking when game begins
+  useEffect(() => {
+    if (gameStarted) {
+      startTracking();
+    }
+  }, [gameStarted, startTracking]);
 
   return (
     <HandDetectionProvider gameName='BubblePopSymphony' isPlaying={gameStarted}>

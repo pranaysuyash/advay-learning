@@ -629,109 +629,128 @@ const ColorPotionsContent = memo(function ColorPotionsContent() {
   );
 
   // Hand tracking
-  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
-    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
-    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
-    setIsHandTrackingActive(true);
-  }, []);
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      if (!frame.indexTip) {
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+      setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+      setIsHandTrackingActive(true);
+    },
+    [],
+  );
 
-  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'ColorPotions', targetFps: 24, onFrame: handleHandTrackingFrame });
+  const { webcamRef: _webcamRef } = useGameHandTracking({
+    gameName: 'ColorPotions',
+    targetFps: 24,
+    onFrame: handleHandTrackingFrame,
+    isRunning: !showMenu,
+  });
 
   return (
-    <GameContainer webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={!showMenu}>
+    <GameContainer
+      webcamRef={_webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={!showMenu}
+    >
       <div ref={gameAreaRef} className='flex-1 relative'>
-        <CursorEmbodiment position={cursor ?? { x: 0, y: 0 }} isHandDetected={isHandTrackingActive} />
+        <CursorEmbodiment
+          position={cursor ?? { x: 0, y: 0 }}
+          isHandDetected={isHandTrackingActive}
+        />
         <VoiceInstructions instructions='Welcome to the color potions lab! Mix colorful ingredients to discover magical potions!' />
 
-      {/* Header */}
-      {!showMenu && (
-        <div className='absolute top-4 left-4 right-4 flex justify-between items-center z-10'>
-          <div className='bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg'>
-            <div className='text-sm text-gray-600'>Discovered</div>
-            <div className='text-xl font-bold text-amber-900'>
-              {
-                progress.discoveredRecipeIds.filter((id) =>
-                  availableRecipes.some((r) => r.id === id),
-                ).length
-              }{' '}
-              / {availableRecipes.length}
+        {/* Header */}
+        {!showMenu && (
+          <div className='absolute top-4 left-4 right-4 flex justify-between items-center z-10'>
+            <div className='bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg'>
+              <div className='text-sm text-gray-600'>Discovered</div>
+              <div className='text-xl font-bold text-amber-900'>
+                {
+                  progress.discoveredRecipeIds.filter((id) =>
+                    availableRecipes.some((r) => r.id === id),
+                  ).length
+                }{' '}
+                / {availableRecipes.length}
+              </div>
+            </div>
+
+            <div className='bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg'>
+              <div className='text-sm text-gray-600'>Level {level}</div>
+              <div className='w-32 h-2 bg-gray-200 rounded-full overflow-hidden'>
+                <div
+                  className='h-full bg-amber-500 transition-all'
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
             </div>
           </div>
+        )}
 
-          <div className='bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg'>
-            <div className='text-sm text-gray-600'>Level {level}</div>
-            <div className='w-32 h-2 bg-gray-200 rounded-full overflow-hidden'>
-              <div
-                className='h-full bg-amber-500 transition-all'
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
+        {/* Feedback */}
+        {!showMenu && (
+          <div className='absolute top-20 left-1/2 -translate-x-1/2 z-10'>
+            <motion.div
+              className='bg-white/90 backdrop-blur-sm rounded-lg px-6 py-3 shadow-lg text-lg'
+              key={feedback}
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+            >
+              {feedback}
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Feedback */}
-      {!showMenu && (
-        <div className='absolute top-20 left-1/2 -translate-x-1/2 z-10'>
-          <motion.div
-            className='bg-white/90 backdrop-blur-sm rounded-lg px-6 py-3 shadow-lg text-lg'
-            key={feedback}
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+        {/* Game Area */}
+        {showMenu ? (
+          <div className='flex-1 flex flex-col items-center justify-center p-8'>
+            <h1 className='text-4xl font-bold text-amber-900 mb-4'>
+              Color Potions 🧪
+            </h1>
+            <p className='text-lg text-amber-800 mb-8 text-center max-w-md'>
+              Mix colorful ingredients to discover magical potions!
+            </p>
+            <GameControls controls={menuControls} />
+          </div>
+        ) : (
+          <>
+            {renderBeaker()}
+            {renderIngredientShelf()}
+          </>
+        )}
+
+        {/* Controls */}
+        {!showMenu && <GameControls controls={gameControls} />}
+
+        {/* Finish button */}
+        {!showMenu && (
+          <button
+            onClick={handleFinish}
+            className='absolute top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-20'
+            type='button'
           >
-            {feedback}
-          </motion.div>
-        </div>
-      )}
+            Done
+          </button>
+        )}
 
-      {/* Game Area */}
-      {showMenu ? (
-        <div className='flex-1 flex flex-col items-center justify-center p-8'>
-          <h1 className='text-4xl font-bold text-amber-900 mb-4'>
-            Color Potions 🧪
-          </h1>
-          <p className='text-lg text-amber-800 mb-8 text-center max-w-md'>
-            Mix colorful ingredients to discover magical potions!
-          </p>
-          <GameControls controls={menuControls} />
-        </div>
-      ) : (
-        <>
-          {renderBeaker()}
-          {renderIngredientShelf()}
-        </>
-      )}
+        {/* Modals */}
+        {renderRecipeBook()}
+        {renderHint()}
 
-      {/* Controls */}
-      {!showMenu && <GameControls controls={gameControls} />}
-
-      {/* Finish button */}
-      {!showMenu && (
-        <button
-          onClick={handleFinish}
-          className='absolute top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-20'
-          type='button'
-        >
-          Done
-        </button>
-      )}
-
-      {/* Modals */}
-      {renderRecipeBook()}
-      {renderHint()}
-
-      {/* Celebrations */}
-      <CelebrationOverlay
-        show={showCelebration}
-        letter={recentDiscovery?.recipe?.name?.[0] || 'P'}
-        accuracy={100}
-        message={
-          recentDiscovery?.recipe
-            ? `Discovered ${recentDiscovery.recipe.name}!`
-            : ''
-        }
-        onComplete={() => setShowCelebration(false)}
-      />
+        {/* Celebrations */}
+        <CelebrationOverlay
+          show={showCelebration}
+          letter={recentDiscovery?.recipe?.name?.[0] || 'P'}
+          accuracy={100}
+          message={
+            recentDiscovery?.recipe
+              ? `Discovered ${recentDiscovery.recipe.name}!`
+              : ''
+          }
+          onComplete={() => setShowCelebration(false)}
+        />
       </div>
     </GameContainer>
   );
