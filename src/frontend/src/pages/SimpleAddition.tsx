@@ -189,6 +189,17 @@ export const SimpleAdditionContent = memo(function SimpleAdditionGame() {
     }
   }, [difficulty, speak, ttsEnabled, resetAutoCompletion]);
 
+  // Auto-start game on mount (skip pre-game menu for instant play)
+  useEffect(() => {
+    if (gameState.status === 'idle') {
+      // Small delay for camera to initialize
+      const timer = setTimeout(() => {
+        handleStart();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.status, handleStart]);
+
   const handleGameComplete = useCallback(() => {
     setShowCelebration(false);
     resetAutoCompletion();
@@ -402,9 +413,9 @@ export const SimpleAdditionContent = memo(function SimpleAdditionGame() {
                   </button>
                   <button
                     onClick={() => navigate('/games')}
-                    className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-xl"
+                    className="px-6 py-3 bg-[#10B981] hover:bg-emerald-600 text-white font-bold rounded-xl"
                   >
-                    Exit
+                    More Games 🎮
                   </button>
                 </div>
               </motion.div>

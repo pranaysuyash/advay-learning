@@ -9,10 +9,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Clock, Star, Trophy, RotateCcw, Sparkles } from 'lucide-react';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { useSubscription } from '../hooks/useSubscription';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   type GameState,
   type RoomItem,
@@ -34,7 +39,9 @@ function TidyUpTimeGameContent() {
   const [showMenu, setShowMenu] = useState(true);
   const [selectedItem, setSelectedItem] = useState<RoomItem | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const timerRef = useRef<number | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   // Timer effect
   useEffect(() => {
@@ -66,6 +73,27 @@ function TidyUpTimeGameContent() {
       triggerHaptic('error');
     }
   }, [gameState.isComplete, gameState.isGameOver, showCelebration, playCelebration, playError, gameState.score, completeGame]);
+
+  // Hand tracking hook
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
+    gameName: 'TidyUpTime',
+    targetFps: 30,
+    isRunning: !showMenu && !gameState.isComplete && !gameState.isGameOver,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (!showMenu && !gameState.isComplete && !gameState.isGameOver && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [showMenu, gameState.isComplete, gameState.isGameOver, isHandTrackingReady, isModelLoading, startTracking]);
 
   // Start game
   const startGame = useCallback(() => {
@@ -261,8 +289,14 @@ function TidyUpTimeGameContent() {
 
   return (
     <GameShell gameId='tidy-up-time' gameName='Tidy Up Time'>
-      <GameContainer title='Tidy Up Time' onHome={returnToMenu}>
-        <div className='relative w-full h-[70vh] bg-amber-50 rounded-xl overflow-hidden'>
+      <GameContainer
+        title='Tidy Up Time'
+        onHome={returnToMenu}
+        webcamRef={webcamRef}
+        isHandDetected={isHandTrackingReady}
+        isPlaying={!showMenu && !gameState.isComplete && !gameState.isGameOver}
+      >
+        <div ref={gameAreaRef} className='relative w-full h-[70vh] bg-amber-50 rounded-xl overflow-hidden'>
           {/* Room background */}
           <div className='absolute inset-0 bg-gradient-to-b from-amber-100 to-amber-200'>
             {/* Floor */}
@@ -354,6 +388,19 @@ function TidyUpTimeGameContent() {
                 Tap an item, then tap where it goes!
               </p>
             </div>
+          )}
+
+          {/* GameCursor for hand tracking */}
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace="normalized"
+              containerRef={gameAreaRef}
+              isPinching={false}
+              isHandDetected={true}
+              size={64}
+              color="#8B5CF6"
+            />
           )}
         </div>
       </GameContainer>

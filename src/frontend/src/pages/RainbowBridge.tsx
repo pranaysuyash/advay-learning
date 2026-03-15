@@ -4,10 +4,15 @@ import { motion } from 'framer-motion';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
+import { Point } from '../types/tracking';
+import { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import {
   RAINBOW_COLORS,
   createGame,
@@ -60,6 +65,9 @@ export function RainbowBridgeContent() {
   const timerRef = useRef<number | null>(null);
   const dotsRef = useRef<Dot[]>([]);
   const currentIndexRef = useRef(0);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
 
   const { playPop, playSuccess, playClick } = useAudio();
   const { completeGame } = useGameCompletion('rainbow-bridge');
@@ -177,9 +185,19 @@ export function RainbowBridgeContent() {
     startGame();
   }, [startGame]);
 
+  const isPlaying = gameState === 'playing';
+
+  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
+    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+    setIsHandTrackingActive(true);
+  }, []);
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'RainbowBridge', targetFps: 24, onFrame: handleHandTrackingFrame });
+
   if (gameState === 'start') {
     return (
-      <GameContainer title="Rainbow Bridge">
+      <GameContainer title="Rainbow Bridge" webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
         <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
           <h2 className="text-3xl font-bold text-purple-600">Rainbow Bridge 🌈</h2>
           <p className="text-lg text-slate-700 text-center">
@@ -216,7 +234,7 @@ export function RainbowBridgeContent() {
 
   if (gameState === 'complete') {
     return (
-      <GameContainer title="Rainbow Bridge">
+      <GameContainer title="Rainbow Bridge" webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
         <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
           <h2 className="text-4xl font-bold text-purple-600">Rainbow Complete! 🌈</h2>
           <p className="text-2xl font-bold text-slate-700">Score: {score}</p>
@@ -242,11 +260,13 @@ export function RainbowBridgeContent() {
   }
 
   return (
-    <GameContainer title="Rainbow Bridge">
+    <GameContainer title="Rainbow Bridge" webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
       <div
+        ref={gameAreaRef}
         className="relative w-full h-full"
         style={{ background: `linear-gradient(180deg, ${GAME_COLORS.sky} 60%, ${GAME_COLORS.grass} 60%)` }}
       >
+        <CursorEmbodiment position={cursor ?? { x: 0.5, y: 0.5 }} isHandDetected={isHandTrackingActive} />
         <div className="absolute top-4 left-4 right-4 flex justify-between">
           <div className="bg-white/80 rounded-lg px-4 py-2 shadow">
             <span className="font-bold text-slate-700">Score: {score}</span>

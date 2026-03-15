@@ -689,6 +689,7 @@ The audit-to-ticket gap exists because:
 - [ ] If any gate/test/typecheck fails, fix failures completely, rerun checks, then retry commit (do not bypass unless user explicitly authorizes)
 - [ ] Ensure worklog addendum is updated for code changes
 - [ ] Write meaningful commit message explaining WHAT and WHY
+- [ ] **WAIT for explicit user approval before running `git commit` or `git push`** — never commit/push autonomously
 ```
 
 ### Before Creating PR
@@ -1316,6 +1317,7 @@ Pass if:
 15. **Never** modify `.env`/`.env.*` files while remediating secret scans unless the user explicitly instructs it; fix hardcoded secrets in tracked code instead
 16. **Never** proceed to push after hook failures; first resolve failing checks, rerun them to green, then re-attempt commit/push
 17. **Never** commit directly on `main` unless the user explicitly approves `ALLOW_MAIN_COMMIT=1` for the current task
+18. **Never** commit or push changes without explicit user approval in the current conversation — even if all checks pass, always wait for the user to say "commit", "push", "merge", or equivalent
 
 ---
 

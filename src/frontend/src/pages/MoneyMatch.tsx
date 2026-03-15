@@ -1,11 +1,13 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AssetPreloader } from '../components/AssetPreloader';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import {
   LEVELS,
@@ -17,15 +19,34 @@ import {
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { GameBackground } from '../components/game/GameBackground';
+import type { Point } from '../types/tracking';
+import { type TrackedHandFrame } from '../utils/handTrackingFrame';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
-const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
-  { type: 'image', src: '/assets/kenney/platformer/collectibles/coin_gold.png', priority: 'critical' },
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
-];
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
+  [
+    {
+      type: 'image',
+      src: '/assets/kenney/platformer/collectibles/coin_gold.png',
+      priority: 'critical',
+    },
+    {
+      type: 'image',
+      src: '/assets/kenney/platformer/hud/hud_heart.png',
+      priority: 'critical',
+    },
+    {
+      type: 'image',
+      src: '/assets/kenney/platformer/hud/hud_heart_empty.png',
+      priority: 'critical',
+    },
+  ];
 
 function MoneyMatchContent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [targetAmount, setTargetAmount] = useState(0);
@@ -128,6 +149,27 @@ function MoneyMatchContent() {
 
   const currentTotal = selectedCoins.reduce((sum, c) => sum + c.value, 0);
 
+  const handleHandTrackingFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      if (!frame.indexTip) {
+        setCursor(null);
+        setIsHandTrackingActive(false);
+        return;
+      }
+      setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+      setIsHandTrackingActive(true);
+    },
+    [],
+  );
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({
+    gameName: 'MoneyMatch',
+    targetFps: 24,
+    onFrame: handleHandTrackingFrame,
+  });
+
+  const isPlaying = gameState === 'playing';
+
   if (!assetsLoaded) {
     return (
       <AssetPreloader
@@ -143,166 +185,204 @@ function MoneyMatchContent() {
       title='Money Match'
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={_webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={isPlaying}
     >
-      <div className="relative">
-        <GameBackground type="solid_cloud" className="absolute inset-0" />
-        <div className="relative z-10 flex flex-col items-center gap-4 p-4">
-        <div className='flex gap-2'>
-          {LEVELS.map((l) => (
-            <button
-              type='button'
-              key={l.level}
-              onClick={() => {
-                playClick();
-                setCurrentLevel(l.level);
-              }}
-              className={`px-4 py-2 rounded-full font-bold ${currentLevel === l.level ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
-            >
-              Level {l.level}
-            </button>
-          ))}
-        </div>
-
-        {gameState === 'start' && (
-          <div className='text-center'>
-            <div className='flex justify-center mb-4'><KenneyIcon type='coin' size={64} /></div>
-            <h2 className='text-2xl font-bold mb-2'>Money Match!</h2>
-            <p className='mb-4'>Count the coins to make the amount!</p>
-            <button
-              type='button'
-              onClick={handleStart}
-              className='px-8 py-4 bg-green-500 text-white rounded-2xl font-bold text-xl'
-            >
-              Start!
-            </button>
+      <div className='relative' ref={gameAreaRef}>
+        <GameBackground type='solid_cloud' className='absolute inset-0' />
+        <CursorEmbodiment position={cursor ?? { x: 0.5, y: 0.5 }} isHandDetected={isHandTrackingActive} />
+        <div className='relative z-10 flex flex-col items-center gap-4 p-4'>
+          <div className='flex gap-2'>
+            {LEVELS.map((l) => (
+              <button
+                type='button'
+                key={l.level}
+                onClick={() => {
+                  playClick();
+                  setCurrentLevel(l.level);
+                }}
+                className={`px-4 py-2 rounded-full font-bold ${currentLevel === l.level ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
+              >
+                Level {l.level}
+              </button>
+            ))}
           </div>
-        )}
 
-        {gameState === 'playing' && (
-          <div className='text-center'>
-            {/* Streak HUD */}
-            <div className="flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm">
-              <div className='flex items-center gap-1'><KenneyIcon type='heart' size={20} /><span className="font-black text-lg">Streak</span></div>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <img
-                    key={i}
-                    src={
-                      streak >= i * 2
-                        ? '/assets/kenney/platformer/hud/hud_heart.png'
-                        : '/assets/kenney/platformer/hud/hud_heart_empty.png'
-                    }
-                    alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
-                    className="w-6 h-6"
-                  />
+          {gameState === 'start' && (
+            <div className='text-center'>
+              <div className='flex justify-center mb-4'>
+                <KenneyIcon type='coin' size={64} />
+              </div>
+              <h2 className='text-2xl font-bold mb-2'>Money Match!</h2>
+              <p className='mb-4'>Count the coins to make the amount!</p>
+              <button
+                type='button'
+                onClick={handleStart}
+                className='px-8 py-4 bg-green-500 text-white rounded-2xl font-bold text-xl'
+              >
+                Start!
+              </button>
+            </div>
+          )}
+
+          {gameState === 'playing' && (
+            <div className='text-center'>
+              {/* Streak HUD */}
+              <div className='flex items-center justify-center gap-3 bg-white rounded-xl border-2 border-orange-200 px-4 py-2 mb-4 shadow-sm'>
+                <div className='flex items-center gap-1'>
+                  <KenneyIcon type='heart' size={20} />
+                  <span className='font-black text-lg'>Streak</span>
+                </div>
+                <div className='flex gap-1'>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <img
+                      key={i}
+                      src={
+                        streak >= i * 2
+                          ? '/assets/kenney/platformer/hud/hud_heart.png'
+                          : '/assets/kenney/platformer/hud/hud_heart_empty.png'
+                      }
+                      alt={streak >= i * 2 ? 'filled heart' : 'empty heart'}
+                      className='w-6 h-6'
+                    />
+                  ))}
+                </div>
+                <span className='font-black text-2xl text-orange-500 min-w-[2ch] text-center'>
+                  {streak}
+                </span>
+              </div>
+
+              {/* Streak milestone popup */}
+              {showMilestone && (
+                <div className='animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block'>
+                  <div className='text-xl font-black text-orange-600'>
+                    <span className='flex items-center justify-center gap-2'>
+                      <KenneyIcon type='heart' size={20} /> {streak} Streak!{' '}
+                      <KenneyIcon type='heart' size={20} />
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <p className='text-xl font-bold mb-2'>Make this amount:</p>
+              <p className='text-5xl font-bold text-green-600 mb-4'>
+                ${(targetAmount / 100).toFixed(2)}
+              </p>
+              <div className='bg-yellow-100 p-4 rounded-xl mb-4 min-h-20 flex flex-wrap justify-center gap-2'>
+                {selectedCoins.map(
+                  (coin, idx) =>
+                    coin.icon && (
+                      <img
+                        key={idx}
+                        src={coin.icon}
+                        alt={coin.name}
+                        className='w-8 h-8'
+                      />
+                    ),
+                )}
+                {selectedCoins.length === 0 && (
+                  <span className='text-gray-400'>Tap coins below!</span>
+                )}
+              </div>
+              <p className='text-lg font-bold mb-4'>
+                Total: ${(currentTotal / 100).toFixed(2)}
+              </p>
+              <div className='flex gap-3 mb-4'>
+                {COINS.map((coin) => (
+                  <button
+                    key={coin.name}
+                    type='button'
+                    onClick={() => addCoin(coin)}
+                    className='px-4 py-3 bg-yellow-200 rounded-xl font-bold hover:bg-yellow-300 flex flex-col items-center'
+                  >
+                    {coin.icon && (
+                      <img
+                        src={coin.icon}
+                        alt={coin.name}
+                        className='w-8 h-8 mb-1'
+                      />
+                    )}
+                    <span className='text-xs'>
+                      ${(coin.value / 100).toFixed(2)}
+                    </span>
+                  </button>
                 ))}
               </div>
-              <span className="font-black text-2xl text-orange-500 min-w-[2ch] text-center">
-                {streak}
-              </span>
-            </div>
+              <button
+                type='button'
+                onClick={() => {
+                  playClick();
+                  setSelectedCoins([]);
+                }}
+                className='px-4 py-2 bg-gray-200 rounded-lg text-sm'
+              >
+                Clear
+              </button>
+              {/* Score popup */}
+              {scorePopup && (
+                <div className='font-black text-3xl text-green-500 animate-bounce mb-2'>
+                  +{scorePopup.points}
+                </div>
+              )}
 
-            {/* Streak milestone popup */}
-            {showMilestone && (
-              <div className="animate-bounce bg-orange-100 border-2 border-orange-300 rounded-xl px-6 py-3 mb-4 inline-block">
-                <div className="text-xl font-black text-orange-600">
-                  <span className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></span>
+              <p className='text-lg font-medium text-purple-600 mt-2'>
+                {feedback}
+              </p>
+              <div className='flex gap-4 mt-4'>
+                <div className='bg-green-100 px-4 py-2 rounded-xl text-center border-2 border-green-200'>
+                  <p className='text-xs font-black uppercase text-green-600'>
+                    Correct
+                  </p>
+                  <p className='text-2xl font-bold text-green-700'>{correct}</p>
+                </div>
+                <div className='bg-yellow-100 px-4 py-2 rounded-xl text-center border-2 border-yellow-200'>
+                  <p className='text-xs font-black uppercase text-yellow-600'>
+                    Round
+                  </p>
+                  <p className='text-2xl font-bold text-yellow-700'>
+                    {round + 1}/5
+                  </p>
+                </div>
+                <div className='bg-orange-100 px-4 py-2 rounded-xl text-center border-2 border-orange-200'>
+                  <p className='text-xs font-black uppercase text-orange-600'>
+                    Best Streak
+                  </p>
+                  <p className='text-2xl font-bold text-orange-700'>
+                    {maxStreak}
+                  </p>
                 </div>
               </div>
-            )}
-
-            <p className='text-xl font-bold mb-2'>Make this amount:</p>
-            <p className='text-5xl font-bold text-green-600 mb-4'>
-              ${(targetAmount / 100).toFixed(2)}
-            </p>
-            <div className='bg-yellow-100 p-4 rounded-xl mb-4 min-h-20 flex flex-wrap justify-center gap-2'>
-              {selectedCoins.map((coin, idx) => (
-                coin.icon && <img key={idx} src={coin.icon} alt={coin.name} className='w-8 h-8' />
-              ))}
-              {selectedCoins.length === 0 && (
-                <span className='text-gray-400'>Tap coins below!</span>
-              )}
             </div>
-            <p className='text-lg font-bold mb-4'>
-              Total: ${(currentTotal / 100).toFixed(2)}
-            </p>
-            <div className='flex gap-3 mb-4'>
-              {COINS.map((coin) => (
-                <button
-                  key={coin.name}
-                  type='button'
-                  onClick={() => addCoin(coin)}
-                  className='px-4 py-3 bg-yellow-200 rounded-xl font-bold hover:bg-yellow-300 flex flex-col items-center'
-                >
-                  {coin.icon && <img src={coin.icon} alt={coin.name} className='w-8 h-8 mb-1' />}
-                  <span className='text-xs'>
-                    ${(coin.value / 100).toFixed(2)}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <button
-              type='button'
-              onClick={() => {
-                playClick();
-                setSelectedCoins([]);
-              }}
-              className='px-4 py-2 bg-gray-200 rounded-lg text-sm'
-            >
-              Clear
-            </button>
-            {/* Score popup */}
-            {scorePopup && (
-              <div className="font-black text-3xl text-green-500 animate-bounce mb-2">
-                +{scorePopup.points}
-              </div>
-            )}
+          )}
 
-            <p className='text-lg font-medium text-purple-600 mt-2'>
-              {feedback}
-            </p>
-            <div className='flex gap-4 mt-4'>
-              <div className='bg-green-100 px-4 py-2 rounded-xl text-center border-2 border-green-200'>
-                <p className='text-xs font-black uppercase text-green-600'>Correct</p>
-                <p className='text-2xl font-bold text-green-700'>{correct}</p>
+          {gameState === 'complete' && (
+            <div className='text-center'>
+              <div className='flex justify-center mb-4'>
+                <KenneyIcon type='star' size={64} />
               </div>
-              <div className='bg-yellow-100 px-4 py-2 rounded-xl text-center border-2 border-yellow-200'>
-                <p className='text-xs font-black uppercase text-yellow-600'>Round</p>
-                <p className='text-2xl font-bold text-yellow-700'>{round + 1}/5</p>
-              </div>
-              <div className='bg-orange-100 px-4 py-2 rounded-xl text-center border-2 border-orange-200'>
-                <p className='text-xs font-black uppercase text-orange-600'>Best Streak</p>
-                <p className='text-2xl font-bold text-orange-700'>{maxStreak}</p>
-              </div>
+              <h2 className='text-2xl font-bold mb-2'>Money Master!</h2>
+              <p className='text-xl mb-4'>You got {correct} right!</p>
+              <p className='text-2xl font-bold text-green-600 mb-4'>
+                Score: {score}
+              </p>
+              <button
+                type='button'
+                onClick={handleStart}
+                className='px-6 py-3 bg-green-500 text-white rounded-xl font-bold mr-4'
+              >
+                Play Again
+              </button>
+              <button
+                type='button'
+                onClick={handleFinish}
+                className='px-6 py-3 bg-gray-200 rounded-xl font-bold'
+              >
+                Finish
+              </button>
             </div>
-          </div>
-        )}
-
-        {gameState === 'complete' && (
-          <div className='text-center'>
-            <div className='flex justify-center mb-4'><KenneyIcon type='star' size={64} /></div>
-            <h2 className='text-2xl font-bold mb-2'>Money Master!</h2>
-            <p className='text-xl mb-4'>You got {correct} right!</p>
-            <p className='text-2xl font-bold text-green-600 mb-4'>
-              Score: {score}
-            </p>
-            <button
-              type='button'
-              onClick={handleStart}
-              className='px-6 py-3 bg-green-500 text-white rounded-xl font-bold mr-4'
-            >
-              Play Again
-            </button>
-            <button
-              type='button'
-              onClick={handleFinish}
-              className='px-6 py-3 bg-gray-200 rounded-xl font-bold'
-            >
-              Finish
-            </button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       </div>
     </GameContainer>
   );
@@ -310,8 +390,8 @@ function MoneyMatchContent() {
 
 export const MoneyMatch = () => (
   <GameShell
-    gameId="money-match"
-    gameName="Money Match"
+    gameId='money-match'
+    gameName='Money Match'
     showWellnessTimer={true}
     enableErrorBoundary={true}
   >

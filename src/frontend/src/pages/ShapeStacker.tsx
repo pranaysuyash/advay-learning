@@ -8,6 +8,11 @@ import { GameHUD } from '../components/game/GameHUD';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import { type TrackedHandFrame } from '../utils/handTrackingFrame';
+import { type HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import {
   createShapes,
   createTargets,
@@ -41,6 +46,9 @@ const GAME_COLORS = {
 };
 function ShapeStackerContent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [shapes, setShapes] = useState<FallingShape[]>([]);
   const [targets, setTargets] = useState<TargetSlot[]>([]);
@@ -60,6 +68,14 @@ function ShapeStackerContent() {
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { completeGame } = useGameCompletion('shape-stacker');
   useGameSessionProgress({ gameName: 'Shape Stacker', score, level: currentLevel, isPlaying: gameState === 'playing' });
+
+  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
+    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+    setIsHandTrackingActive(true);
+  }, []);
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'ShapeStacker', targetFps: 24, onFrame: handleHandTrackingFrame });
 
   // Slower fall speed, scaling with level
   const FALL_SPEED = currentLevel === 1 ? 0.05 : currentLevel === 2 ? 0.08 : 0.12;
@@ -200,9 +216,11 @@ function ShapeStackerContent() {
     </svg>
   );
 
+  const isPlaying = gameState === 'playing';
+
   if (gameState === 'start') {
     return (
-      <GameContainer title="Shape Stacker" onHome={() => navigate('/games')} reportSession={false}>
+      <GameContainer title="Shape Stacker" onHome={() => navigate('/games')} reportSession={false} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
         <div className="flex flex-col items-center justify-center h-full gap-6 p-8 relative">
           <VoiceInstructions text="Tap the falling shapes to match them with the target slots!" autoPlay={true} />
           
@@ -241,7 +259,7 @@ function ShapeStackerContent() {
 
   if (gameState === 'complete') {
     return (
-      <GameContainer title="Shape Stacker" onHome={() => navigate('/games')} reportSession={false}>
+      <GameContainer title="Shape Stacker" onHome={() => navigate('/games')} reportSession={false} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
         <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
           <h2 className="text-4xl font-bold text-indigo-600">Stacked! 🔷</h2>
           <p className="text-2xl font-bold text-slate-700">Score: {score}</p>
@@ -268,11 +286,13 @@ function ShapeStackerContent() {
   }
 
   return (
-    <GameContainer title="Shape Stacker" onHome={() => navigate('/games')} reportSession={false}>
+    <GameContainer title="Shape Stacker" onHome={() => navigate('/games')} reportSession={false} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={gameState === 'playing'}>
       <div
         className="relative w-full h-full"
         style={{ backgroundColor: GAME_COLORS.background }}
+        ref={gameAreaRef}
       >
+        <CursorEmbodiment position={cursor ?? { x: 0.5, y: 0.5 }} isHandDetected={isHandTrackingActive} />
         <GameHUD
           score={score}
           streak={streak}

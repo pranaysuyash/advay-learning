@@ -158,7 +158,12 @@ export class TTSService {
 
       utterance.onend = () => resolve();
       utterance.onerror = (event) => {
-        if (event.error === 'interrupted') {
+        if (event.error === 'interrupted' || event.error === 'not-allowed') {
+          // 'not-allowed' happens if the browser blocks autoplay without user interaction.
+          // We resolve gracefully to prevent uncaught promise rejections in game loops.
+          if (event.error === 'not-allowed') {
+            console.warn('[TTSService] Web Speech blocked (not-allowed). Requires user interaction.');
+          }
           resolve();
         } else {
           console.error('[TTSService] Web Speech error:', event.error);

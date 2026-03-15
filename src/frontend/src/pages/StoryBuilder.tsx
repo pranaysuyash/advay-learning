@@ -1,19 +1,26 @@
-import { memo, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import {
   createStoryBuilderRound,
   evaluateStoryWordPick,
   type StoryBuilderRound,
 } from '../games/storyBuilderLogic';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 function StoryBuilderGame() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { completeGame } = useGameCompletion('story-builder');
 
@@ -95,6 +102,38 @@ function StoryBuilderGame() {
     navigate('/games');
   };
 
+  // Hand tracking
+  const handleFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const tip = frame.indexTip;
+      if (!tip) {
+        setCursor(null);
+        return;
+      }
+      setCursor(tip);
+    },
+    [],
+  );
+
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef,
+  } = useGameHandTracking({
+    gameName: 'StoryBuilder',
+    targetFps: 30,
+    isRunning: Boolean(activeRound),
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (activeRound && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [activeRound, isHandTrackingReady, isModelLoading, startTracking]);
+
   return (
     <GameContainer
       title='Story Builder'
@@ -103,8 +142,11 @@ function StoryBuilderGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={Boolean(activeRound)}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-4xl mx-auto space-y-4'>
           {!activeRound ? (
             <div className='rounded-3xl border-3 border-[#F2CC8F] bg-white p-8 text-center shadow-[0_6px_0_#E5B86E] space-y-5'>
@@ -178,6 +220,19 @@ function StoryBuilderGame() {
                 </button>
               </div>
             </>
+          )}
+
+          {/* Hand tracking cursor */}
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace='normalized'
+              containerRef={gameAreaRef}
+              isPinching={false}
+              isHandDetected={true}
+              size={64}
+              color='#0ea5e9'
+            />
           )}
         </div>
       </div>

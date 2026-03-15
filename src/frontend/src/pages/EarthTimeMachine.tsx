@@ -6,6 +6,7 @@
  */
 
 import { memo, useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
@@ -32,6 +33,7 @@ import { useTTS } from '../hooks/useTTS';
 const TIMER_INTERVAL = 1000;
 
 function EarthTimeMachineContent() {
+  const navigate = useNavigate();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('earth-time-machine');
   const { playClick, playSuccess, playError } = useAudio();
@@ -130,7 +132,7 @@ function EarthTimeMachineContent() {
 
   return (
     <GameShell gameId='earth-time-machine' gameName='Earth Time Machine'>
-      <GameContainer>
+      <GameContainer onHome={() => navigate('/games')}>
         <AnimatePresence mode='wait'>
           {state.status === 'menu' && (
             <motion.div

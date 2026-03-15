@@ -9,11 +9,16 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
+import { Point } from '../types/tracking';
+import { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import {
   LEVELS,
   createBalls,
@@ -36,6 +41,9 @@ const GAME_COLORS = {
 
 const BeatBounceGame = memo(function BeatBounceGameComponent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [balls, setBalls] = useState<BouncingBall[]>([]);
   const [score, setScore] = useState(0);
@@ -198,6 +206,16 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
     return 'transparent';
   };
 
+  const isPlaying = gameState === 'playing';
+
+  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
+    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+    setIsHandTrackingActive(true);
+  }, []);
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'BeatBounce', targetFps: 24, onFrame: handleHandTrackingFrame });
+
   if (gameState === 'start') {
     return (
       <GameContainer title="Beat Bounce" onHome={handleBack} reportSession={false}>
@@ -266,8 +284,9 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
   }
 
   return (
-    <GameContainer title="Beat Bounce" onHome={handleBack} reportSession={false}>
-      <button
+    <GameContainer title="Beat Bounce" onHome={handleBack} reportSession={false} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={isPlaying}>
+      <div ref={gameAreaRef} className="relative w-full h-full">
+        <button
         type="button"
         className="relative w-full h-full cursor-pointer"
         style={{ backgroundColor: GAME_COLORS.background }}
@@ -381,7 +400,10 @@ const BeatBounceGame = memo(function BeatBounceGameComponent() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <CursorEmbodiment position={cursor ?? { x: 0, y: 0 }} isHandDetected={isHandTrackingActive} coordinateSpace="normalized" containerRef={gameAreaRef} />
       </button>
+    </div>
     </GameContainer>
   );
 });

@@ -6,15 +6,20 @@
  * @ticket TCK-20260310-015
  */
 
-import { memo, useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   TASTE_ZONES,
   type FoodTaste,
@@ -28,6 +33,7 @@ const MATCHES_NEEDED = 10;
 
 function TasteMatchGame() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
   const [currentLevel] = useState(1);
   const [availableFoods, setAvailableFoods] = useState<FoodTaste[]>([]);
@@ -35,6 +41,7 @@ function TasteMatchGame() {
   const [matched, setMatched] = useState(0);
   const [score, setScore] = useState(0);
   const [showFeedback, setShowFeedback] = useState<{ correct: boolean; taste: string } | null>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   
   const { playSuccess, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -47,6 +54,26 @@ function TasteMatchGame() {
     isPlaying: gameState === 'playing',
     metaData: { matched },
   });
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef: _webcamRef } = useGameHandTracking({
+    gameName: 'TasteMatch',
+    targetFps: 30,
+    isRunning: gameState === 'playing',
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (gameState === 'playing' && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [gameState, isHandTrackingReady, isModelLoading, startTracking]);
 
   const speakText = useCallback((text: string) => {
     if (ttsEnabled) {
@@ -196,7 +223,7 @@ function TasteMatchGame() {
 
       {/* Playing Screen */}
       {gameState === 'playing' && currentFood && (
-        <div className="flex flex-col h-full">
+        <div ref={gameAreaRef} className="flex flex-col h-full relative">
           {/* Header */}
           <div className="flex justify-between items-center p-4">
             <button
@@ -257,6 +284,19 @@ function TasteMatchGame() {
               ))}
             </div>
           </div>
+
+          {/* GameCursor for hand tracking */}
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace="normalized"
+              containerRef={gameAreaRef}
+              isPinching={false}
+              isHandDetected={true}
+              size={64}
+              color="#F59E0B"
+            />
+          )}
         </div>
       )}
 

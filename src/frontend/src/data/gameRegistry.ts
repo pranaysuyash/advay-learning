@@ -44,6 +44,7 @@ export interface GameManifest {
   path: string;
   icon: IconName | string;
   previewImage?: string; // High fidelity image for game card headers
+  previewImages?: string[]; // Multiple preview images for game card carousel
 
   // World & feel
   worldId: string;
@@ -149,7 +150,6 @@ export const GAME_REGISTRY: GameManifest[] = [
 
 // ─── LOOKUP HELPERS ─────────────────────────────────────────────────────
 
-// Dev-time uniqueness guard — throws immediately if any game ID is duplicated.
 if (import.meta.env.DEV) {
   const seen = new Set<string>();
   for (const g of GAME_REGISTRY) {

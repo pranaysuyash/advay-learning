@@ -68,6 +68,8 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
   const { completeGame, saveProgress } = useGameCompletion('bubble-pop');
 
   // Hand tracking state
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
 
   // Audio
@@ -361,6 +363,15 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
   // Stats for display
   const stats = getStats(gameState);
 
+  // Hand tracking hook
+  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
+    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+    setIsHandTrackingActive(true);
+  }, []);
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'BubblePop', targetFps: 24, onFrame: handleHandTrackingFrame });
+
   if (!assetsLoaded) {
     return (
       <AssetPreloader
@@ -378,6 +389,9 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
     <GameContainer
       title="Bubble Pop"
       score={gameState.score}
+      webcamRef={_webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={!showMenu && !gameState.gameOver}
       onHome={() => {
         stop();
         navigate('/games');
@@ -386,7 +400,6 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
         stop();
         setShowMenu(true);
       }}
-      isPlaying={!showMenu && !gameState.gameOver}
     >
       <VoiceInstructions
         instructions={[
@@ -397,7 +410,8 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
       />
 
       {/* Game Content */}
-      <div className="relative w-full h-full flex flex-col items-center justify-center p-4">
+      <div ref={gameAreaRef} className="relative w-full h-full flex flex-col items-center justify-center p-4">
+        {cursor && isHandTrackingActive && <CursorEmbodiment position={cursor} isPinching={false} />}
         {/* Menu Screen */}
         {showMenu && (
           <motion.div

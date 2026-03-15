@@ -1,15 +1,20 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   BASE_COLORS,
   createColorMixRound,
@@ -26,6 +31,10 @@ const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
 function ColorMixingGame() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [hoveredButtonId, setHoveredButtonId] = useState<string | null>(null);
+
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { completeGame } = useGameCompletion('color-mixing');
 
@@ -122,6 +131,58 @@ function ColorMixingGame() {
     navigate('/games');
   };
 
+  // Hand tracking frame handler
+  const handleFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const tip = frame.indexTip;
+      if (!tip) {
+        setCursor(null);
+        setHoveredButtonId(null);
+        return;
+      }
+      setCursor(tip);
+
+      // Check for pinch to select answer
+      if (frame.pinch.transition !== 'start') return;
+
+      // If we have a hovered button, trigger its click
+      if (hoveredButtonId) {
+        if (hoveredButtonId === 'start') {
+          handleStart();
+        } else if (hoveredButtonId === 'finish') {
+          void handleFinish();
+        } else {
+          handleSelectAnswer(hoveredButtonId);
+        }
+      }
+    },
+    [hoveredButtonId, handleStart, handleFinish, handleSelectAnswer],
+  );
+
+  // Initialize hand tracking
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef,
+  } = useGameHandTracking({
+    gameName: 'ColorMixing',
+    targetFps: 30,
+    isRunning: Boolean(activeRound) || !assetsLoaded,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => {
+      setCursor(null);
+      setHoveredButtonId(null);
+    },
+  });
+
+  // Start tracking when round starts
+  useEffect(() => {
+    if (activeRound && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [activeRound, isHandTrackingReady, isModelLoading, startTracking]);
+
   if (!assetsLoaded) {
     return (
       <AssetPreloader
@@ -141,8 +202,14 @@ function ColorMixingGame() {
         showScore
         reportSession={false}
         onHome={() => navigate('/games')}
+        webcamRef={webcamRef}
+        isHandDetected={isHandTrackingReady}
+        isPlaying={true}
       >
-        <div className='h-full overflow-auto p-4 md:p-6'>
+        <div
+          ref={gameAreaRef}
+          className='h-full overflow-auto p-4 md:p-6'
+        >
           <div className='max-w-3xl mx-auto rounded-3xl border-3 border-[#F2CC8F] bg-white p-8 text-center shadow-[0_6px_0_#E5B86E] space-y-5'>
             <p className='text-sm font-black uppercase tracking-widest text-[#D97706]'>Creative Science</p>
             <h2 className='text-4xl font-black text-slate-900'>Color Mixing Lab</h2>
@@ -176,8 +243,14 @@ function ColorMixingGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={true}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div
+        ref={gameAreaRef}
+        className='h-full overflow-auto p-4 md:p-6'
+      >
         <div className='max-w-4xl mx-auto space-y-4'>
           <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4 shadow-[0_4px_0_#E5B86E]'>
             <div className='flex items-center justify-between'>
@@ -281,6 +354,19 @@ function ColorMixingGame() {
             </button>
           </div>
         </div>
+
+        {/* Hand tracking cursor */}
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={true}
+            size={64}
+            color='#f97316'
+          />
+        )}
       </div>
     </GameContainer>
   );

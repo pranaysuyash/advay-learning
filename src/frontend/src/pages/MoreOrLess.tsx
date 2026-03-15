@@ -1,21 +1,28 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateQuestion, calculateScore, type CompareQuestion } from '../games/moreOrLessLogic';
 import { triggerHaptic } from '../utils/haptics';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 function MoreOrLessContent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [question, setQuestion] = useState<CompareQuestion | null>(null);
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const {
     streak,
     maxStreak,
@@ -36,9 +43,29 @@ function MoreOrLessContent() {
     gameName: 'More or Less',
     score,
     level: currentLevel,
-    isPlaying: true,
+    isPlaying: !!question,
     metaData: { correct, round },
   });
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
+    gameName: 'MoreOrLess',
+    targetFps: 30,
+    isRunning: !!question,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (question && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [question, isHandTrackingReady, isModelLoading, startTracking]);
 
   const startNewRound = () => {
     const newQuestion = generateQuestion(currentLevel);
@@ -148,8 +175,11 @@ function MoreOrLessContent() {
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={!!question}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6 relative'>
         <div className='max-w-2xl mx-auto space-y-4'>
 
           {/* Level selector */}
@@ -287,6 +317,19 @@ function MoreOrLessContent() {
             </>
           )}
         </div>
+
+        {/* GameCursor for hand tracking */}
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace="normalized"
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={true}
+            size={64}
+            color="#8B5CF6"
+          />
+        )}
       </div>
     </GameContainer>
   );

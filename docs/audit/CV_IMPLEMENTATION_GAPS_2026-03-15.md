@@ -27,12 +27,16 @@ These games declare CV in registry but have **NO tracking hooks** in their code:
 
 | Game | Registry CV | Actual Implementation |
 |------|-------------|----------------------|
-| `color-splash` | `['hand']` | ❌ No hook - uses `handleObjectClick` |
-| `color-mixing` | `['hand']` | ❌ No hook - uses `handleSelectAnswer` |
-| `color-potions` | `['hand']` | ❌ No hook - pointer clicks |
+| `color-splash` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with pinch-to-splash |
+| `color-mixing` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with cursor |
+| `color-potions` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with cursor |
 | `pack-lunchbox` | `['hand']` | ❌ No hook - pointer clicks |
 | `set-the-table` | `['hand']` | ❌ No hook - pointer clicks |
-| `story-builder` | `['hand']` | ❌ No hook - pointer clicks |
+| `story-builder` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with cursor |
+
+## Gap Category 1: Games Missing CV Hooks Entirely
+
+These games declare CV in registry but have **NO tracking hooks** in their code:
 
 ### Selection/Sorting Games (All declare `cv: ['hand']`)
 
@@ -45,6 +49,7 @@ These games declare CV in registry but have **NO tracking hooks** in their code:
 | `farm-friends` | `['hand']` | ❌ No hook - pointer clicks |
 | `texture-explorer` | `['hand']` | ❌ No hook - pointer clicks |
 | `tidy-up-time` | `['hand']` | ❌ No hook - pointer clicks |
+| `color-sort` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with cursor |
 
 ### Educational Games (All declare `cv: ['hand']`)
 

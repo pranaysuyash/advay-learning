@@ -198,7 +198,7 @@ export const Home = memo(function Home() {
                   onClick={startRegistration}
                   className="w-full bg-[#E85D04] hover:bg-[#ff6c14] text-white px-10 py-5 rounded-full font-black text-2xl border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all flex items-center justify-center gap-3"
                 >
-                  Create a Profile
+                  Start Free
                 </button>
               </motion.div>
 
@@ -207,7 +207,7 @@ export const Home = memo(function Home() {
                   onClick={startDemo}
                   className="w-full bg-white text-[#3B82F6] border-3 border-[#3B82F6] px-10 py-5 rounded-full font-black text-2xl shadow-[0_6px_0_0_#2563EB] active:translate-y-[6px] active:shadow-none transition-all drop-shadow-[0_4px_0_#E5B86E] flex items-center justify-center gap-3"
                 >
-                  <Sparkles size={28} /> Try The Magic
+                  <Sparkles size={28} /> Try Demo — No Account Needed
                 </button>
               </motion.div>
             </div>
@@ -330,7 +330,7 @@ export const Home = memo(function Home() {
                 We built Advay Learning on WebAssembly. That means our complex Computer Vision runs entirely inside your device browser. Uncompromising privacy by design.
               </p>
               <button onClick={startRegistration} className="bg-[#FFF8F0] text-slate-900 hover:bg-white text-2xl font-black px-12 py-6 rounded-full border-3 border-[#000000] shadow-[0_6px_0_0_#000000] active:translate-y-[6px] active:shadow-none transition-all drop-shadow-xl inline-block max-w-full">
-                Create Child Profile
+                Start Free Account
               </button>
             </div>
           </div>

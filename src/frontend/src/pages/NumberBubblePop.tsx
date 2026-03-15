@@ -54,6 +54,16 @@ function NumberBubblePopContent() {
     setGameState('playing');
   };
 
+  // Auto-start game on mount (skip pre-game menu for instant play)
+  useEffect(() => {
+    if (gameState === 'start') {
+      const timer = setTimeout(() => {
+        startGame();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState]);
+
   const handleBubbleClick = (bubble: Bubble) => {
     if (gameState !== 'playing') return;
     playClick();

@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
@@ -8,6 +8,11 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { GameHUD } from '../components/game/GameHUD';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   createEndingSoundsRound,
   isEndingSoundCorrect,
@@ -23,12 +28,51 @@ function EndingSoundsGame() {
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(0);
   const [usedWords, setUsedWords] = useState<string[]>([]);
-  const [activeRound, setActiveRound] = useState<EndingSoundsRound | null>(null);
+  const [activeRound, setActiveRound] = useState<EndingSoundsRound | null>(
+    null,
+  );
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState('Find the ending sound.');
 
   // Streak tracking
   const { streak, incrementStreak, resetStreak } = useStreakTracking();
+
+  // Hand tracking state
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+
+  const isPlaying = Boolean(activeRound);
+
+  const handleFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const tip = frame.indexTip;
+      if (!tip) {
+        setCursor(null);
+        return;
+      }
+      setCursor(tip);
+    },
+    [],
+  );
+
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef,
+  } = useGameHandTracking({
+    gameName: 'EndingSounds',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isPlaying, isHandTrackingReady, isModelLoading, startTracking]);
 
   const roundsPerSession = 8;
 
@@ -66,11 +110,15 @@ function EndingSoundsGame() {
       incrementStreak();
       setCorrect((prev) => prev + 1);
       setScore((prev) => prev + 20);
-      setFeedback(`Great! ${activeRound.target.word} ends with ${activeRound.target.endingLetter}.`);
+      setFeedback(
+        `Great! ${activeRound.target.word} ends with ${activeRound.target.endingLetter}.`,
+      );
     } else {
       resetStreak();
       playError();
-      setFeedback(`Nice try! ${activeRound.target.word} ends with ${activeRound.target.endingLetter}.`);
+      setFeedback(
+        `Nice try! ${activeRound.target.word} ends with ${activeRound.target.endingLetter}.`,
+      );
     }
 
     if (round >= roundsPerSession) {
@@ -102,17 +150,33 @@ function EndingSoundsGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div
+        ref={gameAreaRef}
+        className='h-full overflow-auto p-4 md:p-6 relative'
+      >
         <div className='max-w-4xl mx-auto space-y-4'>
           {!activeRound ? (
             <div className='rounded-3xl border-3 border-[#F2CC8F] bg-white p-8 text-center shadow-[0_6px_0_#E5B86E] space-y-5'>
-              <p className='text-sm font-black uppercase tracking-widest text-[#7C3AED]'>Phonics</p>
-              <h2 className='text-4xl font-black text-slate-900'>Ending Sounds</h2>
-              <p className='text-lg font-bold text-slate-600' data-ux-goal='Identify the final sound in simple words.'>
+              <p className='text-sm font-black uppercase tracking-widest text-[#7C3AED]'>
+                Phonics
+              </p>
+              <h2 className='text-4xl font-black text-slate-900'>
+                Ending Sounds
+              </h2>
+              <p
+                className='text-lg font-bold text-slate-600'
+                data-ux-goal='Identify the final sound in simple words.'
+              >
                 Listen to the word and pick its ending sound.
               </p>
-              <p className='text-base font-bold text-slate-500' data-ux-instruction='Read the word and tap the correct ending letter.'>
+              <p
+                className='text-base font-bold text-slate-500'
+                data-ux-instruction='Read the word and tap the correct ending letter.'
+              >
                 Read the word and tap the correct ending letter.
               </p>
               <button
@@ -136,12 +200,16 @@ function EndingSoundsGame() {
               <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4 shadow-[0_4px_0_#E5B86E]'>
                 <div className='mt-3 text-center'>
                   <p className='text-6xl'>{activeRound.target.emoji}</p>
-                  <p className='text-4xl font-black text-slate-900 mt-2'>{activeRound.target.word}</p>
+                  <p className='text-4xl font-black text-slate-900 mt-2'>
+                    {activeRound.target.word}
+                  </p>
                 </div>
               </div>
 
               <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4'>
-                <p className='text-sm font-bold uppercase tracking-wide text-slate-500 mb-3'>Pick the ending letter</p>
+                <p className='text-sm font-bold uppercase tracking-wide text-slate-500 mb-3'>
+                  Pick the ending letter
+                </p>
                 <div className='grid grid-cols-2 sm:grid-cols-4 gap-3'>
                   {activeRound.options.map((option) => (
                     <button
@@ -175,13 +243,29 @@ function EndingSoundsGame() {
           )}
         </div>
       </div>
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace='normalized'
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color='#7C3AED'
+        />
+      )}
     </GameContainer>
   );
 }
 
 export const EndingSounds = memo(function EndingSoundsPage() {
   return (
-    <GameShell gameId='ending-sounds' gameName='Ending Sounds' showWellnessTimer enableErrorBoundary>
+    <GameShell
+      gameId='ending-sounds'
+      gameName='Ending Sounds'
+      showWellnessTimer
+      enableErrorBoundary
+    >
       <EndingSoundsGame />
     </GameShell>
   );

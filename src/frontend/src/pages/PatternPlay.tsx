@@ -1,14 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { GameHUD } from '../components/game/GameHUD';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { Point } from '../types/tracking';
+import { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { LEVELS, generatePattern, generateOptions, type PatternItem } from '../games/patternPlayLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 
@@ -18,6 +23,9 @@ const COLOR_MAP: Record<string, string> = {
 
 export function PatternPlayContent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [pattern, setPattern] = useState<{ shown: PatternItem[]; answer: PatternItem } | null>(null);
   const [options, setOptions] = useState<PatternItem[]>([]);
@@ -105,9 +113,17 @@ export function PatternPlayContent() {
   const handleStart = () => { playClick(); startGame(); };
   const handleFinish = useCallback(async () => { playClick(); await completeGame({ score: correct, level: currentLevel }); navigate('/games'); }, [correct, completeGame, navigate, playClick, currentLevel]);
 
+  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
+    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+    setIsHandTrackingActive(true);
+  }, []);
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'PatternPlay', targetFps: 24, onFrame: handleHandTrackingFrame });
+
   return (
-    <GameContainer title="Pattern Play" onHome={() => navigate('/games')} reportSession={false}>
-      <div className="flex flex-col items-center gap-4 p-4">
+    <GameContainer title="Pattern Play" onHome={() => navigate('/games')} reportSession={false} webcamRef={_webcamRef} isHandDetected={isHandTrackingActive} isPlaying={gameState === 'playing'}>
+      <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4">
         <div className="flex gap-2">
           {LEVELS.map((l) => (
             <button type="button" key={l.level} onClick={() => { playClick(); setCurrentLevel(l.level); }}
@@ -205,6 +221,7 @@ export function PatternPlayContent() {
           </div>
         )}
       </div>
+      <CursorEmbodiment position={cursor ?? { x: 0.5, y: 0.5 }} isHandDetected={isHandTrackingActive} />
     </GameContainer>
   );
 }

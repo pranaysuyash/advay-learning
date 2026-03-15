@@ -89,7 +89,7 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
   });
   const [stepIndex, setStepIndex] = useState(0);
   const [cursor, setCursor] = useState<Point | null>(null);
-  const [feedback, setFeedback] = useState('Pinch letters to spell the word!');
+  const [feedback, setFeedback] = useState('Tap Start to begin! 🎮');
   const [showCelebration, setShowCelebration] = useState(false);
   const [, setCompletedLetters] = useState<string[]>([]);
   const [streak, setStreak] = useState(0);
@@ -245,9 +245,9 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
 
     const rawTargets = createLetterTargets(newWord.word, distractors, randomFloat01);
     setTargets(layoutTargets(rawTargets, randomFloat01));
-    setFeedback(`Spell: ${newWord.word}`);
+    setFeedback(`🔤 Find the letter "${newWord.word[0]}"`);
     if (ttsEnabled) {
-      void speak(`Spell the word: ${newWord.word}!`);
+      void speak(`Spell the word ${newWord.word}! Find the letter ${newWord.word[0]}!`);
     }
   }, [speak, ttsEnabled]);
 
@@ -340,7 +340,7 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
       const hit = findHitTarget(tip, activeTargets, HIT_RADIUS);
 
       if (!hit) {
-        setFeedback('Move closer to a letter and pinch.');
+        setFeedback('👆 Move closer to a letter!');
         playError();
         return;
       }
@@ -378,26 +378,26 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
         setStepIndex(nextStep);
 
         if (nextStep >= currentWord.length) {
-          setFeedback(`${currentWord} complete!`);
+          setFeedback(`🎉 You spelled ${currentWord}!`);
           if (ttsEnabled) {
-            void speak(`Great job! You spelled ${currentWord}!`);
+            void speak(`Amazing! You spelled ${currentWord}!`);
           }
           triggerHaptic('celebration');
-          wordBuilder.recordWordCompleted(currentWord); // Unified analytics
+          wordBuilder.recordWordCompleted(currentWord);
           completeWord();
         } else {
-          setFeedback(`Great! Next: "${currentWord[nextStep]}"`);
+          setFeedback(`✨ Yes! Now find "${currentWord[nextStep]}"`);
           if (ttsEnabled) {
-            void speak(`Great! Next letter: ${currentWord[nextStep]!}`);
+            void speak(`Yes! Now find the letter ${currentWord[nextStep]!}`);
           }
         }
       } else {
         // Wrong - break streak
         setStreak(0);
         setShowStreakMilestone(false);
-        setFeedback(`That's "${hit.letter}". Find "${expectedLetter}".`);
+        setFeedback(`🔤 That's ${hit.letter}. Look for ${expectedLetter}!`);
         if (ttsEnabled) {
-          void speak(`That's ${hit.letter}. Find ${expectedLetter}!`);
+          void speak(`That's ${hit.letter}. Look for ${expectedLetter}!`);
         }
         playError();
         triggerHaptic('error');
@@ -503,6 +503,16 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
     resetGame();
     navigate('/dashboard');
   };
+
+  // Auto-start game on mount (skip pre-game menu for instant play)
+  useEffect(() => {
+    if (!isPlaying && !gameCompleted && isHandTrackingReady) {
+      const timer = setTimeout(() => {
+        startGame();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isPlaying, gameCompleted, isHandTrackingReady]);
 
   const controls: GameControl[] = [
     {
@@ -615,9 +625,9 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
             const isCompleted =
               target.isCorrect && target.orderIndex < stepIndex;
             return (
-              <div
+              <motion.div
                 key={target.id}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-300 ${isCompleted ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
+                className={`absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none ${isCompleted ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
                 style={{
                   left: `${target.position.x * 100}%`,
                   top: `${target.position.y * 100}%`,
@@ -625,16 +635,24 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
                   height: `${TARGET_SIZE}px`,
                 }}
                 aria-hidden='true'
+                animate={isExpected ? {
+                  scale: [1, 1.08, 1],
+                } : {}}
+                transition={isExpected ? {
+                  duration: 1.2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                } : { duration: 0.3 }}
               >
                 <div
                   className={`absolute inset-0 rounded-full border-[6px] flex items-center justify-center font-black text-5xl shadow-[0_4px_0_#E5B86E] ${isExpected
-                      ? 'border-[#F59E0B] bg-amber-50 text-[#F59E0B] z-10 scale-110'
+                      ? 'border-[#F59E0B] bg-amber-50 text-[#F59E0B] z-10'
                       : 'border-[#3B82F6] bg-blue-50 text-[#3B82F6]'
                     }`}
                 >
                   {target.letter}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
 

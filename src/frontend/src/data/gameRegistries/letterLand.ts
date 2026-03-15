@@ -26,7 +26,7 @@ export const LETTER_LAND_GAMES: GameManifest[] = [
     tagline: 'Hidden letters are everywhere — can you spot them? ⭐',
     path: '/games/letter-hunt',
     icon: 'target',
-    previewImage: '/assets/previews/letter-hunt.png',
+    previewImage: '/assets/previews/letter-hunt-v2.png',
     worldId: 'letter-land',
     vibe: 'active',
     ageRange: '2-6',

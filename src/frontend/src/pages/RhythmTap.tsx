@@ -1,18 +1,26 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, createPattern, checkPattern } from '../games/rhythmTapLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { Point } from '../types/tracking';
+import { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 function RhythmTapContent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [pattern, setPattern] = useState<number[]>([]);
   const [userInput, setUserInput] = useState<number[]>([]);
@@ -125,6 +133,16 @@ function RhythmTapContent() {
     navigate('/games');
   }, [correct, navigate, playClick, completeGame, currentLevel]);
 
+  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
+    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+    setIsHandTrackingActive(true);
+  }, []);
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'RhythmTap', targetFps: 24, onFrame: handleHandTrackingFrame });
+
+  const isPlaying = gameState !== 'start' && gameState !== 'complete';
+
   return (
     <GameContainer
       title='Rhythm Tap'
@@ -133,8 +151,12 @@ function RhythmTapContent() {
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={_webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={isPlaying}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
+        <CursorEmbodiment position={cursor ?? { x: 0, y: 0 }} isHandDetected={isHandTrackingActive} />
         <div className='max-w-2xl mx-auto space-y-4'>
           {/* Level selector */}
           <div className='flex gap-2 justify-center'>

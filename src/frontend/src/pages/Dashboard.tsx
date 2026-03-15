@@ -32,48 +32,48 @@ import { useGameStatsMapForProfile } from '../hooks/useGameStats';
 import type { ProgressItem } from '../types/progress';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 
-function PendingBadge({ 
-  count, 
-  profileId: _profileId, 
-  onNavigate 
-}: { 
-  count: number; 
-  profileId: string; 
+function PendingBadge({
+  count,
+  profileId: _profileId,
+  onNavigate
+}: {
+  count: number;
+  profileId: string;
   onNavigate: () => void;
 }) {
   const { t } = useTranslation(['dashboard', 'common']);
   const raw = t('dashboard:badges.pendingCount', { count });
-  const label = raw && raw.indexOf('dashboard:') === -1 ? raw : `Pending (${count})`;
+  const label = raw && raw.indexOf('dashboard:') === -1 ? raw : `To Sync (${count})`;
   return (
     <div
       onClick={onNavigate}
-      className='bg-yellow-100 border border-yellow-300 px-3 py-1 rounded-full text-yellow-800 font-medium cursor-pointer hover:bg-yellow-200 transition ml-2'
+      className='bg-blue-100 border border-blue-300 px-3 py-1 rounded-full text-blue-800 font-medium cursor-pointer hover:bg-blue-200 transition ml-2'
       title={t('dashboard:badges.pending')}
     >
-      {label}
+      <span className="mr-1">🔄</span>{label}
     </div>
   );
 }
 
-function DeadLetterBadge({ 
-  count, 
-  profileId: _profileId, 
-  onNavigate 
-}: { 
-  count: number; 
-  profileId: string; 
+function DeadLetterBadge({
+  count,
+  profileId: _profileId,
+  onNavigate
+}: {
+  count: number;
+  profileId: string;
   onNavigate: () => void;
 }) {
   const { t } = useTranslation(['dashboard', 'common']);
   const raw = t('dashboard:badges.failedCount', { count });
-  const label = raw && raw.indexOf('dashboard:') === -1 ? raw : `Failed (${count})`;
+  const label = raw && raw.indexOf('dashboard:') === -1 ? raw : `Needs Retry (${count})`;
   return (
     <div
       onClick={onNavigate}
-      className='bg-red-100 border border-red-300 px-3 py-1 rounded-full text-red-800 font-medium cursor-pointer hover:bg-red-200 transition ml-2'
+      className='bg-orange-100 border border-orange-300 px-3 py-1 rounded-full text-orange-800 font-medium cursor-pointer hover:bg-orange-200 transition ml-2'
       title={t('dashboard:badges.failed')}
     >
-      {label}
+      <span className="mr-1">💡</span>{label}
     </div>
   );
 }
@@ -166,6 +166,8 @@ export const Dashboard = memo(function Dashboard() {
   const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [showConsentFlow, setShowConsentFlow] = useState(false);
   const [pendingConsentProfile, setPendingConsentProfile] = useState<Profile | null>(null);
+  // Adventure Map - hidden by default for kid-friendly experience
+  const [showAdventureMap, setShowAdventureMap] = useState(false);
 
   useEffect(() => {
     if (!isGuest) {
@@ -582,24 +584,57 @@ export const Dashboard = memo(function Dashboard() {
         )}
 
         {/* SECONDARY AREA: ADVENTURE MAP (Keep logic, style to match V1) */}
-        <section className='bg-white rounded-3xl border-2 border-slate-200 shadow-sm p-8 relative overflow-hidden'>
-          <div className='absolute -right-10 -bottom-10 opacity-10 pointer-events-none'>
-            <Mascot state='idle' responsiveSize='lg' />
-          </div>
-
-          <div className='flex items-center justify-between mb-8 relative z-10'>
-            <div>
-              <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
-                {t('dashboard:learningMap.title')} 🗺️
-              </h2>
-              <p className='text-slate-500 font-medium'>{t('dashboard:learningMap.subtitle')}</p>
+        {/* Collapsed by default for kid-friendly experience - expandable for parents */}
+        {showAdventureMap ? (
+          <section className='bg-white rounded-3xl border-2 border-slate-200 shadow-sm p-8 relative overflow-hidden'>
+            <div className='absolute -right-10 -bottom-10 opacity-10 pointer-events-none'>
+              <Mascot state='idle' responsiveSize='lg' />
             </div>
-          </div>
 
-          <div className='relative z-10'>
-            <AdventureMap />
-          </div>
-        </section>
+            <div className='flex items-center justify-between mb-8 relative z-10'>
+              <div>
+                <h2 className='text-2xl font-extrabold text-slate-800 flex items-center gap-2'>
+                  {t('dashboard:learningMap.title')} 🗺️
+                </h2>
+                <p className='text-slate-500 font-medium'>{t('dashboard:learningMap.subtitle')}</p>
+              </div>
+              <button
+                onClick={() => setShowAdventureMap(false)}
+                className='text-slate-400 hover:text-slate-600 transition-colors'
+                aria-label='Hide adventure map'
+              >
+                <UIIcon name='x' size={24} />
+              </button>
+            </div>
+
+            <div className='relative z-10'>
+              <AdventureMap />
+            </div>
+          </section>
+        ) : (
+          <section className='bg-white rounded-3xl border-2 border-slate-200 shadow-sm p-6 relative overflow-hidden'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-3'>
+                <div className='w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center'>
+                  <span className='text-2xl'>🗺️</span>
+                </div>
+                <div>
+                  <h2 className='text-lg font-bold text-slate-800'>
+                    {t('dashboard:learningMap.title')}
+                  </h2>
+                  <p className='text-sm text-slate-500'>{t('dashboard:learningMap.subtitle')}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAdventureMap(true)}
+                className='px-4 py-2 bg-amber-50 text-amber-600 rounded-full text-sm font-bold hover:bg-amber-100 transition-colors flex items-center gap-2'
+              >
+                <UIIcon name='chevron-down' size={16} />
+                Show Map
+              </button>
+            </div>
+          </section>
+        )}
 
       </main>
 

@@ -6,6 +6,7 @@
  */
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sparkles, Trash2 } from 'lucide-react';
 import { GameShell } from '../components/GameShell';
@@ -30,6 +31,7 @@ import {
 } from '../games/lightPainterLogic';
 
 function LightPainterGameContent() {
+  const navigate = useNavigate();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
   const hasAccess = canAccessGame('light-painter');
   // Game completion hook - available when needed
@@ -253,7 +255,7 @@ function LightPainterGameContent() {
   if (showMenu) {
     return (
       <GameShell gameId='light-painter' gameName='Light Painter'>
-        <GameContainer title='Light Painter'>
+        <GameContainer title='Light Painter' onHome={() => navigate('/games')}>
           <div className='flex flex-col items-center justify-center min-h-[60vh] gap-8'>
             <motion.div
               initial={{ scale: 0 }}

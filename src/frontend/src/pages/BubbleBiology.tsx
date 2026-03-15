@@ -14,6 +14,7 @@
  */
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { GameShell } from '../components/GameShell';
@@ -43,6 +44,7 @@ import {
 } from '../games/bubbleBiologyLogic';
 
 const BubbleBiologyContent = memo(function BubbleBiologyContent() {
+  const navigate = useNavigate();
   const canvasRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
   const lastTimeRef = useRef<number>(0);
@@ -414,7 +416,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   };
   
   return (
-    <GameContainer>
+    <GameContainer onHome={() => navigate('/games')}>
       <VoiceInstructions
         instructions="Welcome to Bubble Biology! Pinch cells and drop them in the matching jars!"
       />

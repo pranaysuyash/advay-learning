@@ -1,11 +1,16 @@
-import { memo, useState } from 'react';
+import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   createSameAndDifferentRound,
   isSameAndDifferentCorrect,
@@ -20,9 +25,13 @@ function SameAndDifferentGame() {
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [round, setRound] = useState(0);
-  const [activeRound, setActiveRound] = useState<SameAndDifferentRound | null>(null);
+  const [activeRound, setActiveRound] = useState<SameAndDifferentRound | null>(
+    null,
+  );
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState('Are these the same or different?');
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const roundsPerSession = 8;
 
@@ -33,6 +42,41 @@ function SameAndDifferentGame() {
     isPlaying: Boolean(activeRound),
     metaData: { round, correct, roundsPerSession },
   });
+
+  // Hand tracking frame handler
+  const handleFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const tip = frame.indexTip;
+      if (!tip) {
+        setCursor(null);
+        return;
+      }
+      setCursor(tip);
+    },
+    [],
+  );
+
+  // Hand tracking hook
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef,
+  } = useGameHandTracking({
+    gameName: 'Same and Different',
+    targetFps: 30,
+    isRunning: Boolean(activeRound),
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  // Auto-start hand tracking when game is active
+  useEffect(() => {
+    const isPlaying = Boolean(activeRound);
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [activeRound, isHandTrackingReady, isModelLoading, startTracking]);
 
   const startRound = () => {
     setActiveRound(createSameAndDifferentRound());
@@ -89,14 +133,23 @@ function SameAndDifferentGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={Boolean(activeRound)}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-4xl mx-auto space-y-4'>
           {!activeRound ? (
             <div className='rounded-3xl border-3 border-[#F2CC8F] bg-white p-8 text-center shadow-[0_6px_0_#E5B86E] space-y-5'>
-              <p className='text-sm font-black uppercase tracking-widest text-[#15803D]'>Logic</p>
-              <h2 className='text-4xl font-black text-slate-900'>Same and Different</h2>
-              <p className='text-lg font-bold text-slate-600'>Look carefully and compare both cards.</p>
+              <p className='text-sm font-black uppercase tracking-widest text-[#15803D]'>
+                Logic
+              </p>
+              <h2 className='text-4xl font-black text-slate-900'>
+                Same and Different
+              </h2>
+              <p className='text-lg font-bold text-slate-600'>
+                Look carefully and compare both cards.
+              </p>
               <button
                 type='button'
                 onClick={startGame}
@@ -108,7 +161,9 @@ function SameAndDifferentGame() {
           ) : (
             <>
               <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4 shadow-[0_4px_0_#E5B86E]'>
-                <p className='text-sm font-black uppercase tracking-wide text-slate-500'>Round {round} / {roundsPerSession}</p>
+                <p className='text-sm font-black uppercase tracking-wide text-slate-500'>
+                  Round {round} / {roundsPerSession}
+                </p>
                 <div className='mt-3 grid grid-cols-2 gap-3'>
                   <div className='rounded-xl border-2 border-slate-200 bg-slate-50 p-4 text-center'>
                     <p className='text-sm font-bold text-slate-500'>Card 1</p>
@@ -165,6 +220,18 @@ function SameAndDifferentGame() {
             </>
           )}
         </div>
+        {/* Hand tracking cursor */}
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={true}
+            size={64}
+            color='#15803D'
+          />
+        )}
       </div>
     </GameContainer>
   );

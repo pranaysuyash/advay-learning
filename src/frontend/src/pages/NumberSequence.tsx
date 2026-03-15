@@ -1,12 +1,17 @@
-import { memo, useState } from 'react';
+import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   NUMBER_SEQUENCE_LEVELS,
   createNumberSequenceRound,
@@ -36,6 +41,8 @@ function NumberSequenceGame() {
   const [activeRound, setActiveRound] = useState<NumberSequenceRound | null>(null);
   const [feedback, setFeedback] = useState('Find the missing number.');
   const [showResult, setShowResult] = useState(false);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const roundsPerSession = 8;
 
@@ -50,6 +57,33 @@ function NumberSequenceGame() {
       roundsPerSession,
     },
   });
+
+  // Hand tracking frame handler
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) {
+      setCursor(null);
+      return;
+    }
+    setCursor(tip);
+  }, []);
+
+  // Hand tracking hook
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
+    gameName: 'Number Sequence',
+    targetFps: 30,
+    isRunning: Boolean(activeRound),
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  // Auto-start hand tracking when game is active
+  useEffect(() => {
+    const isPlaying = Boolean(activeRound);
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [activeRound, isHandTrackingReady, isModelLoading, startTracking]);
 
   const startRound = (nextLevel = level) => {
     setActiveRound(createNumberSequenceRound(nextLevel));
@@ -131,8 +165,11 @@ function NumberSequenceGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={Boolean(activeRound)}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-4xl mx-auto space-y-4'>
           <div className='flex gap-2 justify-center'>
             {NUMBER_SEQUENCE_LEVELS.map((entry) => (
@@ -274,7 +311,19 @@ function NumberSequenceGame() {
             </>
           )}
         </div>
-      </div>
+      {/* Hand tracking cursor */}
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace='normalized'
+              containerRef={gameAreaRef}
+              isPinching={false}
+              isHandDetected={true}
+              size={64}
+              color='#3B82F6'
+            />
+          )}
+        </div>
     </GameContainer>
   );
 }

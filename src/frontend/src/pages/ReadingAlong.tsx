@@ -12,7 +12,7 @@
  * @juice-score-target 7/10 (from 3/10)
  */
 
-import { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -27,6 +27,11 @@ import { Mascot } from '../components/Mascot';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { triggerHaptic } from '../utils/haptics';
 import { trackEvent } from '../analytics/launch';
+import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { type Point } from '../types/tracking';
+import { type TrackedHandFrame } from '../utils/handTrackingFrame';
+import { type HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 
 import {
   createReadingAlongRound,
@@ -49,6 +54,11 @@ function ReadingAlongGame() {
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { speak, isSpeaking, isEnabled: ttsEnabled } = useTTS();
   const { completeGame } = useGameCompletion('reading-along');
+
+  // Hand tracking state
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
 
   // Game state
   const [score, setScore] = useState(0);
@@ -257,6 +267,14 @@ function ReadingAlongGame() {
     }));
   }, [sentenceWords, activeRound]);
 
+  const handleHandTrackingFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    if (!frame.indexTip) { setCursor(null); setIsHandTrackingActive(false); return; }
+    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+    setIsHandTrackingActive(true);
+  }, []);
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'ReadingAlong', targetFps: 24, onFrame: handleHandTrackingFrame });
+
   return (
     <GameContainer
       title='Reading Along'
@@ -265,6 +283,9 @@ function ReadingAlongGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={_webcamRef}
+      isHandDetected={isHandTrackingActive}
+      isPlaying={Boolean(activeRound)}
     >
       {/* Celebration Effects */}
       <CelebrationEffects
@@ -298,7 +319,9 @@ function ReadingAlongGame() {
         </motion.div>
       )}
 
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div className='h-full overflow-auto p-4 md:p-6' ref={gameAreaRef}>
+        <CursorEmbodiment position={cursor ?? { x: 0.5, y: 0.5 }} isHandDetected={isHandTrackingActive} />
+
         <div className='max-w-4xl mx-auto space-y-4'>
           <AnimatePresence mode='wait'>
             {!activeRound ? (

@@ -12,14 +12,16 @@ interface CameraPermissionPromptProps {
 
 /**
  * CameraPermissionPrompt
- * Displays a friendly, context-aware prompt explaining why camera is needed
- * and requesting user permission to access the camera.
+ * Displays a magical, exciting prompt for activating "Magic Vision"
+ * - Frames camera as a superpower, not a permission
+ * - Celebrates the magical capabilities it unlocks
+ * - Makes the experience feel like unlocking a feature
  *
  * Props:
  * - onPermissionGranted: Called when user grants camera permission
  * - onPermissionDenied: Called when user denies or closes the prompt
- * - title: Custom title (defaults to "Ready to Play?")
- * - description: Custom description explaining why camera is needed
+ * - title: Custom title (defaults to magical headline)
+ * - description: Custom description explaining the magic
  * - fullscreen: If true, displays as fullscreen overlay; otherwise inline
  *
  * Usage:
@@ -31,7 +33,7 @@ interface CameraPermissionPromptProps {
 export function CameraPermissionPrompt({
   onPermissionGranted,
   onPermissionDenied,
-  title = 'Ready to Play?',
+  title = '✨ Activate Magic Vision! ✨',
   description,
   fullscreen = true,
 }: CameraPermissionPromptProps) {
@@ -39,14 +41,14 @@ export function CameraPermissionPrompt({
   const [error, setError] = useState<string | null>(null);
 
   const defaultDescription =
-    "We'd love to see your hands move! Your camera helps Pip track your gestures to make the game fun and interactive. You can always play without it, too.";
+    "Wave your hands to draw in the air! Pinch to pop bubbles! Your gestures control the game. 🪄";
 
   const handleRequestPermission = useCallback(async () => {
     setIsRequesting(true);
     setError(null);
 
     try {
-      // Request camera permission
+      // Activate Magic Vision!
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
@@ -58,7 +60,7 @@ export function CameraPermissionPrompt({
       // Stop the stream - we're just checking permission
       stream.getTracks().forEach((track) => track.stop());
 
-      // Permission granted
+      // Magic Vision activated!
       onPermissionGranted();
     } catch (err) {
       const errorNameRaw =
@@ -67,29 +69,29 @@ export function CameraPermissionPrompt({
       const errorName = String(errorNameRaw);
       const msgLower = errorMessage.toLowerCase();
 
-      // Handle specific error cases - check both instanceof and name property
+      // Handle specific error cases - reframed as "magic blocked"
       if (
         errorName === 'NotAllowedError' ||
         msgLower.includes('permission denied') ||
         msgLower.includes('notallowed')
       ) {
-        setError('Camera permission was denied. You can still play with touch!');
+        setError('Magic Vision needs camera access. You can still play with touch! 👆');
       } else if (
         errorName === 'NotFoundError'
       ) {
-        setError('No camera found on this device. You can still play with touch!');
+        setError('No camera found. You can still play with touch mode!');
       } else if (
         errorName === 'NotReadableError'
       ) {
         setError(
-          'Your camera is being used by another app. Close it and try again, or play with touch!',
+          'Camera is busy. Close other apps and try again, or play with touch!',
         );
       } else if (errorName === 'SecurityError' || msgLower.includes('security')) {
-        setError('Camera access is not allowed in this context. You can still play with touch!');
+        setError('Magic Vision not available here. You can still play with touch!');
       } else if (err instanceof DOMException) {
-        setError(`Camera error: ${errorMessage}. You can still play with touch!`);
+        setError(`Camera unavailable. You can still play with touch!`);
       } else {
-        setError('Unable to access camera. You can still play with touch!');
+        setError('Camera unavailable. You can still play with touch!');
       }
 
 
@@ -103,49 +105,63 @@ export function CameraPermissionPrompt({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className={`${fullscreen ? 'fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4' : 'relative'}`}
+      className={`${fullscreen ? 'fixed inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900/40 to-blue-900/40 backdrop-blur-sm z-50 p-4' : 'relative'}`}
     >
-      <div className={`${fullscreen ? 'w-full max-w-md' : 'w-full'} bg-white rounded-lg shadow-lg p-6`}>
-        {/* Camera Icon */}
+      <div className={`${fullscreen ? 'w-full max-w-md' : 'w-full'} bg-white rounded-3xl shadow-2xl p-8 border-4 border-[#F2CC8F]`}>
+
+        {/* Magical Sparkles Decoration */}
+        <div className="absolute -top-6 -left-6 text-4xl animate-bounce">✨</div>
+        <div className="absolute -top-6 -right-6 text-4xl animate-bounce" style={{animationDelay: '0.2s'}}>✨</div>
+        <div className="absolute -bottom-6 -left-6 text-4xl animate-bounce" style={{animationDelay: '0.4s'}}>✨</div>
+        <div className="absolute -bottom-6 -right-6 text-4xl animate-bounce" style={{animationDelay: '0.6s'}}>✨</div>
+
+        {/* Magic Wand Icon */}
         <div className='flex justify-center mb-6'>
-          <div className='w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center'>
-            <svg
-              className='w-8 h-8 text-blue-600'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z'
-              />
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M15 13a3 3 0 11-6 0 3 3 0 016 0z'
-              />
-            </svg>
-          </div>
+          <motion.div
+            className='w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center shadow-lg'
+            animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <span className='text-5xl'>🪄</span>
+          </motion.div>
         </div>
 
         {/* Title */}
-        <h2 className='text-2xl font-bold text-center text-text-primary mb-3'>{title}</h2>
+        <h2 className='text-2xl md:text-3xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-3'>
+          {title}
+        </h2>
 
         {/* Description */}
-        <p className='text-center text-text-secondary mb-6'>{description || defaultDescription}</p>
+        <p className='text-center text-slate-700 font-bold mb-6'>{description || defaultDescription}</p>
+
+        {/* Magic Features List */}
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-4 mb-6 border-2 border-purple-100">
+          <p className="text-sm font-bold text-purple-800 mb-3">🌟 Magic Vision lets you:</p>
+          <ul className="space-y-2 text-sm text-slate-700">
+            <li className="flex items-center gap-2">
+              <span className="text-lg">✋</span>
+              <span>Draw letters in the air!</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-lg">👆</span>
+              <span>Pop bubbles with gestures!</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-lg">🎯</span>
+              <span>Control games without touching!</span>
+            </li>
+          </ul>
+        </div>
 
         {/* Error Message */}
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className='bg-red-50 border border-red-200 rounded-lg p-3 mb-6'
+            className='bg-orange-50 border-2 border-orange-200 rounded-2xl p-3 mb-6'
           >
-            <p className='text-sm text-red-700'>{error}</p>
-            <p className='text-xs text-red-600 mt-2'>
+            <p className='text-sm text-orange-700 font-bold'>{error}</p>
+            <p className='text-xs text-orange-600 mt-2'>
               {/chrome/i.test(navigator.userAgent) && !(/edg/i.test(navigator.userAgent))
                 ? '💡 Chrome: Settings → Privacy → Site Settings → Camera'
                 : /safari/i.test(navigator.userAgent) && !(/chrome/i.test(navigator.userAgent))
@@ -163,27 +179,30 @@ export function CameraPermissionPrompt({
             onClick={handleRequestPermission}
             disabled={isRequesting}
             size='lg'
-            className='w-full'
-            aria-label='Request camera permission'
+            className='w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black shadow-lg'
+            aria-label='Activate Magic Vision'
           >
-            {isRequesting ? 'Requesting Permission...' : error ? 'Try Again 📷' : 'Use Camera 📷'}
+            {isRequesting ? '🪄 Awakening Magic...' : error ? 'Try Again 🪄' : 'Activate Magic Vision 🪄'}
           </Button>
 
           <Button
             onClick={onPermissionDenied}
             variant='secondary'
             size='lg'
-            className='w-full'
-            aria-label='Skip camera and play with touch'
+            className='w-full font-bold'
+            aria-label='Play with touch instead'
           >
             Play with Touch 👆
           </Button>
         </div>
 
-        {/* Privacy Notice */}
-        <p className='text-xs text-text-tertiary text-center mt-6'>
-          Your camera feed stays on your device. We never store or share your video.
-        </p>
+        {/* Privacy Notice - Friendlier tone */}
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <span className="text-2xl">🔒</span>
+          <p className='text-xs text-slate-500 text-center'>
+            Your camera stays private. Only you see you! 🛡️
+          </p>
+        </div>
       </div>
     </motion.div>
   );
