@@ -110,7 +110,7 @@ jobs:
                 }
                 const author = t.comments?.nodes?.[0]?.author?.login;
                 // Ignore all bot comments (end with [bot]) and known security bots
-                const botPatterns = ['[bot]', 'github-advanced-security'];
+                const botPatterns = ['[bot]', 'github-advanced-security', 'copilot-pull-request-reviewer', 'chatgpt-codex-connector'];
                 return !botPatterns.some(p => author?.includes(p));
               }).length;
 

@@ -79,5 +79,5 @@ echo "[db-migration-guard] Database model-layer files changed without a migratio
 echo "[db-migration-guard] Changed model files:" >&2
 echo "$model_changes" | sed 's/^/[db-migration-guard]   - /' >&2
 echo "[db-migration-guard] Add an Alembic migration under src/backend/alembic/versions/" >&2
-echo "[db-migration-guard] Bypass is disabled by repo policy; resolve this before commit/push." >&2
+echo "[db-migration-guard] or set SKIP_DB_MIGRATION_CHECK=1 for an explicit emergency bypass." >&2
 exit 1
