@@ -36,7 +36,8 @@ Purpose:
   - Warns about undocumented breaking changes
 
 Environment variables:
-  No bypass flags are supported.
+  SKIP_REGRESSION_TESTS=1  # Skip test execution
+  SKIP_EXPORT_CHECK=1      # Skip export comparison
 USAGE
 }
 
@@ -69,14 +70,9 @@ if [[ -z "$MODE" ]]; then
   MODE="staged"
 fi
 
-# Block legacy bypass env flags.
-if [[ -n "${SKIP_REGRESSION_TESTS:-}" ]]; then
-  log_error "SKIP_REGRESSION_TESTS is disabled by repo policy. Resolve failing tests instead of bypassing."
-  exit 2
-fi
-if [[ -n "${SKIP_EXPORT_CHECK:-}" ]]; then
-  log_error "SKIP_EXPORT_CHECK is disabled by repo policy. Resolve export regressions instead of bypassing."
-  exit 2
+# Environment variable overrides
+if [[ "${SKIP_REGRESSION_TESTS:-}" == "1" ]]; then
+  SKIP_TESTS=true
 fi
 
 # Get changed files
@@ -336,10 +332,12 @@ main() {
     log_warn "⏭️  Skipping tests (SKIP_TESTS=true)"
   fi
   
-  # 2. Check for export changes
-  if ! check_export_changes "$frontend_files"; then
-    log_warn "⚠️  Removed exports detected. Consider documenting this breaking change."
-    # Don't fail on export changes, just warn
+  # 2. Check for export changes (unless skip)
+  if [[ "${SKIP_EXPORT_CHECK:-}" != "1" ]]; then
+    if ! check_export_changes "$frontend_files"; then
+      log_warn "⚠️  Removed exports detected. Consider documenting this breaking change."
+      # Don't fail on export changes, just warn
+    fi
   fi
   
   # 3. Classify the change

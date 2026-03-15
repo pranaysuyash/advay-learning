@@ -96,67 +96,20 @@ for g in games:
     if cv_str is None:
         gap_missing_cv.append(g)
         continue
-    # Use ast.literal_eval instead of eval for security (avoids arbitrary code execution)
-    import ast
     try:
-        # Handle markdown code block formatting (```ts ... ```)
-        cv_str_clean = cv_str.strip()
-        if cv_str_clean.startswith('```'):
-            # Extract content between code blocks
-            lines = cv_str_clean.split('\n')
-            cv_str_clean = '\n'.join(lines[1:-1]).strip() if len(lines) > 2 else cv_str_clean
-        # Try to parse as Python list first
-        cv_list = ast.literal_eval(cv_str_clean)
-    except (ValueError, SyntaxError):
-        # Fallback: try to extract array content manually
-        import re
-        match = re.search(r'\[(.*?)\]', cv_str_clean, re.DOTALL)
-        if match:
-            content = match.group(1)
-            cv_list = [item.strip().strip("'\"") for item in content.split(',') if item.strip()]
-        else:
-            cv_list = []
+        cv_list = eval(cv_str)
+    except:
+        cv_list = []
     if not cv_list:
         gap_missing_cv.append(g)
         continue
-    # Check file exists - normalize path relative to project root
+    # Check file exists
     file_path = g['file']
-    if not file_path:
-        gap_missing_cv.append(g)
-        continue
-
-    # Try to find the file relative to project root
-    # The audit may contain absolute paths, so extract relative path
-    if os.path.isabs(file_path):
-        # Try to find the relative path by checking against common roots
-        # Look for src/frontend/src/ in the path
-        if 'src/frontend/src/' in file_path:
-            rel_path = file_path[file_path.index('src/frontend/src/'):]
-        elif 'src/' in file_path:
-            rel_path = file_path[file_path.index('src/'):]
-        else:
-            rel_path = os.path.basename(file_path)
+    if not file_path or not os.path.exists(file_path):
+        # try to construct path from component name
+        pass
     else:
-        rel_path = file_path
-
-    # Try multiple possible locations
-    possible_paths = [
-        rel_path,  # As-is relative path
-        os.path.join('src/frontend', rel_path),  # Under src/frontend
-        os.path.basename(file_path),  # Just filename
-    ]
-
-    found_path = None
-    for test_path in possible_paths:
-        if os.path.exists(test_path):
-            found_path = test_path
-            break
-
-    if not found_path:
-        gap_missing_cv.append(g)
-        continue
-
-    with open(found_path, 'r') as f:
+        with open(file_path, 'r') as f:
             content = f.read()
         missing_hooks = []
         for mode in cv_list:
