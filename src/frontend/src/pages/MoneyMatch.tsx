@@ -162,13 +162,13 @@ function MoneyMatchContent() {
     [],
   );
 
+  const isPlaying = gameState === 'playing';
+
   const { webcamRef: _webcamRef } = useGameHandTracking({
     gameName: 'MoneyMatch',
     targetFps: 24,
     onFrame: handleHandTrackingFrame,
   });
-
-  const isPlaying = gameState === 'playing';
 
   if (!assetsLoaded) {
     return (

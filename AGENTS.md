@@ -107,9 +107,10 @@ This document governs how AI agents (including myself and others) work on the Ad
 ### What This Means
 
 This app is a **multi-modal vision platform** where children interact with games using:
+
 - **Hand tracking** (index finger pointing, pinch-to-grab, hand gestures)
 - **Face tracking** (head tilt, facial expressions)
-- **Pose tracking** (full body movements, arm positions, jumping)
+- **Pose tracking** (full-body movements, arm positions, jumping)
 - **Voice input** (speech recognition for voice-controlled games)
 
 **Each game can require different combinations of these modes.** A game might need only hand tracking, or hand + face, or all three visual modes. The specific combination is determined by the game's design requirements.
@@ -133,7 +134,7 @@ This app is a **multi-modal vision platform** where children interact with games
 
 4. **The `cv` field in gameRegistry is authoritative**:
    - If `cv: ['hand']` — game MUST work with hand tracking
-   - If `cv: ['pose']` — game MUST work with pose tracking  
+   - If `cv: ['pose']` — game MUST work with pose tracking
    - If `cv: ['hand', 'face']` — game MUST work with BOTH
    - If `cv: []` or missing — this is a bug that needs fixing
 
@@ -152,14 +153,14 @@ This app is a **multi-modal vision platform** where children interact with games
 
 ### Key Files for Vision Implementation
 
-| File | Purpose |
-|------|---------|
-| `src/frontend/src/hooks/useGameHandTracking.ts` | Hand tracking hook |
-| `src/frontend/src/hooks/useGamePoseTracking.ts` | Pose tracking hook |
-| `src/frontend/src/hooks/useGameFaceTracking.ts` | Face tracking hook |
-| `docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md` | Implementation guide |
-| `src/frontend/src/data/gameRegistry.ts` | Game manifest with `cv: [...]` field |
-| `docs/audit/CONTROL_MODE_AUDIT_2026-03-12.md` | Full audit of CV vs pointer status |
+| File                                                  | Purpose                              |
+| ----------------------------------------------------- | ------------------------------------ |
+| `src/frontend/src/hooks/useGameHandTracking.ts`       | Hand tracking hook                   |
+| `src/frontend/src/hooks/useGamePoseTracking.ts`       | Pose tracking hook                   |
+| `src/frontend/src/hooks/useGameFaceTracking.ts`       | Face tracking hook                   |
+| `docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md` | Implementation guide                 |
+| `src/frontend/src/data/gameRegistry.ts`               | Game manifest with `cv: [...]` field |
+| `docs/audit/CONTROL_MODE_AUDIT_2026-03-12.md`         | Full audit of CV vs pointer status   |
 
 ### Why This Matters
 

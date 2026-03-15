@@ -229,6 +229,7 @@ export function createLetterTargets(
 /**
  * Layout targets in a grid pattern within the game area.
  * Spreads targets evenly so they don't overlap.
+ * Uses TARGET_SIZE (120px) to calculate optimal grid dimensions.
  */
 export function layoutTargets(
   targets: LetterTarget[],
@@ -239,13 +240,22 @@ export function layoutTargets(
   // Shuffle targets so correct letters aren't always first
   const shuffled = [...targets].sort(() => random() - 0.5);
 
-  // Calculate grid dimensions - aim for roughly square layout
+  // Calculate grid dimensions based on TARGET_SIZE (120px)
   const count = shuffled.length;
-  const cols = Math.ceil(Math.sqrt(count));
-  const rows = Math.ceil(count / cols);
 
   // Playable area margins (avoid edges and top HUD area)
   const marginX = 0.12;
+
+  // Assume typical screen width, calculate how many columns fit with TARGET_SIZE
+  // This ensures targets are approximately 120px in diameter
+  const assumedScreenWidth = 1920;
+  const usableWidthPx = (1 - marginX * 2) * assumedScreenWidth; // ~1460px for 1920px screen
+  const maxCols = Math.floor(usableWidthPx / TARGET_SIZE);
+
+  // Calculate columns: respect maxCols but don't force too many columns for few targets
+  const sqrtCols = Math.ceil(Math.sqrt(count));
+  const cols = Math.min(sqrtCols, maxCols);
+  const rows = Math.ceil(count / cols);
   const marginTop = 0.35; // below HUD, word display, and feedback
   const marginBottom = 0.08;
   const usableWidth = 1 - marginX * 2;

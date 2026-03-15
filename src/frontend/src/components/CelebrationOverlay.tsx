@@ -172,9 +172,10 @@ export function CelebrationOverlay({
   // Auto-dismiss after animation completes (reduced from 2.5s to 2s for snappier feel)
   useEffect(() => {
     if (show) {
+      // Auto-complete after animation finishes (2.5s for confetti + text)
       const timer = setTimeout(() => {
         onComplete();
-      }, 2000);
+      }, 2500);
       return () => clearTimeout(timer);
     }
   }, [show, onComplete]);

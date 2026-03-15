@@ -179,4 +179,8 @@ Status updates:
   - ShadowPortal.tsx: Fixed isPlaying state to enable game loop and hand tracking
   - Resolved 19 outdated review threads via GraphQL
   - All 7266 tests pass
+- 2026-03-15T19:36:00Z **IN_PROGRESS** - Fixed 2 P1 issues:
+  - ColorByNumber.tsx: Added enabled property to start hand tracking during gameplay
+  - ShadowPortal.tsx: Fixed state setter (_setPortals -> setPortals), added win condition check
+  - All 7266 tests pass
 

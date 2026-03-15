@@ -139,9 +139,9 @@ function RhythmTapContent() {
     setIsHandTrackingActive(true);
   }, []);
 
-  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'RhythmTap', targetFps: 24, onFrame: handleHandTrackingFrame });
-
   const isPlaying = gameState !== 'start' && gameState !== 'complete';
+
+  const { webcamRef: _webcamRef } = useGameHandTracking({ gameName: 'RhythmTap', targetFps: 24, onFrame: handleHandTrackingFrame });
 
   return (
     <GameContainer

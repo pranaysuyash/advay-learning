@@ -189,22 +189,26 @@ export const SimpleAdditionContent = memo(function SimpleAdditionGame() {
     }
   }, [difficulty, speak, ttsEnabled, resetAutoCompletion]);
 
-  // Auto-start game on mount (skip pre-game menu for instant play)
-  useEffect(() => {
-    if (gameState.status === 'idle') {
-      // Small delay for camera to initialize
-      const timer = setTimeout(() => {
-        handleStart();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [gameState.status, handleStart]);
-
   const handleGameComplete = useCallback(() => {
     setShowCelebration(false);
     resetAutoCompletion();
     setGameState(createInitialState());
   }, [resetAutoCompletion]);
+
+  // Auto-start game on mount (skip pre-game menu for instant play)
+  // Uses ref to prevent re-triggering which breaks the menu
+  const autoStartedRef = useRef(false);
+  const handleStartRef = useRef(handleStart);
+  handleStartRef.current = handleStart;
+  useEffect(() => {
+    if (gameState.status === 'idle' && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      const timer = setTimeout(() => {
+        handleStartRef.current();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.status]);
 
   // Render visual representations
   const renderVisuals = (count: number, emoji: string) => {

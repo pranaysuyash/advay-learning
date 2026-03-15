@@ -23,10 +23,19 @@ import {
   type ColorMixRound,
 } from '../games/colorMixingLogic';
 
-const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
-];
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
+  [
+    {
+      type: 'image',
+      src: '/assets/kenney/platformer/hud/hud_heart.png',
+      priority: 'critical',
+    },
+    {
+      type: 'image',
+      src: '/assets/kenney/platformer/hud/hud_heart_empty.png',
+      priority: 'critical',
+    },
+  ];
 
 function ColorMixingGame() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
@@ -48,7 +57,14 @@ function ColorMixingGame() {
   const [showResult, setShowResult] = useState(false);
 
   // Streak tracking
-  const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
+  const {
+    streak,
+    showMilestone,
+    scorePopup,
+    incrementStreak,
+    resetStreak,
+    setScorePopup,
+  } = useStreakTracking();
 
   const roundsPerSession = 8;
 
@@ -113,7 +129,11 @@ function ColorMixingGame() {
     const isFinalRound = roundIndex >= roundsPerSession;
     if (isFinalRound) {
       playCelebration();
-      await completeGame({ score: score + (ok ? 20 : 0), completed: true, level: 1 });
+      await completeGame({
+        score: score + (ok ? 20 : 0),
+        completed: true,
+        level: 1,
+      });
       setTimeout(() => {
         setActiveRound(null);
       }, 1400);
@@ -183,6 +203,21 @@ function ColorMixingGame() {
     }
   }, [activeRound, isHandTrackingReady, isModelLoading, startTracking]);
 
+  // Detect button hover based on cursor position
+  useEffect(() => {
+    if (!cursor || !gameAreaRef.current) {
+      setHoveredButtonId(null);
+      return;
+    }
+    const container = gameAreaRef.current;
+    const rect = container.getBoundingClientRect();
+    const x = cursor.x * rect.width + rect.left;
+    const y = cursor.y * rect.height + rect.top;
+    const el = document.elementFromPoint(x, y);
+    const btn = el?.closest('button[data-hover-id]');
+    setHoveredButtonId(btn ? btn.getAttribute('data-hover-id') : null);
+  }, [cursor]);
+
   if (!assetsLoaded) {
     return (
       <AssetPreloader
@@ -206,21 +241,29 @@ function ColorMixingGame() {
         isHandDetected={isHandTrackingReady}
         isPlaying={true}
       >
-        <div
-          ref={gameAreaRef}
-          className='h-full overflow-auto p-4 md:p-6'
-        >
+        <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
           <div className='max-w-3xl mx-auto rounded-3xl border-3 border-[#F2CC8F] bg-white p-8 text-center shadow-[0_6px_0_#E5B86E] space-y-5'>
-            <p className='text-sm font-black uppercase tracking-widest text-[#D97706]'>Creative Science</p>
-            <h2 className='text-4xl font-black text-slate-900'>Color Mixing Lab</h2>
-            <p className='text-lg font-bold text-slate-600' data-ux-goal='Mix two colors and choose the new color.'>
+            <p className='text-sm font-black uppercase tracking-widest text-[#D97706]'>
+              Creative Science
+            </p>
+            <h2 className='text-4xl font-black text-slate-900'>
+              Color Mixing Lab
+            </h2>
+            <p
+              className='text-lg font-bold text-slate-600'
+              data-ux-goal='Mix two colors and choose the new color.'
+            >
               Mix two colors and choose the color they make together.
             </p>
-            <p className='text-base font-bold text-slate-500' data-ux-instruction='Tap Start, then choose the mixed color.'>
+            <p
+              className='text-base font-bold text-slate-500'
+              data-ux-instruction='Tap Start, then choose the mixed color.'
+            >
               Tap Start, then pick the right color answer.
             </p>
             <button
               type='button'
+              data-hover-id='start'
               onClick={handleStart}
               className='px-12 py-4 rounded-2xl bg-[#F97316] text-white font-black text-2xl shadow-[0_4px_0_#C2410C] hover:scale-105 active:scale-95 transition-all'
             >
@@ -232,8 +275,10 @@ function ColorMixingGame() {
     );
   }
 
-  const left = BASE_COLORS.find((entry) => entry.id === leftColor) ?? BASE_COLORS[0];
-  const right = BASE_COLORS.find((entry) => entry.id === rightColor) ?? BASE_COLORS[1];
+  const left =
+    BASE_COLORS.find((entry) => entry.id === leftColor) ?? BASE_COLORS[0];
+  const right =
+    BASE_COLORS.find((entry) => entry.id === rightColor) ?? BASE_COLORS[1];
 
   return (
     <GameContainer
@@ -247,14 +292,13 @@ function ColorMixingGame() {
       isHandDetected={isHandTrackingReady}
       isPlaying={true}
     >
-      <div
-        ref={gameAreaRef}
-        className='h-full overflow-auto p-4 md:p-6'
-      >
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-4xl mx-auto space-y-4'>
           <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4 shadow-[0_4px_0_#E5B86E]'>
             <div className='flex items-center justify-between'>
-              <p className='text-sm font-black uppercase tracking-wide text-slate-500'>Round {roundIndex} / {roundsPerSession}</p>
+              <p className='text-sm font-black uppercase tracking-wide text-slate-500'>
+                Round {roundIndex} / {roundsPerSession}
+              </p>
               {streak > 0 && (
                 <p className='text-sm font-black text-orange-600 flex items-center gap-1'>
                   <KenneyIcon type='heart' size={16} />
@@ -262,7 +306,9 @@ function ColorMixingGame() {
                 </p>
               )}
             </div>
-            <p className='text-xl font-black text-slate-900 mt-1'>What color do these make?</p>
+            <p className='text-xl font-black text-slate-900 mt-1'>
+              What color do these make?
+            </p>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -273,6 +319,7 @@ function ColorMixingGame() {
                   <button
                     key={entry.id}
                     type='button'
+                    data-hover-id={entry.id}
                     onClick={() => setLeftColor(entry.id)}
                     className={`rounded-xl border-2 p-3 font-black ${leftColor === entry.id ? 'border-slate-800' : 'border-[#F2CC8F]'}`}
                     style={{ backgroundColor: `${entry.hex}33` }}
@@ -291,6 +338,7 @@ function ColorMixingGame() {
                   <button
                     key={entry.id}
                     type='button'
+                    data-hover-id={entry.id}
                     onClick={() => setRightColor(entry.id)}
                     className={`rounded-xl border-2 p-3 font-black ${rightColor === entry.id ? 'border-slate-800' : 'border-[#F2CC8F]'}`}
                     style={{ backgroundColor: `${entry.hex}33` }}
@@ -307,7 +355,11 @@ function ColorMixingGame() {
             {scorePopup && (
               <div
                 className='absolute pointer-events-none animate-bounce font-black text-green-600 text-2xl z-10'
-                style={{ left: `${scorePopup.x}%`, top: `${scorePopup.y}%`, transform: 'translate(-50%, -50%)' }}
+                style={{
+                  left: `${scorePopup.x}%`,
+                  top: `${scorePopup.y}%`,
+                  transform: 'translate(-50%, -50%)',
+                }}
               >
                 +{scorePopup.points}
               </div>
@@ -329,6 +381,7 @@ function ColorMixingGame() {
                 <button
                   key={option}
                   type='button'
+                  data-hover-id={option}
                   disabled={showResult}
                   onClick={() => {
                     void handleSelectAnswer(option);
@@ -345,6 +398,7 @@ function ColorMixingGame() {
             <p className='font-bold text-slate-700'>{feedback}</p>
             <button
               type='button'
+              data-hover-id='finish'
               onClick={() => {
                 void handleFinish();
               }}
@@ -374,7 +428,12 @@ function ColorMixingGame() {
 
 export const ColorMixing = memo(function ColorMixingPage() {
   return (
-    <GameShell gameId='color-mixing' gameName='Color Mixing' showWellnessTimer enableErrorBoundary>
+    <GameShell
+      gameId='color-mixing'
+      gameName='Color Mixing'
+      showWellnessTimer
+      enableErrorBoundary
+    >
       <ColorMixingGame />
     </GameShell>
   );

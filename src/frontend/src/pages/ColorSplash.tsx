@@ -93,6 +93,7 @@ function ColorSplashContent() {
         // Streak and scoring
         const newStreak = incrementStreak();
         const streakBonus = Math.min(newStreak * 3, 20);
+        const finalScore = score + result.scoreDelta + streakBonus + 50;
 
         playPop();
         triggerHaptic('success');
@@ -104,7 +105,7 @@ function ColorSplashContent() {
 
         if (result.allSplashed) {
           setGameState('complete');
-          completeGame({ score: score + 50 + streakBonus });
+          completeGame({ score: finalScore });
           playSuccess();
         }
       } else {

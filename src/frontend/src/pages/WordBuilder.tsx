@@ -505,10 +505,15 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
   };
 
   // Auto-start game on mount (skip pre-game menu for instant play)
+  // Uses ref to prevent re-triggering which breaks the menu
+  const autoStartedRef = useRef(false);
+  const startGameRef = useRef(startGame);
+  startGameRef.current = startGame;
   useEffect(() => {
-    if (!isPlaying && !gameCompleted && isHandTrackingReady) {
+    if (!isPlaying && !gameCompleted && isHandTrackingReady && !autoStartedRef.current) {
+      autoStartedRef.current = true;
       const timer = setTimeout(() => {
-        startGame();
+        startGameRef.current();
       }, 300);
       return () => clearTimeout(timer);
     }

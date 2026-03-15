@@ -46,6 +46,33 @@ const SHADOW_PORTAL_CONFIG = {
   scorePerParticle: 10,
 };
 
+const updateParticlePhysics = (particle: Particle): Particle => {
+  let newVY = particle.vy + SHADOW_PORTAL_CONFIG.gravity;
+  let newVX = particle.vx * SHADOW_PORTAL_CONFIG.friction;
+  let newX = particle.x + newVX;
+  let newY = particle.y + newVY;
+
+  if (newX < 0 || newX > 800) {
+    newVX = -newVX * 0.8;
+    newX = Math.max(0, Math.min(800, newX));
+  }
+
+  if (newY > 600) {
+    newVY = -newVY * 0.6;
+    newY = 600;
+    newVX += (Math.random() - 0.5) * 2;
+  }
+
+  return { ...particle, x: newX, y: newY, vx: newVX, vy: newVY };
+};
+
+const checkPortalCollision = (portal: Portal, particle: Particle): boolean => {
+  const dx = particle.x - portal.x;
+  const dy = particle.y - portal.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  return distance < portal.radius && particle.type === portal.targetType;
+};
+
 export const ShadowPortal: React.FC = () => {
   const navigate = useNavigate();
   const { canAccessGame, isLoading: subLoading } = useSubscription();
@@ -58,7 +85,7 @@ export const ShadowPortal: React.FC = () => {
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(SHADOW_PORTAL_CONFIG.gameDuration);
   const [particles, setParticles] = useState<Particle[]>([]);
-  const [_portals, _setPortals] = useState<Portal[]>([]);
+  const [_portals, setPortals] = useState<Portal[]>([]);
   const [gameStatus, setGameStatus] = useState<
     'menu' | 'playing' | 'won' | 'lost'
   >('menu');
@@ -126,7 +153,7 @@ export const ShadowPortal: React.FC = () => {
     }
 
     setParticles(newParticles);
-    _setPortals(newPortals);
+    setPortals(newPortals);
     setScore(0);
     setTimeLeft(SHADOW_PORTAL_CONFIG.gameDuration);
     setGameStatus('playing');
@@ -138,76 +165,41 @@ export const ShadowPortal: React.FC = () => {
   const gameLoop = useCallback(() => {
     if (!isPlaying || gameStatus !== 'playing') return;
 
-    setParticles((prevParticles) => {
-      return prevParticles.map((particle) => {
-        // Apply gravity
-        let newVY = particle.vy + SHADOW_PORTAL_CONFIG.gravity;
-        let newVX = particle.vx * SHADOW_PORTAL_CONFIG.friction;
+    setParticles((prev) => prev.map(updateParticlePhysics));
 
-        // Update position
-        let newX = particle.x + newVX;
-        let newY = particle.y + newVY;
-
-        // Bounce off walls
-        if (newX < 0 || newX > 800) {
-          newVX = -newVX * 0.8;
-          newX = Math.max(0, Math.min(800, newX));
-        }
-
-        // Bounce off floor
-        if (newY > 600) {
-          newVY = -newVY * 0.6;
-          newY = 600;
-          // Add some random horizontal movement when hitting floor
-          newVX += (Math.random() - 0.5) * 2;
-        }
-
-        return {
-          ...particle,
-          x: newX,
-          y: newY,
-          vx: newVX,
-          vy: newVY,
-        };
-      });
-    });
-
-    // Check portal collisions
-    _setPortals((prevPortals: Portal[]) => {
-      return prevPortals.map((portal) => {
+    const collectedIds: string[] = [];
+    setPortals((prevPortals) => {
+      const updated = prevPortals.map((portal) => {
         let newProgress = portal.progress;
-        let particlesToRemove: string[] = [];
 
         particles.forEach((particle) => {
-          const dx = particle.x - portal.x;
-          const dy = particle.y - portal.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < portal.radius && particle.type === portal.targetType) {
+          if (checkPortalCollision(portal, particle)) {
             newProgress += 1;
-            particlesToRemove.push(particle.id);
+            collectedIds.push(particle.id);
             playPop();
           }
         });
 
-        // Remove collected particles
-        setParticles((prev) =>
-          prev.filter((p) => !particlesToRemove.includes(p.id)),
-        );
-
-        // Check if portal is full
         if (newProgress >= 5) {
           playFanfare();
-          setScore((prev) => prev + SHADOW_PORTAL_CONFIG.scorePerParticle * 5);
+          setScore((s) => s + SHADOW_PORTAL_CONFIG.scorePerParticle * 5);
           return { ...portal, progress: 0, isActive: false };
         }
-
         return { ...portal, progress: newProgress };
       });
+
+      if (updated.every((p) => !p.isActive)) {
+        setGameStatus('won');
+      }
+      return updated;
     });
 
+    if (collectedIds.length > 0) {
+      setParticles((prev) => prev.filter((p) => !collectedIds.includes(p.id)));
+    }
+
     rafId.current = requestAnimationFrame(gameLoop);
-  }, [isPlaying, gameStatus, playPop, playFanfare]);
+  }, [isPlaying, gameStatus, playPop, playFanfare, particles]);
 
   // Time management
   useEffect(() => {

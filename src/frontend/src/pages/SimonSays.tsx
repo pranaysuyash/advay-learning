@@ -31,7 +31,11 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
-import { calculatePoseMatchScore, checkFingerMatch, type PoseAction } from '../utils/poseMatching';
+import {
+  calculatePoseMatchScore,
+  checkFingerMatch,
+  type PoseAction,
+} from '../utils/poseMatching';
 
 // Icon components for body actions
 const HeadIcon = () => (
@@ -822,17 +826,6 @@ const SimonSaysContent = memo(function SimonSays() {
       cancelAnimationFrame(animationRef.current);
     }
   };
-
-  // Auto-start game on mount (skip pre-game menu for instant play)
-  useEffect(() => {
-    if (!isLoading && !isPlaying && !error) {
-      // Small delay for models to initialize
-      const timer = setTimeout(() => {
-        startGame();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading, isPlaying, error]);
 
   if (isLoading) {
     return (

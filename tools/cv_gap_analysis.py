@@ -96,10 +96,26 @@ for g in games:
     if cv_str is None:
         gap_missing_cv.append(g)
         continue
+    # Use ast.literal_eval instead of eval for security (avoids arbitrary code execution)
+    import ast
     try:
-        cv_list = eval(cv_str)
-    except:
-        cv_list = []
+        # Handle markdown code block formatting (```ts ... ```)
+        cv_str_clean = cv_str.strip()
+        if cv_str_clean.startswith('```'):
+            # Extract content between code blocks
+            lines = cv_str_clean.split('\n')
+            cv_str_clean = '\n'.join(lines[1:-1]).strip() if len(lines) > 2 else cv_str_clean
+        # Try to parse as Python list first
+        cv_list = ast.literal_eval(cv_str_clean)
+    except (ValueError, SyntaxError):
+        # Fallback: try to extract array content manually
+        import re
+        match = re.search(r'\[(.*?)\]', cv_str_clean, re.DOTALL)
+        if match:
+            content = match.group(1)
+            cv_list = [item.strip().strip("'\"") for item in content.split(',') if item.strip()]
+        else:
+            cv_list = []
     if not cv_list:
         gap_missing_cv.append(g)
         continue
