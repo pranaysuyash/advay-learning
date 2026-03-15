@@ -26,3 +26,17 @@ Execution log:
 
 Status updates:
 - 2026-03-15T23:58 IN_PROGRESS - Consolidation complete, pushing to remote
+
+### GameContainer Fix
+
+Type: FIX
+Owner: Codex
+Created: 2026-03-15
+Status: DONE
+
+Scope: Restore HeaderErrorBoundary wrapper missed in merge conflict resolution
+
+Execution log:
+- 2026-03-16T00:04: Added missing <HeaderErrorBoundary> opening tag
+- 2026-03-16T00:04: Verified TS compiles clean
+- 2026-03-16T00:04: Verified progressQueue test failures are pre-existing on main
