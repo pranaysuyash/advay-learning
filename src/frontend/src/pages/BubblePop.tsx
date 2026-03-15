@@ -433,6 +433,7 @@ const BubblePopGame = memo(function BubblePopGameComponent() {
     gameName: 'BubblePop',
     targetFps: 24,
     onFrame: handleHandTrackingFrame,
+    isRunning: !showMenu && !gameState.gameOver,
   });
 
   if (!assetsLoaded) {

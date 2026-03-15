@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useRef, useCallback } from 'react';
+import { memo, useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
@@ -115,11 +115,18 @@ const ColorByNumberGame = memo(function ColorByNumberGameComponent({
     [],
   );
 
-  const { webcamRef: _webcamRef } = useGameHandTracking({
+  const { webcamRef: _webcamRef, startTracking } = useGameHandTracking({
     gameName: 'ColorByNumber',
     targetFps: 24,
     onFrame: handleHandTrackingFrame,
   });
+
+  // Start hand tracking when game begins
+  useEffect(() => {
+    if (view === 'play') {
+      startTracking();
+    }
+  }, [view, startTracking]);
 
   const startLevel = (nextIndex: number) => {
     const template = COLOR_BY_NUMBER_TEMPLATES[nextIndex];

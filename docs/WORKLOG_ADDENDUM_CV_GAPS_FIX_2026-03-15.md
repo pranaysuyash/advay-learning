@@ -1,5 +1,25 @@
 # TCK-20260315-001 :: Fix CV Implementation Gaps - Games Missing Tracking Hooks
 
+Ticket Stamp: STAMP-20260315T164915Z-codex-020t
+
+Type: BUG_FIX / CV_INTEGRATION
+Owner: Pranay
+Created: 2026-03-15
+Status: **IN_PROGRESS**
+Priority: **P0** - Core product promise violation
+
+## 2026-03-15 Updates
+
+### Commit: coderabbitai review comment fixes
+- **ColorByNumber.tsx**: Added missing `useEffect` import
+- **NumberBubblePop.tsx**: Fixed coordinate conversion bug - normalized cursor (0-1) was
+  incorrectly converted to percentage (0-100) then compared to pixel-based bubble positions.
+  Fixed by converting cursor to 320x320 pixel space to match bubble coordinates.
+- **BubblePop.tsx**: Removed manual tracking start/stop useEffect (caused hoisting issues),
+  now uses `isRunning` parameter on `useGameHandTracking` hook
+
+---
+
 Ticket Stamp: STAMP-20260315T142500Z-codex
 
 Type: BUG_FIX / CV_INTEGRATION

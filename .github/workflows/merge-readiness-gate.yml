@@ -109,7 +109,8 @@ jobs:
                   return false;
                 }
                 const author = t.comments?.nodes?.[0]?.author?.login;
-                return author !== "github-advanced-security";
+                // Ignore all bot comments (end with [bot])
+                return !author?.includes('[bot]');
               }).length;
 
               const pageInfo = pr.reviewThreads.pageInfo;

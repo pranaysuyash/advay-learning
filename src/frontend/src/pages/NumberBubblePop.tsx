@@ -145,14 +145,16 @@ function NumberBubblePopContent() {
       // Use pinch state instead of transition for continuous detection
       if (!frame.pinch?.state?.isPinching) return;
 
-      // Convert normalized (0-1) to percentage (0-100) for bubble comparison
-      const relX = newCursor.x * 100;
-      const relY = newCursor.y * 100;
+      // Convert normalized (0-1) to pixel space (game area is 320x320)
+      // Bubbles are positioned in pixel coordinates (x: 20-300, y: 50-250)
+      const GAME_SIZE = 320;
+      const pixelX = newCursor.x * GAME_SIZE;
+      const pixelY = newCursor.y * GAME_SIZE;
 
       const bubbleRadius = 7;
       for (const bubble of bubbles) {
-        const dx = Math.abs(relX - bubble.x);
-        const dy = Math.abs(relY - bubble.y);
+        const dx = Math.abs(pixelX - bubble.x);
+        const dy = Math.abs(pixelY - bubble.y);
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (distance < bubbleRadius + 3) {
           handleBubbleClickRef.current(bubble);
