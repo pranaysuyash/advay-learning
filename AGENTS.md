@@ -416,7 +416,46 @@ EOF
 echo "Added to tools/README.md with usage examples"
 ```
 
-### 7.1 Kenney Asset Source Policy
+### 7.1 Saving Inline Utility Scripts
+
+**When creating helpful scripts during tasks** (e.g., checking GitHub threads, parsing logs, analyzing data), always save them to `tools/` even if they were created inline:
+
+```python
+# Example: You create a script inline to check PR review threads
+# Instead of leaving it as a one-off, save it:
+
+# 1. Save to tools/ with descriptive name
+#    tools/check_review_threads.py
+#    tools/resolve_github_threads.py
+#    tools/find_unresolved_pr_comments.py
+
+# 2. Update tools/README.md with:
+#    - Purpose
+#    - Usage examples
+#    - What patterns it excludes/handles
+
+# 3. Make it reusable with argparse for different inputs
+python3 tools/check_review_threads.py --pr 50 --filter-bot
+```
+
+**Common utility categories to save:**
+
+| Category | Example Filenames | Purpose |
+|----------|------------------|---------|
+| GitHub PR mgmt | `check_unresolved_threads.py`, `resolve_review_threads.py` | Thread resolution, gate debugging |
+| CI/CD debugging | `check_workflow_status.py`, `parse_ci_logs.py` | Analyze CI failures |
+| Code analysis | `count_exports.py`, `find_unused_imports.py` | Static analysis helpers |
+| Data parsing | `parse_test_results.py`, `extract_metrics.py` | Parse outputs for reporting |
+| Asset management | `validate_assets.py`, `check_image_sizes.py` | Asset pipeline helpers |
+
+**Why save even "temporary" scripts:**
+
+- Future agents face the same problems
+- GitHub API patterns (GraphQL pagination, thread resolution) are reusable
+- CI debugging patterns repeat across PRs
+- Builds institutional knowledge in `tools/` directory
+
+### 7.2 Kenney Asset Source Policy
 
 **Canonical local source for this repo:**
 
