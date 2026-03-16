@@ -175,7 +175,7 @@ export function CelebrationOverlay({
       // Auto-complete after animation finishes (2.5s for confetti + text)
       const timer = setTimeout(() => {
         onComplete();
-      }, 2500);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [show, onComplete]);

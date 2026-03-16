@@ -30,6 +30,7 @@ import {
   ENQUEUE_WINDOW_MS,
 } from './progressConstants';
 import { ProgressRepository, progressRepository } from '../repositories';
+import { progressApi } from '../services/api';
 
 export interface ProgressItem {
   idempotency_key: string;
@@ -81,11 +82,7 @@ export interface LegacyProgressItem {
 }
 
 export interface ApiClient {
-  post(
-    url: string,
-    data: unknown,
-    config?: { params?: Record<string, unknown> },
-  ): Promise<{ status: number; data?: unknown }>;
+  post(url: string, data: unknown): Promise<{ status: number; data?: unknown }>;
 }
 
 type Subscriber = () => void;
@@ -514,7 +511,7 @@ export function createProgressQueue(repo: ProgressRepository) {
      */
     async processItemWithRetry(
       item: ProgressItem,
-      apiClient: ApiClient,
+      _apiClient: ApiClient,
     ): Promise<{ success: boolean; shouldRetry: boolean; error?: string }> {
        const retryCount = item.retryCount || 0;
 
@@ -527,9 +524,7 @@ export function createProgressQueue(repo: ProgressRepository) {
        }
 
        try {
-         await apiClient.post('/progress/', item, {
-           params: { profile_id: item.profile_id },
-         });
+         await progressApi.saveProgress(item.profile_id, item);
          return { success: true, shouldRetry: false };
        } catch (error: unknown) {
          const err = error as {

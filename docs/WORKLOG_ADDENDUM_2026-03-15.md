@@ -58,9 +58,51 @@ Owner: Codex
 Created: 2026-03-16
 Status: IN_PROGRESS
 
-Scope: Merge midline-violator branch changes (GameContainer fixes, preview assets, hook improvements) into open PR branch.
+Scope: Merge midline-violator branch changes (GameContainer fixes, preview assets, hook improvements) into open PR branch. Also includes: GameContainer improvements, Hooks improvements, Page fixes, Preview assets.
+
+Refs: TCK-20260315-013
 
 Execution log:
 - 2026-03-16T01:xx: Merged codex/wip-midline-violator into codex/wip-utility-tools-merge (preferred incoming changes)
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+### TCK-20260316-004 :: Branch recovery — apply stash@{0} game improvements
+
+Ticket Stamp: STAMP-20260316T120000Z-copilot-br04
+
+Type: CONSOLIDATION
+Owner: Copilot
+Created: 2026-03-16
+Status: DONE
+
+Scope contract:
+- In-scope: Apply stash@{0} improvements to codex/wip-utility-tools-merge; recover unique changes from local branches
+- Out-of-scope: stash@{1} (different branch), behavioral regressions
+- Behavior change allowed: YES (additive/net-better)
+
+Changes applied:
+- .agent/AGENT_KICKOFF_PROMPT.txt: Added CRITICAL PRIORITY multi-modal vision platform block (additive)
+- src/frontend/src/pages/BubblePop.tsx: Removed unused CV imports/state; cleaned stash-applied version
+- src/frontend/src/pages/ColorByNumber.tsx: Code style simplification from stash
+- src/frontend/src/pages/LetterHunt.tsx: Code style simplification from stash
+- src/frontend/src/pages/NumberTracing.tsx: Code style simplification from stash
+- src/frontend/src/pages/NumberBubblePop.tsx: Code style simplification from stash
+- src/frontend/src/hooks/useHandInteraction.ts: Simplified collision detection (cursor→viewport→rect)
+- src/frontend/src/hooks/useGameHandTracking.ts: Formatting improvements; kept 'worker' default (behavioral regression in stash reverted)
+- src/frontend/src/data/gameRegistries/labOfWonders.ts: Stash reformatting applied; restored shadow-portal + egg-shadow-master entries (stash regression fixed)
+- src/frontend/src/games/wordBuilderLogic.ts: Improvements from stash
+- find_missing_previews.py, find_visible_missing_v3.py: Improvements from stash
+- docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md: Additive content from stash
+- .githooks/pre-commit: Applied midline-violator version (adds SKIP_* flag support per AGENTS.md policy)
+- src/backend/mypy.ini: Added namespace_packages + explicit_package_bases from wip-all-better-code
+
+Regressions prevented:
+- useGameHandTracking.ts: Did NOT apply 'main-thread' default (stash removed the documented 'worker' default without explanation)
+- labOfWonders.ts: shadow-portal and egg-shadow-master were removed in stash; restored
+
+Evidence:
+- Command: cd src/frontend && npx tsc --noEmit → exit 0 (no TypeScript errors)
+- Command: git stash pop stash@{0} → applied, conflict in WORKLOG resolved by keeping upstream (more detailed)
+
+Prompt Trace: branch-recovery-implementation-agent

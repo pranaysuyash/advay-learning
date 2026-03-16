@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+const { chromium } = require('playwright');
 
 async function debugMirrorMaze() {
   const browser = await chromium.launch({
