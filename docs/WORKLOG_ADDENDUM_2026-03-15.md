@@ -342,3 +342,28 @@ Evidence:
 - Command: cd src/frontend && npx tsc --noEmit → 0 errors
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+### TCK-20260316-010 :: AGENTS.md workflow rules — no co-author trailers, main-only local workflow, reuse existing venv
+
+Type: POLICY
+Owner: pranaysuyash
+Created: 2026-03-16
+Status: **DONE**
+Ticket Stamp: STAMP-20260316T090000Z-copilot-coord4
+
+Scope contract:
+- In-scope: AGENTS.md — commit policy, branch workflow, Python venv rules
+- Out-of-scope: Code changes
+- Behavior change allowed: YES (policy clarification only)
+
+Changes:
+1. Before Committing checklist: added explicit "No Co-authored-by trailers" rule
+2. Environment Management / Python: added "For tests always activate existing .venv;
+   do not create new venv" rule with correct/incorrect code examples
+3. Both rules also captured in session summary and memory store
+
+Evidence:
+- Command: grep -n "Co-authored-by\|co-author\|NEVER create" AGENTS.md → confirmed rules present
+- Command: git diff --stat HEAD AGENTS.md → 2 hunks changed
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md

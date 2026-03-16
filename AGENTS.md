@@ -252,20 +252,20 @@ The app's unique value proposition is **camera-based, hands-free learning** for 
 
 **Default branch workflow (required):**
 
-- Local edits may happen on `main` while iterating.
-- Before any commit, create/switch to a short-lived WIP branch:
-  - Naming: `codex/wip-<ticket-or-scope>`
-  - Base: current `main` HEAD
-  - Keep uncommitted changes; then commit on the WIP branch
-- Open a PR from `codex/wip-*` -> `main` for AI/human review.
-- Merge to `main` only after review findings are resolved.
-- Direct commits on `main` are blocked by default via `pre-commit`.
+- **ALL local work happens directly on `main`.** Commit to `main` locally. Do not create a branch unless the user explicitly asks to "start the git workflow", "open a PR", or "create a branch".
+- When the user explicitly triggers the git workflow:
+  - Create `codex/wip-<ticket-or-scope>` from current `main` HEAD
+  - Push the WIP branch and open a PR from `codex/wip-*` → `main`
+  - Merge to `main` only after all review findings and CI checks are resolved
+  - Delete the WIP branch after merge
+- If no git workflow is triggered: commit directly to local `main`, push when instructed.
 
 **Branch discipline:**
 
+- Do not proactively create WIP branches. Wait for explicit instruction.
 - Do not create long-lived branch trees (`feature/*`, `fix/*`, `hotfix/*`) unless user explicitly asks.
-- **One branch until merged.** A "task" = all work until the branch is merged to `main`. Do NOT create multiple WIP branches while previous ones are still unmerged. Reuse the existing WIP branch for all pending work. Delete stale/empty branches immediately.
-- If a user-created feature branch already exists, continue there and still use PR review before merge.
+- **One branch per task.** Do NOT create multiple WIP branches while previous ones are still unmerged. Delete stale/empty branches immediately.
+- If a user-created feature branch already exists, continue there and use PR review before merge.
 
 **🚫 NEVER delete or revert files with unrecognized changes.**
 
@@ -731,6 +731,7 @@ The audit-to-ticket gap exists because:
 - [ ] Do not use shorthand claims like “pre-existing/unrelated failures”; the agent who encounters the issue resolves it before commit/push
 - [ ] Ensure worklog addendum is updated for code changes
 - [ ] Write meaningful commit message explaining WHAT and WHY
+- [ ] **Commit authorship: ALL commits use the repo owner name only. Never add `Co-authored-by:` trailers of any kind (no Copilot, no bot, no AI attribution). Every commit belongs to pranaysuyash.**
 - [ ] **WAIT for explicit user approval before running `git commit` or `git push`** — never commit/push autonomously
 ```
 
@@ -803,6 +804,16 @@ uv venv --python python3.13 && source .venv/bin/activate
 **Canonical env**: use the repo root `/.venv` for backend and repo tooling.
 
 **NEVER create nested venvs.** `src/backend/.venv` and `src/backend/venv` are legacy local environments and should not be recreated.
+
+**For tests and scripts: always activate the existing `.venv` first. Do not create a new venv.**
+
+```bash
+# Correct — reuse existing
+source .venv/bin/activate && python -m pytest ...
+
+# Wrong — never do this before checking
+uv venv && ...
+```
 
 ### Node.js (Frontend)
 
