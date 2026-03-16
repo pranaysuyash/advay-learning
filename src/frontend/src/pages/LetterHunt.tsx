@@ -811,7 +811,7 @@ const LetterHuntGame = memo(function LetterHuntComponent() {
                 <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> A target letter appears on the camera screen</li>
                 <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Move your index finger to control the cursor</li>
                 <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Pinch (thumb + index) while hovering a tile to select it</li>
-                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> You have 30 seconds per round — faster answers score more</li>
+                <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> You have 60 seconds per round — faster answers score more</li>
                 <li className='flex items-center gap-3'><span className='text-blue-500 text-lg'>•</span> Complete all 10 rounds to advance to the next level</li>
               </ul>
             </div>

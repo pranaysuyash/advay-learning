@@ -122,11 +122,12 @@ For each game idea, provide:
 
 ## 🎯 CV MODES (REQUIRED)
 
-**Registry `cv` field**: `['hand']` or `['pose']` or `['face']` or `['hand', 'face']` etc.
+**Registry `cv` field**: `['hand']` or `['pose']` or `['face']` or `['voice']` or `['hand', 'face']` etc.
 **Hooks to use**:
 - Hand: `useGameHandTracking` — specify which landmarks (8=index tip, etc.)
 - Pose: `useGamePoseTracking` — specify which joints (0=nose, 15/16=wrists, etc.)
 - Face: `useGameFaceTracking` — specify roll/pitch/yaw usage
+- Voice: `useMicrophoneInput` or `useVoicePrompt` — specify trigger words or volume thresholds
 
 **Camera behavior**: [What does the camera preview show? Visual feedback?]
 

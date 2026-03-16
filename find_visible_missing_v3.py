@@ -6,7 +6,7 @@ files = sorted([f for f in os.listdir(registry_dir) if f.endswith('.ts')])
 
 for file in files:
     path = os.path.join(registry_dir, file)
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         content = f.read()
     
     # Games are items in a list [ { ... }, { ... } ]

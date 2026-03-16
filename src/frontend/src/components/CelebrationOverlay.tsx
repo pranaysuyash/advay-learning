@@ -169,13 +169,13 @@ export function CelebrationOverlay({
     '#3b82f6',
   ]);
 
-  // Auto-dismiss after animation completes (reduced from 2.5s to 2s for snappier feel)
+  // Auto-dismiss after animation completes (2.5s for confetti + text to finish)
   useEffect(() => {
     if (show) {
       // Auto-complete after animation finishes (2.5s for confetti + text)
       const timer = setTimeout(() => {
         onComplete();
-      }, 2000);
+      }, 2500);
       return () => clearTimeout(timer);
     }
   }, [show, onComplete]);

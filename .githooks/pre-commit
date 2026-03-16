@@ -31,12 +31,8 @@ fi
 ./scripts/agent_gate.sh --staged
 
 # 2. Secret scan: block commits that include leaked credentials
-# Skip with SKIP_SECRET_SCAN=1 or --no-verify
-if [[ "${SKIP_SECRET_SCAN:-}" != "1" ]]; then
-  ./scripts/secret_scan.sh --staged
-else
-  echo "[pre-commit] Skipping secret scan (SKIP_SECRET_SCAN=1)"
-fi
+# NOTE: SKIP_SECRET_SCAN is disabled by repo policy — secret_scan.sh enforces this directly.
+./scripts/secret_scan.sh --staged
 
 # 3. DB migration guard: block model-layer DB changes without Alembic migration
 # Skip with SKIP_DB_MIGRATION_CHECK=1 or --no-verify

@@ -4,12 +4,6 @@ Use sources in this order:
 3) learning_for_kids/.agent/SESSION_CONTEXT.md
 4) /Users/pranay/Projects/workspace_memory/sources/...
 
-CRITICAL PRIORITY: This is a MULTI-MODAL VISION PLATFORM.
-- Every game MUST use camera-based CV controls (hand, face, pose, or voice)
-- The `cv: [...]` field in gameRegistry.ts defines what each game requires
-- When adding or modifying games, CV integration is Step 1, NOT an afterthought
-- See AGENTS.md section "🎯 MULTI-MODAL VISION PLATFORM" for full rules
-
 Rules:
 - Cite concrete file paths for decisions or constraints.
 - If sources conflict, show the conflict and ask before proceeding.

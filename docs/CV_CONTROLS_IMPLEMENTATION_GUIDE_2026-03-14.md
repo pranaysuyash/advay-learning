@@ -37,18 +37,18 @@ function MyGame() {
     setHandPosition({ x: indexTip.x, y: indexTip.y });
   }, []);
 
-  const { handDetected } = useGameHandTracking({
+  const { handVisible } = useGameHandTracking({
     gameName: 'My Game',
     webcamRef,
     onFrame: handleHandFrame,
-    enabled: isPlaying,
+    isRunning: isPlaying,
   });
 
   return (
     <GameContainer
       title="My Game"
       isPlaying={isPlaying}
-      isHandDetected={handDetected}
+      isHandDetected={handVisible}
       webcamRef={webcamRef}
     >
       {/* Game content */}

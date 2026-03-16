@@ -314,10 +314,11 @@ All comparisons use:
 - `AGENTS.md` — selective port (policy table columns only)
 **NOT included**: `.github/workflows/merge-readiness-gate.yml` (regression in pre-squash, REJECT)  
 **Tests to run**: `bash scripts/agent_gate.sh --staged`, `bash scripts/secret_scan.sh --staged`  
-**Docs to update**: `docs/WORKLOG_ADDENDUM_2026-03-15.md` (append recovery entry)  
+**Docs to update**: `docs/WORKLOG_ADDENDUM_2026-03-15.md` — file exists; append recovery entry  
 **Risks**: Bypass flag removal makes gates stricter. Agents/devs cannot skip these checks. Intended.  
 **In scope**: scripts/, tools/ improvements from pre-squash  
-**Out of scope**: Any source code changes from PR #52; merge-readiness-gate.yml
+**Out of scope**: Any source code changes from PR #52; merge-readiness-gate.yml  
+**Status**: ✅ COMPLETE — All BR-001 through BR-007 fixes are present in the current branch.
 
 ### UNIT-2: Restore .agent/AGENT_KICKOFF_PROMPT.txt (P1)
 **Findings covered**: BR-008  
@@ -352,13 +353,13 @@ All comparisons use:
 
 | ID | Finding | Decision | Unit | Status | Notes |
 |----|---------|----------|------|--------|-------|
-| BR-001 | cv_gap_analysis security fix | KEEP from pre-squash | UNIT-1 | 🔴 PENDING | P0 — security |
-| BR-002 | cv_hook_scan dynamic rewrite | KEEP from pre-squash | UNIT-1 | 🔴 PENDING | P0 |
-| BR-003 | regression_check bypass block | KEEP from pre-squash | UNIT-1 | 🔴 PENDING | P0 |
-| BR-004 | secret_scan bypass block | KEEP from pre-squash | UNIT-1 | 🔴 PENDING | P0 |
-| BR-005 | maintainability bypass block | KEEP from pre-squash | UNIT-1 | 🔴 PENDING | P0 |
-| BR-006 | agent_gate worklog gate | KEEP from pre-squash | UNIT-1 | 🔴 PENDING | P1 |
-| BR-007 | AGENTS.md policy table | ADAPT | UNIT-1 | 🔴 PENDING | P1 |
+| BR-001 | cv_gap_analysis security fix | KEEP from pre-squash | UNIT-1 | ✅ DONE | P0 — security; already in branch |
+| BR-002 | cv_hook_scan dynamic rewrite | KEEP from pre-squash | UNIT-1 | ✅ DONE | P0; already in branch |
+| BR-003 | regression_check bypass block | KEEP from pre-squash | UNIT-1 | ✅ DONE | P0; already in branch |
+| BR-004 | secret_scan bypass block | KEEP from pre-squash | UNIT-1 | ✅ DONE | P0; already in branch (pre-commit hook updated too) |
+| BR-005 | maintainability bypass block | KEEP from pre-squash | UNIT-1 | ✅ DONE | P0; already in branch |
+| BR-006 | agent_gate worklog gate | KEEP from pre-squash | UNIT-1 | ✅ DONE | P1; already in branch |
+| BR-007 | AGENTS.md policy table | ADAPT | UNIT-1 | ✅ DONE | P1; already in branch |
 | BR-008 | AGENT_KICKOFF multi-modal | KEEP from stash | UNIT-2 | 🔴 PENDING | P1 |
 | BR-009 | useHandInteraction simplification | DEFER | UNIT-3 | 📋 DEFERRED | Needs call-site audit |
 | BR-010 | useGameHandTracking default mode | DEFER | UNIT-3 | 📋 DEFERRED | Intent unknown, high risk |

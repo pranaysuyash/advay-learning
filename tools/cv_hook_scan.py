@@ -5,8 +5,12 @@ Outputs a markdown table with the results.
 """
 import os, re
 
-registry_dir = 'src/frontend/src/data/gameRegistries/'
-frontend_src = 'src/frontend/src/pages/'
+# Resolve paths relative to this script's directory, not the caller's cwd
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_repo_root = os.path.dirname(_script_dir)
+
+registry_dir = os.path.join(_repo_root, 'src/frontend/src/data/gameRegistries/')
+frontend_src = os.path.join(_repo_root, 'src/frontend/src/pages/')
 
 files = sorted([f for f in os.listdir(registry_dir) if f.endswith('.ts')])
 
@@ -26,6 +30,10 @@ for file in files:
                              registry_content, re.DOTALL)
     
     for game_id, game_path, cv_str in game_blocks:
+        # Skip header-like entries (e.g. template rows with placeholder ids/paths)
+        if not game_path.startswith('/games/') or game_id in ('id', 'header', '---'):
+            continue
+
         # Extract component name from path (e.g., /games/chemistry-lab -> ChemistryLab)
         # Map path to actual file
         component_name = game_path.replace('/games/', '').replace('-', '').title().replace('3d', '3D').replace('Vr', 'VR')
@@ -66,10 +74,10 @@ for file in files:
         else:
             found_hooks = []
             found_mediapipe = []
-        
+
         has_cv = len(found_hooks) > 0 or len(found_mediapipe) > 0
         cv_declared = cv_str.strip()
-        
+
         results.append({
             'id': game_id,
             'path': game_path,
@@ -78,12 +86,17 @@ for file in files:
             'hooks': found_hooks,
             'mediapipe': found_mediapipe,
             'has_cv_impl': has_cv,
+            'file_found': found_file is not None,
         })
 
-# Output results
+# Output results — only count rows where the source file was actually found
+scanned = [r for r in results if r['file_found']]
+unscanned = [r for r in results if not r['file_found']]
 print(f"Total games scanned: {len(results)}")
-print(f"Games with CV implementation: {sum(1 for r in results if r['has_cv_impl'])}")
-print(f"Games without CV implementation: {sum(1 for r in results if not r['has_cv_impl'])}")
+print(f"Games with CV implementation: {sum(1 for r in scanned if r['has_cv_impl'])}")
+print(f"Games without CV implementation: {sum(1 for r in scanned if not r['has_cv_impl'])}")
+if unscanned:
+    print(f"Games with missing source files (not counted above): {len(unscanned)}")
 print()
 
 # Output as markdown table

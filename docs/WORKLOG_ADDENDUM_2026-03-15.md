@@ -244,3 +244,53 @@ Evidence:
 - Command: npx tsc --noEmit → exit 0
 
 Prompt Trace: branch-recovery-pre-commit-agent
+
+---
+
+### TCK-20260316-005 :: PR #53 Review Thread Resolution
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-03-16
+Status: **DONE**
+Priority: P1
+
+Ticket Stamp: STAMP-20260316T120000Z-copilot
+
+Scope contract:
+- In-scope: Fix all blocking coderabbitai and cubic-dev-ai review threads on PR #53
+- Out-of-scope: New features, logic changes unrelated to reviewer findings
+- Behavior change allowed: YES (bug fixes, doc corrections)
+
+Acceptance Criteria:
+- [x] All coderabbitai threads resolved (fixed or justified)
+- [x] All cubic-dev-ai threads resolved (fixed or justified)
+- [x] chatgpt-codex-connector threads resolved for cleanliness
+- [x] find_unresolved.py shows "Would fail workflow: 0"
+
+Fixes implemented:
+1. tools/cv_hook_scan.py: Script-relative path resolution; skip non-game entries; unscanned row tracking
+2. src/frontend/debug-mirrormaze.js: CommonJS require → ESM import (ESM package.json type)
+3. src/frontend/debug-mirrormaze.ts: Move args from newContext() to chromium.launch()
+4. find_missing_previews.py: Replace [^{}]* regex with brace-counting parser for nested objects
+5. find_visible_missing_v3.py: Add encoding='utf-8' to file reads
+6. src/frontend/src/components/CelebrationOverlay.tsx: Timer 2000ms → 2500ms (matches confetti duration)
+7. prompts/content/game-design-prompt-v1.0.md: Add voice example to cv modes section
+8. src/frontend/src/pages/LetterHunt.tsx: Fix "30 seconds" → "60 seconds" per round
+9. .githooks/pre-commit: Remove SKIP_SECRET_SCAN bypass (secret_scan.sh already enforces no-bypass policy)
+10. docs/SETUP.md: Update SKIP_SECRET_SCAN docs to reflect disabled status
+11. docs/CV_CONTROLS_IMPLEMENTATION_GUIDE_2026-03-14.md: Fix handDetected→handVisible, enabled→isRunning
+12. pyproject.toml [tool.mypy]: Add namespace_packages+explicit_package_bases from dead src/backend/mypy.ini
+13. src/backend/mypy.ini: Add superseded-by note
+14. docs/audit/BRANCH_RECOVERY_REGISTER.md: Update BR-001-007 status to DONE; add worklog file note
+15. docs/audit/CV_IMPLEMENTATION_GAPS_2026-03-15.md: Correct 18 games from ❌ to ✅ (already integrated)
+
+Acknowledged/false-positives resolved with justification:
+- .agent/STEP1_ENV.sh MEMSEARCH_MODEL: bge-base-en-v1.5 is intentional lighter model for this project
+- src/frontend/src/main.tsx console.error: Filtering is MediaPipe-specific (path/circle/render.ts patterns only)
+
+Evidence:
+- Command: python3 tools/cv_hook_scan.py → shows correct per-game status
+- Command: grep -n "SKIP_SECRET_SCAN" scripts/secret_scan.sh → confirms line 43 die() enforcement
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
