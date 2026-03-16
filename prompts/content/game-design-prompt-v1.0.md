@@ -127,7 +127,7 @@ For each game idea, provide:
 - Hand: `useGameHandTracking` — specify which landmarks (8=index tip, etc.)
 - Pose: `useGamePoseTracking` — specify which joints (0=nose, 15/16=wrists, etc.)
 - Face: `useGameFaceTracking` — specify roll/pitch/yaw usage
-- Voice: `useMicrophoneInput` or `useVoicePrompt` — specify trigger words or volume thresholds
+- Voice input: `useMicrophoneInput` — specify trigger words or volume thresholds (note: `useVoicePrompt` is TTS output, not input)
 
 **Camera behavior**: [What does the camera preview show? Visual feedback?]
 

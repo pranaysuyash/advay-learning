@@ -42,6 +42,11 @@ function MyGame() {
     webcamRef,
     onFrame: handleHandFrame,
     isRunning: isPlaying,
+    // Pass runtimeMode: 'main-thread' when the worker runtime may be unavailable
+    // (e.g., environments without SharedArrayBuffer). Omitting it defaults to
+    // worker mode with automatic fallback, but explicit main-thread mode ensures
+    // detection starts immediately when workers are blocked.
+    // runtimeMode: 'main-thread',
   });
 
   return (
