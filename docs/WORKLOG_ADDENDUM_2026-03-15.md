@@ -109,7 +109,7 @@ Prompt Trace: branch-recovery-implementation-agent
 
 ---
 
-### TCK-20260316-002 :: Branch Recovery — CV Coordinate Fixes from codex/wip-gamecontainer-remediation
+### TCK-20260316-007 :: Branch Recovery — CV Coordinate Fixes from codex/wip-gamecontainer-remediation
 
 Type: REMEDIATION
 Owner: Pranay
@@ -220,15 +220,7 @@ Prompt Trace: branch recovery agent systematic pass
 
 ---
 
-### TCK-20260316-004 :: WordSearch CV Integration + Game Page Formatting
-
-Type: FEATURE / CLEANUP
-Owner: Pranay
-Created: 2026-03-16
-Status: **DONE**
-Priority: P2
-
-Ticket Stamp: STAMP-20260316T062609Z-copilot
+### TCK-20260316-008 :: WordSearch CV Integration + Game Page Formatting
 
 Scope contract:
 - In-scope: Add useGameHandTracking + GameCursor to WordSearch; Prettier reformat PopTheNumber, NumberBubblePop, NumberTracing
@@ -247,7 +239,7 @@ Prompt Trace: branch-recovery-pre-commit-agent
 
 ---
 
-### TCK-20260316-005 :: PR #53 Review Thread Resolution
+### TCK-20260316-006 :: PR #53 Review Thread Resolution
 
 Type: REMEDIATION
 Owner: Pranay

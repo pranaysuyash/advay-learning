@@ -159,7 +159,7 @@ export function WordSearchContent() {
       onHome={() => navigate('/games')}
       reportSession={false}
       webcamRef={webcamRef}
-      isHandDetected={isHandTrackingReady}
+      isHandDetected={!!cursor}
       isPlaying={gameState === 'playing'}
     >
       <div ref={gameAreaRef} className='flex flex-col items-center gap-4 p-4'>
@@ -249,7 +249,7 @@ export function WordSearchContent() {
         )}
 
         {/* Hand tracking cursor */}
-        {cursor && (
+        {cursor && gameState === 'playing' && (
           <GameCursor
             position={cursor}
             coordinateSpace='normalized'

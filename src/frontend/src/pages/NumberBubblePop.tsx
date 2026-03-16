@@ -144,20 +144,23 @@ function NumberBubblePopContent() {
       if (!gameArea) return;
 
       const gameAreaRect = gameArea.getBoundingClientRect();
+      // Convert normalized 0-1 coords to viewport pixel space for DOM hit-testing
+      const viewportX = newCursor.x * window.innerWidth;
+      const viewportY = newCursor.y * window.innerHeight;
       const isOverGameArea =
-        newCursor.x >= gameAreaRect.left &&
-        newCursor.x <= gameAreaRect.right &&
-        newCursor.y >= gameAreaRect.top &&
-        newCursor.y <= gameAreaRect.bottom;
+        viewportX >= gameAreaRect.left &&
+        viewportX <= gameAreaRect.right &&
+        viewportY >= gameAreaRect.top &&
+        viewportY <= gameAreaRect.bottom;
 
       if (!isOverGameArea) return;
 
       if (frame.pinch.transition !== 'start') return;
 
       const relX =
-        ((newCursor.x - gameAreaRect.left) / gameAreaRect.width) * 100;
+        ((viewportX - gameAreaRect.left) / gameAreaRect.width) * 100;
       const relY =
-        ((newCursor.y - gameAreaRect.top) / gameAreaRect.height) * 100;
+        ((viewportY - gameAreaRect.top) / gameAreaRect.height) * 100;
 
       const bubbleRadius = 7;
       for (const bubble of bubbles) {
@@ -194,7 +197,7 @@ function NumberBubblePopContent() {
       >
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && (
-          <CursorEmbodiment position={cursor} isPinching={false} />
+          <CursorEmbodiment position={cursor} coordinateSpace='normalized' containerRef={gameAreaRef} isPinching={false} />
         )}
         <div className='flex gap-2'>
           {LEVELS.map((l) => (

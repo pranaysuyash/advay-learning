@@ -106,7 +106,7 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
         y: Math.max(0, Math.min(1, (newCursor.y - canvasRect.top) / canvasRect.height)),
       };
 
-      const isPinching = frame.pinch?.transition === 'start';
+      const isPinching = frame.pinch?.state.isPinching ?? false;
 
       if (isPinching && !wasPinchingRef.current) {
         playClick();
