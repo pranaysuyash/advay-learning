@@ -160,3 +160,60 @@ Evidence:
 - Command: cd src/frontend && npx tsc --noEmit → exit 0 (clean)
 
 Prompt Trace: branch recovery agent
+
+---
+
+### TCK-20260316-005 :: Systematic branch comparison — midline-violator + all backup branches
+
+Type: BRANCH_RECOVERY
+Owner: Pranay
+Created: 2026-03-16
+Status: **DONE**
+Ticket Stamp: STAMP-20260316T052613Z-copilot-b
+Priority: P1
+
+Scope contract:
+- In-scope: Full systematic diff of codex/wip-midline-violator, codex/wip-gamecontainer-remediation, backup branches, origin/codex/wip-agents-md-utility-guide vs HEAD
+- Out-of-scope: New feature work, behavior changes
+- Behavior change allowed: NO (type fixes only)
+
+Findings:
+
+**PART 1 — 5 "definitely-missing" files**: All already present in HEAD (HEAD is superset of midline-violator).
+  Evidence: git diff --name-only --diff-filter=A HEAD codex/wip-midline-violator → empty output.
+  midlineViolatorLogic.ts disk file was empty (0 bytes) despite being committed with 188 lines → restored from HEAD commit.
+
+**PART 2 — MidlineViolator wiring**: Already wired in lazyPages.tsx (line 110), App.tsx (lines 83, 925). gameRegistry.ts correct (shadow-portal registered in labOfWonders.ts, not duplicate in wordWorkshop.ts).
+
+**PART 3 — Game registries**:
+  - wordWorkshop.ts: midline-violator has shadow-portal entry duplicate (already in labOfWonders.ts) → HEAD wins
+  - bodyZone.ts: HEAD=22 entries vs MV=21 → HEAD wins
+  - All other registries: equal count or HEAD has previewImages field MV lacks → HEAD wins on all
+
+**PART 3 — Game pages**: All 37 game pages + Dashboard/Home/Register: HEAD >= MV in LOC → HEAD wins all.
+
+**PART 3 — Shared components**: GameContainer (176 vs 143), GameCard (319 vs 313), App.tsx (1248 vs 1240), OnboardingFlow (408 vs 402), CameraPermissionPrompt (260 vs 241) → HEAD wins all.
+  lazyPages.tsx: MV=241 vs HEAD=224 — MV adds bare loadThreeDPage() calls; HEAD uses proper lazy()+named exports → HEAD wins.
+
+**PART 3 — Docs**: All listed docs (GLOBAL_GAME_JUICE_AUDIT, PR50_*, UX_AUDIT_*, BRANCH_RECOVERY_REGISTER, tickets, WORKLOG_ADDENDUM_CV_GAPS_*) already present in HEAD.
+
+**PART 3 — Other files**: drawing.ts (315 vs 311), TTSService.ts (451 vs 446), osv-scanner.toml (45 vs 0 — MV deleted it), pre-push (102 vs 67), copilot-instructions.md, QWEN.md → HEAD wins all.
+
+**PART 4 — codex/wip-gamecontainer-remediation**: No unique files. OddOneOut/PopTheNumber/SizeSorting identical. Fully covered by HEAD.
+
+**PART 5 — Both backup branches**: No unique files. Fully covered by HEAD.
+
+**PART 6 — origin/codex/wip-agents-md-utility-guide**: No unique files. Fully covered by HEAD.
+
+**PART 7 — TypeScript fixes applied**:
+  - MidlineViolator.tsx: Added `TargetObject` to imports
+  - MidlineViolator.tsx line 52: `setState(prevState =>` → `setState((prevState: MidlineViolatorState) =>`
+  - MidlineViolator.tsx line 105: `forEach(target =>` → `forEach((target: TargetObject) =>`
+  - Result: npx tsc --noEmit → exit 0 (clean)
+
+Execution log:
+- 2026-03-16T05:26Z Systematic diff of all 6 branch targets vs HEAD | Evidence: git diff --name-only --diff-filter=A/D
+- 2026-03-16T05:26Z Restored midlineViolatorLogic.ts from HEAD commit (0-byte disk anomaly) | Evidence: git show HEAD:... | wc -l → 188
+- 2026-03-16T05:26Z Fixed 3 TypeScript errors in MidlineViolator.tsx | Evidence: npx tsc --noEmit → exit 0
+
+Prompt Trace: branch recovery agent systematic pass
