@@ -83,6 +83,7 @@ function SizeSortingGame() {
   } = useGameHandTracking({
     gameName: 'SizeSorting',
     targetFps: 24,
+    isRunning: Boolean(activeRound),
     onFrame: handleHandTrackingFrame,
   });
 
@@ -182,7 +183,7 @@ function SizeSortingGame() {
       <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6 relative'>
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && activeRound && (
-          <CursorEmbodiment position={cursor} isPinching={false} />
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
         )}
         <div className='max-w-4xl mx-auto space-y-4'>
           {!activeRound ? (

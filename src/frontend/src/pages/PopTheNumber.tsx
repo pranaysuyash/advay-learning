@@ -142,28 +142,26 @@ function PopTheNumberContent() {
         return;
       }
 
+      // indexTip is already normalized (0-1), use directly
       const newCursor: Point = { x: hand.indexTip.x, y: hand.indexTip.y };
       setCursor(newCursor);
       setIsHandTrackingActive(true);
 
       if (gameState !== 'playing') return;
 
-      const gameArea = gameAreaRef.current;
-      if (!gameArea) return;
-
-      const gameAreaRect = gameArea.getBoundingClientRect();
+      // Use normalized bounds check (0-1) instead of pixel bounds
       const isOverGameArea =
-        newCursor.x >= gameAreaRect.left &&
-        newCursor.x <= gameAreaRect.right &&
-        newCursor.y >= gameAreaRect.top &&
-        newCursor.y <= gameAreaRect.bottom;
+        newCursor.x >= 0 && newCursor.x <= 1 &&
+        newCursor.y >= 0 && newCursor.y <= 1;
 
       if (!isOverGameArea) return;
 
-      if (frame.pinch.transition !== 'start') return;
+      // Use pinch state instead of transition for continuous detection
+      if (!frame.pinch?.state?.isPinching) return;
 
-      const relX = (newCursor.x - gameAreaRect.left) / gameAreaRect.width * 100;
-      const relY = (newCursor.y - gameAreaRect.top) / gameAreaRect.height * 100;
+      // Convert normalized (0-1) to percentage (0-100) for bubble comparison
+      const relX = newCursor.x * 100;
+      const relY = newCursor.y * 100;
 
       const bubbleRadius = 4;
       for (const bubble of bubbles) {
@@ -216,7 +214,7 @@ function PopTheNumberContent() {
       <div ref={gameAreaRef} className="relative w-full h-full bg-gradient-to-b from-sky-100 to-blue-200 rounded-lg overflow-hidden">
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && (
-          <CursorEmbodiment position={cursor} isPinching={false} />
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
         )}
         {gameState === 'start' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">

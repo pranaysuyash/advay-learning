@@ -106,3 +106,57 @@ Evidence:
 - Command: git stash pop stash@{0} → applied, conflict in WORKLOG resolved by keeping upstream (more detailed)
 
 Prompt Trace: branch-recovery-implementation-agent
+
+---
+
+### TCK-20260316-002 :: Branch Recovery — CV Coordinate Fixes from codex/wip-gamecontainer-remediation
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-03-16
+Status: **DONE**
+Priority: P1
+
+Ticket Stamp: STAMP-20260316T052613Z-copilot
+
+Scope contract:
+- In-scope: Apply CV coordinate fixes and UX improvements from codex/wip-gamecontainer-remediation
+- Out-of-scope: Workflow bot pattern changes, AGENTS.md downgrades, QWEN.md deletion
+- Behavior change allowed: YES (additive/net-better)
+
+Assessment of midline-violator branch:
+- HEAD (codex/wip-utility-tools-merge) is already MORE complete than codex/wip-midline-violator
+- All 17 preview images already present on HEAD
+- All game pages on HEAD are larger/more complete (branch is older state)
+- Workflows on branch REGRESS 4-bot patterns — NOT taken
+- AGENTS.md on branch is older/less complete — NOT taken
+- QWEN.md deletion on branch — NOT taken (parallel-work preservation policy)
+- Tools (README, cv_gap_analysis, cv_hook_scan) on HEAD are larger — NOT taken from branch
+
+Changes applied from codex/wip-gamecontainer-remediation:
+- src/frontend/src/pages/OddOneOut.tsx: Added isRunning + coordinateSpace="normalized" + containerRef
+- src/frontend/src/pages/PopTheNumber.tsx: Normalized bounds check (0-1 range) + pinch state detection
+- src/frontend/src/pages/SizeSorting.tsx: Added isRunning=Boolean(activeRound) + normalized cursor
+- src/frontend/src/pages/WordBuilder.tsx: Better UX feedback messages + auto-start + motion.div animations
+- src/frontend/src/pages/NumberBubblePop.tsx: Auto-start + normalized coords + coordinateSpace="normalized"
+- src/frontend/src/pages/BubblePop.tsx: Added hand tracking (CursorEmbodiment + useGameHandTracking)
+- src/frontend/src/pages/ColorByNumber.tsx: Auto-start tracking on game begin + startTracking hook
+- src/frontend/src/pages/NumberTracing.tsx: checkStrokeCompletion refactor + improvements
+- src/frontend/src/games/wordBuilderLogic.ts: TARGET_SIZE-based column calculation for grid layout
+- src/frontend/src/services/progressQueue.ts: Remove self-import + add optional config to ApiClient.post + fix processItemWithRetry to use apiClient.post
+- src/frontend/src/hooks/useHandInteraction.ts: Normalized coordinate comparison (container-relative bounds check)
+
+Files NOT taken from codex/wip-midline-violator (HEAD already better or regression risk):
+- .github/workflows/merge-readiness-gate.yml: Branch removes 4-bot patterns → SKIP
+- .github/workflows/pr-comment-gate.yml: Branch removes 4-bot patterns → SKIP
+- .githooks/pre-push: Branch removes security checks (disallowed overrides, non-FF detection) → SKIP
+- AGENTS.md: Branch has older/less complete version → SKIP
+- QWEN.md: Branch deletes file → SKIP (parallel-work policy)
+- All game pages: HEAD is larger/more complete than branch → SKIP
+- All game registries: HEAD has previewImage fields and more entries that branch is missing → SKIP
+- scripts/agent_gate.sh etc: HEAD is more comprehensive → SKIP
+
+Evidence:
+- Command: cd src/frontend && npx tsc --noEmit → exit 0 (clean)
+
+Prompt Trace: branch recovery agent

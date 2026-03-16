@@ -83,6 +83,7 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
   } = useGameHandTracking({
     gameName: 'OddOneOut',
     targetFps: 24,
+    isRunning: gameState === 'playing',
     onFrame: handleHandTrackingFrame,
   });
 
@@ -218,7 +219,7 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
       <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto relative">
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && (
-          <CursorEmbodiment position={cursor} isPinching={false} />
+          <CursorEmbodiment position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} />
         )}
         <div className="flex gap-2">
           {LEVELS.map((level) => (
