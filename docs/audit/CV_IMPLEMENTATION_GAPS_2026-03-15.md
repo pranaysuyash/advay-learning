@@ -27,45 +27,40 @@ These games declare CV in registry but have **NO tracking hooks** in their code:
 
 | Game | Registry CV | Actual Implementation |
 |------|-------------|----------------------|
-| `color-splash` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with pinch-to-splash |
-| `color-mixing` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with cursor |
-| `color-potions` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with cursor |
-| `pack-lunchbox` | `['hand']` | ❌ No hook - pointer clicks |
+| `color-splash` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `color-mixing` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `color-potions` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `pack-lunchbox` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
 | `set-the-table` | `['hand']` | ❌ No hook - pointer clicks |
-| `story-builder` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with cursor |
-
-## Gap Category 1: Games Missing CV Hooks Entirely
-
-These games declare CV in registry but have **NO tracking hooks** in their code:
+| `story-builder` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
 
 ### Selection/Sorting Games (All declare `cv: ['hand']`)
 
 | Game | Registry CV | Actual Implementation |
 |------|-------------|----------------------|
-| `temperature-sort` | `['hand']` | ❌ No hook - pointer clicks |
+| `temperature-sort` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
 | `plant-garden` | `['hand']` | ❌ No hook - pointer clicks |
-| `sound-garden` | `['hand']` | ❌ No hook - pointer clicks |
-| `taste-match` | `['hand']` | ❌ No hook - pointer clicks |
+| `sound-garden` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `taste-match` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
 | `farm-friends` | `['hand']` | ❌ No hook - pointer clicks |
-| `texture-explorer` | `['hand']` | ❌ No hook - pointer clicks |
-| `tidy-up-time` | `['hand']` | ❌ No hook - pointer clicks |
-| `color-sort` | `['hand']` | ✅ **FIXED** - Added `useGameHandTracking` with cursor |
+| `texture-explorer` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `tidy-up-time` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
 
 ### Educational Games (All declare `cv: ['hand']`)
 
 | Game | Registry CV | Actual Implementation |
 |------|-------------|----------------------|
-| `counting-objects` | `['hand']` | ❌ No hook - pointer clicks |
-| `more-or-less` | `['hand']` | ❌ No hook - pointer clicks |
-| `number-sequence` | `['hand']` | ❌ No hook - pointer clicks |
-| `blend-builder` | `['hand']` | ❌ No hook - pointer clicks |
+| `counting-objects` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `more-or-less` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `number-sequence` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `blend-builder` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
 | `sight-word-flash` | `['hand']` | ❌ No hook - pointer clicks |
-| `ending-sounds` | `['hand']` | ❌ No hook - pointer clicks |
-| `letter-sound-match` | `['hand']` | ❌ No hook - pointer clicks |
-| `same-and-different` | `['hand']` | ❌ No hook - pointer clicks |
+| `ending-sounds` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `letter-sound-match` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
+| `same-and-different` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
 | `shadow-match` | `['hand']` | ❌ No hook - pointer clicks |
 | `weather-match` | `['hand']` | ❌ No hook - pointer clicks |
-| `pattern-play` | `['hand']` | ❌ No hook - pointer clicks |
+| `pattern-play` | `['hand']` | ✅ Integrated — uses `useGameHandTracking` |
 | `animal-sounds` | `['hand']` | ❌ No hook - pointer clicks |
 
 ### Complex/3D Games (Declare various CV modes)

@@ -156,6 +156,8 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
+namespace_packages = true
+explicit_package_bases = false
 
 [[tool.mypy.overrides]]
 module = [

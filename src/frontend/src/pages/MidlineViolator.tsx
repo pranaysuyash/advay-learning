@@ -5,6 +5,7 @@ import {
   initGameState,
   updateGameState,
   MidlineViolatorState,
+  TargetObject,
   INITIAL_CONFIG
 } from '../games/midlineViolatorLogic';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -49,7 +50,7 @@ const MidlineViolator: React.FC = () => {
       const deltaTime = time - lastTimeRef.current;
       lastTimeRef.current = time;
 
-      setState(prevState => {
+      setState((prevState: MidlineViolatorState) => {
         const nextState = updateGameState(
           prevState,
           time,
@@ -102,7 +103,7 @@ const MidlineViolator: React.FC = () => {
     ctx.setLineDash([]);
 
     // Draw Targets
-    state.targets.forEach(target => {
+    state.targets.forEach((target: TargetObject) => {
       if (target.isHit) return;
 
       const tx = target.x * canvas.width;

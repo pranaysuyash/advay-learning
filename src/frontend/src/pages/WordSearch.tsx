@@ -1,15 +1,23 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, generateWordSearch } from '../games/wordSearchLogic';
-import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import {
+  STREAK_MILESTONE_INTERVAL,
+  STREAK_MILESTONE_DURATION_MS,
+} from '../games/constants';
 
 export function WordSearchContent() {
   const navigate = useNavigate();
@@ -24,6 +32,8 @@ export function WordSearchContent() {
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>(
     'start',
   );
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const { playClick, playSuccess } = useAudio();
   const { completeGame } = useGameCompletion('word-search');
@@ -32,9 +42,43 @@ export function WordSearchContent() {
     gameName: 'Word Search',
     score,
     level: currentLevel,
-    isPlaying: true,
+    isPlaying: gameState === 'playing',
     metaData: { foundWords: foundWords.length },
   });
+
+  // Hand tracking frame handler
+  const handleFrame = useCallback(
+    (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+      const tip = frame.indexTip;
+      if (!tip) {
+        setCursor(null);
+        return;
+      }
+      setCursor(tip);
+    },
+    [],
+  );
+
+  // Hand tracking hook
+  const {
+    isLoading: isModelLoading,
+    isReady: isHandTrackingReady,
+    startTracking,
+    webcamRef,
+  } = useGameHandTracking({
+    gameName: 'Word Search',
+    targetFps: 30,
+    isRunning: gameState === 'playing',
+    onFrame: handleFrame,
+    onNoVideoFrame: () => setCursor(null),
+  });
+
+  // Auto-start hand tracking when game is active
+  useEffect(() => {
+    if (gameState === 'playing' && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [gameState, isHandTrackingReady, isModelLoading, startTracking]);
 
   const startGame = () => {
     const { grid: newGrid, words: newWords } = generateWordSearch(currentLevel);
@@ -68,7 +112,7 @@ export function WordSearchContent() {
         const basePoints = foundWord.length * 10;
         const streakBonus = Math.min(newStreak * 3, 20);
         const totalPoints = basePoints + streakBonus;
-        
+
         playSuccess();
         triggerHaptic('success');
         setFoundWords((f) => [...f, foundWord]);
@@ -78,10 +122,13 @@ export function WordSearchContent() {
         if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
           setShowStreakMilestone(true);
           triggerHaptic('celebration');
-          setTimeout(() => setShowStreakMilestone(false), STREAK_MILESTONE_DURATION_MS);
+          setTimeout(
+            () => setShowStreakMilestone(false),
+            STREAK_MILESTONE_DURATION_MS,
+          );
         }
       };
-      
+
       if (words.includes(word) && !foundWords.includes(word)) {
         handleWordFound(word);
       } else if (words.includes(reversed) && !foundWords.includes(reversed)) {
@@ -111,8 +158,11 @@ export function WordSearchContent() {
       title='Word Search'
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={!!cursor}
+      isPlaying={gameState === 'playing'}
     >
-      <div className='flex flex-col items-center gap-4 p-4'>
+      <div ref={gameAreaRef} className='flex flex-col items-center gap-4 p-4'>
         <div className='flex gap-2'>
           {LEVELS.map((l) => (
             <button
@@ -176,7 +226,9 @@ export function WordSearchContent() {
             <div className='flex items-center justify-center gap-4'>
               <div className='text-xl font-bold'>Score: {score}</div>
               {streak > 0 && (
-                <div className='text-orange-500 font-bold text-xl'>🔥 {streak}</div>
+                <div className='text-orange-500 font-bold text-xl'>
+                  🔥 {streak}
+                </div>
               )}
             </div>
           </div>
@@ -194,6 +246,19 @@ export function WordSearchContent() {
               🔥 {streak} Streak! 🔥
             </div>
           </motion.div>
+        )}
+
+        {/* Hand tracking cursor */}
+        {cursor && gameState === 'playing' && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={true}
+            size={64}
+            color='#3B82F6'
+          />
         )}
 
         {gameState === 'complete' && (
@@ -226,7 +291,7 @@ export function WordSearchContent() {
 }
 
 export const WordSearch = () => (
-  <GameShell gameId="word-search" gameName="Word Search">
+  <GameShell gameId='word-search' gameName='Word Search'>
     <WordSearchContent />
   </GameShell>
 );

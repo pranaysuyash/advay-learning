@@ -301,8 +301,10 @@ Manual checks:
 Temporary bypass (emergency only):
 
 ```bash
-SKIP_SECRET_SCAN=1 git commit ...
-SKIP_SECRET_SCAN=1 git push ...
+# NOTE: SKIP_SECRET_SCAN is disabled by repo policy — secret_scan.sh will
+# reject this flag with exit code 2. Resolve the findings instead.
+# git commit --no-verify bypasses the pre-commit hook; git push --no-verify
+# bypasses the pre-push hook. Both require explicit human approval.
 ```
 
 ### DB Migration Guard (Required)

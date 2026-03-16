@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 async function debugMirrorMaze() {
   const browser = await chromium.launch({
     headless: true,
-    // Use fake camera for testing - must be passed to launch(), not newContext()
+    // Fake camera flags must be launch options, not context options
     args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'],
   });
 

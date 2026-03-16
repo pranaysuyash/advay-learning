@@ -41,13 +41,18 @@ function MyGame() {
     gameName: 'My Game',
     webcamRef,
     onFrame: handleHandFrame,
+    isRunning: isPlaying,
+    // To force main-thread mode explicitly (skipping worker startup) pass:
+    // runtimeMode: 'main-thread'
+    // Otherwise the hook defaults to worker mode and auto-falls back to
+    // main-thread when worker support is not available.
   });
 
   return (
     <GameContainer
       title="My Game"
       isPlaying={isPlaying}
-      isHandDetected={handDetected}
+      isHandDetected={handVisible}
       webcamRef={webcamRef}
     >
       {/* Game content */}

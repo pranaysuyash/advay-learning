@@ -65,35 +65,59 @@ jobs:
               { owner, repo, pull_number, per_page: 100 }
             );
 
+            // Bots use standard auto-generated phrasing that may accidentally
+            // match narrative patterns. Enforcement is for human agents only.
+            // Some automated reviewers use logins without the [bot] suffix.
+            const KNOWN_BOT_LOGINS = new Set([
+              "coderabbitai", "cubic-dev-ai", "chatgpt-codex-connector",
+              "dependabot", "renovate", "github-actions",
+            ]);
+            const isBot = (login) =>
+              !login ||
+              login.endsWith("[bot]") ||
+              KNOWN_BOT_LOGINS.has(login);
+
             const entries = [];
-            entries.push({
-              source: "PR body",
-              author: pr.data.user?.login || "unknown",
-              text: `${pr.data.title || ""}\n${pr.data.body || ""}`.trim(),
-            });
+            const prAuthor = pr.data.user?.login || "unknown";
+            if (!isBot(prAuthor)) {
+              entries.push({
+                source: "PR body",
+                author: prAuthor,
+                text: `${pr.data.title || ""}\n${pr.data.body || ""}`.trim(),
+              });
+            }
 
             for (const c of issueComments) {
-              entries.push({
-                source: `Issue comment #${c.id}`,
-                author: c.user?.login || "unknown",
-                text: c.body || "",
-              });
+              const author = c.user?.login || "unknown";
+              if (!isBot(author)) {
+                entries.push({
+                  source: `Issue comment #${c.id}`,
+                  author,
+                  text: c.body || "",
+                });
+              }
             }
 
             for (const c of reviewComments) {
-              entries.push({
-                source: `Review comment #${c.id}`,
-                author: c.user?.login || "unknown",
-                text: c.body || "",
-              });
+              const author = c.user?.login || "unknown";
+              if (!isBot(author)) {
+                entries.push({
+                  source: `Review comment #${c.id}`,
+                  author,
+                  text: c.body || "",
+                });
+              }
             }
 
             for (const r of reviews) {
-              entries.push({
-                source: `Review summary #${r.id}`,
-                author: r.user?.login || "unknown",
-                text: r.body || "",
-              });
+              const author = r.user?.login || "unknown";
+              if (!isBot(author)) {
+                entries.push({
+                  source: `Review summary #${r.id}`,
+                  author,
+                  text: r.body || "",
+                });
+              }
             }
 
             const patterns = [

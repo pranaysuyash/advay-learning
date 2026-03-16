@@ -218,16 +218,15 @@ export function useGameHandTracking(
   const [runtimeFallbackReason, setRuntimeFallbackReason] = useState<
     string | null
   >(null);
-  const [lifecycleState, setLifecycleState] =
-    useState<HandTrackingLifecycleState>('idle');
+  const [lifecycleState, setLifecycleState] = useState<HandTrackingLifecycleState>(
+    'idle',
+  );
   const [sessionRunningDelegate, setSessionRunningDelegate] = useState<
     'GPU' | 'CPU' | null
   >(null);
 
   // Tracking loss detection - ISSUE-002
-  const pauseOnTrackingLossEnabled = useFeatureFlag(
-    'safety.pauseOnTrackingLoss',
-  );
+  const pauseOnTrackingLossEnabled = useFeatureFlag('safety.pauseOnTrackingLoss');
   const [trackingLossState, setTrackingLossState] = useState<{
     isLost: boolean;
     durationMs: number;
@@ -250,12 +249,7 @@ export function useGameHandTracking(
     () => ({
       ...pinch,
     }),
-    [
-      pinch.landmarks?.[0],
-      pinch.landmarks?.[1],
-      pinch.releaseThreshold,
-      pinch.startThreshold,
-    ],
+    [pinch.landmarks?.[0], pinch.landmarks?.[1], pinch.releaseThreshold, pinch.startThreshold],
   );
   const smoothingConfig = useMemo<OneEuroFilterOptions | false>(() => {
     if (smoothing === false) {
@@ -265,12 +259,7 @@ export function useGameHandTracking(
     return {
       ...smoothing,
     };
-  }, [
-    smoothing === false,
-    smoothing && smoothing.beta,
-    smoothing && smoothing.dCutoff,
-    smoothing && smoothing.minCutoff,
-  ]);
+  }, [smoothing === false, smoothing && smoothing.beta, smoothing && smoothing.dCutoff, smoothing && smoothing.minCutoff]);
   const resolvedHandTrackingOptions = useMemo<UseHandTrackingOptions>(
     () => ({
       numHands: 1,
@@ -293,12 +282,10 @@ export function useGameHandTracking(
   const workerHandTrackingOptions = useMemo<UseHandTrackingOptions>(
     () => ({
       numHands: resolvedHandTrackingOptions.numHands ?? 1,
-      minDetectionConfidence:
-        resolvedHandTrackingOptions.minDetectionConfidence ?? 0.3,
+      minDetectionConfidence: resolvedHandTrackingOptions.minDetectionConfidence ?? 0.3,
       minHandPresenceConfidence:
         resolvedHandTrackingOptions.minHandPresenceConfidence ?? 0.3,
-      minTrackingConfidence:
-        resolvedHandTrackingOptions.minTrackingConfidence ?? 0.3,
+      minTrackingConfidence: resolvedHandTrackingOptions.minTrackingConfidence ?? 0.3,
       delegate: resolvedHandTrackingOptions.delegate ?? 'GPU',
       enableFallback: resolvedHandTrackingOptions.enableFallback ?? true,
     }),
@@ -317,12 +304,7 @@ export function useGameHandTracking(
       targetFps: workerConfig?.targetFps,
       transferMode: workerConfig?.transferMode ?? 'bitmap',
     }),
-    [
-      runtimeFallbackReason,
-      workerConfig?.targetFps,
-      workerConfig?.transferMode,
-      workerRequestedByOptions,
-    ],
+    [runtimeFallbackReason, workerConfig?.targetFps, workerConfig?.transferMode, workerRequestedByOptions],
   );
 
   // Track pinch state for transitions
@@ -372,22 +354,20 @@ export function useGameHandTracking(
         }
 
         if (frame.indexTip) {
-          setCursor((prev) => {
+          setCursor(prev => {
             if (!prev) return frame.indexTip;
             const dx = Math.abs(prev.x - frame.indexTip!.x);
             const dy = Math.abs(prev.y - frame.indexTip!.y);
-            return dx > 0.001 || dy > 0.001 ? frame.indexTip : prev;
+            return (dx > 0.001 || dy > 0.001) ? frame.indexTip : prev;
           });
         } else {
-          setCursor((prev) => (prev === null ? null : null));
+          setCursor(prev => prev === null ? null : null);
         }
 
         const currentPinch = frame.pinch.state;
         setPinchState((prevState) => {
-          if (
-            prevState.isPinching === currentPinch.isPinching &&
-            Math.abs(prevState.distance - currentPinch.distance) < 0.01
-          ) {
+          if (prevState.isPinching === currentPinch.isPinching && 
+              Math.abs(prevState.distance - currentPinch.distance) < 0.01) {
             return prevState;
           }
           return {
@@ -411,29 +391,23 @@ export function useGameHandTracking(
         previousPinchRef.current = defaultState;
         pinchStateRef.current = defaultState;
       }
-
+      
       // Tracking loss detection - ISSUE-002
       if (pauseOnTrackingLossEnabled && isTracking) {
         if (!trackingLossStartTimeRef.current) {
           trackingLossStartTimeRef.current = Date.now();
           // Start timer to check for persistent loss (>1s)
           trackingLossTimerRef.current = setTimeout(() => {
-            setTrackingLossState((prev) => ({
+            setTrackingLossState(prev => ({
               ...prev,
               isLost: true,
             }));
           }, 1000); // 1 second threshold per audit requirement
         }
       }
-
+      
       onNoVideoFrame?.();
-    }, [
-      isTracking,
-      onNoVideoFrame,
-      pauseOnTrackingLossEnabled,
-      pinchConfig,
-      resetPinchOnNoHand,
-    ]),
+    }, [isTracking, onNoVideoFrame, pauseOnTrackingLossEnabled, pinchConfig, resetPinchOnNoHand]),
     onError: useCallback(
       (error: unknown) => {
         onError?.(error as Error);
@@ -469,12 +443,8 @@ export function useGameHandTracking(
     isRunning: runtimeEnabled,
     targetFps,
     onFrame: useCallback((_deltaTime, currentFps) => {
-      setFps((prev) =>
-        Math.abs(prev - currentFps) > 1 ? Math.round(currentFps) : prev,
-      );
-      setAverageFps((prev) =>
-        Math.abs(prev - currentFps) > 1 ? Math.round(currentFps) : prev,
-      );
+      setFps(prev => Math.abs(prev - currentFps) > 1 ? Math.round(currentFps) : prev);
+      setAverageFps(prev => Math.abs(prev - currentFps) > 1 ? Math.round(currentFps) : prev);
     }, []),
   });
 
@@ -491,11 +461,11 @@ export function useGameHandTracking(
       (frame: TrackedHandFrame, meta: HandTrackingRuntimeMeta) => {
         // Update cursor position
         if (frame.indexTip) {
-          setCursor((prev) => {
+          setCursor(prev => {
             if (!prev) return frame.indexTip;
             const dx = Math.abs(prev.x - frame.indexTip!.x);
             const dy = Math.abs(prev.y - frame.indexTip!.y);
-            return dx > 0.001 || dy > 0.001 ? frame.indexTip : prev;
+            return (dx > 0.001 || dy > 0.001) ? frame.indexTip : prev;
           });
         } else {
           setCursor(null);
@@ -504,10 +474,8 @@ export function useGameHandTracking(
         // Update pinch state with transition detection
         const currentPinch = frame.pinch.state;
         setPinchState((prevState) => {
-          if (
-            prevState.isPinching === currentPinch.isPinching &&
-            Math.abs(prevState.distance - currentPinch.distance) < 0.01
-          ) {
+          if (prevState.isPinching === currentPinch.isPinching && 
+              Math.abs(prevState.distance - currentPinch.distance) < 0.01) {
             return prevState;
           }
           return {
@@ -627,7 +595,7 @@ export function useGameHandTracking(
       durationMs: 0,
       lastFrameTime: Date.now(),
     });
-
+    
     // Reinitialize if needed
     if (activeRuntimeMode === 'main-thread') {
       await resetHandTracking();
@@ -639,17 +607,17 @@ export function useGameHandTracking(
   // Update tracking loss duration while lost - ISSUE-002
   useEffect(() => {
     if (!trackingLossState.isLost) return;
-
+    
     const interval = setInterval(() => {
       if (trackingLossStartTimeRef.current) {
         const duration = Date.now() - trackingLossStartTimeRef.current;
-        setTrackingLossState((prev) => ({
+        setTrackingLossState(prev => ({
           ...prev,
           durationMs: duration,
         }));
       }
     }, 100); // Update every 100ms for smooth UI
-
+    
     return () => clearInterval(interval);
   }, [trackingLossState.isLost]);
 
@@ -751,7 +719,7 @@ export function useGameHandTracking(
     lifecycleState,
     activeDelegate:
       activeRuntimeMode === 'main-thread'
-        ? (handTrackingDelegate ?? sessionRunningDelegate)
+        ? handTrackingDelegate ?? sessionRunningDelegate
         : sessionRunningDelegate,
   };
 }

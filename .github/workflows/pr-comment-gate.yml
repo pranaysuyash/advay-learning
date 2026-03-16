@@ -71,7 +71,9 @@ jobs:
 
               for (const thread of threads) {
                 const author = thread.comments?.nodes?.[0]?.author?.login;
-                if (!thread.isResolved && author !== 'github-advanced-security') {
+                const botPatterns = ['[bot]', 'github-advanced-security', 'copilot-pull-request-reviewer', 'chatgpt-codex-connector'];
+                const isBot = botPatterns.some(p => author?.includes(p));
+                if (!thread.isResolved && !isBot) {
                   unresolved.push(thread);
                 }
               }
