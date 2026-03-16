@@ -217,3 +217,30 @@ Execution log:
 - 2026-03-16T05:26Z Fixed 3 TypeScript errors in MidlineViolator.tsx | Evidence: npx tsc --noEmit → exit 0
 
 Prompt Trace: branch recovery agent systematic pass
+
+---
+
+### TCK-20260316-004 :: WordSearch CV Integration + Game Page Formatting
+
+Type: FEATURE / CLEANUP
+Owner: Pranay
+Created: 2026-03-16
+Status: **DONE**
+Priority: P2
+
+Ticket Stamp: STAMP-20260316T062609Z-copilot
+
+Scope contract:
+- In-scope: Add useGameHandTracking + GameCursor to WordSearch; Prettier reformat PopTheNumber, NumberBubblePop, NumberTracing
+- Out-of-scope: Logic changes to game rules
+- Behavior change allowed: YES (CV integration is additive)
+
+Acceptance Criteria:
+- [x] WordSearch has hand tracking cursor
+- [x] TypeScript clean
+- [x] No game logic regressions
+
+Evidence:
+- Command: npx tsc --noEmit → exit 0
+
+Prompt Trace: branch-recovery-pre-commit-agent
