@@ -22,6 +22,7 @@ import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 function NumberBubblePopContent() {
   const navigate = useNavigate();
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const bubbleArenaRef = useRef<HTMLDivElement>(null);
   const handleBubbleClickRef = useRef<(bubble: Bubble) => void>(() => {});
   const [currentLevel, setCurrentLevel] = useState(1);
   const [targetNumber, setTargetNumber] = useState(1);
@@ -157,10 +158,13 @@ function NumberBubblePopContent() {
 
       if (frame.pinch.transition !== 'start') return;
 
-      // bubble.x/y are container-relative pixels; bubble is w-14 h-14 = 56px
-      const gameX = viewportX - gameAreaRect.left;
-      const gameY = viewportY - gameAreaRect.top;
-      const hitRadius = 35;
+      // bubble.x/y are relative to the inner 320×320 bubble arena, not the
+      // outer wrapper. Use bubbleArenaRef for accurate origin.
+      const arena = bubbleArenaRef.current;
+      const arenaRect = arena?.getBoundingClientRect() ?? gameAreaRect;
+      const gameX = viewportX - arenaRect.left;
+      const gameY = viewportY - arenaRect.top;
+      const hitRadius = 35; // bubble is w-14 h-14 = 56px; center at +28px
       for (const bubble of bubbles) {
         const bubbleCenterX = bubble.x + 28;
         const bubbleCenterY = bubble.y + 28;
@@ -235,7 +239,7 @@ function NumberBubblePopContent() {
         )}
 
         {gameState === 'playing' && (
-          <div className='relative w-80 h-80 bg-sky-50 rounded-full overflow-hidden'>
+          <div ref={bubbleArenaRef} className='relative w-80 h-80 bg-sky-50 rounded-full overflow-hidden'>
             {/* Streak HUD */}
             <div className='absolute top-2 left-2 right-2 flex items-center justify-center gap-2 bg-white/90 rounded-xl border-2 border-orange-200 px-2 py-1 z-10'>
               <span className='font-black text-sm'>🔥</span>

@@ -325,3 +325,20 @@ Evidence:
 - Command: python3 tools/find_unresolved.py --pr 53 → 0 unresolved after resolution
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+### TCK-20260316-009 Addendum :: Round 4 Fixes (PR #53 bot review threads)
+
+Ticket Stamp: STAMP-20260316T083000Z-copilot-rnd4
+
+Additional fixes from round 4 cubic-dev-ai threads:
+1. NumberBubblePop.tsx: add `bubbleArenaRef` for inner 320×320 arena; update
+   hit-test to use arena bounds (bubble.x/y are relative to inner arena, not wrapper)
+2. prompts/game-design-prompt-v1.0.md: reference `sttService` from STTService.ts
+   for spoken-word recognition games
+3. .github/workflows/pr-failure-narrative-gate.yml: add KNOWN_BOT_LOGINS set
+   (cubic-dev-ai, chatgpt-codex-connector, etc.) since these don't use [bot] suffix
+
+Evidence:
+- Command: cd src/frontend && npx tsc --noEmit → 0 errors
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md

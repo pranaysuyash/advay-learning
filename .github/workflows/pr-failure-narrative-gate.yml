@@ -67,7 +67,15 @@ jobs:
 
             // Bots use standard auto-generated phrasing that may accidentally
             // match narrative patterns. Enforcement is for human agents only.
-            const isBot = (login) => !login || login.endsWith("[bot]");
+            // Some automated reviewers use logins without the [bot] suffix.
+            const KNOWN_BOT_LOGINS = new Set([
+              "coderabbitai", "cubic-dev-ai", "chatgpt-codex-connector",
+              "dependabot", "renovate", "github-actions",
+            ]);
+            const isBot = (login) =>
+              !login ||
+              login.endsWith("[bot]") ||
+              KNOWN_BOT_LOGINS.has(login);
 
             const entries = [];
             const prAuthor = pr.data.user?.login || "unknown";
