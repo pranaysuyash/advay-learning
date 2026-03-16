@@ -55,7 +55,7 @@ Checks:
   - Optional max cyclomatic complexity via lizard (if installed)
 
 Environment variables:
-  SKIP_MAINTAINABILITY_CHECK=1  Skip this check
+  No bypass flags are supported.
   MAX_FILE_LOC=N                Override LOC threshold (default: 1000)
   MAX_FILE_BYTES=N              Override byte threshold (default: 60000)
   MAX_FILE_CCN=N                Override max CCN threshold (default: 60)
@@ -86,9 +86,9 @@ if [[ -z "$MODE" ]]; then
   MODE="staged"
 fi
 
-if [[ "${SKIP_MAINTAINABILITY_CHECK:-}" == "1" ]]; then
-  log_info "Skipping maintainability guard (SKIP_MAINTAINABILITY_CHECK=1)"
-  exit 0
+if [[ -n "${SKIP_MAINTAINABILITY_CHECK:-}" ]]; then
+  log_error "SKIP_MAINTAINABILITY_CHECK is disabled by repo policy. Resolve maintainability issues instead of bypassing."
+  exit 2
 fi
 
 get_changed_files() {
@@ -248,7 +248,7 @@ main() {
   fi
 
   log_error "Static maintainability guard failed."
-  log_error "Temporary override (must be intentional): SKIP_MAINTAINABILITY_CHECK=1 git commit ..."
+  log_error "Bypass is disabled. Fix the file or adjust static thresholds with documented justification."
   log_error "Threshold overrides: MAX_FILE_LOC, MAX_FILE_BYTES, MAX_FILE_CCN"
   exit 1
 }
