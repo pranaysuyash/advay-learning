@@ -259,7 +259,7 @@ function PopTheNumberContent() {
       >
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && (
-          <CursorEmbodiment position={cursor} coordinateSpace='normalized' containerRef={gameAreaRef} isPinching={false} />
+          <CursorEmbodiment position={{ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight }} isPinching={false} />
         )}
         {gameState === 'start' && (
           <div className='absolute inset-0 flex flex-col items-center justify-center z-10'>

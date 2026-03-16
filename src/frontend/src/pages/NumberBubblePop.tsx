@@ -157,17 +157,16 @@ function NumberBubblePopContent() {
 
       if (frame.pinch.transition !== 'start') return;
 
-      const relX =
-        ((viewportX - gameAreaRect.left) / gameAreaRect.width) * 100;
-      const relY =
-        ((viewportY - gameAreaRect.top) / gameAreaRect.height) * 100;
-
-      const bubbleRadius = 7;
+      // bubble.x/y are container-relative pixels; bubble is w-14 h-14 = 56px
+      const gameX = viewportX - gameAreaRect.left;
+      const gameY = viewportY - gameAreaRect.top;
+      const hitRadius = 35;
       for (const bubble of bubbles) {
-        const dx = Math.abs(relX - bubble.x);
-        const dy = Math.abs(relY - bubble.y);
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < bubbleRadius + 3) {
+        const bubbleCenterX = bubble.x + 28;
+        const bubbleCenterY = bubble.y + 28;
+        const dx = Math.abs(gameX - bubbleCenterX);
+        const dy = Math.abs(gameY - bubbleCenterY);
+        if (Math.sqrt(dx * dx + dy * dy) < hitRadius) {
           handleBubbleClickRef.current(bubble);
           break;
         }
@@ -197,7 +196,7 @@ function NumberBubblePopContent() {
       >
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && (
-          <CursorEmbodiment position={cursor} coordinateSpace='normalized' containerRef={gameAreaRef} isPinching={false} />
+          <CursorEmbodiment position={{ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight }} isPinching={false} />
         )}
         <div className='flex gap-2'>
           {LEVELS.map((l) => (
