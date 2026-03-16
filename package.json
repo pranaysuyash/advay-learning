@@ -1,7 +1,7 @@
 {
   "scripts": {
     "check:db-migration": "bash ./scripts/ci_db_migration_check.sh",
-    "check:mandatory": "npm run -s check:db-migration && npm -C src/frontend run -s type-check && npm -C src/frontend run -s test && (cd src/backend && uv run pytest -q)"
+    "check:mandatory": "pnpm run -s check:db-migration && pnpm -C src/frontend run -s type-check && pnpm -C src/frontend run -s test && (cd src/backend && uv run pytest -q)"
   },
   "dependencies": {
     "@mediapipe/camera_utils": "^0.3.1675466862",

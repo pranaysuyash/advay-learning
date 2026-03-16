@@ -2,352 +2,117 @@
 
 ## Overview
 
-We use a **simplified Git Flow** optimized for a small team (you and AI assistant) with emphasis on code quality over automation.
+This repo uses a **main-first workflow** optimised for a single owner with multiple concurrent AI agents.
 
 ## Branch Structure
 
 ```
-main (production)
-  ↑
-develop (integration)
-  ↑
-feature/*  fix/*  docs/*
+origin/main  ←  all merged work
+    ↑
+codex/wip-<scope>  ←  created only when PR is needed
 ```
 
-### Branch Purposes
+There is no `develop` branch. There are no `feature/*`, `fix/*`, `hotfix/*`, or `release/*` branches.
 
-| Branch | Purpose | Protection |
-|--------|---------|------------|
-| `main` | Production-ready, stable releases | Manual verification required |
-| `develop` | Integration branch, feature collection | PR review required |
-| `feature/*` | New features | None (work branches) |
-| `fix/*` | Bug fixes | None (work branches) |
-| `docs/*` | Documentation | None (work branches) |
-| `hotfix/*` | Critical production fixes | Fast-track review |
+## Day-to-Day Workflow
 
-## Workflow Steps
+### 1. Work directly on local `main`
 
-### 1. Starting a New Feature
+All iterative work — commits, experiments, incremental changes — happens on local `main`. This includes work from multiple concurrent agents. There is no friction creating a branch just to commit.
 
 ```bash
-# Update local develop
-git checkout develop
-git pull origin develop
-
-# Create feature branch with descriptive name
-git checkout -b feature/hand-tracking-basics
-
-# Alternative naming examples:
-# git checkout -b feature/alphabet-hindi-module
-# git checkout -b feature/drawing-canvas-ui
-# git checkout -b fix/camera-initialization-error
+# Work, stage, commit freely on local main
+git add -A
+git commit -m "feat(games): improve pinch detection threshold"
 ```
 
-### 2. Making Commits
+### 2. When the user asks to open a PR
+
+Run the **only approved branch creation command**:
 
 ```bash
-# Stage changes
-git add src/hand_tracking/detector.py
-
-# Commit with conventional message
-git commit -m "feat(hand_tracking): add hand landmark detection
-
-- Implement MediaPipe hand tracking integration
-- Add coordinate normalization
-- Include confidence threshold filtering
-
-Relates to: #12"
+./scripts/start_wip_branch.sh <ticket-or-scope>
+# Examples:
+./scripts/start_wip_branch.sh TCK-20260316-010
+./scripts/start_wip_branch.sh cv-coordinate-fixes
 ```
 
-#### Commit Message Format
+This script automatically:
+1. Creates `codex/wip-<scope>` at the current `HEAD` (carries all local-main commits)
+2. Resets local `main` back to `origin/main` (so `main` is clean for the next task)
+3. Pushes `codex/wip-<scope>` to `origin`
+4. Opens a PR against `main`
 
-```
-<type>(<scope>): <subject>
+After this, local `main` is ready for the next batch of work while the PR is under review.
 
-<body> (optional)
+### 3. While PR is under review
 
-<footer> (optional)
-```
+Continue committing new work to local `main` as normal.
 
-**Types:**
-
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation
-- `style`: Formatting (no code change)
-- `refactor`: Code restructuring
-- `test`: Tests
-- `chore`: Maintenance
-
-**Scopes:**
-
-- `hand_tracking`
-- `face_tracking`
-- `ui`
-- `games`
-- `alphabet`
-- `words`
-- `storage`
-- `auth`
-- `config`
-- `deps`
-
-### 3. Keeping Branch Updated
+### 4. After PR is merged
 
 ```bash
-# While on feature branch, update from develop
-git fetch origin
-git rebase origin/develop
-
-# Or merge if preferred
-git merge origin/develop
-```
-
-### 4. Pre-Push Checks
-
-```bash
-# Run quality checks
-./scripts/check.sh
-
-# Check test coverage
-pytest --cov=src --cov-report=term-missing
-
-# Check LOC changed
-git diff --stat develop...HEAD
-```
-
-### 5. Creating Pull Request
-
-```bash
-# Push branch
-git push -u origin feature/hand-tracking-basics
-
-# Create PR (using GitHub CLI or web)
-gh pr create --title "feat(hand_tracking): add hand landmark detection" \
-             --body-file .github/PULL_REQUEST_TEMPLATE.md
-```
-
-### 6. PR Review Checklist
-
-**Author Checklist:**
-
-- [ ] Branch is up-to-date with develop
-- [ ] All tests pass
-- [ ] Code is formatted (black)
-- [ ] Linting passes (ruff)
-- [ ] Type checking passes (mypy)
-- [ ] PR size is reasonable (< 300 LOC preferred)
-- [ ] Documentation updated
-- [ ] CHANGELOG.md updated (if user-facing)
-
-**Reviewer Checklist:**
-
-- [ ] Code logic is correct
-- [ ] Edge cases handled
-- [ ] Error handling appropriate
-- [ ] Tests cover new functionality
-- [ ] No security concerns
-- [ ] Performance acceptable
-
-### 7. Merging
-
-```bash
-# After approval, merge to develop
-git checkout develop
-git merge --no-ff feature/hand-tracking-basics
-
-# Delete feature branch
-git branch -d feature/hand-tracking-basics
-git push origin --delete feature/hand-tracking-basics
-```
-
-## PR Size Management
-
-### Why Size Matters
-
-- Smaller PRs = faster reviews = fewer bugs
-- Easier to understand context
-- Quicker to test and merge
-
-### Size Guidelines
-
-| Metric | Target | Maximum |
-|--------|--------|---------|
-| Lines Changed | < 200 | 400 |
-| Files Changed | < 8 | 15 |
-| Commits | < 5 | 10 |
-
-### Checking PR Size
-
-```bash
-# Script to check LOC against develop
-./scripts/check_pr_size.sh
-
-# Manual check
-echo "=== Files Changed ==="
-git diff --name-only develop...HEAD
-
-echo "=== LOC Changed ==="
-git diff --stat develop...HEAD
-
-echo "=== Total LOC ==="
-git diff --numstat develop...HEAD | awk '{add+=$1; del+=$2} END {print "Added:", add, "Deleted:", del, "Total:", add+del}'
-```
-
-### Splitting Large PRs
-
-If PR is too large:
-
-1. **Identify logical chunks**: Can features be separated?
-2. **Extract foundation**: Base changes in separate PR
-3. **Stack PRs**: Build dependent PRs on top of each other
-4. **Document dependencies**: Note which PR needs to merge first
-
-Example:
-
-```
-PR #1: feat(hand_tracking): add detector base class
-PR #2: feat(hand_tracking): implement gesture recognition (depends on #1)
-PR #3: feat(games): add drawing game using hand tracking (depends on #2)
-```
-
-## Release Workflow
-
-### Preparing Release
-
-```bash
-# 1. Ensure develop is stable
-# Run full test suite
-pytest
-
-# 2. Update version
-# Edit pyproject.toml version = "0.2.0"
-
-# 3. Update CHANGELOG.md
-# Add version section with changes
-
-# 4. Create release branch
-git checkout -b release/v0.2.0
-
-# 5. Final testing on release branch
-# Manual smoke tests
-
-# 6. Merge to main
 git checkout main
-git merge --no-ff release/v0.2.0
-
-# 7. Tag release
-git tag -a v0.2.0 -m "Release version 0.2.0
-
-Features:
-- Hand tracking with pinch gesture
-- Alphabet tracing module (English)
-- Basic drawing canvas
-
-Fixes:
-- Camera initialization on macOS"
-
-# 8. Push
-git push origin main
-git push origin v0.2.0
-
-# 9. Merge back to develop
-git checkout develop
-git merge main
+git pull origin main
 ```
 
-## Hotfix Workflow
+Local `main` is now synced. Any new local-main commits are still there, ready for the next PR.
 
-For critical production fixes:
+## Enforcement
+
+**Agents MUST NOT create branches with any other command.** The following are prohibited:
 
 ```bash
-# 1. Create from main
-git checkout main
-git checkout -b hotfix/camera-crash-fix
-
-# 2. Fix and test
-
-# 3. PR to main (fast-track)
-# 4. After merge, also merge to develop
+# ❌ ALL of these are blocked
+git switch -c <branch>
+git checkout -b <branch>
+git branch <branch>
 ```
 
-## Git Configuration
+The `pre-commit` hook blocks commits on any branch not created via `start_wip_branch.sh`.  
+The `pre-push` hook blocks:
+- Any push directly to `origin/main`
+- Any push of a new branch not created via `start_wip_branch.sh`
 
-### Recommended Settings
+## Multiple Concurrent PRs
 
-```bash
-# Set up commit template
-git config --local commit.template .gitmessage
+Multiple WIP branches are allowed when the user explicitly requests parallel PRs (e.g., multiple agents each handling a distinct scope). Each agent runs `start_wip_branch.sh` with its own scope name.
 
-# Enable useful features
-git config --local pull.rebase true
-git config --local rebase.autoStash true
+## Commit Message Format
 
-# Better diffs
-git config --local diff.algorithm histogram
+```
+<type>(<scope>): <description>
+
+<body — optional>
+
+Refs: TCK-YYYYMMDD-NNN
 ```
 
-### Git Hooks
+**Types:** `feat` · `fix` · `docs` · `refactor` · `test` · `chore`
 
-Pre-commit hooks run automatically:
+**No `Co-authored-by:` trailers.** All commits are authored by the repo owner (pranaysuyash) only.
 
-```bash
-# Install hooks
-pre-commit install
+## Merge Strategy
 
-# Run manually on all files
-pre-commit run --all-files
-```
+- Squash merge into `main`
+- Delete WIP branch after merge
+- `git pull origin main` on local `main` to sync
 
-## Common Commands Reference
+## Common Commands
 
 ```bash
-# Start feature
-git checkout develop && git pull && git checkout -b feature/name
-
-# Update feature branch
-git fetch && git rebase origin/develop
-
 # Check status
 git status
-git log --oneline --graph --all -10
+git log --oneline origin/main..HEAD   # commits not yet in a PR
 
-# Undo last commit (keep changes)
-git reset --soft HEAD~1
+# Start PR workflow (only when asked)
+./scripts/start_wip_branch.sh <scope>
 
-# Undo and discard changes
-git reset --hard HEAD~1
+# Sync local main after a PR merges
+git checkout main && git pull origin main
 
-# Stash changes
-git stash push -m "work in progress"
-git stash pop
-
-# View diff
-git diff develop...HEAD
-
-# Clean up merged branches
-git branch --merged develop | grep -v develop | xargs git branch -d
+# Recover if you accidentally need to check what's in a PR branch
+git fetch origin codex/wip-<scope>
+git diff main origin/codex/wip-<scope>
 ```
 
-## Troubleshooting
-
-### Merge Conflicts
-
-```bash
-# During rebase
-git rebase --continue  # after fixing conflicts
-git rebase --abort     # to cancel
-
-# During merge
-git merge --abort      # to cancel
-```
-
-### Recovering Lost Work
-
-```bash
-# View reflog
-git reflog
-
-# Recover commit
-git checkout -b recovery-branch HEAD@{2}
-```

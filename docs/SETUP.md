@@ -255,23 +255,26 @@ To generate a unique ticket stamp for worklog entries:
 # -> STAMP-20260224T220000Z-codex-ab12
 ```
 
-### Main Branch Commit Guard (Required)
+### Main Branch Commit Workflow
 
-`pre-commit` blocks direct commits on `main` to enforce PR-based review:
+All local work happens directly on `main`. Commit freely to local `main` — no branch needed for day-to-day iteration.
 
-- Keep iterating locally as needed.
-- Before commit, switch/create a short-lived branch:
-  - `./scripts/start_wip_branch.sh <ticket-or-scope>`
-  - or `git switch -c codex/wip-<ticket-or-scope>`
-- Commit on that branch, push it, and create a PR to `main` so remote review checks trigger.
-  - Example push: `git push -u origin codex/wip-<ticket-or-scope>`
-  - Example PR: `gh pr create --base main --head codex/wip-<ticket-or-scope> --fill`
-
-Emergency-only bypass (must be explicitly approved for the current task):
+**Agents MUST NOT create branches manually** (`git switch -c`, `git checkout -b`, `git branch <new>`). Branch creation is exclusively done by:
 
 ```bash
-ALLOW_MAIN_COMMIT=1 git commit ...
+./scripts/start_wip_branch.sh <ticket-or-scope>
 ```
+
+This script (run only when the user explicitly asks to "start the git workflow", "open a PR", or "create a branch"):
+1. Creates `codex/wip-<scope>` at current `HEAD` (carrying all local-main commits)
+2. Resets local `main` back to `origin/main` (keeps main clean for the next task)
+3. Pushes the WIP branch and opens a PR
+
+Multiple WIP branches are allowed when the user explicitly requests concurrent PRs.
+
+The `pre-commit` and `pre-push` hooks enforce this: commits and pushes on any branch not created via this script are blocked.
+
+**Never push directly to `origin/main`.** All code reaches `main` via merged PRs only.
 
 ### Secret Scanning Gate (Required)
 

@@ -34,8 +34,8 @@ You are NOT:
 4) **Preservation-first**: do not delete other agents’ work/artifacts unless the user explicitly asks or explicitly approves it (recorded in the active ticket). Prefer archiving + pointer notes.
 5) **Staging policy**: default to `git add -A` (unless the user explicitly requests partial staging).
 
-6) **Commit via short-lived PR branch**: local edits can be prepared on `main`, but before commit create/switch to `codex/wip-<ticket-or-scope>`, commit there, open PR to `main`, and merge only after review.
-7) **Direct commits to `main` are blocked by hook policy** unless user explicitly authorizes `ALLOW_MAIN_COMMIT=1` for the current task.
+6) **Work on `main` locally.** Commit directly to local `main`. Do NOT push to `origin/main`.
+7) **To open a PR (only when user explicitly asks):** run `./scripts/start_wip_branch.sh <scope>`. This is the ONLY approved way to create a branch. Never run `git switch -c`, `git checkout -b`, or `git branch <new>` directly.
 8) **NEVER delete/revert files with unrecognized changes** - these may be from parallel agents. Preserve all changes you did not create.
 
 ---

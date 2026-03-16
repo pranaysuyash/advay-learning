@@ -13,7 +13,6 @@ echo ""
 cd "$(git rev-parse --show-toplevel)"
 
 disallowed_overrides=(
-    "ALLOW_MAIN_COMMIT"
     "ALLOW_REFACTORED_SIDE_CARS"
     "ALLOW_BYPASS_CHECKS"
     "SKIP_SECRET_SCAN"
@@ -42,6 +41,26 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
     if [[ "$local_sha" =~ ^0+$ ]]; then
         continue
+    fi
+
+    # Block direct pushes to origin/main. All code reaches main via PR only.
+    if [[ "$remote_ref" == "refs/heads/main" ]]; then
+        echo "❌ Direct push to origin/main is blocked." >&2
+        echo "   Use ./scripts/start_wip_branch.sh <scope> to create a PR branch." >&2
+        exit 1
+    fi
+
+    # Block pushing a new branch that was not created via start_wip_branch.sh
+    git_dir="$(git rev-parse --git-dir)"
+    marker_file="$git_dir/WIP_BRANCH_AUTHORIZED"
+    branch_name="${remote_ref#refs/heads/}"
+    if [[ "$remote_sha" =~ ^0+$ && "$branch_name" != "main" ]]; then
+        if [[ ! -f "$marker_file" ]] || ! grep -qxF "$branch_name" "$marker_file"; then
+            echo "❌ Push of new branch '$branch_name' is blocked." >&2
+            echo "   Agents must not create branches manually." >&2
+            echo "   Use: ./scripts/start_wip_branch.sh <scope>" >&2
+            exit 1
+        fi
     fi
 
     if [[ -n "${remote_sha:-}" && ! "$remote_sha" =~ ^0+$ ]]; then

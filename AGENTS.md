@@ -252,20 +252,26 @@ The app's unique value proposition is **camera-based, hands-free learning** for 
 
 **Default branch workflow (required):**
 
-- **ALL local work happens directly on `main`.** Commit to `main` locally. Do not create a branch unless the user explicitly asks to "start the git workflow", "open a PR", or "create a branch".
-- When the user explicitly triggers the git workflow:
-  - Create `codex/wip-<ticket-or-scope>` from current `main` HEAD
-  - Push the WIP branch and open a PR from `codex/wip-*` → `main`
-  - Merge to `main` only after all review findings and CI checks are resolved
-  - Delete the WIP branch after merge
-- If no git workflow is triggered: commit directly to local `main`, push when instructed.
+- **ALL local work happens directly on `main`.** Multiple concurrent agents each commit to their local `main`. No branch is ever needed for day-to-day iteration.
+- **Agents MUST NOT create branches manually** (`git switch -c`, `git checkout -b`, `git branch <new>`). This is enforced by `pre-commit` and `pre-push` hooks.
+- **The only approved way to create a branch** is:
+  ```bash
+  ./scripts/start_wip_branch.sh <ticket-or-scope>
+  ```
+  This is run **only when the user explicitly says** "start the git workflow", "open a PR", or "create a branch". It:
+  1. Creates `codex/wip-<scope>` at the current `HEAD` (carries all local-main commits)
+  2. Resets local `main` back to `origin/main` (keeps `main` clean for the next task)
+  3. Pushes `codex/wip-<scope>` and opens a PR
+- **Never push directly to `origin/main`.** All code reaches `main` via merged PRs only.
+- Multiple WIP branches are allowed when the user explicitly requests parallel PRs.
+- Delete WIP branch after merge. Run `git pull origin main` to sync local `main`.
 
 **Branch discipline:**
 
-- Do not proactively create WIP branches. Wait for explicit instruction.
-- Do not create long-lived branch trees (`feature/*`, `fix/*`, `hotfix/*`) unless user explicitly asks.
-- **One branch per task.** Do NOT create multiple WIP branches while previous ones are still unmerged. Delete stale/empty branches immediately.
-- If a user-created feature branch already exists, continue there and use PR review before merge.
+- Do not proactively create branches. Wait for explicit user instruction.
+- Do not create `feature/*`, `fix/*`, `hotfix/*`, or `release/*` branches unless user explicitly asks.
+- Multiple concurrent WIP branches are OK when the user explicitly requests them.
+- Delete stale/merged branches immediately after merge.
 
 **🚫 NEVER delete or revert files with unrecognized changes.**
 

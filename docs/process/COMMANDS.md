@@ -27,18 +27,18 @@ git config --get core.hooksPath
 ./scripts/agent_gate.sh --staged
 ```
 
-## Start WIP PR Branch
+## Start PR Branch (only when user explicitly asks)
 
 ```bash
-# From main, create/switch to short-lived branch for PR review workflow
+# All local work happens on main. When the user says "start git workflow" /
+# "open a PR" / "create a branch", run this — it moves local-main commits to
+# a WIP branch, resets main to origin/main, pushes branch, and opens PR.
 ./scripts/start_wip_branch.sh <ticket-or-scope>
 # e.g.
 ./scripts/start_wip_branch.sh TCK-20260227-013
-
-# After commit, push and open PR so review checks trigger
-git push -u origin codex/wip-<ticket-or-scope>
-gh pr create --base main --head codex/wip-<ticket-or-scope> --fill
 ```
+
+**Agents MUST NOT run** `git switch -c`, `git checkout -b`, or `git branch <new>` directly.
 
 ## Canonical File Finding
 

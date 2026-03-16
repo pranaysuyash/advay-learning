@@ -367,3 +367,38 @@ Evidence:
 - Command: git diff --stat HEAD AGENTS.md → 2 hunks changed
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+### TCK-20260316-011 :: Enforce main-first workflow, restrict branch creation to start_wip_branch.sh
+
+Type: POLICY + TOOLING
+Owner: pranaysuyash
+Created: 2026-03-16
+Status: **DONE**
+Ticket Stamp: STAMP-20260316T093000Z-copilot-coord5
+
+Scope contract:
+- In-scope: All docs, hooks, scripts, and prompts referencing branch workflow
+- Out-of-scope: Application code
+- Behavior change allowed: YES (policy + hook enforcement)
+
+Changes:
+1. .githooks/pre-commit: Added WIP_BRANCH_AUTHORIZED marker check — commits on
+   any branch not created via start_wip_branch.sh are blocked
+2. .githooks/pre-push: Removed ALLOW_MAIN_COMMIT from disallowed list; added
+   block for pushing to origin/main directly; added block for unauthorized new branches
+3. scripts/start_wip_branch.sh: Full workflow — branch at HEAD, reset main to
+   origin/main, write marker, push, open PR
+4. docs/project-management/GIT_WORKFLOW.md: Fully rewritten for main-first model
+5. docs/project-management/CONTRIBUTING.md: Branch strategy section updated
+6. docs/SETUP.md: Replaced ALLOW_MAIN_COMMIT section with new workflow
+7. docs/process/COMMANDS.md: Updated Start WIP Branch and Branch Discipline sections
+8. QWEN.md: Updated Branch Discipline section
+9. prompts/README.md: Updated Critical Rules section
+10. prompts/workflow/agent-entrypoint-v1.0.md: Updated rules 6 and 7
+11. AGENTS.md: Section 6 rewritten with explicit enforcement details
+
+Evidence:
+- Command: git status --short → all changed files staged
+- Observed: pre-commit and pre-push hooks updated with enforcement logic
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
