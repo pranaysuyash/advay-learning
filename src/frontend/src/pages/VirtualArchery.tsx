@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameContainer } from '../components/GameContainer';
 import { GameHUD } from '../components/game/GameHUD';
 import { GameBackground } from '../components/game/GameBackground';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -298,6 +299,8 @@ function drawCursor(
 
 export function VirtualArcheryContent() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const webcamRef = useRef<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameState, setGameState] = useState<VirtualArcheryState>(createInitialState());
   const stateRef = useRef<VirtualArcheryState>(gameState);
@@ -313,6 +316,7 @@ export function VirtualArcheryContent() {
   } = useGameHandTracking({
     gameName: 'VirtualArchery',
     targetFps: 60,
+    webcamRef,
   });
 
   useEffect(() => {
@@ -416,7 +420,9 @@ export function VirtualArcheryContent() {
       onHome={() => window.location.href = '/dashboard'}
       isHandDetected={isReady}
       isPlaying={isPlaying}
+      webcamRef={webcamRef}
     >
+      <div ref={gameAreaRef} className="relative w-full h-full">
       <GameBackground type="hills" variant="color" className="absolute inset-0" />
       
       {!isPlaying && (
@@ -467,6 +473,18 @@ export function VirtualArcheryContent() {
         />
       </div>
 
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={isPinching}
+          isHandDetected={isReady}
+          size={64}
+          color="#22c55e"
+        />
+      )}
+      </div>
     </GameContainer>
   );
 }

@@ -1,201 +1,315 @@
-# Project Overview: Advay's AI Learning App
+# Project Overview - Learning for Kids (Advay)
 
-## Quick Links
+**Project Name:** Learning for Kids / Advay  
+**Type:** AI-powered educational gaming platform  
+**Target Users:** Children ages 3-8  
+**Primary Interaction:** Hand tracking / computer vision  
+**Status:** Active development (March 2026)
 
-| Resource | Path |
-|----------|------|
-| 🗺️ Roadmap | [docs/features/ROADMAP.md](features/ROADMAP.md) |
-| 🏗️ Architecture | [docs/architecture/TECH_STACK.md](architecture/TECH_STACK.md) |
-| 🔒 Security | [docs/security/SECURITY.md](security/SECURITY.md) |
-| 🎓 Learning Plan | [docs/LEARNING_PLAN.md](LEARNING_PLAN.md) |
-| 🎮 Game Mechanics | [docs/GAME_MECHANICS.md](GAME_MECHANICS.md) |
-| 👶 Age Bands | [docs/AGE_BANDS.md](AGE_BANDS.md) |
-| 🤝 Contributing | [docs/project-management/CONTRIBUTING.md](project-management/CONTRIBUTING.md) |
-| 📝 Feature Template | [docs/features/FEATURE_TEMPLATE.md](features/FEATURE_TEMPLATE.md) |
+---
 
-## Project Structure
+## What is This Project?
+
+Learning for Kids is an **AI-powered educational gaming platform** where children learn through **natural hand gestures and body movements** rather than traditional touch or keyboard controls.
+
+### Core Value Proposition
+
+**"Learn with your hands, not just your eyes"**
+
+Instead of tapping on screens, kids:
+- 👆 Point at answers with their finger
+- 🤜 Trace letters in the air
+- 💃 Dance to match poses
+- ✌️ Count with their fingers
+- 🤚 Grab and move objects virtually
+
+### Why This Matters
+
+Traditional educational apps:
+- ❌ Passive consumption (watch and tap)
+- ❌ Limited physical engagement
+- ❌ Abstract interactions (button = action)
+
+Our approach:
+- ✅ Active physical participation
+- ✅ Kinesthetic learning (learning by doing)
+- ✅ Natural interactions (like real world)
+- ✅ Multi-sensory engagement
+
+---
+
+## Key Features
+
+### 1. Hand Tracking Games
+
+| Game | Skill | Interaction |
+|------|-------|-------------|
+| **Air Tap** | Letters/Numbers | Point and tap in air |
+| **Finger Count** | Math | Show fingers to count |
+| **Pose Match** | Body awareness | Copy body poses |
+| **Trace Letters** | Writing | Trace in air with finger |
+| **Grab & Sort** | Categories | Virtual grab and move |
+
+### 2. AI-Powered Adaptation
+
+- Difficulty adjusts based on performance
+- Content personalizes to child's level
+- Real-time feedback and encouragement
+- Progress tracking across all games
+
+### 3. Multi-Modal Learning
+
+- Visual (colors, shapes, animations)
+- Auditory (instructions, sounds, music)
+- Kinesthetic (body movement)
+- Cognitive (problem solving)
+
+---
+
+## Technology Stack
+
+### Frontend
+- **Framework:** React 18 + TypeScript
+- **Build:** Vite
+- **Styling:** Tailwind CSS
+- **State:** Zustand
+- **Animation:** Framer Motion
+
+### Computer Vision
+- **Hand Tracking:** MediaPipe Hands (21 landmarks)
+- **Face Tracking:** MediaPipe Face (468 landmarks)
+- **Pose Tracking:** MediaPipe Pose (33 landmarks)
+- **Runtime:** TensorFlow.js + WebGL
+
+### Backend
+- **API:** Node.js + Express
+- **Database:** PostgreSQL
+- **Auth:** Custom JWT
+- **Storage:** AWS S3
+
+### AI/ML
+- **Models:** MediaPipe Tasks Vision
+- **Future:** RF-DETR (object detection), MobileSAM (segmentation)
+
+---
+
+## Architecture Overview
 
 ```
-learning_for_kids/
-├── 📁 src/                      # Source code
-│   ├── hand_tracking/           # Hand detection & gestures
-│   ├── face_tracking/           # Face detection & expressions
-│   ├── ui/                      # User interface
-│   ├── games/                   # Gamification
-│   ├── learning_modules/        # Educational content
-│   ├── storage/                 # Data persistence
-│   ├── auth/                    # Parent authentication
-│   └── utils/                   # Utilities
-│
-├── 📁 tests/                    # Test suite
-│   ├── unit/                    # Unit tests
-│   └── integration/             # Integration tests
-│
-├── 📁 docs/                     # Documentation
-│   ├── architecture/            # System design, ADRs
-│   ├── project-management/      # Git workflow, PR guidelines
-│   ├── security/                # Security & privacy
-│   ├── features/                # Roadmap, specs
-│   └── api/                     # API documentation
-│
-├── 📁 prompts/                  # AI prompts for development
-├── 📁 scripts/                  # Development scripts
-├── 📁 assets/                   # Static assets
-└── 📁 .github/                  # GitHub templates
+┌───────────────────────────────────────────────────────────────┐
+│                           BROWSER (React App)                           │
+├───────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   ┌────────────────────┐  ┌────────────────────┐  ┌────────────────────┐     │
+│   │  Game Components   │  │  CV Components    │  │  UI Components    │     │
+│   │  (Game logic)      │  │  (Hand tracking)  │  │  (Buttons, etc.)  │     │
+│   └────────────────────┘  └────────────────────┘  └────────────────────┘     │
+│            │                 │                 │                      │
+│            └───────────────┼───────────────┘                      │
+│                          │                                           │
+│               ┌─────────────┴─────────────┐                               │
+│               │   State Management (Zustand)   │                               │
+│               ├──────────────────────────┤                               │
+│               │   - SpatialInputContext        │                               │
+│               │   - Game state                 │                               │
+│               │   - Progress tracking          │                               │
+│               └──────────────────────────┘                               │
+│                                                                         │
+└───────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌───────────────────────────────────────────────────────────────┐
+│                          BACKEND (Node.js)                             │
+├───────────────────────────────────────────────────────────────┤
+│   REST API → PostgreSQL → Progress Tracking → User Profiles           │
+└───────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Game Catalog
+
+### Current Games (~140 total)
+
+**Category: Literacy**
+- Letter Sound Match
+- Alphabet Game
+- Word Builder
+- Letter Trace
+
+**Category: Math**
+- Finger Count
+- Pattern Play
+- Shape Safari
+- Color Sort
+- Counting Collectathon
+
+**Category: Motor Skills**
+- Air Guitar Hero
+- Dance Freeze
+- Balance Beam
+- Bubble Pop Symphony
+
+**Category: Science**
+- Animal Sounds
+- Color Mixing
+- Circuit Builder
+- Bubble Biology
+
+**Category: Art & Creativity**
+- Air Canvas
+- Kaleidoscope Hands
+- Color Potions
+- Circle Drawing
+
+**Full list:** [GAME_IDEAS_CATALOG.md](./GAME_IDEAS_CATALOG.md)
+
+---
+
+## Current Challenges
+
+### 1. Button CV Control Gap (🚨 CRITICAL)
+
+**Problem:** 99% of games use regular buttons that don't work with hand tracking
+
+**Impact:**
+- Kids must switch to touch/mouse for buttons
+- Breaks "hands-only" experience
+- UX inconsistency
+
+**Solution:**
+- Quick fix: [GlobalCVCursor](./GLOBAL_CV_CURSOR_QUICK_FIX.md)
+- Long-term: [Migration to VisionButton](./BUTTON_CV_AUDIT_AND_MIGRATION_PLAN.md)
+
+**Status:** Documented, ready to implement
+
+### 2. Performance Optimization
+
+**Target:** <150ms latency for hand tracking
+
+**Current:** Working but needs monitoring
+
+**Action:** FPS benchmarking on target devices
+
+### 3. Model Expansion
+
+**Phase 2:** Add object detection (RF-DETR) for "find object" games
+
+**Phase 3:** Add segmentation (MobileSAM) for sticker/cutout features
+
+---
+
+## Development Workflow
+
+### 1. Feature Development
+```
+Research → Design → Prototype → Test → Implement → Review → Deploy
+```
+
+### 2. Game Development
+```
+Game Idea → Research → Spec → Assets → Code → Test → Iterate
+```
+
+### 3. Documentation
+- Every feature documented
+- Every game has spec
+- Every API endpoint documented
+- Updates tracked in worklogs
+
+---
+
+## Key Metrics
+
+### Technical
+- **Target FPS:** >20 (hand tracking)
+- **Target Latency:** <150ms (interaction)
+- **Model Load Time:** <3 seconds
+- **Bundle Size:** <5MB (initial load)
+
+### Business
+- **Games:** ~140 implemented
+- **Target Age:** 3-8 years
+- **Platforms:** iPad, Android tablets, Web
+- **Business Model:** Subscription
+
+---
+
+## Team Structure
+
+### Current Roles
+- **Tech Lead:** Architecture, code review
+- **CV/ML Engineer:** Hand tracking, models
+- **Frontend Developers:** Game implementation
+- **UX Designer:** Game design, interactions
+- **Product Manager:** Priorities, roadmap
+
+### Communication
+- **Daily:** Standup (async)
+- **Weekly:** Sprint planning
+- **Docs:** Everything in `/docs`
+
+---
+
+## Roadmap
+
+### Q1 2026 (Current)
+- ✅ Core hand tracking infrastructure
+- ✅ ~140 games implemented
+- ⏳ Fix button CV control (CRITICAL)
+- ⏳ Performance optimization
+
+### Q2 2026
+- Add object detection (RF-DETR)
+- Improve gesture recognition
+- Parent dashboard
+- Multiplayer features
+
+### Q3 2026
+- Add segmentation (MobileSAM)
+- Semantic visual Q&A (Moondream 2)
+- AI tutor features
+- Expanded content library
+
+---
 
 ## Getting Started
 
-### 1. Initial Setup
+### New Developer?
+1. Read [DEVELOPMENT_SETUP.md](./DEVELOPMENT_SETUP.md)
+2. Review [ARCHITECTURE.md](./ARCHITECTURE.md)
+3. Study [Game Development Guide](./games/GAME_DEVELOPMENT_GUIDE.md)
+4. Check out [AnimalSounds.tsx](../src/pages/AnimalSounds.tsx) - Best reference
 
-```bash
-# Run the setup script
-./scripts/setup.sh
+### New Product Manager?
+1. Read this file
+2. Review [GAME_IDEAS_CATALOG.md](./GAME_IDEAS_CATALOG.md)
+3. Study [Research Documents](./research/)
+4. Check [Vision & Strategy](./VISION_*.md) docs
 
-# Activate environment
-source .venv/bin/activate
-```
+---
 
-### 2. Development Workflow
+## Important Documents
 
-```bash
-# Start development
-./scripts/dev.sh
+### Must Read
+1. [Button CV Audit](./BUTTON_CV_AUDIT_AND_MIGRATION_PLAN.md) - Critical issue
+2. [Vision Stack Architecture](./VISION_STACK_ARCHITECTURE_2026-03-18.md) - Model strategy
+3. [Project Overview](./PROJECT_OVERVIEW.md) - This file
 
-# Run checks before committing
-./scripts/check.sh
+### Reference
+- [API Guide](./API_GUIDE.md)
+- [Testing Guide](./TESTING_GUIDE.md)
+- [Troubleshooting](./TROUBLESHOOTING.md)
 
-# Check PR size before creating PR
-./scripts/check_pr_size.sh
-```
+---
 
-### 3. Creating a Feature
+## Contact
 
-1. **Plan**: Create feature spec in `docs/features/specs/`
-2. **Branch**: `git checkout -b feature/your-feature`
-3. **Develop**: Write code with tests
-4. **Check**: Run `./scripts/check.sh`
-5. **Commit**: Follow conventional commits
-6. **PR**: Create PR with template, ensure size < 300 LOC
+- **Slack:** #learning-for-kids
+- **Docs:** All in `/docs` folder
+- **Repo:** `learning_for_kids`
+- **Status Dashboard:** [Link]
 
-## Key Decisions
+---
 
-| Decision | Status | Document |
-|----------|--------|----------|
-| Local-First Architecture | ✅ Accepted | [ADR-001](architecture/decisions/001-local-first-architecture.md) |
-| Python + PyQt6 Stack | ✅ Accepted | [ADR-002](architecture/decisions/002-python-tech-stack.md) |
-| SQLite Storage | ✅ Accepted | [ADR-003](architecture/decisions/003-storage-strategy.md) |
-
-## Current Status
-
-### MVP Definition
-
-Child can:
-
-1. Open the app
-2. Use hand gestures to interact
-3. Trace English alphabet letters
-4. Get feedback on progress
-5. See their learning progress
-
-### In Progress
-
-- Project setup and documentation ✅
-
-### Next Up
-
-1. Camera integration
-2. Hand tracking basics
-3. Basic UI framework
-4. Drawing canvas
-5. English alphabet module
-
-## Development Guidelines
-
-### Code Quality
-
-- Type hints required
-- Docstrings for public APIs
-- Tests for new code
-- Pre-commit hooks run automatically
-
-### PR Guidelines
-
-- Size: < 300 LOC preferred
-- Reviews: At least 1 approval
-- Tests: Must pass
-- Docs: Update as needed
-
-### No CI/CD
-
-We use manual quality gates:
-
-- Pre-commit hooks for style
-- Local test runs
-- PR review checklist
-- Manual merge verification
-
-## Communication
-
-### Questions?
-
-1. Check documentation in `docs/`
-2. Review existing feature specs
-3. Create issue for discussion
-
-### Reporting Issues
-
-- Use clear, descriptive titles
-- Include steps to reproduce
-- Note environment details
-- Attach screenshots if UI-related
-
-## Resources
-
-### External Documentation
-
-- [MediaPipe Hands](https://developers.google.com/mediapipe/solutions/vision/hand_landmarker)
-- [OpenCV Python](https://docs.opencv.org/4.x/d6/d00/tutorial_py_root.html)
-- [PyQt6 Reference](https://www.riverbankcomputing.com/static/Docs/PyQt6/)
-- [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
-
-### Tools
-
-- **Package Manager**: [uv](https://github.com/astral-sh/uv)
-- **Linter**: [ruff](https://docs.astral.sh/ruff/)
-- **Formatter**: [black](https://black.readthedocs.io/)
-- **Type Checker**: [mypy](https://mypy.readthedocs.io/)
-- **Testing**: [pytest](https://docs.pytest.org/)
-
-## Success Metrics
-
-### Technical
-
-- [ ] 30 FPS hand tracking
-- [ ] < 200MB memory usage
-- [ ] < 1 second startup time
-- [ ] 80%+ test coverage
-
-### User Experience
-
-- [ ] Child can use independently
-- [ ] Parent can review progress
-- [ ] Works offline
-- [ ] No crashes in normal use
-
-## Roadmap Timeline
-
-| Phase | Duration | Key Deliverables |
-|-------|----------|------------------|
-| Foundation | Weeks 1-2 | Camera, tracking, basic UI |
-| Core Interaction | Weeks 3-4 | Gestures, drawing, face tracking |
-| First Module | Weeks 5-6 | English alphabet, progress tracking |
-| Polish & Test | Week 7 | Bug fixes, optimization |
-| **MVP Release** | **Week 8** | **Working learning app** |
-
-## Notes
-
-- This is a learning project for Advay ❤️
-- Prioritize safety and privacy
-- Keep it fun and engaging
-- Document as we build
+**Last Updated:** March 18, 2026

@@ -5,13 +5,19 @@
  * @ticket S-003
  */
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { AccessDenied } from '../components/ui/AccessDenied';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
@@ -186,9 +192,27 @@ export const WeatherLabContent = memo(function WeatherLabComponent() {
   const hasAccess = canAccessGame('weather-lab');
   const { playClick, playSuccess, playError } = useAudio();
   const { speak } = useTTS();
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   const [state, setState] = useState<GameState>(createInitialState());
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  const isPlaying = state.status === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'WeatherLab',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
 
   // Real weather data state
   const [realWeather, setRealWeather] = useState<RealWeatherData | null>(null);
@@ -510,8 +534,11 @@ export const WeatherLabContent = memo(function WeatherLabComponent() {
       title='Weather Lab'
       onHome={() => navigate('/games')}
       score={state.status === 'success' ? finalScore : undefined}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='flex flex-col lg:flex-row gap-4 p-4'>
+      <div ref={gameAreaRef} className='flex flex-col lg:flex-row gap-4 p-4 relative'>
         {/* Main Game Area */}
         <div className='flex-1'>
           {/* Challenge Selector */}
@@ -841,6 +868,9 @@ export const WeatherLabContent = memo(function WeatherLabComponent() {
             )}
           </motion.div>
         </div>
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
+        )}
       </div>
     </GameContainer>
   );

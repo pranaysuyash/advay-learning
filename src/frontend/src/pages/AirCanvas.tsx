@@ -26,6 +26,8 @@ import {
 import { mapNormalizedPointToCover } from '../utils/coordinateTransform';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { IssueReportFlowModal } from '../components/issue-reporting/IssueReportFlowModal';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
 
 interface Brush {
   id: string;
@@ -84,6 +86,8 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
   const colorIndexRef = useRef(0);
   const lastPositionRef = useRef<{ x: number; y: number } | null>(null);
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   const { playPop, playSuccess } = useSoundEffects();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -174,6 +178,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
     if (frame.hands.length > 0) {
       const landmarks = frame.hands[0];
       const indexFinger = landmarks[8];
+      setCursor({ x: indexFinger.x, y: indexFinger.y });
       const middleFinger = landmarks[12];
       const ringFinger = landmarks[16];
       const pinky = landmarks[20];
@@ -301,6 +306,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
     isLoading: isHandLoading,
     isReady: isHandReady,
     startTracking,
+    stopTracking,
   } = useGameHandTracking({
     gameName: 'AirCanvas',
     webcamRef,
@@ -323,7 +329,11 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
     if (!isHandReady && !isHandLoading) {
       void startTracking();
     }
-  }, [isHandLoading, isHandReady, startTracking]);
+    // Cleanup: stop tracking on unmount to avoid leaks
+    return () => {
+      stopTracking?.();
+    };
+  }, [isHandLoading, isHandReady, startTracking, stopTracking]);
 
   // Clear canvas
   const clearCanvas = () => {
@@ -394,7 +404,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#FFF8F0] relative overflow-hidden font-sans">
+    <div ref={gameAreaRef} className="min-h-[100dvh] bg-[#FFF8F0] relative overflow-hidden font-sans">
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-6 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
         <button
@@ -407,12 +417,6 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
           <h1 className="text-2xl md:text-3xl font-black text-white tracking-wide drop-shadow-md">Air Canvas</h1>
         </div>
         <div className="pointer-events-auto flex items-center gap-3">
-          <button
-            onClick={() => setShowIssueReport(true)}
-            className="px-5 py-3 bg-[#10B981] hover:bg-emerald-500 border-3 border-emerald-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 text-base md:text-lg"
-          >
-            Report Issue
-          </button>
           <button
             onClick={() => setShowUI(!showUI)}
             className="px-6 py-3 bg-[#F59E0B] hover:bg-amber-500 border-3 border-amber-300 rounded-[1.5rem] font-black text-white shadow-[0_4px_0_#E5B86E] transition-all hover:scale-105 active:scale-95 text-lg"
@@ -643,6 +647,18 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
           height: 120,
         }}
       />
+
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </div>
   );
 });

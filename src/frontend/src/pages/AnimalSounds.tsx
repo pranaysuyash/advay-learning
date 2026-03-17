@@ -7,11 +7,14 @@
 import { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { GameHUD } from '../components/game/GameHUD';
 import {
   LEVELS,
@@ -26,6 +29,9 @@ import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { KenneyCharacter } from '../components/game/KenneyCharacterAnimated';
 import { AssetPreloader, type AssetToPreload } from '../components/AssetPreloader';
 import { GameBackground } from '../components/game/GameBackground';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 interface InnerProps {
   score: number;
@@ -75,6 +81,9 @@ function AnimalSoundsGame({
   // All hooks must be above early returns — React Rules of Hooks
   const allowInteractionRef = useRef(true);
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   // Hand tracking (currently disabled)
 
@@ -111,6 +120,24 @@ function AnimalSoundsGame({
       setError(err as Error);
     }
   }, [onFinish]);
+
+  const isPlaying = gameState === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'AnimalSounds',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) { void startTracking(); }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   if (isLoading) {
     return (
@@ -231,8 +258,11 @@ function AnimalSoundsGame({
       title='Animal Sounds'
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className="relative">
+      <div ref={gameAreaRef} className="relative">
         <GameBackground type="trees" variant="color" className="absolute inset-0" />
         <div className="relative z-10 flex flex-col items-center gap-4 p-4">
         <div className='flex gap-2'>
@@ -420,6 +450,9 @@ function AnimalSoundsGame({
               Finish
             </button>
           </div>
+        )}
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
         )}
       </div>
       </div>

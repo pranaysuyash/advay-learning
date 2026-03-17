@@ -16,6 +16,7 @@ import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { getLaneFromNormalizedX, pickNextLane } from '../games/musicPinchLogic';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { STREAK_MILESTONE_INTERVAL } from '../games/constants';
+import { GameCursor } from '../components/game/GameCursor';
 
 const LANE_COUNT = 3;
 const LANE_LABELS = ['Sa', 'Re', 'Ga'] as const;
@@ -28,6 +29,7 @@ export const MusicPinchBeatContent = memo(function MusicPinchBeatComponent() {
   const [streak, setStreak] = useState(0);
   const [targetLane, setTargetLane] = useState(1);
   const [cursorX, setCursorX] = useState<number | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const [selectedLane, setSelectedLane] = useState<number | null>(null);
   const [feedback, setFeedback] = useState(
     'Pinch on the glowing lane to play the beat!',
@@ -208,7 +210,7 @@ export const MusicPinchBeatContent = memo(function MusicPinchBeatComponent() {
       isHandDetected={isHandTrackingReady}
       isPlaying={isPlaying}
     >
-      <div className='absolute inset-0 bg-blue-50 overflow-hidden'>
+      <div ref={gameAreaRef} className='absolute inset-0 bg-blue-50 overflow-hidden'>
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-blue-100/40 pointer-events-none' />
 
         <div className='absolute inset-x-4 top-24 bottom-24 grid grid-cols-3 gap-4 md:gap-8'>
@@ -260,6 +262,18 @@ export const MusicPinchBeatContent = memo(function MusicPinchBeatComponent() {
               <path d='M10 15V9a2 2 0 0 1 2-2h2' />
             </svg>
           </div>
+        )}
+
+        {cursorX !== null && (
+          <GameCursor
+            position={{ x: cursorX, y: 0.5 }}
+            coordinateSpace="normalized"
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isHandTrackingReady}
+            size={64}
+            color="#22c55e"
+          />
         )}
 
         <div className='absolute top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[300px]'>

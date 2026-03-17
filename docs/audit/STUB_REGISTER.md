@@ -1,5 +1,7 @@
 # Stub Register
 
+**Ticket**: TCK-20260319-013
+
 This document tracks every stub, placeholder, or incomplete implementation found in game-related code.
 
 | STUB-ID  | Game / Area       | File(s) & Lines                                             | Type                    | Mechanics Impact | User Impact / Risk                                                 | Status   | Implementation Unit |

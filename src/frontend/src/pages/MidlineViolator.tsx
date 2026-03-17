@@ -182,7 +182,7 @@ const MidlineViolator: React.FC = () => {
             </p>
             <button
               onClick={startGame}
-              className="px-8 py-4 bg-orange-500 hover:bg-orange-600 rounded-full text-2xl font-bold transition-all transform hover:scale-105"
+              className="px-8 py-4 min-h-[80px] bg-orange-500 hover:bg-orange-600 rounded-full text-2xl font-bold transition-all transform hover:scale-105"
             >
               Let's Go!
             </button>
@@ -195,7 +195,7 @@ const MidlineViolator: React.FC = () => {
             <p className="text-3xl mb-8">Score: {Math.floor(state.score)}</p>
             <button
               onClick={startGame}
-              className="px-8 py-4 bg-green-500 hover:bg-green-600 rounded-full text-2xl font-bold transition-all transform hover:scale-105"
+              className="px-8 py-4 min-h-[80px] bg-green-500 hover:bg-green-600 rounded-full text-2xl font-bold transition-all transform hover:scale-105"
             >
               Play Again
             </button>

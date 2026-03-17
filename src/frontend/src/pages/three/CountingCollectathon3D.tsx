@@ -2,36 +2,42 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF, Html, useKeyboardControls } from '@react-three/drei';
-import { useBox, useSphere, Physics } from '@react-three/cannon';
+import { RigidBody, Physics } from '@react-three/rapier';
 import * as THREE from 'three';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
 import { GameContainer } from '../../components/GameContainer';
 import { use3DGameAudio } from '../../hooks/use3DGameAudio';
-import { Volume2, VolumeX, Trophy, RotateCcw, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
+import {
+  Volume2,
+  VolumeX,
+  Trophy,
+  RotateCcw,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+} from 'lucide-react';
 import { KeyboardControls } from '@react-three/drei';
 
 // Collectible numbers
 const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 // Player character
-function Player({ startPosition, onJump }: { startPosition: [number, number, number]; onJump?: () => void }) {
-  const [ref, api] = useSphere(() => ({
-    mass: 1,
-    position: startPosition,
-    args: [0.4],
-    material: { friction: 0.3, restitution: 0 },
-    fixedRotation: true,
-  }));
-
+function Player({
+  startPosition,
+  onJump,
+}: {
+  startPosition: [number, number, number];
+  onJump?: () => void;
+}) {
+  const rigidBodyRef = useRef<any>(null);
   const [, getKeys] = useKeyboardControls();
   const velocity = useRef([0, 0, 0]);
   const isGrounded = useRef(false);
-  
-  useEffect(() => {
-    api.velocity.subscribe((v) => (velocity.current = v));
-  }, [api]);
 
   useFrame(() => {
+    if (!rigidBodyRef.current) return;
+
     const { forward, backward, left, right, jump } = getKeys();
     const speed = 6;
     const jumpForce = 10;
@@ -44,15 +50,20 @@ function Player({ startPosition, onJump }: { startPosition: [number, number, num
     if (left) vx = -speed;
     if (right) vx = speed;
 
-    api.velocity.set(vx, velocity.current[1], vz);
+    // Get current velocity
+    const currentVel = rigidBodyRef.current.linvel();
+    velocity.current = [currentVel.x, currentVel.y, currentVel.z];
+
+    // Set new velocity
+    rigidBodyRef.current.setLinvel({ x: vx, y: currentVel.y, z: vz }, true);
 
     if (jump && isGrounded.current) {
-      api.velocity.set(vx, jumpForce, vz);
+      rigidBodyRef.current.setLinvel({ x: vx, y: jumpForce, z: vz }, true);
       isGrounded.current = false;
       onJump?.();
     }
 
-    if (velocity.current[1] === 0) {
+    if (Math.abs(currentVel.y) < 0.01) {
       isGrounded.current = true;
     }
   });
@@ -70,9 +81,17 @@ function Player({ startPosition, onJump }: { startPosition: [number, number, num
   }, [scene]);
 
   return (
-    <group ref={ref}>
+    <RigidBody
+      ref={rigidBodyRef}
+      position={startPosition}
+      mass={1}
+      colliders='ball'
+      restitution={0}
+      friction={0.3}
+      lockRotations
+    >
       <primitive object={characterScene} scale={0.5} position={[0, -0.4, 0]} />
-    </group>
+    </RigidBody>
   );
 }
 
@@ -94,7 +113,8 @@ function CollectibleNumber({
   useFrame(({ clock }) => {
     if (meshRef.current && !collected) {
       meshRef.current.rotation.y = clock.getElapsedTime() * 2;
-      meshRef.current.position.y = position[1] + Math.sin(clock.elapsedTime * 3) * 0.1;
+      meshRef.current.position.y =
+        position[1] + Math.sin(clock.elapsedTime * 3) * 0.1;
     }
   });
 
@@ -114,16 +134,18 @@ function CollectibleNumber({
       {/* Number display */}
       <mesh>
         <boxGeometry args={[0.6, 0.6, 0.1]} />
-        <meshStandardMaterial 
-          color={isNext ? '#22c55e' : '#64748b'} 
+        <meshStandardMaterial
+          color={isNext ? '#22c55e' : '#64748b'}
           emissive={isNext ? '#22c55e' : '#000000'}
           emissiveIntensity={isNext ? 0.3 : 0}
         />
       </mesh>
-      
+
       {/* Text label */}
       <Html center distanceFactor={8}>
-        <div className={`text-2xl font-bold ${isNext ? 'text-white' : 'text-slate-400'}`}>
+        <div
+          className={`text-2xl font-bold ${isNext ? 'text-white' : 'text-slate-400'}`}
+        >
           {number}
         </div>
       </Html>
@@ -133,17 +155,13 @@ function CollectibleNumber({
 
 // Ground platform
 function Ground() {
-  const [ref] = useBox(() => ({
-    type: 'Static',
-    position: [0, -1, 0],
-    args: [20, 1, 20],
-  }));
-
   return (
-    <mesh ref={ref} receiveShadow>
-      <boxGeometry args={[20, 1, 20]} />
-      <meshStandardMaterial color="#3d5a80" />
-    </mesh>
+    <RigidBody type='fixed' position={[0, -1, 0]} colliders='cuboid'>
+      <mesh receiveShadow>
+        <boxGeometry args={[20, 1, 20]} />
+        <meshStandardMaterial color='#3d5a80' />
+      </mesh>
+    </RigidBody>
   );
 }
 
@@ -158,7 +176,9 @@ export default function CountingCollectathon3D() {
   const [score, setScore] = useState(0);
   const [nextNumber, setNextNumber] = useState(1);
   const [gameWon, setGameWon] = useState(false);
-  const [numbers, setNumbers] = useState<{ id: number; number: number; position: [number, number, number] }[]>([]);
+  const [numbers, setNumbers] = useState<
+    { id: number; number: number; position: [number, number, number] }[]
+  >([]);
 
   // Preload audio
   useEffect(() => {
@@ -179,19 +199,22 @@ export default function CountingCollectathon3D() {
     setNumbers(nums);
   }, []);
 
-  const handleCollect = useCallback((number: number) => {
-    if (number === nextNumber) {
-      setScore((s) => s + 10);
-      playSFX('coin', 0.5);
-      
-      if (number === 10) {
-        setGameWon(true);
-        playSFX('win', 0.7);
-      } else {
-        setNextNumber((n) => n + 1);
+  const handleCollect = useCallback(
+    (number: number) => {
+      if (number === nextNumber) {
+        setScore((s) => s + 10);
+        playSFX('coin', 0.5);
+
+        if (number === 10) {
+          setGameWon(true);
+          playSFX('win', 0.7);
+        } else {
+          setNextNumber((n) => n + 1);
+        }
       }
-    }
-  }, [nextNumber, playSFX]);
+    },
+    [nextNumber, playSFX],
+  );
 
   const handleJump = useCallback(() => {
     playSFX('jump', 0.3);
@@ -222,7 +245,10 @@ export default function CountingCollectathon3D() {
   };
 
   return (
-    <GameContainer title="Counting Adventure 3D" onHome={() => navigate('/games')}>
+    <GameContainer
+      title='Counting Adventure 3D'
+      onHome={() => navigate('/games')}
+    >
       <KeyboardControls
         map={[
           { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
@@ -232,13 +258,20 @@ export default function CountingCollectathon3D() {
           { name: 'jump', keys: ['Space'] },
         ]}
       >
-        <div className="h-[600px] w-full rounded-xl overflow-hidden relative" style={{ backgroundColor: 'rgb(15, 23, 42)' }}>
+        <div
+          className='h-[600px] w-full rounded-xl overflow-hidden relative'
+          style={{ backgroundColor: 'rgb(15, 23, 42)' }}
+        >
           {/* Mute button */}
           <button
             onClick={toggleMute}
-            className="absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors"
+            className='absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors'
           >
-            {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
+            {isMuted ? (
+              <VolumeX className='w-5 h-5 text-white' />
+            ) : (
+              <Volume2 className='w-5 h-5 text-white' />
+            )}
           </button>
 
           <ThreeDGameCanvas
@@ -246,13 +279,13 @@ export default function CountingCollectathon3D() {
             cameraTarget={[0, 0, 0]}
             enableOrbit={false}
             showStats={false}
-            backgroundColor="#0f172a"
-            environment="sunset"
+            backgroundColor='#0f172a'
+            environment='sunset'
           >
             <Physics gravity={[0, -15, 0]}>
               <Player startPosition={[0, 2, 0]} onJump={handleJump} />
               <Ground />
-              
+
               {numbers.map(({ id, number, position }) => (
                 <CollectibleNumber
                   key={id}
@@ -265,32 +298,39 @@ export default function CountingCollectathon3D() {
 
               {/* UI */}
               <Html position={[-4, 3, 0]}>
-                <div className="bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg">
-                  <div className="text-sm text-slate-400">Score</div>
-                  <div className="text-2xl font-bold">{score}</div>
+                <div className='bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg'>
+                  <div className='text-sm text-slate-400'>Score</div>
+                  <div className='text-2xl font-bold'>{score}</div>
                 </div>
               </Html>
 
               <Html position={[4, 3, 0]}>
-                <div className="bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg">
-                  <div className="text-sm text-slate-400">Find Number</div>
-                  <div className="text-3xl font-bold text-green-400">{nextNumber}</div>
+                <div className='bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg'>
+                  <div className='text-sm text-slate-400'>Find Number</div>
+                  <div className='text-3xl font-bold text-green-400'>
+                    {nextNumber}
+                  </div>
                 </div>
               </Html>
 
               {/* Win screen */}
               {gameWon && (
                 <Html center>
-                  <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)' }} className="text-white p-8 rounded-2xl shadow-2xl text-center">
-                    <Trophy className="w-16 h-16 mx-auto mb-4 text-yellow-400" />
-                    <h2 className="text-3xl font-bold mb-2">You Win!</h2>
-                    <p className="text-slate-400 mb-4">You collected all numbers!</p>
-                    <p className="text-xl font-bold mb-4">Score: {score}</p>
+                  <div
+                    style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)' }}
+                    className='text-white p-8 rounded-2xl shadow-2xl text-center'
+                  >
+                    <Trophy className='w-16 h-16 mx-auto mb-4 text-yellow-400' />
+                    <h2 className='text-3xl font-bold mb-2'>You Win!</h2>
+                    <p className='text-slate-400 mb-4'>
+                      You collected all numbers!
+                    </p>
+                    <p className='text-xl font-bold mb-4'>Score: {score}</p>
                     <button
                       onClick={resetGame}
-                      className="flex items-center gap-2 mx-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition-colors"
+                      className='flex items-center gap-2 mx-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition-colors'
                     >
-                      <RotateCcw className="w-5 h-5" />
+                      <RotateCcw className='w-5 h-5' />
                       Play Again
                     </button>
                   </div>
@@ -302,21 +342,23 @@ export default function CountingCollectathon3D() {
       </KeyboardControls>
 
       {/* Controls */}
-      <div className="mt-4 flex justify-center gap-6 text-sm text-slate-500">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1">
-            <ArrowUp className="w-4 h-4" />
-            <ArrowDown className="w-4 h-4" />
-            <ArrowLeft className="w-4 h-4" />
-            <ArrowRight className="w-4 h-4" />
+      <div className='mt-4 flex justify-center gap-6 text-sm text-slate-500'>
+        <div className='flex items-center gap-2'>
+          <div className='flex gap-1'>
+            <ArrowUp className='w-4 h-4' />
+            <ArrowDown className='w-4 h-4' />
+            <ArrowLeft className='w-4 h-4' />
+            <ArrowRight className='w-4 h-4' />
           </div>
           <span>Move</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="px-2 py-1 bg-slate-200 rounded text-xs font-mono">SPACE</span>
+        <div className='flex items-center gap-2'>
+          <span className='px-2 py-1 bg-slate-200 rounded text-xs font-mono'>
+            SPACE
+          </span>
           <span>Jump</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           <span>🎯</span>
           <span>Collect numbers in order (1-10)</span>
         </div>

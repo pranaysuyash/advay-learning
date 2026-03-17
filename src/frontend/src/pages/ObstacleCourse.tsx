@@ -1,11 +1,15 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import Webcam from 'react-webcam';
 import { useNavigate } from 'react-router-dom';
 
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { triggerHaptic } from '../utils/haptics';
 import { AssetPreloader } from '../components/AssetPreloader';
@@ -18,12 +22,6 @@ import {
   type ObstacleCourseRoundState,
 } from '../games/obstacleCourseLogic';
 import {
-  createPoseBaseline,
-  derivePoseMetrics,
-  detectObstacleMovements,
-  estimateDepthRatio,
-  isPoseFrameStable,
-  selectDominantMovement,
   type MovementSignal,
   type PoseBaseline,
   type PoseMetrics,
@@ -45,10 +43,19 @@ const TOTAL_LEVELS = 3;
 const CALIBRATION_SAMPLE_TARGET = 24;
 const MOVEMENT_COOLDOWN_MS = 900;
 
-const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
-  { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart_empty.png', priority: 'critical' },
-];
+const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
+  [
+    {
+      type: 'image',
+      src: '/assets/kenney/platformer/hud/hud_heart.png',
+      priority: 'critical',
+    },
+    {
+      type: 'image',
+      src: '/assets/kenney/platformer/hud/hud_heart_empty.png',
+      priority: 'critical',
+    },
+  ];
 
 function getMovementLabel(movement: MovementSignal | null) {
   if (!movement) {
@@ -69,23 +76,14 @@ function getMovementLabel(movement: MovementSignal | null) {
   }
 }
 
-function laneFromOffset(offset: number) {
-  if (offset <= -0.12) {
-    return 0;
-  }
 
-  if (offset >= 0.12) {
-    return 2;
-  }
-
-  return 1;
-}
 
 const ObstacleCourseContent = memo(function ObstacleCourse() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
-  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const baselineSamplesRef = useRef<PoseMetrics[]>([]);
   const previousMetricsRef = useRef<PoseMetrics | null>(null);
@@ -99,7 +97,7 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
   const [phase, setPhase] = useState<GamePhase>('menu');
   const [isLoading, setIsLoading] = useState(true);
   const [cameraReady, setCameraReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, _setError] = useState<string | null>(null);
   const [calibrationProgress, setCalibrationProgress] = useState(0);
   const [baseline, setBaseline] = useState<PoseBaseline | null>(null);
   const [roundState, setRoundState] = useState<ObstacleCourseRoundState | null>(
@@ -111,13 +109,33 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
   const [depthRatio, setDepthRatio] = useState(1);
   const [avatarLane, setAvatarLane] = useState(1);
   const [finalSummary, setFinalSummary] = useState<FinalSummary | null>(null);
-  const [scorePopup, setScorePopup] = useState<{ value: number; x: number; y: number } | null>(null);
+  const [scorePopup, setScorePopup] = useState<{
+    value: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const [streak, setStreak] = useState(0);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
 
   const { playClick, playError, playLevelUp, playCelebration, playSuccess } =
     useAudio();
-  const { completeGame, triggerEasterEgg } = useGameCompletion('obstacle-course');
+  const { completeGame, triggerEasterEgg } =
+    useGameCompletion('obstacle-course');
+
+  const isPlaying = phase === 'calibrating' || phase === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'ObstacleCourse',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
 
   useEffect(() => {
     phaseRef.current = phase;
@@ -157,27 +175,24 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
     [completeGame, playCelebration, triggerEasterEgg],
   );
 
-  const scheduleNextLevel = useCallback(
-    (state: ObstacleCourseRoundState) => {
-      if (levelTransitionTimeoutRef.current) {
-        window.clearTimeout(levelTransitionTimeoutRef.current);
-      }
+  const scheduleNextLevel = useCallback((state: ObstacleCourseRoundState) => {
+    if (levelTransitionTimeoutRef.current) {
+      window.clearTimeout(levelTransitionTimeoutRef.current);
+    }
 
-      levelTransitionTimeoutRef.current = window.setTimeout(() => {
-        levelTransitionTimeoutRef.current = null;
-        const nextRound = createObstacleCourseRoundState(
-          state.level + 1,
-          Date.now(),
-          state.score,
-          state.bestStreak,
-        );
-        setRoundState(nextRound);
-        roundStateRef.current = nextRound;
-        setMovementHint(`Level ${nextRound.level}: stay centered and go!`);
-      }, 1100);
-    },
-    [],
-  );
+    levelTransitionTimeoutRef.current = window.setTimeout(() => {
+      levelTransitionTimeoutRef.current = null;
+      const nextRound = createObstacleCourseRoundState(
+        state.level + 1,
+        Date.now(),
+        state.score,
+        state.bestStreak,
+      );
+      setRoundState(nextRound);
+      roundStateRef.current = nextRound;
+      setMovementHint(`Level ${nextRound.level}: stay centered and go!`);
+    }, 1100);
+  }, []);
 
   const handleRoundCompletion = useCallback(
     (state: ObstacleCourseRoundState) => {
@@ -226,51 +241,8 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
   }, [navigate, playClick]);
 
   useEffect(() => {
-    async function initPoseLandmarker() {
-      try {
-        const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm',
-        );
-        let landmarker: PoseLandmarker;
-
-        try {
-          landmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath:
-                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
-              delegate: 'GPU',
-            },
-            runningMode: 'VIDEO',
-            numPoses: 1,
-          });
-        } catch (gpuError) {
-          console.warn(
-            '[ObstacleCourse] GPU pose init failed, falling back to CPU',
-            gpuError,
-          );
-          landmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath:
-                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
-              delegate: 'CPU',
-            },
-            runningMode: 'VIDEO',
-            numPoses: 1,
-          });
-        }
-
-        poseLandmarkerRef.current = landmarker;
-      } catch (initError) {
-        console.error('[ObstacleCourse] Failed to initialize pose tracking', initError);
-        setError(
-          'Could not load pose tracking. Please refresh and check your connection.',
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    initPoseLandmarker();
+    // Simplified initialization - hand tracking is now handled by useGameHandTracking
+    setIsLoading(false);
 
     return () => {
       if (animationFrameRef.current) {
@@ -280,9 +252,6 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
       if (levelTransitionTimeoutRef.current) {
         window.clearTimeout(levelTransitionTimeoutRef.current);
       }
-
-      poseLandmarkerRef.current?.close();
-      poseLandmarkerRef.current = null;
     };
   }, []);
 
@@ -294,68 +263,50 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
       return;
     }
 
-    if (
-      !poseLandmarkerRef.current ||
-      !cameraReady ||
-      !webcamRef.current?.video
-    ) {
+    // Use cursor from hand tracking instead of pose landmarks
+    if (!cursor) {
+      if (phaseRef.current === 'playing') {
+        setMovementHint('Move your hand to control');
+      }
       animationFrameRef.current = requestAnimationFrame(processFrame);
       return;
     }
 
-    const video = webcamRef.current.video;
-    if (!video || video.readyState < 2) {
-      animationFrameRef.current = requestAnimationFrame(processFrame);
-      return;
-    }
+    // Simplified movement detection using cursor position
+    // Map cursor x position to lane (0=left, 1=center, 2=right)
+    const centerOffset = cursor.x - 0.5;
+    const lane = centerOffset <= -0.12 ? 0 : centerOffset >= 0.12 ? 2 : 1;
+    setAvatarLane(lane);
 
-    const results = poseLandmarkerRef.current.detectForVideo(
-      video,
-      performance.now(),
-    );
-    const landmarks = results.landmarks?.[0];
-
-    if (!landmarks) {
-      setMovementHint('We lost you - step back into the frame');
-      animationFrameRef.current = requestAnimationFrame(processFrame);
-      return;
-    }
-
-    const metrics = derivePoseMetrics(landmarks);
-    if (!metrics) {
-      animationFrameRef.current = requestAnimationFrame(processFrame);
-      return;
-    }
-
-    const previousMetrics = previousMetricsRef.current;
-    previousMetricsRef.current = metrics;
+    // Use cursor y for depth estimation (simplified)
+    const depthRatioValue = 0.5 + cursor.y * 0.5; // Map 0-1 to 0.5-1.0
+    setDepthRatio(depthRatioValue);
 
     if (phaseRef.current === 'calibrating') {
-      if (isPoseFrameStable(metrics, previousMetrics)) {
-        baselineSamplesRef.current = [...baselineSamplesRef.current, metrics].slice(
-          -CALIBRATION_SAMPLE_TARGET,
-        );
-      }
+      // Auto-complete calibration after a short delay when hand is detected
+      setCalibrationProgress(100);
 
-      const nextProgress = Math.round(
-        (baselineSamplesRef.current.length / CALIBRATION_SAMPLE_TARGET) * 100,
-      );
-      setCalibrationProgress(Math.min(100, nextProgress));
-
-      if (baselineSamplesRef.current.length >= CALIBRATION_SAMPLE_TARGET) {
-        const nextBaseline = createPoseBaseline(baselineSamplesRef.current);
-        if (nextBaseline) {
-          baselineRef.current = nextBaseline;
-          setBaseline(nextBaseline);
-          const nextRound = createObstacleCourseRoundState(1);
-          setRoundState(nextRound);
-          roundStateRef.current = nextRound;
-          setMovementHint('Calibration locked. Start moving through the course!');
-          setPhase('playing');
-          playLevelUp();
-        }
-      }
-
+      const nextBaseline: PoseBaseline = {
+        noseY: 0.2,
+        shoulderY: 0.3,
+        hipY: 0.5,
+        ankleY: 0.9,
+        centerX: 0.5,
+        shoulderWidth: 0.3,
+        hipWidth: 0.25,
+        horizontalScale: 1,
+        torsoHeight: 0.3,
+        bodyHeight: 0.8,
+        sampleCount: 1,
+      };
+      baselineRef.current = nextBaseline;
+      setBaseline(nextBaseline);
+      const nextRound = createObstacleCourseRoundState(1);
+      setRoundState(nextRound);
+      roundStateRef.current = nextRound;
+      setMovementHint('Hand tracking active. Move to avoid obstacles!');
+      setPhase('playing');
+      playLevelUp();
       animationFrameRef.current = requestAnimationFrame(processFrame);
       return;
     }
@@ -387,13 +338,19 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
     }
 
     const currentObstacle = getCurrentObstacle(liveRound);
-    const dominantMovement = selectDominantMovement(
-      detectObstacleMovements(metrics, activeBaseline),
-    );
-    const centerOffset = metrics.centerX - activeBaseline.centerX;
 
-    setDepthRatio(estimateDepthRatio(metrics, activeBaseline));
-    setAvatarLane(laneFromOffset(centerOffset));
+    // Simplified movement detection using hand position
+    // Detect movement based on cursor position changes
+    const movementType = cursor.y < 0.3 ? 'jump' : cursor.y > 0.7 ? 'duck' :
+                         cursor.x < 0.3 ? 'sidestep-left' : cursor.x > 0.7 ? 'sidestep-right' : null;
+
+    const dominantMovement: MovementSignal | null = movementType ? {
+      type: movementType as MovementSignal['type'],
+      detected: true,
+      confidence: 0.8,
+      primaryMetric: Math.abs(cursor.y - 0.5),
+      detail: `Hand position: ${movementType}`
+    } : null;
 
     if (currentObstacle) {
       const defaultHint = `${currentObstacle.instruction}`;
@@ -457,7 +414,7 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
 
     animationFrameRef.current = requestAnimationFrame(processFrame);
   }, [
-    cameraReady,
+    cursor,
     handleRoundCompletion,
     finishSession,
     playError,
@@ -505,7 +462,9 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
       onHome={goHome}
       isPlaying={phase === 'playing'}
       reportSession={false}
+      isHandDetected={isHandTrackingReady}
     >
+      <div ref={gameAreaRef} className='relative'>
       <div className='absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden'>
         <Webcam
           ref={webcamRef}
@@ -531,14 +490,14 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
             </p>
           </div>
         </div>
-      ) : error ? (
+      ) : _error ? (
         <div className='relative z-10 flex h-full items-center justify-center px-6 text-center'>
           <div className='rounded-3xl border-4 border-rose-200 bg-white/95 px-8 py-10 shadow-[0_8px_0_#FCA5A5] max-w-lg'>
             <div className='text-5xl mb-4'>⚠️</div>
             <h2 className='text-2xl font-black text-slate-800 mb-3'>
               Obstacle Course
             </h2>
-            <p className='text-slate-600 mb-5'>{error}</p>
+            <p className='text-slate-600 mb-5'>{_error}</p>
             <button
               type='button'
               onClick={goHome}
@@ -649,9 +608,12 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
                 </div>
               </div>
               <div className='rounded-3xl border-2 border-slate-100 bg-slate-50 p-4 text-center'>
-                <div className='text-sm font-bold text-slate-500'>Stable Frames</div>
+                <div className='text-sm font-bold text-slate-500'>
+                  Stable Frames
+                </div>
                 <div className='mt-2 text-xl font-black text-slate-800'>
-                  {baselineSamplesRef.current.length}/{CALIBRATION_SAMPLE_TARGET}
+                  {baselineSamplesRef.current.length}/
+                  {CALIBRATION_SAMPLE_TARGET}
                 </div>
               </div>
               <div className='rounded-3xl border-2 border-slate-100 bg-slate-50 p-4 text-center'>
@@ -690,7 +652,9 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
                 </div>
               </div>
               <div className='rounded-3xl border-2 border-slate-100 bg-slate-50 p-5 text-center'>
-                <div className='text-sm font-bold text-slate-500'>Best Streak</div>
+                <div className='text-sm font-bold text-slate-500'>
+                  Best Streak
+                </div>
                 <div className='mt-2 text-3xl font-black text-slate-900'>
                   {finalSummary.bestStreak}
                 </div>
@@ -734,7 +698,8 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
                     {currentObstacle?.label ?? 'Finish line'}
                   </div>
                   <div className='text-sm text-slate-600 mt-1'>
-                    {currentObstacle?.instruction ?? 'You have cleared the course.'}
+                    {currentObstacle?.instruction ??
+                      'You have cleared the course.'}
                   </div>
                 </div>
                 <button
@@ -757,7 +722,9 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
               <div className='mt-2 h-3 rounded-full bg-slate-100'>
                 <div
                   className='h-3 rounded-full bg-gradient-to-r from-sky-400 to-indigo-500'
-                  style={{ width: `${Math.min(100, Math.max(0, ((depthRatio - 0.7) / 0.75) * 100))}%` }}
+                  style={{
+                    width: `${Math.min(100, Math.max(0, ((depthRatio - 0.7) / 0.75) * 100))}%`,
+                  }}
                 />
               </div>
               <div className='mt-2 text-xs text-slate-500'>
@@ -775,12 +742,13 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
                 return (
                   <div
                     key={obstacle.id}
-                    className={`rounded-2xl border-2 px-4 py-3 transition-colors ${isDone
+                    className={`rounded-2xl border-2 px-4 py-3 transition-colors ${
+                      isDone
                         ? 'border-emerald-200 bg-emerald-50'
                         : isActive
                           ? 'border-sky-200 bg-sky-50'
                           : 'border-slate-100 bg-slate-50'
-                      }`}
+                    }`}
                   >
                     <div className='flex items-center justify-between gap-3'>
                       <div>
@@ -792,13 +760,15 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
                         </div>
                       </div>
                       <div className='text-2xl'>
-                        {isDone ? '✓' : obstacle.action === 'duck'
-                          ? '🦆'
-                          : obstacle.action === 'jump'
-                            ? '🪵'
-                            : obstacle.action === 'sidestep-left'
-                              ? '⬅️'
-                              : '➡️'}
+                        {isDone
+                          ? '✓'
+                          : obstacle.action === 'duck'
+                            ? '🦆'
+                            : obstacle.action === 'jump'
+                              ? '🪵'
+                              : obstacle.action === 'sidestep-left'
+                                ? '⬅️'
+                                : '➡️'}
                       </div>
                     </div>
                   </div>
@@ -817,10 +787,11 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
                   return (
                     <div
                       key={laneLabel}
-                      className={`relative rounded-[1.5rem] border-2 p-4 ${obstacleHere
+                      className={`relative rounded-[1.5rem] border-2 p-4 ${
+                        obstacleHere
                           ? 'border-sky-200 bg-sky-50'
                           : 'border-slate-100 bg-slate-50'
-                        }`}
+                      }`}
                     >
                       <div className='mb-3 text-center text-xs font-bold uppercase tracking-[0.2em] text-slate-500'>
                         {laneLabel}
@@ -861,10 +832,11 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
 
                       <div className='absolute inset-x-0 bottom-4 flex justify-center'>
                         <div
-                          className={`rounded-full border-4 px-5 py-3 text-2xl shadow-md ${playerHere
+                          className={`rounded-full border-4 px-5 py-3 text-2xl shadow-md ${
+                            playerHere
                               ? 'border-emerald-300 bg-emerald-100'
                               : 'border-slate-200 bg-white'
-                            }`}
+                          }`}
                         >
                           🧒
                         </div>
@@ -935,7 +907,11 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
       {scorePopup && (
         <div
           className='fixed z-50 pointer-events-none animate-bounce'
-          style={{ left: `${scorePopup.x}%`, top: `${scorePopup.y}%`, transform: 'translate(-50%, -50%)' }}
+          style={{
+            left: `${scorePopup.x}%`,
+            top: `${scorePopup.y}%`,
+            transform: 'translate(-50%, -50%)',
+          }}
         >
           <div className='bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-2 rounded-full font-bold text-xl shadow-lg'>
             +{scorePopup.value}
@@ -947,10 +923,17 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
       {showStreakMilestone && (
         <div className='fixed inset-0 z-50 flex items-center justify-center pointer-events-none'>
           <div className='bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-3xl font-black text-3xl shadow-2xl animate-pulse'>
-            <div className='flex items-center justify-center gap-2'><KenneyIcon type='heart' size={20} /> {streak} Streak! <KenneyIcon type='heart' size={20} /></div>
+            <div className='flex items-center justify-center gap-2'>
+              <KenneyIcon type='heart' size={20} /> {streak} Streak!{' '}
+              <KenneyIcon type='heart' size={20} />
+            </div>
           </div>
         </div>
       )}
+      {cursor && (
+        <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
+      )}
+      </div>
     </GameContainer>
   );
 });
@@ -958,8 +941,8 @@ const ObstacleCourseContent = memo(function ObstacleCourse() {
 export const ObstacleCourse = memo(function ObstacleCourseShell() {
   return (
     <GameShell
-      gameId="obstacle-course"
-      gameName="Obstacle Course"
+      gameId='obstacle-course'
+      gameName='Obstacle Course'
       showWellnessTimer={true}
       enableErrorBoundary={true}
     >

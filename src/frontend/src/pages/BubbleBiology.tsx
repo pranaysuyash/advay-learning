@@ -28,6 +28,11 @@ import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   CELL_TYPES,
   LEVEL_CONFIG,
@@ -57,6 +62,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   const isPlayingRef = useRef(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [feedback, setFeedback] = useState('Pinch cells to grab them!');
+  const [cursor, setCursor] = useState<Point | null>(null);
   
   // Streak tracking
   const { streak, incrementStreak, resetStreak } = useStreakTracking();
@@ -65,6 +71,21 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   const { playPop, playSuccess, playError, playCelebration: playCelebrationSound } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { completeGame, saveProgress } = useGameCompletion('bubble-biology');
+
+  const handleHandFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef: handTrackingWebcamRef } = useGameHandTracking({
+    gameName: 'BubbleBiology',
+    targetFps: 30,
+    isRunning: !showMenu,
+    onFrame: handleHandFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
   
   // isPlayingRef is kept in sync synchronously in handleStart / stopGame
   // (useEffect would be asynchronous and could miss the first animation frame)
@@ -326,6 +347,13 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
     };
   }, []);
   
+  // Auto-start hand tracking when game is playing
+  useEffect(() => {
+    if (!showMenu && !isHandTrackingReady && !isModelLoading) {
+      startTracking();
+    }
+  }, [showMenu, isHandTrackingReady, isModelLoading, startTracking]);
+  
   // Menu controls
   const menuControls: GameControl[] = [
     { id: 'play', label: 'Play', icon: 'play', onClick: handleStart },
@@ -416,7 +444,7 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
   };
   
   return (
-    <GameContainer onHome={() => navigate('/games')}>
+    <GameContainer onHome={() => navigate('/games')} isHandDetected={cursor !== null} isPlaying={!showMenu} webcamRef={handTrackingWebcamRef}>
       <VoiceInstructions
         instructions="Welcome to Bubble Biology! Pinch cells and drop them in the matching jars!"
       />
@@ -497,6 +525,17 @@ const BubbleBiologyContent = memo(function BubbleBiologyContent() {
           >
             Done
           </button>
+          
+          {/* Hand tracking cursor */}
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace='normalized'
+              containerRef={canvasRef}
+              isPinching={isGrabbing}
+              isHandDetected={cursor !== null}
+            />
+          )}
         </div>
       )}
       

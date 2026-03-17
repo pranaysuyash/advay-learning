@@ -2,7 +2,7 @@ import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF, Html, useAnimations } from '@react-three/drei';
-import { useBox, useSphere, Physics } from '@react-three/cannon';
+import { RigidBody, Physics } from '@react-three/rapier';
 import * as THREE from 'three';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
 import { GameShell } from '../../components/GameShell';
@@ -43,13 +43,7 @@ function FoodItem({
   position: [number, number, number];
   onFeed: () => void;
 }) {
-  const [ref, api] = useSphere(() => ({
-    mass: 1,
-    position,
-    args: [0.3],
-    material: { friction: 0.5, restitution: 0.3 },
-  }));
-
+  const rigidBodyRef = useRef<any>(null);
   const { scene } = useGLTF(`/assets/kenney/3d/food/${food.id}.glb`);
 
   const foodScene = useMemo(() => {
@@ -62,17 +56,34 @@ function FoodItem({
     return clone;
   }, [scene]);
 
+  const handleFoodClick = () => {
+    if (rigidBodyRef.current) {
+      // Launch food toward monster
+      rigidBodyRef.current.setLinvel(
+        {
+          x: (Math.random() - 0.5) * 2,
+          y: 8,
+          z: 5 + Math.random() * 2,
+        },
+        true,
+      );
+      onFeed();
+    }
+  };
+
   return (
-    <group
-      ref={ref}
-      onClick={() => {
-        // Launch food toward monster
-        api.velocity.set((Math.random() - 0.5) * 2, 8, 5 + Math.random() * 2);
-        onFeed();
-      }}
+    <RigidBody
+      ref={rigidBodyRef}
+      position={position}
+      mass={1}
+      colliders='ball'
+      friction={0.5}
+      restitution={0.3}
     >
-      <primitive object={foodScene} scale={0.4} />
-    </group>
+      <group onClick={handleFoodClick}>
+        <primitive object={foodScene} scale={0.4} />
+      </group>
+    </RigidBody>
   );
 }
 
@@ -155,17 +166,13 @@ function Monster({ state }: { state: (typeof monsterStates)[number] }) {
 
 // Ground
 function Ground() {
-  const [ref] = useBox(() => ({
-    type: 'Static',
-    position: [0, -2, 0],
-    args: [15, 1, 10],
-  }));
-
   return (
-    <mesh ref={ref} receiveShadow>
-      <boxGeometry args={[15, 1, 10]} />
-      <meshStandardMaterial color='#3d5a80' />
-    </mesh>
+    <RigidBody type='fixed' position={[0, -2, 0]} colliders='cuboid'>
+      <mesh receiveShadow>
+        <boxGeometry args={[15, 1, 10]} />
+        <meshStandardMaterial color='#3d5a80' />
+      </mesh>
+    </RigidBody>
   );
 }
 

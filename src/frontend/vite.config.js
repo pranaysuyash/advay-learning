@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { readFileSync } from 'fs';
 import { execSync } from 'child_process';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // Get version from package.json
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8'));
@@ -31,11 +32,9 @@ const getAppChunk = (id, betaThreeDGamesEnabled = false) => {
   }
   if (
     betaThreeDGamesEnabled &&
-    (
-      id.includes('/src/components/game/three/') ||
+    (id.includes('/src/components/game/three/') ||
       id.includes('/src/hooks/use3DGameAudio.ts') ||
-      id.includes('/src/hooks/usePerformanceMonitor.ts')
-    )
+      id.includes('/src/hooks/usePerformanceMonitor.ts'))
   ) {
     return 'app-3d';
   }
@@ -62,26 +61,26 @@ const getVendorChunks = (betaThreeDGamesEnabled = false) => {
     'react-router-dom': 'router-runtime',
     'chart.js': 'charts-runtime',
     'react-chartjs-2': 'charts-runtime',
-    'react': 'react-core',
+    react: 'react-core',
     'react-dom': 'react-core',
-    'scheduler': 'react-core',
-    'zustand': 'state-runtime',
+    scheduler: 'react-core',
+    zustand: 'state-runtime',
     '@tanstack/react-query': 'query-runtime',
-    'axios': 'network-runtime',
+    axios: 'network-runtime',
     'lucide-react': 'icons-runtime',
-    'i18next': 'i18n-runtime',
+    i18next: 'i18n-runtime',
     'react-i18next': 'i18n-runtime',
     'i18next-browser-languagedetector': 'i18n-runtime',
     'i18next-http-backend': 'i18n-runtime',
   };
-  
+
   if (betaThreeDGamesEnabled) {
     Object.assign(chunks, {
-      'three': 'three-core',
+      three: 'three-core',
       'three-stdlib': 'three-stdlib-runtime',
       'camera-controls': 'three-stdlib-runtime',
-      'maath': 'three-helpers-runtime',
-      'meshline': 'three-helpers-runtime',
+      maath: 'three-helpers-runtime',
+      meshline: 'three-helpers-runtime',
       'troika-three-text': 'three-text-runtime',
       'troika-three-utils': 'three-text-runtime',
       'troika-worker-utils': 'three-text-runtime',
@@ -95,14 +94,14 @@ const getVendorChunks = (betaThreeDGamesEnabled = false) => {
       '@react-spring/three': 'spring-3d-runtime',
     });
   }
-  
+
   return chunks;
 };
 
 export default defineConfig(({ mode }) => {
   // Load env variables from .env files
   const env = loadEnv(mode, process.cwd(), '');
-  
+
   // Default to enabled for launch builds unless explicitly disabled.
   const betaLocalAIEnabled =
     String(env.VITE_BETA_LOCAL_AI_ENABLED).toLowerCase() !== 'false';
@@ -113,6 +112,16 @@ export default defineConfig(({ mode }) => {
     cacheDir: '.vite_cache_new',
     plugins: [
       react(),
+      // Bundle analysis - run with: npm run build:analyze
+      mode === 'analyze' &&
+        visualizer({
+          open: true,
+          gzipSize: true,
+          brotliSize: true,
+          filename: 'dist/stats.html',
+          title: 'Advay Vision - Bundle Analysis',
+          template: 'treemap',
+        }),
     ],
     define: {
       __APP_VERSION__: JSON.stringify(packageJson.version),
@@ -139,7 +148,9 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules')) {
               const packageName = getPackageName(id);
               const vendorChunks = getVendorChunks(betaThreeDGamesEnabled);
-              const vendorChunk = packageName ? vendorChunks[packageName] : null;
+              const vendorChunk = packageName
+                ? vendorChunks[packageName]
+                : null;
               if (vendorChunk) {
                 return vendorChunk;
               }

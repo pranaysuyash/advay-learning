@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF, Html, useKeyboardControls } from '@react-three/drei';
-import { useBox, useSphere, Physics } from '@react-three/cannon';
+import { RigidBody, Physics } from '@react-three/rapier';
 import * as THREE from 'three';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
 import { GameShell } from '../../components/GameShell';
@@ -11,28 +11,38 @@ import { use3DGameAudio } from '../../hooks/use3DGameAudio';
 import { useAutoGameCompletion } from '../../hooks/useAutoGameCompletion';
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 import { KeyboardControls } from '@react-three/drei';
-import { Trophy, RotateCcw, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Volume2, VolumeX } from 'lucide-react';
+import {
+  Trophy,
+  RotateCcw,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 
 // Player character with physics
-function Player({ startPosition, onJump, onLand, isMuted }: { startPosition: [number, number, number]; onJump: () => void; onLand: () => void; isMuted: boolean }) {
-  const [ref, api] = useSphere(() => ({
-    mass: 1,
-    position: startPosition,
-    args: [0.3],
-    material: { friction: 0.3, restitution: 0 },
-    fixedRotation: true,
-  }));
-
+function Player({
+  startPosition,
+  onJump,
+  onLand,
+  isMuted,
+}: {
+  startPosition: [number, number, number];
+  onJump: () => void;
+  onLand: () => void;
+  isMuted: boolean;
+}) {
+  const rigidBodyRef = useRef<any>(null);
   const [, getKeys] = useKeyboardControls();
   const velocity = useRef([0, 0, 0]);
   const isGrounded = useRef(false);
   const wasGrounded = useRef(false);
 
-  useEffect(() => {
-    api.velocity.subscribe((v) => (velocity.current = v));
-  }, [api]);
-
   useFrame(() => {
+    if (!rigidBodyRef.current) return;
+
     const { forward, backward, left, right, jump } = getKeys();
     const speed = 5;
     const jumpForce = 8;
@@ -46,19 +56,23 @@ function Player({ startPosition, onJump, onLand, isMuted }: { startPosition: [nu
     if (left) vx = -speed;
     if (right) vx = speed;
 
+    // Get current velocity
+    const currentVel = rigidBodyRef.current.linvel();
+    velocity.current = [currentVel.x, currentVel.y, currentVel.z];
+
     // Apply horizontal movement
-    api.velocity.set(vx, velocity.current[1], vz);
+    rigidBodyRef.current.setLinvel({ x: vx, y: currentVel.y, z: vz }, true);
 
     // Jump
     if (jump && isGrounded.current) {
-      api.velocity.set(vx, jumpForce, vz);
+      rigidBodyRef.current.setLinvel({ x: vx, y: jumpForce, z: vz }, true);
       isGrounded.current = false;
       onJump();
     }
 
     // Check if grounded (simple check)
     wasGrounded.current = isGrounded.current;
-    if (Math.abs(velocity.current[1]) < 0.1) {
+    if (Math.abs(currentVel.y) < 0.1) {
       isGrounded.current = true;
       // Play landing sound when just landed
       if (!wasGrounded.current && !isMuted) {
@@ -83,22 +97,30 @@ function Player({ startPosition, onJump, onLand, isMuted }: { startPosition: [nu
   }, [scene]);
 
   return (
-    <group ref={ref}>
+    <RigidBody
+      ref={rigidBodyRef}
+      position={startPosition}
+      mass={1}
+      colliders='ball'
+      restitution={0}
+      friction={0.3}
+      lockRotations
+    >
       <primitive object={characterScene} scale={0.4} position={[0, -0.3, 0]} />
-    </group>
+    </RigidBody>
   );
 }
 
 // Platform component
-function Platform({ position, type = 'grass' }: { position: [number, number, number]; type?: string }) {
+function Platform({
+  position,
+  type = 'grass',
+}: {
+  position: [number, number, number];
+  type?: string;
+}) {
   const modelPath = `/assets/kenney/3d/platformer/block-${type}-large.glb`;
   const { scene } = useGLTF(modelPath);
-
-  const [ref] = useBox(() => ({
-    type: 'Static',
-    position,
-    args: [1, 1, 1],
-  }));
 
   const platformScene = useMemo(() => {
     const clone = scene.clone();
@@ -111,27 +133,21 @@ function Platform({ position, type = 'grass' }: { position: [number, number, num
     return clone;
   }, [scene]);
 
-  return <primitive ref={ref} object={platformScene} scale={0.5} />;
+  return (
+    <RigidBody type='fixed' position={position} colliders='cuboid'>
+      <primitive object={platformScene} scale={0.5} />
+    </RigidBody>
+  );
 }
 
 // Spike hazard
 function Spike({ position }: { position: [number, number, number] }) {
   const { scene } = useGLTF('/assets/kenney/3d/platformer/spike-block.glb');
 
-  const [ref] = useBox(() => ({
-    type: 'Static',
-    position,
-    args: [0.8, 0.8, 0.8],
-    isTrigger: true,
-  }));
-
   return (
-    <primitive
-      ref={ref}
-      object={scene}
-      position={position}
-      scale={0.4}
-    />
+    <RigidBody type='fixed' position={position} colliders='cuboid' sensor>
+      <primitive object={scene} scale={0.4} />
+    </RigidBody>
   );
 }
 
@@ -152,7 +168,8 @@ function Coin({
   useFrame(({ clock }) => {
     if (coinRef.current && !collected) {
       coinRef.current.rotation.y = clock.getElapsedTime() * 3;
-      coinRef.current.position.y = position[1] + Math.sin(clock.getElapsedTime() * 3) * 0.1;
+      coinRef.current.position.y =
+        position[1] + Math.sin(clock.getElapsedTime() * 3) * 0.1;
     }
   });
 
@@ -174,7 +191,13 @@ function Coin({
 }
 
 // Finish flag
-function FinishFlag({ position, onReach }: { position: [number, number, number]; onReach: () => void }) {
+function FinishFlag({
+  position,
+  onReach,
+}: {
+  position: [number, number, number];
+  onReach: () => void;
+}) {
   const { scene } = useGLTF('/assets/kenney/3d/platformer/flag.glb');
 
   return (
@@ -232,7 +255,7 @@ function Level({
       { pos: [14, 2, 0], type: 'grass' },
       { pos: [15, 2, 0], type: 'grass' },
     ],
-    []
+    [],
   );
 
   const spikes = useMemo(() => [{ pos: [8, 1.5, 0] }], []);
@@ -245,13 +268,17 @@ function Level({
       { pos: [11, 3, 2] },
       { pos: [13, 3, 0] },
     ],
-    []
+    [],
   );
 
   return (
     <>
       {platforms.map((p, i) => (
-        <Platform key={i} position={p.pos as [number, number, number]} type={p.type} />
+        <Platform
+          key={i}
+          position={p.pos as [number, number, number]}
+          type={p.type}
+        />
       ))}
 
       {spikes.map((s, i) => (
@@ -259,7 +286,12 @@ function Level({
       ))}
 
       {coins.map((c, i) => (
-        <Coin key={i} position={c.pos as [number, number, number]} onCollect={onCoinCollect} playCollectSound={playCollectSound} />
+        <Coin
+          key={i}
+          position={c.pos as [number, number, number]}
+          onCollect={onCoinCollect}
+          playCollectSound={playCollectSound}
+        />
       ))}
 
       <FinishFlag position={[15, 3, 0]} onReach={onFinish} />
@@ -268,16 +300,12 @@ function Level({
 }
 
 // Game UI
-function GameUI({
-  score,
-}: {
-  score: number;
-}) {
+function GameUI({ score }: { score: number }) {
   return (
     <Html position={[-3, 3, 0]}>
-      <div className="bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg">
-        <div className="text-sm text-slate-400">Coins</div>
-        <div className="text-2xl font-bold flex items-center gap-2">
+      <div className='bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg'>
+        <div className='text-sm text-slate-400'>Coins</div>
+        <div className='text-2xl font-bold flex items-center gap-2'>
           🪙 {score}
         </div>
       </div>
@@ -297,7 +325,7 @@ useGLTF.preload('/assets/kenney/3d/platformer/flag.glb');
 export default function ObstacleCourse3D() {
   const navigate = useNavigate();
   const { playSFX, preload, setMuted } = use3DGameAudio();
-  
+
   // Performance monitoring
   usePerformanceMonitor('ObstacleCourse3D', {
     warnThreshold: 30,
@@ -350,81 +378,101 @@ export default function ObstacleCourse3D() {
 
   return (
     <GameShell gameId='obstacle-course-3d' gameName='Obstacle Course 3D'>
-    <GameContainer title="3D Obstacle Course" onHome={() => navigate('/games')}>
-      <KeyboardControls
-        map={[
-          { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
-          { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
-          { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
-          { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
-          { name: 'jump', keys: ['Space'] },
-        ]}
+      <GameContainer
+        title='3D Obstacle Course'
+        onHome={() => navigate('/games')}
       >
-        <div className="h-[600px] w-full rounded-xl overflow-hidden bg-[#FFF8F0] relative">
-          {/* Mute button */}
-          <button
-            onClick={toggleMute}
-            className="absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors"
-            aria-label={isMuted ? 'Unmute' : 'Mute'}
-          >
-            {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
-          </button>
-          <ThreeDGameCanvas
-            cameraPosition={[5, 5, 8]}
-            cameraTarget={[5, 1, 0]}
-            enableOrbit={false}
-            showStats={import.meta.env.DEV}
-            showFPS={import.meta.env.DEV}
-            backgroundColor="#0f172a"
-            environment="sunset"
-          >
-            <Physics gravity={[0, -20, 0]}>
-              <Player startPosition={[0, 2, 0]} onJump={handleJump} onLand={handleLand} isMuted={isMuted} />
-              <Level onCoinCollect={handleCoinCollect} playCollectSound={playCollectSound} onFinish={() => setGameWon(true)} />
-              <GameUI score={score} />
-
-              {gameWon && (
-                <Html center>
-                  <div className="bg-[#FFF8F0] text-gray-800 p-8 rounded-2xl shadow-2xl text-center">
-                    <Trophy className="w-16 h-16 mx-auto mb-4 text-yellow-400" />
-                    <h2 className="text-3xl font-bold mb-2">Level Complete!</h2>
-                    <p className="text-slate-400 mb-4">Score: {score}</p>
-                    <button
-                      onClick={resetGame}
-                      className="flex items-center gap-2 mx-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition-colors"
-                    >
-                      <RotateCcw className="w-5 h-5" />
-                      Play Again
-                    </button>
-                  </div>
-                </Html>
+        <KeyboardControls
+          map={[
+            { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
+            { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
+            { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
+            { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
+            { name: 'jump', keys: ['Space'] },
+          ]}
+        >
+          <div className='h-[600px] w-full rounded-xl overflow-hidden bg-[#FFF8F0] relative'>
+            {/* Mute button */}
+            <button
+              onClick={toggleMute}
+              className='absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors'
+              aria-label={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted ? (
+                <VolumeX className='w-5 h-5 text-white' />
+              ) : (
+                <Volume2 className='w-5 h-5 text-white' />
               )}
-            </Physics>
-          </ThreeDGameCanvas>
-        </div>
-      </KeyboardControls>
+            </button>
+            <ThreeDGameCanvas
+              cameraPosition={[5, 5, 8]}
+              cameraTarget={[5, 1, 0]}
+              enableOrbit={false}
+              showStats={import.meta.env.DEV}
+              showFPS={import.meta.env.DEV}
+              backgroundColor='#0f172a'
+              environment='sunset'
+            >
+              <Physics gravity={[0, -20, 0]}>
+                <Player
+                  startPosition={[0, 2, 0]}
+                  onJump={handleJump}
+                  onLand={handleLand}
+                  isMuted={isMuted}
+                />
+                <Level
+                  onCoinCollect={handleCoinCollect}
+                  playCollectSound={playCollectSound}
+                  onFinish={() => setGameWon(true)}
+                />
+                <GameUI score={score} />
 
-      {/* Controls */}
-      <div className="mt-4 flex justify-center gap-6 text-sm text-slate-500">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1">
-            <ArrowUp className="w-4 h-4" />
-            <ArrowDown className="w-4 h-4" />
-            <ArrowLeft className="w-4 h-4" />
-            <ArrowRight className="w-4 h-4" />
+                {gameWon && (
+                  <Html center>
+                    <div className='bg-[#FFF8F0] text-gray-800 p-8 rounded-2xl shadow-2xl text-center'>
+                      <Trophy className='w-16 h-16 mx-auto mb-4 text-yellow-400' />
+                      <h2 className='text-3xl font-bold mb-2'>
+                        Level Complete!
+                      </h2>
+                      <p className='text-slate-400 mb-4'>Score: {score}</p>
+                      <button
+                        onClick={resetGame}
+                        className='flex items-center gap-2 mx-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition-colors'
+                      >
+                        <RotateCcw className='w-5 h-5' />
+                        Play Again
+                      </button>
+                    </div>
+                  </Html>
+                )}
+              </Physics>
+            </ThreeDGameCanvas>
           </div>
-          <span>Move</span>
+        </KeyboardControls>
+
+        {/* Controls */}
+        <div className='mt-4 flex justify-center gap-6 text-sm text-slate-500'>
+          <div className='flex items-center gap-2'>
+            <div className='flex gap-1'>
+              <ArrowUp className='w-4 h-4' />
+              <ArrowDown className='w-4 h-4' />
+              <ArrowLeft className='w-4 h-4' />
+              <ArrowRight className='w-4 h-4' />
+            </div>
+            <span>Move</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <span className='px-2 py-1 bg-slate-200 rounded text-xs font-mono'>
+              SPACE
+            </span>
+            <span>Jump</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <span>🪙</span>
+            <span>Collect coins</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="px-2 py-1 bg-slate-200 rounded text-xs font-mono">SPACE</span>
-          <span>Jump</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span>🪙</span>
-          <span>Collect coins</span>
-        </div>
-      </div>
-    </GameContainer>
+      </GameContainer>
     </GameShell>
   );
 }

@@ -53,12 +53,13 @@ function MoreOrLessContent() {
     setCursor(tip);
   }, []);
 
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
     gameName: 'MoreOrLess',
     targetFps: 30,
     isRunning: !!question,
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   useEffect(() => {

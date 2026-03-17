@@ -163,6 +163,11 @@ function ColorSplashContent() {
     [handleObjectClick],
   );
 
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+    setIsHandTrackingActive(false);
+  }, []);
+
   // Initialize hand tracking
   const {
     isLoading: isModelLoading,
@@ -174,7 +179,7 @@ function ColorSplashContent() {
     targetFps: 30,
     isRunning: gameState === 'playing',
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   // Start tracking when game starts

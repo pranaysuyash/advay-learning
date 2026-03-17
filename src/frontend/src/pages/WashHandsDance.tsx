@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -34,6 +35,7 @@ const MOVEMENT_THRESHOLD = 0.015;
 
 const WashHandsDanceGame = memo(function WashHandsDanceGameComponent() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
   const [currentStep, setCurrentStep] = useState(0);
@@ -161,7 +163,11 @@ const WashHandsDanceGame = memo(function WashHandsDanceGameComponent() {
   }, [currentStep, gameState]); // intentional: speak only when step/gameState change, not on every dep
 
   return (
-    <GameContainer>
+    <GameContainer
+      webcamRef={webcamRef}
+      isHandDetected={isReady}
+    >
+      <div ref={gameAreaRef} className="relative w-full h-full">
       {/* Start Screen */}
       {gameState === 'start' && (
         <div className="flex flex-col items-center gap-8 max-w-md w-full px-4">
@@ -356,6 +362,19 @@ const WashHandsDanceGame = memo(function WashHandsDanceGameComponent() {
           </div>
         </div>
       )}
+
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={isReady}
+          size={64}
+          color="#22c55e"
+        />
+      )}
+      </div>
     </GameContainer>
   );
 });

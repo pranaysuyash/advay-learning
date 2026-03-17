@@ -8,9 +8,15 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
@@ -48,6 +54,24 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
   const { speak } = useTTS();
 
   const [state, setState] = useState<GameState>(createInitialState());
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+
+  const isPlaying = state.status === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'CircuitBuilder',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
   const [selectedTool, setSelectedTool] = useState<ComponentType | null>(null);
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -294,8 +318,11 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
       title={`Circuit Builder: ${currentChallenge?.name || ''}`}
       onHome={() => navigate('/games')}
       score={state.score}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='flex flex-col lg:flex-row gap-4 p-4'>
+      <div ref={gameAreaRef} className='flex flex-col lg:flex-row gap-4 p-4 relative'>
         {/* Toolbox */}
         <div className='lg:w-48 bg-white rounded-xl shadow-md p-4'>
           <h3 className='font-bold text-gray-700 mb-3'>Toolbox</h3>
@@ -499,6 +526,9 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
             </div>
           )}
         </div>
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
+        )}
       </div>
     </GameContainer>
   );

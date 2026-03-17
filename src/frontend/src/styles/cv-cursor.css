@@ -1,0 +1,144 @@
+/**
+ * CV Cursor Styles - Global styles for CV-controlled buttons
+ * 
+ * These styles enable visual feedback when hand cursor hovers/clicks
+ * on regular buttons (when using GlobalCVCursor as a quick fix).
+ * 
+ * Import in App.tsx:
+ * import './styles/cv-cursor.css';
+ */
+
+/* Hover state - when hand cursor is over element */
+.cv-cursor-hover,
+[data-cv-hover="true"] {
+  /* Scale up slightly */
+  transform: scale(1.1) !important;
+  
+  /* Add brightness */
+  filter: brightness(1.2) !important;
+  
+  /* Add glow border */
+  box-shadow: 
+    0 0 0 4px rgba(251, 191, 36, 0.8),
+    0 0 20px rgba(251, 191, 36, 0.5) !important;
+  
+  /* Smooth transition */
+  transition: all 0.15s ease-out !important;
+  
+  /* Ensure it's above other elements */
+  z-index: 100 !important;
+}
+
+/* Clicking state - when pinch gesture detected */
+.cv-cursor-clicking,
+[data-cv-hover="true"]:active {
+  /* Scale down slightly (press effect) */
+  transform: scale(0.95) !important;
+  
+  /* Darken slightly */
+  filter: brightness(0.9) !important;
+  
+  /* Change glow color to indicate click */
+  box-shadow: 
+    0 0 0 4px rgba(34, 197, 94, 0.8),
+    0 0 20px rgba(34, 197, 94, 0.5) !important;
+}
+
+/* Ensure buttons are clickable with CV cursor */
+.cv-cursor-hover button,
+[data-cv-hover="true"] button,
+.cv-cursor-hover a,
+[data-cv-hover="true"] a {
+  pointer-events: auto !important;
+}
+
+/* Pulse animation for hover state */
+@keyframes cv-cursor-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 4px rgba(251, 191, 36, 0.8),
+      0 0 20px rgba(251, 191, 36, 0.5);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 6px rgba(251, 191, 36, 0.6),
+      0 0 30px rgba(251, 191, 36, 0.7);
+  }
+}
+
+.cv-cursor-hover,
+[data-cv-hover="true"] {
+  animation: cv-cursor-pulse 1s ease-in-out infinite;
+}
+
+/* Disable animation during click */
+.cv-cursor-clicking,
+[data-cv-hover="true"]:active {
+  animation: none !important;
+}
+
+/* Specific styles for different button types */
+
+/* Standard HTML buttons */
+button.cv-cursor-hover,
+button[data-cv-hover="true"] {
+  /* Ensure button styling doesn't break */
+  position: relative;
+}
+
+/* Link buttons */
+a.cv-cursor-hover,
+a[data-cv-hover="true"] {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Input buttons */
+input[type="button"].cv-cursor-hover,
+input[type="submit"].cv-cursor-hover,
+input[type="reset"].cv-cursor-hover,
+input[type="checkbox"].cv-cursor-hover,
+input[type="radio"].cv-cursor-hover {
+  cursor: pointer;
+}
+
+/* Disabled elements should not show hover */
+.cv-cursor-hover:disabled,
+[data-cv-hover="true"]:disabled,
+.cv-cursor-hover[disabled],
+[data-cv-hover="true"][disabled] {
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+  opacity: 0.5;
+}
+
+/* Touch device fallback - hide CV cursor styles */
+@media (pointer: coarse) {
+  .cv-cursor-hover,
+  [data-cv-hover="true"] {
+    transform: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .cv-cursor-hover,
+  [data-cv-hover="true"] {
+    outline: 4px solid yellow !important;
+    outline-offset: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .cv-cursor-hover,
+  [data-cv-hover="true"] {
+    animation: none !important;
+    transition: none !important;
+  }
+}

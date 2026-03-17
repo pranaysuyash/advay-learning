@@ -22,6 +22,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { KenneyHandCursor } from '../components/game/KenneyHandCursor';
+import { GameCursor } from '../components/game/GameCursor';
 import Webcam from 'react-webcam';
 import type { Point, TrackedHandFrame } from '../types/tracking';
 import {
@@ -88,6 +89,7 @@ function AirGuitarHeroInner({
 
   // CV Hand tracking state
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const [cursorPx, setCursorPx] = useState<Point | null>(null);
   const [handDetected, setHandDetected] = useState(false);
   const [strumZoneActive, setStrumZoneActive] = useState(false);
@@ -266,6 +268,8 @@ function AirGuitarHeroInner({
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={handDetected}
     >
       {/* Hidden webcam for hand tracking */}
       <Webcam
@@ -289,7 +293,7 @@ function AirGuitarHeroInner({
       )}
 
       <GameBackground type="mushrooms" variant="color" className="absolute inset-0" />
-      <div className="h-full overflow-auto p-4 md:p-6 relative z-10">
+      <div ref={gameAreaRef} className="h-full overflow-auto p-4 md:p-6 relative z-10">
         <div className="max-w-2xl mx-auto space-y-4">
           {/* Level selector */}
           <div className="flex gap-2 justify-center">
@@ -659,6 +663,19 @@ function AirGuitarHeroInner({
           )}
         </div>
       </div>
+
+      {/* GameCursor for CV control */}
+      {cursorPx && (
+        <GameCursor
+          position={cursorPx}
+          coordinateSpace="viewport"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={handDetected}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameContainer>
   );
 }

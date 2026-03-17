@@ -24,41 +24,53 @@ const DEFAULT_DRAW_OPTIONS: Required<DrawOptions> = {
 };
 
 /**
- * Smooth points using moving average
- * 
+ * Smooth points using Chaikin's corner cutting algorithm for smoother curves
+ *
  * @param points - Array of points to smooth
- * @param windowSize - Size of smoothing window (default: 3)
+ * @param iterations - Number of smoothing iterations (default: 2)
  * @returns Smoothed array of points
  */
 export function smoothPoints(
   points: Point[],
-  windowSize: number = 3
+  iterations: number = 2
 ): Point[] {
-  if (points.length < windowSize) return points;
-  
-  const smoothed: Point[] = [];
-  const halfWindow = Math.floor(windowSize / 2);
-  
-  for (let i = 0; i < points.length; i++) {
-    let sumX = 0, sumY = 0, count = 0;
-    
-    // Average over window centered at current point
-    for (let j = -halfWindow; j <= halfWindow; j++) {
-      const idx = i + j;
-      if (idx >= 0 && idx < points.length) {
-        sumX += points[idx].x;
-        sumY += points[idx].y;
-        count++;
-      }
+  if (points.length < 3) return points;
+
+  let result = [...points];
+
+  for (let iter = 0; iter < iterations; iter++) {
+    if (result.length < 3) break;
+
+    const smoothed: Point[] = [];
+
+    // Keep first point
+    smoothed.push(result[0]);
+
+    // Apply Chaikin's algorithm
+    for (let i = 0; i < result.length - 1; i++) {
+      const p0 = result[i];
+      const p1 = result[i + 1];
+
+      // Q point at 25% between p0 and p1
+      smoothed.push({
+        x: 0.75 * p0.x + 0.25 * p1.x,
+        y: 0.75 * p0.y + 0.25 * p1.y,
+      });
+
+      // R point at 75% between p0 and p1
+      smoothed.push({
+        x: 0.25 * p0.x + 0.75 * p1.x,
+        y: 0.25 * p0.y + 0.75 * p1.y,
+      });
     }
-    
-    smoothed.push({
-      x: sumX / count,
-      y: sumY / count,
-    });
+
+    // Keep last point
+    smoothed.push(result[result.length - 1]);
+
+    result = smoothed;
   }
-  
-  return smoothed;
+
+  return result;
 }
 
 /**
@@ -92,8 +104,8 @@ export function buildSegments(points: Point[]): PointSegment[] {
 }
 
 /**
- * Draw segments to canvas with optional glow effect
- * 
+ * Draw segments to canvas with optional glow effect using quadratic bezier curves
+ *
  * @param ctx - Canvas rendering context
  * @param segments - Array of point segments
  * @param canvasWidth - Canvas width for coordinate scaling
@@ -109,43 +121,69 @@ export function drawSegments(
 ): void {
   const opts = { ...DEFAULT_DRAW_OPTIONS, ...options };
   const glowColor = opts.glowColor || opts.color;
-  
+
   if (segments.length === 0) return;
-  
+
   ctx.save();
-  
+
   // Set up drawing style
   ctx.strokeStyle = opts.color;
   ctx.lineWidth = opts.lineWidth;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  
+
   // Apply glow effect
   if (opts.enableGlow) {
     ctx.shadowColor = glowColor;
     ctx.shadowBlur = opts.glowBlur;
   }
-  
+
   // Draw each segment
   for (const segment of segments) {
     if (segment.length === 0) continue;
 
-    // Apply smoothing for better visual quality (matches prior in-game behavior)
-    const pointsToDraw = segment.length > 3 ? smoothPoints(segment) : segment;
-    
-    ctx.beginPath();
-    
-    // Move to first point
-    ctx.moveTo(pointsToDraw[0].x * canvasWidth, pointsToDraw[0].y * canvasHeight);
-    
-    // Draw lines to remaining points
-    for (let i = 1; i < pointsToDraw.length; i++) {
-      ctx.lineTo(pointsToDraw[i].x * canvasWidth, pointsToDraw[i].y * canvasHeight);
+    // Apply smoothing for better visual quality
+    const pointsToDraw = segment.length > 3 ? smoothPoints(segment, 2) : segment;
+
+    if (pointsToDraw.length === 1) {
+      // Single point - draw as a circle
+      const x = pointsToDraw[0].x * canvasWidth;
+      const y = pointsToDraw[0].y * canvasHeight;
+      ctx.beginPath();
+      ctx.arc(x, y, opts.lineWidth / 2, 0, Math.PI * 2);
+      ctx.fillStyle = opts.color;
+      ctx.fill();
+    } else if (pointsToDraw.length === 2) {
+      // Two points - draw straight line
+      ctx.beginPath();
+      ctx.moveTo(pointsToDraw[0].x * canvasWidth, pointsToDraw[0].y * canvasHeight);
+      ctx.lineTo(pointsToDraw[1].x * canvasWidth, pointsToDraw[1].y * canvasHeight);
+      ctx.stroke();
+    } else {
+      // Three or more points - draw using quadratic bezier curves for smoothness
+      ctx.beginPath();
+      ctx.moveTo(pointsToDraw[0].x * canvasWidth, pointsToDraw[0].y * canvasHeight);
+
+      // Draw quadratic curves through midpoints for smoothness
+      for (let i = 1; i < pointsToDraw.length - 1; i++) {
+        const xc = (pointsToDraw[i].x * canvasWidth + pointsToDraw[i + 1].x * canvasWidth) / 2;
+        const yc = (pointsToDraw[i].y * canvasHeight + pointsToDraw[i + 1].y * canvasHeight) / 2;
+        ctx.quadraticCurveTo(
+          pointsToDraw[i].x * canvasWidth,
+          pointsToDraw[i].y * canvasHeight,
+          xc,
+          yc
+        );
+      }
+
+      // Connect to the last point
+      const lastIdx = pointsToDraw.length - 1;
+      ctx.lineTo(pointsToDraw[lastIdx].x * canvasWidth, pointsToDraw[lastIdx].y * canvasHeight);
+
+      ctx.stroke();
     }
-    
-    ctx.stroke();
   }
-  
+
   ctx.restore();
 }
 
@@ -291,7 +329,7 @@ export function shouldAddPoint(
 
 /**
  * Clear canvas with optional fade effect
- * 
+ *
  * @param ctx - Canvas context
  * @param width - Canvas width
  * @param height - Canvas height
@@ -312,4 +350,72 @@ export function clearCanvas(
     ctx.fillRect(0, 0, width, height);
     ctx.restore();
   }
+}
+
+/**
+ * Draw animated direction arrow to guide tracing
+ *
+ * @param ctx - Canvas context
+ * @param canvasWidth - Canvas width
+ * @param canvasHeight - Canvas height
+ * @param letter - Letter being traced (determines arrow positions)
+ * @param progress - Animation progress (0-1)
+ * @param color - Arrow color
+ */
+export function drawDirectionArrow(
+  ctx: CanvasRenderingContext2D,
+  canvasWidth: number,
+  canvasHeight: number,
+  _letter: string, // Currently unused - could be used for letter-specific arrow paths
+  progress: number,
+  color: string = 'rgba(74, 222, 128, 0.8)'
+): void {
+  const centerX = canvasWidth / 2;
+  const centerY = canvasHeight / 2;
+  const arrowSize = Math.min(canvasWidth, canvasHeight) * 0.08;
+  const arrowOffset = arrowSize * 1.5;
+
+  // Calculate arrow position based on letter tracing direction
+  // For most letters, trace goes counter-clockwise from top
+  const angle = (progress * Math.PI * 2) - Math.PI / 2;
+  const arrowX = centerX + Math.cos(angle) * arrowOffset;
+  const arrowY = centerY + Math.sin(angle) * arrowOffset;
+
+  ctx.save();
+  ctx.translate(arrowX, arrowY);
+  ctx.rotate(angle + Math.PI / 2);
+
+  // Draw arrow
+  ctx.fillStyle = color;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 10;
+
+  ctx.beginPath();
+  ctx.moveTo(0, -arrowSize);
+  ctx.lineTo(-arrowSize * 0.6, arrowSize * 0.4);
+  ctx.lineTo(-arrowSize * 0.3, arrowSize * 0.2);
+  ctx.lineTo(-arrowSize * 0.1, arrowSize * 0.5);
+  ctx.lineTo(arrowSize * 0.1, arrowSize * 0.5);
+  ctx.lineTo(arrowSize * 0.3, arrowSize * 0.2);
+  ctx.lineTo(arrowSize * 0.6, arrowSize * 0.4);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+
+  // Draw small circles at key tracing points (top, clockwise)
+  const guidePoints = [
+    { x: centerX, y: centerY - arrowSize * 1.8 }, // top
+    { x: centerX + arrowSize * 1.8, y: centerY }, // right
+    { x: centerX, y: centerY + arrowSize * 1.8 }, // bottom
+    { x: centerX - arrowSize * 1.8, y: centerY }, // left
+  ];
+
+  guidePoints.forEach((point, idx) => {
+    const alpha = 0.3 + 0.4 * Math.sin((progress * Math.PI * 2) + (idx * Math.PI / 2));
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, arrowSize * 0.15, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(74, 222, 128, ${alpha})`;
+    ctx.fill();
+  });
 }

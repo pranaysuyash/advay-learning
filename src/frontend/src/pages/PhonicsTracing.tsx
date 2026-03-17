@@ -1,11 +1,17 @@
 import { memo, useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useProgressStore } from '../store';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -34,6 +40,8 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
   const { completeGame } = useGameCompletion('phonics-tracing');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const [currentLetter, setCurrentLetter] = useState('S');
   const [currentLevel, setCurrentLevel] = useState(1);
   const [strokePoints, setStrokePoints] = useState<TracePoint[]>([]);
@@ -48,6 +56,7 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
   const [sessionComplete, setSessionComplete] = useState(false);
   const [lastAccuracy, setLastAccuracy] = useState(0);
   const [error, setError] = useState<Error | null>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   const { playClick, playCelebration, playPop, playSuccess } = useAudio();
 
@@ -174,6 +183,25 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
       console.error('Speech synthesis failed:', err);
     }
   }, []);
+
+  // Hand tracking
+  const isPlaying = !showIntro && !sessionComplete;
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'PhonicsTracing',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) { void startTracking(); }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   useEffect(() => {
     if (showIntro && letterData) {
@@ -432,8 +460,11 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
         level={currentLevel}
         onHome={() => navigate('/games')}
         reportSession={false}
+        webcamRef={webcamRef}
+        isHandDetected={isHandTrackingReady}
+        isPlaying={isPlaying}
       >
-        <div className='flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto'>
+        <div ref={gameAreaRef} className='flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto relative'>
           {/* Level selector */}
           <div className='flex gap-2'>
             {LEVELS.map((level) => (
@@ -537,7 +568,9 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
             </motion.button>
           </div>
         </div>
-
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#8b5cf6" />
+        )}
       </GameContainer>
     </GlobalErrorBoundary>
   );

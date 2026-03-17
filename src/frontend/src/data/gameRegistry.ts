@@ -150,7 +150,10 @@ export const GAME_REGISTRY: GameManifest[] = [
 
 // ─── LOOKUP HELPERS ─────────────────────────────────────────────────────
 
-if (import.meta.env.DEV) {
+// Some environments (e.g., Playwright Node runner) may not have Vite's import.meta.env.
+// Guard against undefined to keep this module safe to import everywhere.
+const isDevEnv = typeof import.meta !== 'undefined' && (import.meta as any).env?.DEV;
+if (isDevEnv) {
   const seen = new Set<string>();
   for (const g of GAME_REGISTRY) {
     if (seen.has(g.id)) {

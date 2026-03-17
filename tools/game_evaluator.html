@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Evaluator - Learning for Kids</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .controls {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+        input, select {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            min-width: 200px;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+        .btn-secondary:hover {
+            background: #edf2f7;
+        }
+        .status {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #48bb78;
+            animation: pulse 2s infinite;
+        }
+        .status-indicator.disconnected { background: #f56565; animation: none; }
+        .status-indicator.testing { background: #ed8936; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .status-text {
+            flex: 1;
+            font-weight: 500;
+            color: #2d3748;
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .game-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        .game-card.evaluated {
+            border: 3px solid #48bb78;
+        }
+        .game-card.pending {
+            border: 3px solid #ed8936;
+        }
+        .game-preview {
+            height: 180px;
+            background: linear-gradient(135deg, #f6f8fc 0%, #eef2f6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+        .game-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .game-info {
+            padding: 16px;
+        }
+        .game-name {
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 4px;
+            font-size: 1.1rem;
+        }
+        .game-tagline {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        .game-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tag {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .tag-world { background: #ebf8ff; color: #3182ce; }
+        .tag-vibe { background: #faf5ff; color: #805ad5; }
+        .tag-cv { background: #fff5f5; color: #e53e3e; }
+        .tag-age { background: #f0fff4; color: #38a169; }
+        .evaluation-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        .eval-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .eval-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+        .eval-screenshot {
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            background: #f7fafc;
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px dashed #cbd5e0;
+        }
+        .eval-screenshot img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .criteria-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .criteria-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .criteria-label {
+            font-weight: 600;
+            color: #4a5568;
+            display: flex;
+            justify-content: space-between;
+        }
+        .rating-input {
+            display: flex;
+            gap: 4px;
+        }
+        .rating-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .rating-btn:hover {
+            border-color: #667eea;
+        }
+        .rating-btn.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        .comments-area {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .eval-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .evaluations-list {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .eval-item {
+            padding: 16px;
+            border-radius: 12px;
+            background: #f7fafc;
+            margin-bottom: 12px;
+        }
+        .eval-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .eval-game-name {
+            font-weight: 700;
+            color: #1a202c;
+        }
+        .eval-score {
+            font-weight: 700;
+            color: #48bb78;
+        }
+        .eval-scores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .mini-score {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+        .mini-score-label { color: #718096; }
+        .mini-score-value { font-weight: 600; color: #2d3748; }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .hidden { display: none; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #f6f8fc 0%, #eef2f6 100%);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Game Evaluator</h1>
+        <p class="subtitle">Test and evaluate random games on visuals, appeal, mechanism, rules, learnings & fun</p>
+
+        <div class="status">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <div class="status-text" id="statusText">Ready to connect</div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Dev Server URL</label>
+                <input type="text" id="serverUrl" value="http://localhost:5173" placeholder="http://localhost:5173">
+            </div>
+            <div class="control-group">
+                <label>Number of Games</label>
+                <select id="gameCount">
+                    <option value="3">3 Random Games</option>
+                    <option value="5">5 Random Games</option>
+                    <option value="10">10 Random Games</option>
+                    <option value="all">All Games</option>
+                </select>
+            </div>
+            <button class="btn-primary" id="connectBtn">
+                <span>🔗</span> Connect & Load Games
+            </button>
+            <button class="btn-secondary" id="randomBtn" disabled>
+                <span>🎲</span> Pick Random Game
+            </button>
+            <button class="btn-secondary" id="exportBtn" disabled>
+                <span>📊</span> Export Results
+            </button>
+        </div>
+
+        <div class="stats hidden" id="statsPanel">
+            <div class="stat-card">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total Games</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statEvaluated">0</div>
+                <div class="stat-label">Evaluated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statAvgScore">-</div>
+                <div class="stat-label">Avg Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statTopGame">-</div>
+                <div class="stat-label">Top Game</div>
+            </div>
+        </div>
+
+        <div class="games-grid" id="gamesGrid"></div>
+
+        <div class="evaluation-panel hidden" id="evalPanel">
+            <div class="eval-header">
+                <div>
+                    <div class="eval-title" id="evalGameName">Game Name</div>
+                    <div style="color: #718096;" id="evalGamePath"></div>
+                </div>
+                <button class="btn-secondary" id="closeEvalBtn">✕ Close</button>
+            </div>
+            <div class="eval-screenshot" id="evalScreenshot">
+                <span style="color: #a0aec0; font-size: 3rem;">📸</span>
+            </div>
+            <div class="criteria-grid">
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <span>🎨 Visuals</span>
+                        <span id="visualsScore">-</span>
+                    </div>
+                    <div class="rating-input" data-criteria="visuals">
+                        <button class="rating-btn" data-value="1">1</button>
+                        <button class="rating-btn" data-value="2">2</button>
+                        <button class="rating-btn" data-value="3">3</button>
+                        <button class="rating-btn" data-value="4">4</button>
+                        <button class="rating-btn" data-value="5">5</button>
+                    </div>
+                </div>
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <span>✨ Appeal</span>
+                        <span id="appealScore">-</span>
+                    </div>
+                    <div class="rating-input" data-criteria="appeal">
+                        <button class="rating-btn" data-value="1">1</button>
+                        <button class="rating-btn" data-value="2">2</button>
+                        <button class="rating-btn" data-value="3">3</button>
+                        <button class="rating-btn" data-value="4">4</button>
+                        <button class="rating-btn" data-value="5">5</button>
+                    </div>
+                </div>
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <span>⚙️ Mechanism</span>
+                        <span id="mechanismScore">-</span>
+                    </div>
+                    <div class="rating-input" data-criteria="mechanism">
+                        <button class="rating-btn" data-value="1">1</button>
+                        <button class="rating-btn" data-value="2">2</button>
+                        <button class="rating-btn" data-value="3">3</button>
+                        <button class="rating-btn" data-value="4">4</button>
+                        <button class="rating-btn" data-value="5">5</button>
+                    </div>
+                </div>
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <span>📜 Rules</span>
+                        <span id="rulesScore">-</span>
+                    </div>
+                    <div class="rating-input" data-criteria="rules">
+                        <button class="rating-btn" data-value="1">1</button>
+                        <button class="rating-btn" data-value="2">2</button>
+                        <button class="rating-btn" data-value="3">3</button>
+                        <button class="rating-btn" data-value="4">4</button>
+                        <button class="rating-btn" data-value="5">5</button>
+                    </div>
+                </div>
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <span>🧠 Learnings</span>
+                        <span id="learningsScore">-</span>
+                    </div>
+                    <div class="rating-input" data-criteria="learnings">
+                        <button class="rating-btn" data-value="1">1</button>
+                        <button class="rating-btn" data-value="2">2</button>
+                        <button class="rating-btn" data-value="3">3</button>
+                        <button class="rating-btn" data-value="4">4</button>
+                        <button class="rating-btn" data-value="5">5</button>
+                    </div>
+                </div>
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <span>🎉 Fun Factor</span>
+                        <span id="funScore">-</span>
+                    </div>
+                    <div class="rating-input" data-criteria="fun">
+                        <button class="rating-btn" data-value="1">1</button>
+                        <button class="rating-btn" data-value="2">2</button>
+                        <button class="rating-btn" data-value="3">3</button>
+                        <button class="rating-btn" data-value="4">4</button>
+                        <button class="rating-btn" data-value="5">5</button>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group" style="width: 100%;">
+                <label>Notes & Observations</label>
+                <textarea class="comments-area" id="evalNotes" placeholder="What stood out? What could be improved? Any bugs or issues?"></textarea>
+            </div>
+            <div class="eval-actions">
+                <button class="btn-secondary" id="skipBtn">⏭️ Skip</button>
+                <button class="btn-primary" id="saveEvalBtn">💾 Save Evaluation</button>
+            </div>
+        </div>
+
+        <div class="evaluations-list hidden" id="evaluationsList">
+            <h3 style="margin-bottom: 16px; color: #1a202c;">📋 Completed Evaluations</h3>
+            <div id="evaluationsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let allGames = [];
+        let gameQueue = [];
+        let currentGame = null;
+        let evaluations = [];
+        let browserTabs = [];
+        let currentRatings = {};
+
+        // DOM Elements
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const serverUrlInput = document.getElementById('serverUrl');
+        const connectBtn = document.getElementById('connectBtn');
+        const randomBtn = document.getElementById('randomBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const gamesGrid = document.getElementById('gamesGrid');
+        const evalPanel = document.getElementById('evalPanel');
+        const statsPanel = document.getElementById('statsPanel');
+
+        // Set status
+        function setStatus(type, message) {
+            statusIndicator.className = 'status-indicator';
+            if (type === 'connected') statusIndicator.classList.add('disconnected');
+            if (type === 'testing') statusIndicator.classList.add('testing');
+            statusText.textContent = message;
+        }
+
+        // Connect to server and load games
+        connectBtn.addEventListener('click', async () => {
+            const baseUrl = serverUrlInput.value;
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = '<span class="spinner"></span> Connecting...';
+            setStatus('testing', 'Connecting to dev server...');
+
+            try {
+                // Fetch the games page
+                const response = await fetch(`${baseUrl}/`);
+                if (!response.ok) throw new Error('Could not connect to server');
+
+                // Try to extract games from the page
+                const html = await response.text();
+                setStatus('connected', 'Connected! Parsing games...');
+
+                // Parse games - we'll need to fetch from the game registry
+                await loadGamesFromRegistry(baseUrl);
+
+                connectBtn.innerHTML = '<span>✓</span> Connected';
+                connectBtn.classList.remove('btn-primary');
+                connectBtn.classList.add('btn-secondary');
+                randomBtn.disabled = false;
+                exportBtn.disabled = false;
+                statsPanel.classList.remove('hidden');
+                document.getElementById('statTotal').textContent = allGames.length;
+
+            } catch (error) {
+                setStatus('disconnected', `Error: ${error.message}`);
+                connectBtn.disabled = false;
+                connectBtn.innerHTML = '<span>🔗</span> Connect & Load Games';
+            }
+        });
+
+        // Load games from registry
+        async function loadGamesFromRegistry(baseUrl) {
+            try {
+                // Try to get game data by scanning common paths
+                const gamePaths = [
+                    '/games/alphabet-tracing',
+                    '/games/letter-hunt',
+                    '/games/finger-number-show',
+                    '/games/number-tap-trail',
+                    '/games/number-tracing',
+                    '/games/math-monsters',
+                    '/games/math-jumpers',
+                    '/games/simple-addition',
+                ];
+
+                // Get more games from the games page
+                const gamesResponse = await fetch(`${baseUrl}/games`);
+                const gamesHtml = await gamesResponse.text();
+
+                // Extract game links from the page
+                const linkRegex = /href="\/games\/([^"]+)"/g;
+                let match;
+                const seenPaths = new Set();
+
+                while ((match = linkRegex.exec(gamesHtml)) !== null) {
+                    seenPaths.add(match[1]);
+                }
+
+                // Build games list
+                allGames = Array.from(seenPaths).map(path => ({
+                    id: path.replace('/games/', ''),
+                    path: `/games/${path}`,
+                    name: formatGameName(path),
+                    tagline: 'An amazing learning game!',
+                    world: 'Unknown',
+                    vibe: 'chill',
+                    ageRange: '3-8',
+                    cv: []
+                }));
+
+                renderGamesGrid(allGames);
+
+            } catch (error) {
+                console.error('Error loading games:', error);
+                // Fallback: use hardcoded list
+                allGames = [
+                    { id: 'alphabet-tracing', path: '/games/alphabet-tracing', name: 'Draw Letters', tagline: 'Draw letters with your finger!', world: 'letter-land', vibe: 'chill', ageRange: '2-8', cv: ['hand', 'face'] },
+                    { id: 'letter-hunt', path: '/games/letter-hunt', name: 'Find the Letter', tagline: 'Hidden letters are everywhere!', world: 'letter-land', vibe: 'active', ageRange: '2-6', cv: ['hand'] },
+                    { id: 'finger-number-show', path: '/games/finger-number-show', name: 'Finger Counting', tagline: 'Show numbers with your fingers!', world: 'number-jungle', vibe: 'chill', ageRange: '3-7', cv: ['hand'] },
+                    { id: 'number-tap-trail', path: '/games/number-tap-trail', name: 'Number Tap Trail', tagline: 'Tap numbers in order!', world: 'number-jungle', vibe: 'active', ageRange: '4-8', cv: ['hand'] },
+                    { id: 'number-tracing', path: '/games/number-tracing', name: 'Number Tracing', tagline: 'Trace digits from 0 to 9!', world: 'number-jungle', vibe: 'chill', ageRange: '4-7', cv: ['hand'] },
+                    { id: 'math-monsters', path: '/games/math-monsters', name: 'Math Monsters', tagline: 'Feed hungry monsters!', world: 'number-jungle', vibe: 'brainy', ageRange: '5-8', cv: ['hand'] },
+                    { id: 'math-jumpers', path: '/games/math-jumpers', name: 'Math Jumpers', tagline: 'Jump to the correct answer!', world: 'number-jungle', vibe: 'active', ageRange: '4-7', cv: ['hand'] },
+                    { id: 'simple-addition', path: '/games/simple-addition', name: 'Simple Addition', tagline: 'Add numbers with pictures!', world: 'number-jungle', vibe: 'educational', ageRange: '4-7', cv: ['hand'] },
+                ];
+                renderGamesGrid(allGames);
+            }
+        }
+
+        function formatGameName(path) {
+            return path.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+
+        function renderGamesGrid(games) {
+            gamesGrid.innerHTML = games.map(game => `
+                <div class="game-card ${evaluations.find(e => e.id === game.id) ? 'evaluated' : ''}" data-game-id="${game.id}">
+                    <div class="game-preview">
+                        <img src="${serverUrlInput.value}/assets/previews/${game.id}.png"
+                             onerror="this.style.display='none'; this.parentNode.innerHTML='🎮'"
+                             alt="${game.name}">
+                    </div>
+                    <div class="game-info">
+                        <div class="game-name">${game.name}</div>
+                        <div class="game-tagline">${game.tagline}</div>
+                        <div class="game-meta">
+                            <span class="tag tag-world">${game.world}</span>
+                            <span class="tag tag-vibe">${game.vibe}</span>
+                            <span class="tag tag-age">${game.ageRange}y</span>
+                            ${game.cv.map(c => `<span class="tag tag-cv">${c}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const gameId = card.dataset.gameId;
+                    const game = allGames.find(g => g.id === gameId);
+                    if (game) openEvaluation(game);
+                });
+            });
+        }
+
+        // Pick random game
+        randomBtn.addEventListener('click', () => {
+            const count = document.getElementById('gameCount').value;
+            let pool = allGames.filter(g => !evaluations.find(e => e.id === g.id));
+
+            if (pool.length === 0) {
+                alert('All games have been evaluated! 🎉');
+                return;
+            }
+
+            if (count !== 'all') {
+                pool = pool.sort(() => Math.random() - 0.5).slice(0, parseInt(count));
+            }
+
+            gameQueue = pool;
+            evaluateNextGame();
+        });
+
+        function evaluateNextGame() {
+            if (gameQueue.length === 0) {
+                alert('Evaluation complete! 🎉');
+                return;
+            }
+
+            const game = gameQueue.shift();
+            openEvaluation(game);
+        }
+
+        function openEvaluation(game) {
+            currentGame = game;
+            currentRatings = {};
+
+            document.getElementById('evalGameName').textContent = game.name;
+            document.getElementById('evalGamePath').textContent = game.path;
+            document.getElementById('evalNotes').value = '';
+
+            // Reset ratings
+            document.querySelectorAll('.rating-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('[id$="Score"]').forEach(el => el.textContent = '-');
+
+            evalPanel.classList.remove('hidden');
+
+            // Try to capture screenshot
+            captureGameScreenshot(game);
+        }
+
+        async function captureGameScreenshot(game) {
+            const baseUrl = serverUrlInput.value;
+            const screenshotContainer = document.getElementById('evalScreenshot');
+            screenshotContainer.innerHTML = '<span class="spinner"></span>';
+
+            // Open game in new tab for manual screenshot/capture
+            // Since we can't use CDP directly from this HTML page, we'll provide a link
+            screenshotContainer.innerHTML = `
+                <div style="text-align: center;">
+                    <p style="color: #718096; margin-bottom: 16px;">Click below to open the game and take a screenshot</p>
+                    <a href="${baseUrl}${game.path}" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-block;">
+                        🎮 Open Game in New Tab
+                    </a>
+                    <p style="color: #a0aec0; margin-top: 16px; font-size: 0.9rem;">
+                        Tip: Take a screenshot and paste it below for visual reference
+                    </p>
+                </div>
+            `;
+        }
+
+        // Handle paste events for screenshots
+        evalPanel.addEventListener('paste', (e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (const item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        document.getElementById('evalScreenshot').innerHTML = `
+                            <img src="${event.target.result}" alt="Screenshot">
+                        `;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+        // Rating buttons
+        document.querySelectorAll('.rating-input').forEach(input => {
+            input.querySelectorAll('.rating-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const criteria = input.dataset.criteria;
+                    const value = parseInt(btn.dataset.value);
+
+                    // Update UI
+                    input.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    document.getElementById(`${criteria}Score`).textContent = value;
+
+                    // Store rating
+                    currentRatings[criteria] = value;
+                });
+            });
+        });
+
+        // Save evaluation
+        document.getElementById('saveEvalBtn').addEventListener('click', () => {
+            if (!currentGame) return;
+
+            const evaluation = {
+                id: currentGame.id,
+                name: currentGame.name,
+                path: currentGame.path,
+                ratings: { ...currentRatings },
+                notes: document.getElementById('evalNotes').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // Calculate overall score
+            const scores = Object.values(evaluation.ratings);
+            evaluation.overallScore = scores.length > 0
+                ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 10) / 10
+                : 0;
+
+            evaluations.push(evaluation);
+            updateEvaluationsList();
+            updateStats();
+
+            // Update game card
+            document.querySelector(`[data-game-id="${currentGame.id}"]`)?.classList.add('evaluated');
+
+            evalPanel.classList.add('hidden');
+            evaluateNextGame();
+        });
+
+        // Skip evaluation
+        document.getElementById('skipBtn').addEventListener('click', () => {
+            evalPanel.classList.add('hidden');
+            evaluateNextGame();
+        });
+
+        // Close evaluation
+        document.getElementById('closeEvalBtn').addEventListener('click', () => {
+            evalPanel.classList.add('hidden');
+        });
+
+        function updateEvaluationsList() {
+            const container = document.getElementById('evaluationsContainer');
+            const list = document.getElementById('evaluationsList');
+
+            if (evaluations.length === 0) {
+                list.classList.add('hidden');
+                return;
+            }
+
+            list.classList.remove('hidden');
+            container.innerHTML = evaluations.map(e => `
+                <div class="eval-item">
+                    <div class="eval-item-header">
+                        <span class="eval-game-name">${e.name}</span>
+                        <span class="eval-score">⭐ ${e.overallScore}</span>
+                    </div>
+                    <div class="eval-scores">
+                        ${Object.entries(e.ratings).map(([key, value]) => `
+                            <div class="mini-score">
+                                <span class="mini-score-label">${key}:</span>
+                                <span class="mini-score-value">${value}/5</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${e.notes ? `<div style="color: #4a5568; margin-top: 8px;">${e.notes}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('statEvaluated').textContent = evaluations.length;
+
+            if (evaluations.length > 0) {
+                const avg = evaluations.reduce((a, e) => a + e.overallScore, 0) / evaluations.length;
+                document.getElementById('statAvgScore').textContent = avg.toFixed(1);
+
+                const top = evaluations.reduce((a, b) => a.overallScore > b.overallScore ? a : b);
+                document.getElementById('statTopGame').textContent = top.name.substring(0, 10) + '...';
+            }
+        }
+
+        // Export results
+        exportBtn.addEventListener('click', () => {
+            if (evaluations.length === 0) {
+                alert('No evaluations to export!');
+                return;
+            }
+
+            const data = {
+                exportDate: new Date().toISOString(),
+                totalGames: allGames.length,
+                evaluatedGames: evaluations.length,
+                evaluations: evaluations
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `game-evaluations-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>

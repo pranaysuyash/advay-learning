@@ -19,6 +19,7 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameShell } from '../components/GameShell';
 import { useGameCompletion } from '../hooks/useGameCompletion';
@@ -78,14 +79,20 @@ const ShapeSafariContent = memo(function ShapeSafari() {
 
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const isPointerDownRef = useRef(false);
   const lastFoundTimeRef = useRef(0);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   // ===== HAND TRACKING =====
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
-    if (!frame.indexTip || !canvasRef.current || !gameState?.currentScene) return;
+    if (!frame.indexTip || !canvasRef.current || !gameState?.currentScene) {
+      if (!frame.indexTip) setCursor(null);
+      return;
+    }
 
     const { x, y } = frame.indexTip;
+    setCursor({ x, y });
     const canvas = canvasRef.current;
 
     // Check if near a shape outline
@@ -450,12 +457,13 @@ const ShapeSafariContent = memo(function ShapeSafari() {
 
   // ===== RENDER =====
   return (
-    <GameContainer webcamRef={webcamRef} title="Shape Safari" onHome={handleShowMenu}>
+    <GameContainer webcamRef={webcamRef} title="Shape Safari" onHome={handleShowMenu} isHandDetected={!trackingLoss.isLost}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
 
       </div>
 
+      <div ref={gameAreaRef} className="relative w-full h-full">
       {showMenu ? (
         // ===== SCENE SELECTION MENU =====
         <div className="flex flex-col items-center justify-center h-full p-6">
@@ -667,6 +675,7 @@ const ShapeSafariContent = memo(function ShapeSafari() {
           </div>
         </div>
       )}
+      </div>
 
       {/* Celebration Overlay */}
       <CelebrationOverlay
@@ -685,6 +694,17 @@ const ShapeSafariContent = memo(function ShapeSafari() {
         fallbackAvailable={fallbackEnabled}
         onExitToGames={handleShowMenu}
       />
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameContainer>
   );
 });

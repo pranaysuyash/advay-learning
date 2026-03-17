@@ -6,7 +6,7 @@
  * @ticket TCK-20260310-011
  */
 
-import { memo, useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -28,6 +28,13 @@ import {
   calculateStars,
 } from '../games/setTableLogic';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
+import Webcam from 'react-webcam';
+import { GameCursor } from '../components/game/GameCursor';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { GameContainer } from '../components/GameContainer';
 
 const TABLE_ITEMS_NEEDED = 4;
 
@@ -44,6 +51,10 @@ function SetTheTableGame() {
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({ x: 0, y: 0 });
   const [isPinching, setIsPinching] = useState(false);
 
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+
   const { playSuccess, playCelebration, playClick, playPop } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { completeGame } = useGameCompletion('set-the-table');
@@ -55,6 +66,24 @@ function SetTheTableGame() {
     isPlaying: gameState === 'playing',
     metaData: { itemsPlaced: placedItems.length },
   });
+
+  const isPlaying = gameState === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'SetTheTable',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) { void startTracking(); }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const speakText = useCallback((text: string) => {
     if (ttsEnabled) {
@@ -206,17 +235,27 @@ function SetTheTableGame() {
   const stars = calculateStars(score);
 
   return (
-    <div 
-      className="fixed inset-0 overflow-hidden"
-      role="application"
-      aria-label="Set the Table Game"
-      style={{
-        background: 'linear-gradient(180deg, #FFF8E1 0%, #FFECB3 100%)',
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
+    <GameContainer
+      title="Set the Table"
+      onHome={() => navigate('/games')}
+      reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
+      className="bg-transparent"
     >
+      <div 
+        ref={gameAreaRef}
+        className="fixed inset-0 overflow-hidden relative"
+        role="application"
+        aria-label="Set the Table Game"
+        style={{
+          background: 'linear-gradient(180deg, #FFF8E1 0%, #FFECB3 100%)',
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+      >
       {/* Start Screen */}
       {gameState === 'start' && (
         <div className="flex flex-col items-center justify-center h-full p-4">
@@ -277,14 +316,7 @@ function SetTheTableGame() {
       {gameState === 'playing' && (
         <div className="relative h-full">
           {/* Header */}
-          <div className="flex justify-between items-center p-4">
-            <button
-              type="button"
-              onClick={() => navigate('/games')}
-              className="px-4 py-2 bg-white rounded-xl font-bold text-amber-600 shadow"
-            >
-              ← Exit
-            </button>
+          <div className="flex justify-center items-center p-4">
             <div className="flex gap-2">
               {placedItems.map((item, idx) => (
                 <motion.span
@@ -445,7 +477,12 @@ function SetTheTableGame() {
           </motion.div>
         </div>
       )}
-    </div>
+        {/* GameCursor for hand tracking */}
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#3b82f6" />
+        )}
+      </div>
+    </GameContainer>
   );
 }
 

@@ -307,20 +307,28 @@ export class TTSService {
       });
     } else if (
       this.enginePreference !== 'web-speech' &&
-      kokoroStatus === 'loading'
+      (kokoroStatus === 'loading' || kokoroStatus === 'idle')
     ) {
-      // We are still loading the Kokoro model, let's gracefully fall back to web speech for now
+      // Kokoro is loading or hasn't been initialized yet — fall back to web speech while it loads
+      // Only init if idle (not yet started loading)
+      if (kokoroStatus === 'idle') {
+        this.initKokoro();
+      }
       console.log(
-        '[TTSService] Kokoro is still loading, falling back to Web Speech temporarily',
+        '[TTSService] Kokoro not ready yet, falling back to Web Speech (model loading in background)',
       );
+      this._lastActiveEngine = 'web-speech';
+      return this.webSpeechSpeak(text, options);
     } else if (kokoroStatus === 'error') {
-      // Kokoro failed to load - log but continue to fallback
+      // Kokoro failed to load - log and fall back
       console.log(
         '[TTSService] Kokoro failed to load, falling back to Web Speech',
       );
+      this._lastActiveEngine = 'web-speech';
+      return this.webSpeechSpeak(text, options);
     }
 
-    // Tier 3: Web Speech API
+    // Tier 3: Web Speech API (default fallback)
     this._lastActiveEngine = 'web-speech';
     console.log('[TTSService] Engine: web-speech');
     return this.webSpeechSpeak(text, options);

@@ -6,7 +6,7 @@
  * @ticket TCK-20260310-016
  */
 
-import { memo, useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,9 +14,11 @@ import {
   type DraggableItem,
   type DropZone,
 } from '../components/game/DragDropSystem';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useTTS } from '../hooks/useTTS';
 import { triggerHaptic, HAPTIC_TYPES } from '../utils/haptics';
@@ -32,11 +34,16 @@ import {
 } from '../games/farmFriendsLogic';
 import { getAnimalFact } from '../utils/animalFactsApi';
 import type { ScreenCoordinate } from '../utils/coordinateTransform';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const FEEDS_NEEDED = 5;
 
 function FarmFriendsGame() {
   const navigate = useNavigate();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [gameState, setGameState] = useState<'start' | 'playing' | 'complete'>('start');
   const [currentAnimal, setCurrentAnimal] = useState<Animal | null>(null);
   const [items, setItems] = useState<DraggableItem[]>([]);
@@ -48,7 +55,7 @@ function FarmFriendsGame() {
   const [animalFact, setAnimalFact] = useState<string | null>(null);
   const [showFact, setShowFact] = useState(false);
   const [isLoadingFact, setIsLoadingFact] = useState(false);
-  
+
   const [cursorPosition, setCursorPosition] = useState<ScreenCoordinate>({ x: 0, y: 0 });
   const [isPinching, setIsPinching] = useState(false);
 
@@ -63,6 +70,33 @@ function FarmFriendsGame() {
     isPlaying: gameState === 'playing',
     metaData: { fedCount },
   });
+
+  // Hand tracking for cursor
+  const isPlaying = gameState === 'playing';
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) {
+      setCursor(null);
+      return;
+    }
+    setCursor(tip);
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'FarmFriends',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const speakText = useCallback((text: string) => {
     if (ttsEnabled) {
@@ -225,8 +259,9 @@ function FarmFriendsGame() {
   const stars = calculateStars(score);
 
   return (
-    <div 
-      className="fixed inset-0 overflow-hidden"
+    <div
+      ref={gameAreaRef}
+      className="fixed inset-0 overflow-hidden relative"
       role="application"
       aria-label="Farm Friends Game"
       style={{
@@ -524,6 +559,19 @@ function FarmFriendsGame() {
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* GameCursor for hand tracking */}
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={isHandTrackingReady}
+          size={64}
+          color="#f59e0b"
+        />
       )}
     </div>
   );

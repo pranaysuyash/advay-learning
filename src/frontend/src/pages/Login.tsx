@@ -334,7 +334,7 @@ export function Login() {
                   // Timeout helps router settle before redirect
                   setTimeout(() => navigate('/dashboard'), 50);
                 }}
-                className='w-full py-3.5 bg-white text-advay-slate font-bold text-lg rounded-2xl border-2 border-[#F2CC8F] hover:border-slate-300 hover:bg-slate-50 transition shadow-[0_4px_0_#E5B86E] flex items-center justify-center gap-3 active:scale-[0.98]'
+                className='w-full py-4 min-h-[80px] bg-white text-advay-slate font-bold text-lg rounded-2xl border-2 border-[#F2CC8F] hover:border-slate-300 hover:bg-slate-50 transition shadow-[0_4px_0_#E5B86E] flex items-center justify-center gap-3 active:scale-[0.98]'
               >
                 <UIIcon name='star' size={24} className='text-amber-500' />{' '}
                 {t('login.guestButton')}

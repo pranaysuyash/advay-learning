@@ -1,9 +1,15 @@
-import { memo, useState } from 'react';
+import { memo, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
 import {
@@ -16,6 +22,9 @@ function ShadowMatchGame() {
   const navigate = useNavigate();
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { completeGame } = useGameCompletion('shadow-match');
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -26,6 +35,21 @@ function ShadowMatchGame() {
   const [feedback, setFeedback] = useState('Tap the object that matches the shadow.');
 
   const roundsPerSession = 7;
+
+  const isPlaying = Boolean(activeRound);
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'ShadowMatch',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
 
   useGameSessionProgress({
     gameName: 'Shadow Match',
@@ -95,8 +119,11 @@ function ShadowMatchGame() {
       showScore
       reportSession={false}
       onHome={() => navigate('/games')}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6 relative'>
         <div className='max-w-4xl mx-auto space-y-4'>
           {!activeRound ? (
             <div className='rounded-3xl border-3 border-[#F2CC8F] bg-white p-8 text-center shadow-[0_6px_0_#E5B86E] space-y-5'>
@@ -158,6 +185,9 @@ function ShadowMatchGame() {
             </>
           )}
         </div>
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
+        )}
       </div>
     </GameContainer>
   );

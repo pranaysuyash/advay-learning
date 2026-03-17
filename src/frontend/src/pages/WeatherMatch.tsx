@@ -1,16 +1,25 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { LEVELS, generateGame, calculateScore, type Weather, type GamePair } from '../games/weatherMatchLogic';
 import { triggerHaptic } from '../utils/haptics';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 function WeatherMatchContent() {
   const navigate = useNavigate();
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [pairs, setPairs] = useState<GamePair[]>([]);
   const [selectedWeather, setSelectedWeather] = useState<Weather | null>(null);
@@ -29,6 +38,33 @@ function WeatherMatchContent() {
 
   const { playClick, playSuccess, playError } = useAudio();
   const { completeGame } = useGameCompletion('weather-match');
+
+  const isPlaying = gameState === 'playing';
+
+  // Hand tracking for cursor
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) {
+      setCursor(null);
+      return;
+    }
+    setCursor(tip);
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'WeatherMatch',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   useGameSessionProgress({ gameName: 'Weather Match', score, level: currentLevel, isPlaying: true, metaData: { correct } });
 
@@ -89,8 +125,15 @@ function WeatherMatchContent() {
   }, [correct, completeGame, navigate, playClick, currentLevel]);
 
   return (
-    <GameContainer title="Weather Match" onHome={() => navigate('/games')} reportSession={false}>
-      <div className="flex flex-col items-center gap-4 p-4">
+    <GameContainer
+      title="Weather Match"
+      onHome={() => navigate('/games')}
+      reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
+    >
+      <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 relative">
         <div className="flex gap-2">
           {LEVELS.map((l) => (
             <button type="button" key={l.level} onClick={() => { playClick(); setCurrentLevel(l.level); }}
@@ -226,6 +269,19 @@ function WeatherMatchContent() {
             <button type="button" onClick={handleStart} className="px-6 py-3 bg-sky-500 text-white rounded-xl font-bold mr-4 hover:scale-105 transition-transform">Play Again</button>
             <button type="button" onClick={handleFinish} className="px-6 py-3 bg-gray-200 rounded-xl font-bold hover:bg-gray-300 transition-colors">Finish</button>
           </div>
+        )}
+
+        {/* GameCursor for hand tracking */}
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace="normalized"
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isHandTrackingReady}
+            size={64}
+            color="#0ea5e9"
+          />
         )}
       </div>
     </GameContainer>

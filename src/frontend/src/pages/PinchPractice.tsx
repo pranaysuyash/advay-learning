@@ -23,6 +23,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
 import type { TrackedHandFrame } from '../types/tracking';
+import { GameCursor } from '../components/game/GameCursor';
 import {
   type Difficulty,
   type GameState,
@@ -46,6 +47,7 @@ export const PinchPracticeContent = memo(function PinchPracticeGame() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [gameState, setGameState] = useState<GameState>(() => createInitialState());
@@ -366,7 +368,7 @@ export const PinchPracticeContent = memo(function PinchPracticeGame() {
       isHandDetected={handVisible}
       webcamRef={webcamRef}
     >
-      <div className="relative w-full h-full flex flex-col items-center justify-center">
+      <div ref={gameAreaRef} className="relative w-full h-full flex flex-col items-center justify-center">
         {gameState.status === 'idle' ? (
           <div className="flex flex-col items-center gap-6">
             <h2 className="text-3xl font-bold text-gray-800">Choose Difficulty</h2>
@@ -509,6 +511,17 @@ export const PinchPracticeContent = memo(function PinchPracticeGame() {
             </motion.div>
           )}
         </AnimatePresence>
+        {cursorPos && (
+          <GameCursor
+            position={cursorPos}
+            coordinateSpace="normalized"
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={handVisible}
+            size={64}
+            color="#22c55e"
+          />
+        )}
       </div>
     </GameContainer>
   );

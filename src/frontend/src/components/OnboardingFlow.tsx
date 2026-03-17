@@ -197,6 +197,17 @@ function MagicVisionStep({
   onNext: () => void;
   onSkip: () => void;
 }) {
+  // Auto-advance when camera is successfully granted
+  useEffect(() => {
+    if (status === 'success') {
+      // Show the success state briefly, then auto-advance
+      const timer = setTimeout(() => {
+        onNext();
+      }, 2000); // 2 seconds to see the success state
+      return () => clearTimeout(timer);
+    }
+  }, [status, onNext]);
+
   return (
     <>
       <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-[1.5rem] flex items-center justify-center text-4xl mx-auto mb-6 shadow-[0_4px_0_#E5B86E] border-2 border-white">
@@ -251,7 +262,7 @@ function MagicVisionStep({
               animate={{ opacity: 1, y: 0 }}
               className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-200 shadow-lg"
             >
-              <p className="text-purple-700 font-black text-sm text-center">✨ Magic Vision Activated! You can see yourself!</p>
+              <p className="text-purple-700 font-black text-sm text-center">✨ Magic Vision Activated! Moving to next step...</p>
             </motion.div>
           </>
         )}
@@ -276,7 +287,7 @@ function MagicVisionStep({
             size="lg"
             fullWidth
           >
-            Magic is Ready! Next →
+            Magic is Ready! Auto-advancing... ⏳
           </Button>
         )}
         {status === 'error' && (

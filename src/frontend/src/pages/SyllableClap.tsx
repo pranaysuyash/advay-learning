@@ -47,12 +47,13 @@ function SyllableClapContent() {
     setCursor(tip);
   }, []);
 
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
     gameName: 'SyllableClap',
     targetFps: 30,
     isRunning: isPlaying,
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   useEffect(() => {

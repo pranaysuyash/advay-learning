@@ -17,6 +17,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { KenneyHandCursor } from '../components/game/KenneyHandCursor';
+import { GameCursor } from '../components/game/GameCursor';
 import type { Point, TrackedHandFrame } from '../types/tracking';
 import Webcam from 'react-webcam';
 import {
@@ -39,6 +40,7 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   
   const [currentLevel, setCurrentLevel] = useState(1);
   const [points, setPoints] = useState<CanvasPoint[]>([]);
@@ -47,7 +49,7 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent() {
   const colorProgressRef = useRef(0);
   
   // CV Hand tracking state
-  const [, setCursor] = useState<Point | null>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [cursorPx, setCursorPx] = useState<Point | null>(null);
   const [isPinching, setIsPinching] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
@@ -136,7 +138,7 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent() {
   );
 
   // Setup hand tracking
-  useGameHandTracking({
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
     gameName: 'Kaleidoscope Hands',
     webcamRef,
     isRunning: true,
@@ -273,6 +275,8 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent() {
       title='Kaleidoscope Hands'
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
     >
       {/* Hidden webcam for hand tracking */}
       <Webcam
@@ -295,7 +299,7 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent() {
         />
       )}
 
-      <div className='flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto'>
+      <div ref={gameAreaRef} className='relative flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto'>
         <div className='flex gap-2'>
           {LEVELS.map((level) => (
             <button
@@ -381,6 +385,9 @@ const KaleidoscopeHandsGame = memo(function KaleidoscopeHandsGameComponent() {
           </button>
         </div>
       </div>
+      {cursor && (
+        <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={true} size={64} color="#22c55e" />
+      )}
     </GameContainer>
   );
 });

@@ -13,6 +13,7 @@ import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { LEVELS, createPath, isOnPath, type PathPoint } from '../games/pathFollowingLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import type { TrackedHandFrame } from '../types/tracking';
+import { GameCursor } from '../components/game/GameCursor';
 
 function PathFollowingContent() {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ function PathFollowingContent() {
   });
 
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const [isHandDetected, setIsHandDetected] = useState(false);
   const lastHandStateRef = useRef(false);
   const pathRef = useRef<PathPoint[]>(path);
@@ -154,6 +156,8 @@ function PathFollowingContent() {
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandDetected}
     >
       <div className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-2xl mx-auto space-y-4'>
@@ -226,6 +230,7 @@ function PathFollowingContent() {
               {/* Path canvas */}
               <div className='flex justify-center'>
                 <div
+                  ref={gameAreaRef}
                   className={`relative w-96 h-64 rounded-2xl overflow-hidden border-3 cursor-crosshair transition-all ${offPath
                       ? 'border-red-400 bg-red-50'
                       : 'border-teal-400 bg-gradient-to-br from-teal-50 via-emerald-50 to-white'
@@ -336,6 +341,17 @@ function PathFollowingContent() {
             🔥 {streak} Streak! 🔥
           </div>
         </div>
+      )}
+      {cursorPos && (
+        <GameCursor
+          position={{ x: cursorPos.x / 384, y: cursorPos.y / 256 }}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={isHandDetected}
+          size={64}
+          color="#22c55e"
+        />
       )}
     </GameContainer>
   );

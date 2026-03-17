@@ -29,6 +29,7 @@ export const Games = memo(function Games() {
   const [selectedCvFilters, setSelectedCvFilters] = useState<Set<string>>(
     new Set(),
   );
+  const [showFilters, setShowFilters] = useState(false);
   const { statsMap } = useGameStatsMapForProfile(currentProfile?.age);
 
   const normalizeTranslationList = (value: unknown): string[] => {
@@ -173,56 +174,77 @@ export const Games = memo(function Games() {
           </div>
         </header>
 
-        {/* Search & CV Filters */}
-        <div className='mb-6 space-y-3'>
-          <div className='relative'>
-            <span className='absolute left-5 top-1/2 -translate-y-1/2 text-2xl pointer-events-none'>
-              🔍
-            </span>
-            <input
-              type='text'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder='Search games...'
-              className='w-full pl-14 pr-12 py-4 text-lg font-bold bg-white border-3 border-[#F2CC8F] rounded-[2rem] shadow-[0_4px_0_#E5B86E] placeholder:text-slate-300 text-advay-slate focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_4px_0_#3B82F6] transition-all'
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className='absolute right-5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-500 font-bold transition-colors'
-              >
-                ✕
-              </button>
+        {/* Search & CV Filters — collapsed by default (UX-015) */}
+        <div className='mb-6'>
+          <button
+            onClick={() => setShowFilters((v) => !v)}
+            className='px-5 py-3 rounded-[1.5rem] font-bold text-sm transition-all flex items-center gap-2 bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#3B82F6] shadow-[0_2px_0_#E5B86E] mb-3'
+          >
+            🔍 {showFilters ? 'Hide Filters' : 'Search & Filter'}
+            {(searchQuery || selectedCvFilters.size > 0) && (
+              <span className='w-2 h-2 rounded-full bg-[#E85D04] inline-block' />
             )}
-          </div>
-          <div className='flex flex-wrap gap-2'>
-            {(['hand', 'pose', 'face', 'voice'] as const).map((cv) => {
-              const isActive = selectedCvFilters.has(cv);
-              const cvMeta: Record<
-                string,
-                { emoji: string; label: string }
-              > = {
-                hand: { emoji: '✋', label: 'Hand' },
-                pose: { emoji: '🤸', label: 'Pose' },
-                face: { emoji: '😊', label: 'Face' },
-                voice: { emoji: '🎤', label: 'Voice' },
-              };
-              const cfg = cvMeta[cv];
-              return (
-                <button
-                  key={cv}
-                  onClick={() => toggleCvFilter(cv)}
-                  className={`px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5 ${
-                    isActive
-                      ? 'bg-[#E85D04] text-white shadow-lg'
-                      : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#E85D04]'
-                  }`}
-                >
-                  {cfg.emoji} {cfg.label}
-                </button>
-              );
-            })}
-          </div>
+          </button>
+          <AnimatePresence>
+            {showFilters && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className='overflow-hidden space-y-3'
+              >
+                <div className='relative'>
+                  <span className='absolute left-5 top-1/2 -translate-y-1/2 text-2xl pointer-events-none'>
+                    🔍
+                  </span>
+                  <input
+                    type='text'
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder='Search games...'
+                    className='w-full pl-14 pr-12 py-4 text-lg font-bold bg-white border-3 border-[#F2CC8F] rounded-[2rem] shadow-[0_4px_0_#E5B86E] placeholder:text-slate-300 text-advay-slate focus:outline-none focus:border-[#3B82F6] focus:shadow-[0_4px_0_#3B82F6] transition-all'
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className='absolute right-5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-500 font-bold transition-colors'
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <div className='flex flex-wrap gap-2'>
+                  {(['hand', 'pose', 'face', 'voice'] as const).map((cv) => {
+                    const isActive = selectedCvFilters.has(cv);
+                    const cvMeta: Record<
+                      string,
+                      { emoji: string; label: string }
+                    > = {
+                      hand: { emoji: '✋', label: 'Hand' },
+                      pose: { emoji: '🤸', label: 'Pose' },
+                      face: { emoji: '😊', label: 'Face' },
+                      voice: { emoji: '🎤', label: 'Voice' },
+                    };
+                    const cfg = cvMeta[cv];
+                    return (
+                      <button
+                        key={cv}
+                        onClick={() => toggleCvFilter(cv)}
+                        className={`px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5 ${
+                          isActive
+                            ? 'bg-[#E85D04] text-white shadow-lg'
+                            : 'bg-white border-2 border-[#F2CC8F] text-advay-slate hover:border-[#E85D04]'
+                        }`}
+                      >
+                        {cfg.emoji} {cfg.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* World Filter Tabs */}

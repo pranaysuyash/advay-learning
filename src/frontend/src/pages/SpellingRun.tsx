@@ -5,6 +5,9 @@ import Webcam from 'react-webcam';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
+import { CelebrationEffects } from '../components/game/CelebrationEffects';
+import type { Point } from '../games/shapeSafariLogic';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -17,12 +20,17 @@ import {
   updatePhysics,
   checkCollisions,
   type GameState,
-  PLAYER_SPEED,
   JUMP_FORCE,
 } from '../games/spellingRunLogic';
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
+
+// Kid-friendly settings (slower speed, more lenient gestures)
+const KID_FRIENDLY_SPEED = 2.5; // Reduced from 5 for better control
+const JUMP_HAND_Y_THRESHOLD = 0.3; // Hand above 30% of screen = jump
+const JUMP_COOLDOWN = 500; // ms between jumps to prevent spam
+const GESTURE_CONFIDENCE_THRESHOLD = 3; // frames to confirm gesture
 
 const ASSET_BASE = '/assets/kenney/platformer';
 const ASSETS = {
@@ -37,6 +45,8 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [gameState, setGameState] = useState<GameState>(() =>
     initializeGame(1),
   );
@@ -44,8 +54,14 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
   const [isLoading, setIsLoading] = useState(true);
   const imagesRef = useRef<Record<string, HTMLImageElement>>({});
 
+  // Gesture detection state
+  const [jumpGestureActive, setJumpGestureActive] = useState(false);
+  const [jumpGestureFrames, setJumpGestureFrames] = useState(0);
+  const [lastJumpTime, setLastJumpTime] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+
   const { completeGame } = useGameCompletion('spelling-run');
-  const { playError, playCelebration } = useAudio();
+  const { playError, playCelebration, playClick } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
 
   const gameStateRef = useRef(gameState);
@@ -83,21 +99,45 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
   }, []);
 
   const handleFrame = useCallback((frame: TrackedHandFrame) => {
-    if (!frame.indexTip || gameStateRef.current.status !== 'playing') return;
+    if (!frame.indexTip || gameStateRef.current.status !== 'playing') {
+      if (!frame.indexTip) {
+        setCursor(null);
+        setJumpGestureFrames(0);
+        setJumpGestureActive(false);
+      }
+      return;
+    }
 
     const tip = frame.indexTip;
+    setCursor({ x: tip.x, y: tip.y });
 
-    // Jump detection: Hands up threshold
-    if (tip.y < 0.25 && !gameStateRef.current.player.isJumping) {
-      setGameState((prev) => ({
-        ...prev,
-        player: {
-          ...prev.player,
-          vy: JUMP_FORCE,
-          isJumping: true,
-        },
-      }));
-      triggerHaptic('success');
+    // Better jump detection: Check if hand is raised high enough
+    const isJumpGesture = tip.y < JUMP_HAND_Y_THRESHOLD;
+
+    if (isJumpGesture) {
+      setJumpGestureFrames((f) => f + 1);
+      if (jumpGestureFrames >= GESTURE_CONFIDENCE_THRESHOLD) {
+        setJumpGestureActive(true);
+
+        // Trigger jump with cooldown to prevent spam
+        const now = Date.now();
+        if (now - lastJumpTime > JUMP_COOLDOWN && !gameStateRef.current.player.isJumping) {
+          setGameState((prev) => ({
+            ...prev,
+            player: {
+              ...prev.player,
+              vy: JUMP_FORCE,
+              isJumping: true,
+            },
+          }));
+          setLastJumpTime(now);
+          triggerHaptic('success');
+          playClick();
+        }
+      }
+    } else {
+      setJumpGestureFrames(0);
+      setJumpGestureActive(false);
     }
 
     // Horizontal movement: Map finger X to player target position relative to scroll
@@ -108,7 +148,7 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
         x: tip.x * CANVAS_WIDTH + prev.scrollX,
       },
     }));
-  }, []);
+  }, [jumpGestureFrames, lastJumpTime, playClick]);
 
   const { handVisible } = useGameHandTracking({
     gameName: 'SpellingRun',
@@ -116,7 +156,7 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
     onFrame: handleFrame,
   });
 
-  // Game Loop
+  // Game Loop with kid-friendly speed
   useEffect(() => {
     let animationFrameId: number;
     const loop = () => {
@@ -125,11 +165,12 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
           let next = updatePhysics(prev);
           next = checkCollisions(next);
 
-          // Update scroll
-          next.scrollX += PLAYER_SPEED;
+          // Use slower, kid-friendly scroll speed
+          next.scrollX += KID_FRIENDLY_SPEED;
 
           if (next.status === 'complete') {
             playCelebration();
+            setShowCelebration(true);
             (async () => {
               await completeGame({ score: next.score, level: 1 });
             })();
@@ -204,8 +245,10 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
 
   const handleStart = () => {
     setGameState((prev) => ({ ...prev, status: 'playing' }));
+    setShowCelebration(false);
+    playClick();
     if (ttsEnabled)
-      speak(`Spell ${gameState.targetWord}! Jump to catch the letters!`);
+      speak(`Spell ${gameState.targetWord}! Raise your hand high to jump!`);
   };
 
   return (
@@ -218,26 +261,43 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
       isHandDetected={handVisible}
       webcamRef={webcamRef}
     >
-      <div className='relative w-full h-full flex flex-col items-center justify-center'>
+      <div ref={gameAreaRef} className='relative w-full h-full flex flex-col items-center justify-center'>
         {isLoading ? (
           <div className='text-2xl text-white animate-pulse'>
             Loading Magic Letters...
           </div>
         ) : gameState.status === 'idle' ? (
           <div className='text-center'>
-            <h2 className='text-4xl font-black text-white mb-8'>
+            <h2 className='text-4xl font-black text-white mb-4 drop-shadow-lg'>
               Ready to Spell?
             </h2>
+            <p className='text-xl text-white/90 mb-8 drop-shadow max-w-md mx-auto'>
+              Move your hand to walk • Raise hand high to jump!
+            </p>
             <button
               onClick={handleStart}
-              className='px-12 py-6 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-3xl font-black text-2xl shadow-xl transition-all'
+              className='px-12 py-6 min-h-[80px] bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-3xl font-black text-2xl shadow-xl transition-all transform hover:scale-105'
             >
               Start Running! 🏃‍♂️
             </button>
           </div>
         ) : (
           <>
-            <div className='absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/90 px-8 py-4 rounded-2xl shadow-xl z-10'>
+            {/* Jump gesture indicator */}
+            {jumpGestureActive && (
+              <div className='absolute top-32 left-1/2 -translate-x-1/2 bg-green-500/90 text-white px-6 py-3 rounded-full font-bold text-xl z-10 animate-pulse shadow-lg'>
+                ✨ JUMP! ✨
+              </div>
+            )}
+
+            {/* Gesture hint for new players */}
+            {!jumpGestureActive && gameState.status === 'playing' && (
+              <div className='absolute top-32 left-1/2 -translate-x-1/2 bg-slate-500/50 text-white px-4 py-2 rounded-full font-medium text-sm z-10'>
+                👆 Raise hand high to jump!
+              </div>
+            )}
+
+            <div className='absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/90 backdrop-blur-sm px-8 py-4 rounded-2xl shadow-xl z-10'>
               <span className='text-2xl font-bold text-gray-400'>Target:</span>
               <div className='flex gap-2'>
                 {gameState.targetWord.split('').map((char, i) => (
@@ -290,6 +350,21 @@ export const SpellingRunContent = memo(function SpellingRunContent() {
           </>
         )}
       </div>
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={jumpGestureActive}
+          isHandDetected={true}
+          size={64}
+          color={jumpGestureActive ? '#22c55e' : '#3B82F6'}
+        />
+      )}
+      {/* Celebration effects */}
+      {showCelebration && (
+        <CelebrationEffects trigger={showCelebration} type="confetti" particleCount={50} />
+      )}
     </GameContainer>
   );
 });

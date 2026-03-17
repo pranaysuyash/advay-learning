@@ -12,6 +12,8 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import { CelebrationEffects } from '../components/game/CelebrationEffects';
+import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import type { Point } from '../types/tracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
@@ -43,6 +45,8 @@ function ColorMixingGame() {
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const [cursor, setCursor] = useState<Point | null>(null);
   const [hoveredButtonId, setHoveredButtonId] = useState<string | null>(null);
+  const [triggerCelebration, setTriggerCelebration] = useState(false);
+  const [showCompleteCelebration, setShowCompleteCelebration] = useState(false);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { completeGame } = useGameCompletion('color-mixing');
@@ -119,6 +123,8 @@ function ColorMixingGame() {
       setScorePopup({ points: totalPoints, x: 50, y: 30 });
       setFeedback(`Great mix! ${activeRound.recipe.resultName} is correct.`);
       triggerHaptic('success');
+      setTriggerCelebration(true);
+      setTimeout(() => setTriggerCelebration(false), 800);
     } else {
       playError();
       resetStreak();
@@ -134,8 +140,10 @@ function ColorMixingGame() {
         completed: true,
         level: 1,
       });
+      setShowCompleteCelebration(true);
       setTimeout(() => {
         setActiveRound(null);
+        setShowCompleteCelebration(false);
       }, 1400);
       return;
     }
@@ -299,6 +307,24 @@ function ColorMixingGame() {
       isHandDetected={isHandTrackingReady}
       isPlaying={true}
     >
+      {/* Celebration effects */}
+      <CelebrationEffects
+        trigger={triggerCelebration}
+        type="stars"
+        particleCount={20}
+        duration={1500}
+      />
+
+      {/* Session complete celebration */}
+      <SuccessAnimation
+        show={showCompleteCelebration}
+        type="hearts"
+        message="Great Mixing!"
+        characterEmoji="🎨"
+        particleCount={50}
+        duration={2000}
+      />
+
       <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
         <div className='max-w-4xl mx-auto space-y-4'>
           <div className='rounded-2xl border-2 border-[#F2CC8F] bg-white p-4 shadow-[0_4px_0_#E5B86E]'>

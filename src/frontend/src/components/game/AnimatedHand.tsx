@@ -105,58 +105,46 @@ export function HandTutorialOverlay({ isOpen, onComplete }: HandTutorialOverlayP
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 max-w-sm mx-4">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.3 }}
-        className="bg-bg-secondary border border-border rounded-2xl p-8 max-w-md mx-4 shadow-2xl text-center"
+        className="bg-white/95 backdrop-blur-md border-2 border-brand-primary/30 rounded-2xl p-4 shadow-xl"
       >
-        <motion.div
-          className="mb-6"
-          animate={{
-            scale: [1, 1.05, 1],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        >
-          <AnimatedHand className="w-48 h-48 mx-auto" />
-        </motion.div>
+        <div className="flex items-center gap-4">
+          {/* Animated hand icon */}
+          <motion.div
+            animate={{
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="w-16 h-16 bg-brand-primary/10 rounded-xl flex items-center justify-center flex-shrink-0"
+          >
+            <span className="text-3xl">👆</span>
+          </motion.div>
 
-        <h2 className="text-2xl font-bold text-text-primary mb-3">
-          Trace with Your Finger!
-        </h2>
-        <p className="text-text-secondary mb-6 text-lg">
-          Watch the hand and trace the letter with your finger.
-        </p>
+          <div className="flex-1">
+            <h3 className="font-bold text-text-primary text-lg leading-tight">
+              Pinch to draw, release to stop
+            </h3>
+            <p className="text-text-secondary text-sm mt-1">
+              Touch thumb & index finger together
+            </p>
+          </div>
 
-        <motion.button
-          onClick={onComplete}
-          className="px-8 py-3 bg-brand-primary hover:bg-brand-primary-hover text-white rounded-xl font-semibold transition"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          animate={{
-            boxShadow: [
-              '0 0 0 0 rgba(196, 90, 61, 0)',
-              '0 0 0 10px rgba(196, 90, 61, 0.2)',
-              '0 0 0 20px rgba(196, 90, 61, 0)',
-            ],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-          }}
-        >
-          Let's Trace!
-        </motion.button>
-
-        <p className="text-text-muted text-sm mt-4">
-          Pinch your thumb and index finger together to draw
-        </p>
+          <button
+            onClick={onComplete}
+            className="px-3 py-1.5 bg-brand-primary hover:bg-brand-primary-hover text-white rounded-lg font-semibold text-sm transition flex-shrink-0"
+          >
+            Got it
+          </button>
+        </div>
       </motion.div>
     </div>
   );

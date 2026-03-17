@@ -86,7 +86,14 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      const canvasRect = canvas.getBoundingClientRect();
+      let canvasRect: DOMRect | null = null;
+      try {
+        canvasRect = canvas.getBoundingClientRect();
+      } catch {
+        return;
+      }
+      if (!canvasRect || canvasRect.width === 0 || canvasRect.height === 0) return;
+
       const isOverCanvas =
         newCursor.x >= canvasRect.left &&
         newCursor.x <= canvasRect.right &&
@@ -169,7 +176,19 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
   }, [currentTemplate, strokePoints]);
 
   const getPointFromEvent = (event: React.PointerEvent<HTMLCanvasElement>): TracePoint => {
-    const rect = event.currentTarget.getBoundingClientRect();
+    const target = event.currentTarget as HTMLCanvasElement | null;
+    if (!target) {
+      return { x: 0, y: 0 };
+    }
+    let rect: DOMRect | null = null;
+    try {
+      rect = target.getBoundingClientRect();
+    } catch {
+      return { x: 0, y: 0 };
+    }
+    if (!rect) {
+      return { x: 0, y: 0 };
+    }
     const x = (event.clientX - rect.left) / rect.width;
     const y = (event.clientY - rect.top) / rect.height;
     return {
@@ -345,12 +364,14 @@ const NumberTracingGame = memo(function NumberTracingGameComponent({ completeGam
         {/* Controls */}
         <div className="flex gap-4 mt-6">
           <button
+            type="button"
             onClick={handleUseHint}
             className="px-6 py-3 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-[1.5rem] font-black border-3 border-amber-300 shadow-[0_4px_0_#FCD34D] transition-all"
           >
             💡 Hint
           </button>
           <button
+            type="button"
             onClick={() => {
               setStrokePoints([]);
               setFeedback('Try again! Follow the dots.');

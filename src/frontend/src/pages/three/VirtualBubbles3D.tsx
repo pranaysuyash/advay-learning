@@ -90,11 +90,18 @@ function PopEffect({ position, onComplete }: { position: [number, number, number
 
   const groupRef = useRef<THREE.Group>(null);
   const [progress, setProgress] = useState(0);
+  const completedRef = useRef(false);
+
+  useEffect(() => {
+    if (progress >= 1 && !completedRef.current) {
+      completedRef.current = true;
+      onComplete();
+    }
+  }, [progress, onComplete]);
 
   useFrame(() => {
     setProgress((p) => {
       if (p >= 1) {
-        onComplete();
         return 1;
       }
       return p + 0.05;
@@ -299,7 +306,7 @@ export default function VirtualBubbles3D() {
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [lastPopTime, setLastPopTime] = useState(0);
-  const { savePartialProgress } = useGameCompletion('virtual-bubbles-3d');
+  const { savePartialProgress, canSave } = useGameCompletion('virtual-bubbles-3d');
 
   // Preload audio on mount
   useEffect(() => {
@@ -366,7 +373,7 @@ export default function VirtualBubbles3D() {
   };
 
   useEffect(() => {
-    if (score <= 0) {
+    if (score <= 0 || !canSave) {
       return;
     }
 
@@ -382,7 +389,7 @@ export default function VirtualBubbles3D() {
     }, 1200);
 
     return () => window.clearTimeout(timeout);
-  }, [bgMusicEnabled, combo, savePartialProgress, score]);
+  }, [bgMusicEnabled, combo, savePartialProgress, score, canSave]);
 
   return (
     <GameShell gameId='virtual-bubbles-3d' gameName='Virtual Bubbles 3D'>

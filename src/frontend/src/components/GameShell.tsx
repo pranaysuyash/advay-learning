@@ -70,15 +70,15 @@ export const GameShell: React.FC<GameShellProps> = ({
   // Pending progress indicator logic
   const location = useLocation();
   const navigate = useNavigate();
-  const profileId = (location.state as any)?.profileId as string | undefined;
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [deadLetterCount, setDeadLetterCount] = useState<number>(0);
 
   useEffect(() => {
     const update = () => {
-      if (profileId) {
-        setPendingCount(progressQueue.getPending(profileId).length);
-        setDeadLetterCount(progressQueue.getDeadLetterCount(profileId));
+      const currentProfileId = (location.state as any)?.profileId as string | undefined;
+      if (currentProfileId) {
+        setPendingCount(progressQueue.getPending(currentProfileId).length);
+        setDeadLetterCount(progressQueue.getDeadLetterCount(currentProfileId));
       } else {
         setPendingCount(0);
         setDeadLetterCount(0);
@@ -87,7 +87,7 @@ export const GameShell: React.FC<GameShellProps> = ({
     update();
     const unsubscribe = progressQueue.subscribe(update);
     return unsubscribe;
-  }, [profileId]);
+  }, []); // Empty deps - read location.state directly in update function to avoid infinite loop
 
   useEffect(() => {
     const startedAt = Date.now();
@@ -149,13 +149,12 @@ export const GameShell: React.FC<GameShellProps> = ({
       accessDeniedComponent ?? (
         <div className='min-h-screen flex items-center justify-center bg-[#FFF8F0] p-4'>
           <div className='max-w-md w-full bg-white rounded-[2.5rem] p-8 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-center'>
-            <div className='text-6xl mb-4'>🔒</div>
+            <div className='text-6xl mb-4'>🔑</div>
             <h1 className='text-3xl font-black text-advay-slate mb-4'>
-              Premium Game
+              Locked Game
             </h1>
             <p className='text-lg text-text-secondary mb-6'>
-              {gameName} is available with a subscription. Ask a parent to
-              unlock all games!
+              Ask a grownup to unlock {gameName}!
             </p>
             <button
               onClick={() => {
@@ -164,11 +163,11 @@ export const GameShell: React.FC<GameShellProps> = ({
                   gameId,
                   gameName,
                 });
-                window.location.href = '/pricing';
+                navigate('/games');
               }}
               className='w-full px-6 py-4 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#1D4ED8] transition-all'
             >
-              View Plans
+              Back to Games
             </button>
           </div>
         </div>
@@ -218,9 +217,10 @@ export const GameShell: React.FC<GameShellProps> = ({
         <button
           type='button'
           onClick={() => {
-            if (profileId) {
-              trackLaunchEvent('pending_badge_clicked', { profileId, count: pendingCount, gameId });
-              navigate('/progress', { state: { profileId } });
+            const currentProfileId = (location.state as any)?.profileId as string | undefined;
+            if (currentProfileId) {
+              trackLaunchEvent('pending_badge_clicked', { profileId: currentProfileId, count: pendingCount, gameId });
+              navigate('/progress', { state: { profileId: currentProfileId } });
             }
           }}
           className='inline-flex items-center gap-2 bg-yellow-100 border-2 border-yellow-200 text-yellow-700 px-4 py-2 rounded-xl text-sm font-bold cursor-pointer'
@@ -233,9 +233,10 @@ export const GameShell: React.FC<GameShellProps> = ({
         <button
           type='button'
           onClick={() => {
-            if (profileId) {
-              trackLaunchEvent('failed_badge_clicked', { profileId, count: deadLetterCount, gameId });
-              navigate('/progress', { state: { profileId } });
+            const currentProfileId = (location.state as any)?.profileId as string | undefined;
+            if (currentProfileId) {
+              trackLaunchEvent('failed_badge_clicked', { profileId: currentProfileId, count: deadLetterCount, gameId });
+              navigate('/progress', { state: { profileId: currentProfileId } });
             }
           }}
           className='inline-flex items-center gap-2 bg-red-100 border-2 border-red-200 text-red-700 px-4 py-2 rounded-xl text-sm font-bold cursor-pointer'

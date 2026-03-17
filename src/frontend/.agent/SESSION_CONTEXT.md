@@ -1,9 +1,9 @@
 # Session Context
 
-- Generated: 2026-03-15T02:57:14Z
+- Generated: 2026-03-19T15:39:53Z
 - Project: `learning_for_kids/src/frontend`
 - Provider: `local`
-- Model: `BAAI/bge-base-en-v1.5`
+- Model: `BAAI/bge-m3`
 - Project collection: `projects_proj_learning_for_kids_src_frontend`
 - Shared collection: `projects_workspace_shared`
 

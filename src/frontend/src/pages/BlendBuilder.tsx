@@ -51,12 +51,13 @@ const BlendBuilderGame = memo(function BlendBuilderGameComponent() {
     setCursor(tip);
   }, []);
 
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
     gameName: 'BlendBuilder',
     targetFps: 30,
     isRunning: isPlaying,
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   useEffect(() => {

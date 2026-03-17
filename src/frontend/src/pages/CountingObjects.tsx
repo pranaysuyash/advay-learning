@@ -30,6 +30,9 @@ const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
 const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
   const navigate = useNavigate();
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
   const [cursor, setCursor] = useState<Point | null>(null);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -140,7 +143,7 @@ const CountingObjectsGame = memo(function CountingObjectsGameComponent() {
     targetFps: 30,
     isRunning: scene !== null,
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   useEffect(() => {

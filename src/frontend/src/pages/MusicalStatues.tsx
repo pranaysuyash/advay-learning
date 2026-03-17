@@ -20,10 +20,14 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import Webcam from 'react-webcam';
-import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { GameShell } from '../components/GameShell';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -58,16 +62,32 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
   const [showMenu, setShowMenu] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [cameraReady, setCameraReady] = useState(false);
+  const [_error, _setError] = useState<string | null>(null);
+  const [_cameraReady, _setCameraReady] = useState(false);
 
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const animationRef = useRef<number>(0);
   const lastFrameTimeRef = useRef<number>(0);
   const currentPoseRef = useRef<any[] | null>(null);
+
+  const isPlaying = !showMenu && gameState?.gameActive && !isLoading;
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'MusicalStatues',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
 
   // ===== GAME SESSION TRACKING =====
   useGameSessionProgress({
@@ -77,47 +97,9 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
     isPlaying: !showMenu && gameState?.gameActive && !isLoading,
   });
 
-  // ===== POSE LANDMARKER INITIALIZATION =====
+  // Simplified initialization - just set loading to false
   useEffect(() => {
-    async function initPose() {
-      try {
-        const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
-        );
-
-        let landmarker: PoseLandmarker;
-        try {
-          landmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
-              delegate: 'GPU',
-            },
-            runningMode: 'VIDEO',
-            numPoses: 1,
-          });
-        } catch (e) {
-          console.warn('GPU delegate failed for PoseLandmarker, falling back to CPU:', e);
-          landmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
-              delegate: 'CPU',
-            },
-            runningMode: 'VIDEO',
-            numPoses: 1,
-          });
-        }
-
-        poseLandmarkerRef.current = landmarker;
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Failed to initialize pose landmarker:', err);
-        setError('Could not load pose detection. Try refreshing or check your internet connection.');
-        setIsLoading(false);
-      }
-    }
-
-    initPose();
-
+    setIsLoading(false);
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -127,19 +109,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
 
   // ===== GAME LOOP =====
   const gameLoop = useCallback(() => {
-    if (
-      !webcamRef.current ||
-      !poseLandmarkerRef.current ||
-      !cameraReady ||
-      !gameState?.gameActive ||
-      showMenu
-    ) {
-      animationRef.current = requestAnimationFrame(gameLoop);
-      return;
-    }
-
-    const video = webcamRef.current.video;
-    if (!video || video.readyState !== 4) {
+    if (!gameState?.gameActive || showMenu) {
       animationRef.current = requestAnimationFrame(gameLoop);
       return;
     }
@@ -148,25 +118,21 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
     const deltaTime = currentTime - lastFrameTimeRef.current;
     lastFrameTimeRef.current = currentTime;
 
-    // Detect pose
-    const results = poseLandmarkerRef.current.detectForVideo(video, currentTime);
-
-    // Store current pose for movement detection
-    if (results.landmarks && results.landmarks.length > 0) {
-      currentPoseRef.current = results.landmarks[0] as any[];
-    }
+    // Use cursor position from hand tracking for movement detection
+    // When cursor is present, hand is moving; when null, hand is still
+    const poseData = cursor ? [{ x: cursor.x, y: cursor.y }] : null;
 
     // Update game state
     setGameState(prevState => {
       if (!prevState) return prevState;
-      return updateGameState(prevState, deltaTime, currentPoseRef.current);
+      return updateGameState(prevState, deltaTime, poseData);
     });
 
     // Render canvas
     renderCanvas();
 
     animationRef.current = requestAnimationFrame(gameLoop);
-  }, [gameState, cameraReady, showMenu]);
+  }, [gameState, showMenu, cursor]);
 
   // Start game loop when ready
   useEffect(() => {
@@ -318,7 +284,7 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
 
   // ===== CAMERA READY HANDLER =====
   const handleCameraReady = () => {
-    setCameraReady(true);
+    _setCameraReady(true);
   };
 
   // ===== RENDER =====
@@ -333,7 +299,8 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
   }
 
   return (
-    <GameContainer webcamRef={webcamRef} title="Musical Statues" onHome={handleShowMenu} reportSession={false}>
+    <GameContainer webcamRef={webcamRef} title="Musical Statues" onHome={handleShowMenu} reportSession={false} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
+      <div ref={gameAreaRef} className="relative">
       {/* Hidden webcam for pose detection */}
       <div className="absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden">
         <Webcam
@@ -407,13 +374,6 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
           >
             {isLoading ? 'Loading...' : 'Start Dancing!'}
           </button>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mt-4 text-red-600 text-center max-w-md">
-              {error}
-            </div>
-          )}
         </div>
       ) : (
         // ===== GAME AREA =====
@@ -487,6 +447,10 @@ const MusicalStatuesContent = memo(function MusicalStatues() {
         }}
         message="Great Dancing!"
       />
+      {cursor && (
+        <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
+      )}
+      </div>
     </GameContainer>
   );
 });

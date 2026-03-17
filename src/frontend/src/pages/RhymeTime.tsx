@@ -46,6 +46,8 @@ import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import '../styles/animations.css';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
 import type { TrackedHandFrame } from '../types/tracking';
 import {
   type RhymeRound,
@@ -288,16 +290,22 @@ function RhymeTimeContent() {
   
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const isPinchingRef = useRef(false);
   const optionRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const isProcessingRef = useRef(false);
+
   // ===== HAND TRACKING =====
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
-    if (!frame.indexTip || isProcessing) return;
-    
-    const { x, y } = frame.indexTip;
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+    if (isProcessingRef.current) return;
+
+    const { x, y } = tip;
     const isPinching = frame.pinch?.state.isPinching || false;
-    
+
     // Find hovered option
     let hoveredId: string | null = null;
     optionRefs.current.forEach((el, id) => {
@@ -305,14 +313,14 @@ function RhymeTimeContent() {
       const rect = el.getBoundingClientRect();
       const elX = (x * window.innerWidth - rect.left) / rect.width;
       const elY = (y * window.innerHeight - rect.top) / rect.height;
-      
+
       if (elX >= -0.2 && elX <= 1.2 && elY >= -0.2 && elY <= 1.2) {
         hoveredId = id;
       }
     });
-    
+
     setHoveredOption(hoveredId);
-    
+
     // Handle pinch selection
     if (isPinching && !isPinchingRef.current && hoveredId) {
       isPinchingRef.current = true;
@@ -320,13 +328,20 @@ function RhymeTimeContent() {
     } else if (!isPinching && isPinchingRef.current) {
       isPinchingRef.current = false;
     }
-  }, [isProcessing, currentRound]);
-  
+  }, []);
+
+  // Keep isProcessingRef in sync with state
+  useEffect(() => {
+    isProcessingRef.current = isProcessing;
+  }, [isProcessing]);
+
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
   useGameHandTracking({
     gameName: 'RhymeTime',
     isRunning: !showMenu && !showCelebration && !gameState?.completed,
     webcamRef,
     onFrame: handleHandFrame,
+    onNoVideoFrame: handleNoVideoFrame,
   });
   
   // ===== GAME FLOW =====
@@ -469,8 +484,9 @@ function RhymeTimeContent() {
     <GameContainer title="Rhyme Time" onHome={handleShowMenu}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-        
       </div>
+
+      <div ref={gameAreaRef} className="relative w-full h-full">
       
       {showMenu ? (
         <DifficultyMenu ttsEnabled={ttsEnabled} startGame={startGame} />
@@ -702,7 +718,11 @@ function RhymeTimeContent() {
           )}
         </div>
       )}
-      
+
+      {/* Hand tracking cursor */}
+      {cursor && <GameCursor position={cursor} coordinateSpace='normalized' containerRef={gameAreaRef} isPinching={false} isHandDetected={true} size={64} color='#8b5cf6' />}
+      </div>
+
       {/* Celebration Overlay */}
       <CelebrationOverlay
         show={showCelebration}

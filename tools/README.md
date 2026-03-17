@@ -1007,3 +1007,106 @@ Completed UX audits are stored in `docs/ux_audit/<game_name>/` with:
 **Last Updated:** 2026-02-20
 **Maintained by:** Learning for Kids Project
 **Purpose:** Kids Game UI/UX Quality Assurance
+
+---
+
+## 🎮 CDP Game Tester
+
+**Purpose:** Automated testing tool using Chrome DevTools Protocol (via Playwright) to systematically review all games for UI/UX compliance.
+
+**File:** `cdp_game_tester.py`
+
+### Why This Tool Exists
+
+- **Systematic Review:** Test all games with consistent checks
+- **Screenshot Capture:** Visual evidence of game states
+- **UI/UX Compliance:** Verify button sizes, contrast, spacing
+- **Asset Audit:** Check for Kenney asset usage vs emoji
+- **CV Integration:** Verify MediaPipe/hand tracking presence
+- **Performance:** Measure page load times
+
+### Usage
+
+```bash
+# Install dependencies first
+pip install playwright
+playwright install chromium
+
+# Test all games
+python tools/cdp_game_tester.py
+
+# Test specific game
+python tools/cdp_game_tester.py --game alphabet-tracing
+
+# Show browser (for debugging)
+python tools/cdp_game_tester.py --no-headless
+
+# Custom base URL and output
+python tools/cdp_game_tester.py --base-url http://localhost:3000 --output results.json
+```
+
+### Features
+
+**UI/UX Checks:**
+- Button sizes (minimum 80px for kids)
+- Color contrast (WCAG AA)
+- Emoji vs Kenney asset usage
+- Touch target spacing (minimum 8px gap)
+- Feedback animations
+- CV/MediaPipe element detection
+
+**Output:**
+- Screenshots: `./screenshots/game-test/<game-id>.png`
+- JSON results: `./game-test-results.json`
+- Console summary with pass/fail status
+
+### Games Tested
+
+- alphabet-tracing
+- odd-one-out
+- spelling-run
+- math-jumpers
+- shadow-match
+- balloon-pop-fitness
+- catch-sort
+- maze-runner
+- animal-sounds
+- virtual-bubbles
+
+### Example Output
+
+```
+============================================================
+Testing: Alphabet Tracing (alphabet-tracing)
+============================================================
+  Navigating to: http://localhost:5173/games/alphabet-tracing
+  Page loaded in 1245ms
+  Screenshot saved: ./screenshots/game-test/alphabet-tracing.png
+  Checking button sizes...
+    ✓ All 12 buttons meet minimum size
+  Checking color contrast...
+    ✓ Color contrast looks good
+  Checking for emoji usage...
+    ✓ Emoji usage acceptable (3 found)
+  Checking CV/MediaPipe integration...
+    ✓ CV elements present
+  UI Checks: 5/6 passed
+  ✓ PASS - 0 issues, 1 warnings
+```
+
+### Adding New Games
+
+To add a new game to the test suite, add an entry to the `GAMES` list in `cdp_game_tester.py`:
+
+```python
+{
+    "id": "my-new-game",
+    "name": "My New Game",
+    "route": "/games/my-new-game",
+    "category": "logic",
+    "expected_elements": ["game area", "score"],
+    "min_button_size": 80,
+    "uses_kenney_assets": True,
+    "has_cv_controls": True,
+}
+```
