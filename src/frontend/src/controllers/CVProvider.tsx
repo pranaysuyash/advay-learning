@@ -90,25 +90,21 @@ export function CVProvider({ children }: CVProviderProps) {
 
   // Always call all modality hooks unconditionally (React rules requirement).
   // Which hook's result is used is determined by activeModality via useMemo below.
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const handTracking = useGameHandTracking({
     gameName: activeGameName ?? 'CVProvider',
     webcamRef,
     targetFps: 30,
   });
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const poseTracking = useGamePoseTracking({
     gameName: activeGameName ?? 'CVProvider',
     webcamRef,
   });
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const faceTracking = useGameFaceTracking({
     gameName: activeGameName ?? 'CVProvider',
     webcamRef,
   });
 
   // Pose ↔ SpatialInputContext bridge — active only when modality === 'pose'
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     const setSpatial = setSpatialCursorRef.current;
     const resetSpatial = resetSpatialCursorRef.current;
@@ -121,7 +117,6 @@ export function CVProvider({ children }: CVProviderProps) {
   }, [activeModality, poseTracking.poseDetected]);
 
   // Face ↔ SpatialInputContext bridge — active only when modality === 'face'
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     const setSpatial = setSpatialCursorRef.current;
     const resetSpatial = resetSpatialCursorRef.current;
@@ -192,9 +187,9 @@ export function CVProvider({ children }: CVProviderProps) {
 }
 
 /** Hook for game pages to consume unified CV state */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCV(modality: CVModality = 'hand'): CVState {
   const ctx = useContext(CVContext);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     if (!ctx) return;
     ctx.registerGame(`${modality}Game`, modality);
@@ -216,6 +211,7 @@ export function useCV(modality: CVModality = 'hand'): CVState {
 }
 
 /** Hook to check if a specific modality is available */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCVModality(modality: CVModality): boolean {
   const ctx = useContext(CVContext);
   if (!ctx) return false;

@@ -171,11 +171,9 @@ export function updatePhysics(state: GameState, deltaTime: number): GameState {
 
   // Update foods
   const updatedFoods: FoodItem3D[] = [];
-  let eatenCount = 0;
 
   for (const food of state.foods) {
     if (food.eaten) {
-      eatenCount++;
       continue;
     }
 
@@ -192,7 +190,6 @@ export function updatePhysics(state: GameState, deltaTime: number): GameState {
 
     if (distanceToMonster < 1.5 && newY > 0 && newY < 2) {
       // Eaten!
-      eatenCount++;
       continue;
     }
 
