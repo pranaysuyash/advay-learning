@@ -144,7 +144,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     vibe: 'brainy',
     ageRange: '3-6',
     isNew: true,
-    cv: ['hand', 'voice'],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'creature-owl', chance: 0.15 },

@@ -76,9 +76,9 @@ export const MAGIC_E_PAIRS: MagicEWord[] = [
   { shortForm: 'tub', longForm: 'tube', vowel: 'u', meaning: 'Cylindrical pipe', emoji: '🧪' },
   { shortForm: 'cub', longForm: 'cube', vowel: 'u', meaning: '3D square', emoji: '🎲' },
   { shortForm: 'hug', longForm: 'huge', vowel: 'u', meaning: 'Very big', emoji: '🐋' },
-  { shortForm: 'mug', longForm: 'muge', vowel: 'u', meaning: 'A type of herb', emoji: '🌿' },
+  { shortForm: 'rub', longForm: 'rube', vowel: 'u', meaning: 'To scrape or polish', emoji: '🧽' },
   { shortForm: 'tun', longForm: 'tune', vowel: 'u', meaning: 'Musical melody', emoji: '🎵' },
-  { shortForm: 'pun', longForm: 'pune', vowel: 'u', meaning: 'A city in India', emoji: '🏙️' },
+  { shortForm: 'us', longForm: 'use', vowel: 'u', meaning: 'To make use of something', emoji: '🛠️' },
   { shortForm: 'dun', longForm: 'dune', vowel: 'u', meaning: 'Sand hill', emoji: '🏜️' },
 ];
 

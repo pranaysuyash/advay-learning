@@ -195,6 +195,7 @@ const PhonicsTracingGame = memo(function PhonicsTracingGameComponent() {
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
     gameName: 'PhonicsTracing',
     targetFps: 30,
+    webcamRef,
     isRunning: isPlaying,
     onFrame: handleFrame,
     onNoVideoFrame: handleNoVideoFrame,

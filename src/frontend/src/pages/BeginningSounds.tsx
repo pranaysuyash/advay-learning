@@ -125,6 +125,7 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
     gameName: 'BeginningSounds',
     targetFps: 30,
+    webcamRef,
     isRunning: isPlaying,
     onFrame: handleFrame,
     onNoVideoFrame: handleNoVideoFrame,

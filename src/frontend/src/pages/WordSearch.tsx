@@ -117,10 +117,12 @@ export function WordSearchContent() {
         } else if (!isPinching && isDragging) {
           // End drag - check for word
           setIsDragging(false);
+          let matchedWord = false;
           if (dragPath.length >= 2) {
             const word = dragPath.map(p => grid[p.x][p.y]).join('');
             const reversed = word.split('').reverse().join('');
             const handleWordFound = (foundWord: string) => {
+              matchedWord = true;
               const newStreak = streak + 1;
               setStreak(newStreak);
               const basePoints = foundWord.length * 10;
@@ -157,7 +159,7 @@ export function WordSearchContent() {
           setDragPath([]);
           setSelected([]);
 
-          if (foundWords.length + 1 >= words.length) {
+          if (matchedWord && foundWords.length + 1 >= words.length) {
             setScore((s) => s + 50);
             setGameState('complete');
           }
@@ -211,10 +213,12 @@ export function WordSearchContent() {
     const newSelected = [...selected, { x, y }];
     setSelected(newSelected);
 
+    let matchedWord = false;
     if (newSelected.length >= 2) {
       const word = newSelected.map((s) => grid[s.x][s.y]).join('');
       const reversed = word.split('').reverse().join('');
       const handleWordFound = (foundWord: string) => {
+        matchedWord = true;
         const newStreak = streak + 1;
         setStreak(newStreak);
         const basePoints = foundWord.length * 10;
@@ -248,7 +252,7 @@ export function WordSearchContent() {
       }
       setSelected([]);
 
-      if (foundWords.length + 1 >= words.length) {
+      if (matchedWord && foundWords.length + 1 >= words.length) {
         setScore((s) => s + 50);
         setGameState('complete');
       }

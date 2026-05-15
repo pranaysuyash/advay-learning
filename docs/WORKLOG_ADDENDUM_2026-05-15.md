@@ -56,3 +56,11 @@ Next actions:
   - `src/frontend/src/components/game/GlobalCVCursor.tsx`: set `coordinateSpace='normalized'` for `KenneyHandCursor`.
 - 2026-05-15 11:01 UTC — Validation: `cd src/frontend && npm run lint` => pass (`0 errors`, `149 warnings`, threshold `150`).
 - 2026-05-15 11:05 UTC — Current blocker remains PR thread resolution (`review-policy` reports 3 unresolved non-bot threads).
+- 2026-05-15 13:44 UTC — Resolved 7 newly-opened review threads from review-bot reruns by applying code/data fixes:
+  - `GlobalCVCursor`: added `containerRef` + explicit viewport sizing for normalized cursor conversion.
+  - `wordWorkshop` registry: removed undeclared `voice` CV mode from `phonics-fun`.
+  - `AlphabetGame`: fixed analytics content ID to use `currentLetter.char`.
+  - `magicELogic`: replaced invalid/non-word pairs (`mug->muge`, `pun->pune`) with valid educational alternatives.
+  - `PhonicsTracing` + `BeginningSounds`: passed rendered `webcamRef` into `useGameHandTracking`.
+  - `WordSearch`: completion now gates on actual matched word, not any drag path.
+- 2026-05-15 13:45 UTC — Validation: targeted eslint over all 7 touched frontend files passed.

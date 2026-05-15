@@ -411,7 +411,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
     // Track analytics
     trackGameActivity({
       activityType: 'letter_tracing',
-      contentId: `letter-${currentLetter || 'A'}`,
+      contentId: `letter-${currentLetter?.char || 'A'}`,
       score: Math.round(score),
       durationSeconds: 0, // gameTime tracking not implemented
       metadata: {

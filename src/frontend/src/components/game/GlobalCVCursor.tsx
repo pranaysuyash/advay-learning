@@ -164,6 +164,8 @@ export function GlobalCVCursor({
         position: 'fixed',
         top: 0,
         left: 0,
+        width: '100vw',
+        height: '100vh',
         pointerEvents: 'none',
         zIndex: 9999,
       }}
@@ -180,6 +182,7 @@ export function GlobalCVCursor({
       <KenneyHandCursor
         position={cursor.position}
         coordinateSpace='normalized'
+        containerRef={cursorRef}
         state={cursorState}
         isHandDetected={cursor.isActive}
         color={color}
