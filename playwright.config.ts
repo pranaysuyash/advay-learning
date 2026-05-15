@@ -11,7 +11,7 @@ const fakeCameraArgs = [
 export default defineConfig({
   // Playwright will search for test files under this directory.
   // See: https://playwright.dev/docs/test-configuration
-  testDir: './src/frontend/src',
+  testDir: './src/frontend/e2e',
   fullyParallel: false,
   forbidOnly: false,
   retries: process.env.CI ? 2 : 0,

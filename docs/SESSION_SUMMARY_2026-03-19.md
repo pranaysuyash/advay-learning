@@ -65,7 +65,7 @@ cd src/frontend && npm run type-check
 - `src/frontend/src/pages/three/ColorMatchGarden3D.tsx`
 - `src/frontend/src/pages/three/ShapeSafari3D.tsx`
 
-### Core (6 modified)
+### Core (8 modified)
 - `PhysicsProvider.tsx`
 - `ThreeDGameCanvas.tsx`
 - `webgpu.ts` (new)
@@ -75,7 +75,7 @@ cd src/frontend && npm run type-check
 - `lazyPages.tsx`
 - `threeDWorld.ts`
 
-### Documentation (19 total)
+### Documentation (18 total)
 - 2 active
 - 16 archived
 

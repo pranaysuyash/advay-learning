@@ -68,7 +68,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Documentation | 19 files, 160KB+ |
+| Total Documentation | 17 files, 160KB+ |
 | Archived Documents | 15 files, ~100KB |
 | Active Documents | 2 files |
 | Games Converted | 3 (P0 scope) |
@@ -108,7 +108,7 @@ ls -lh docs/archive/3d-ecosystem-2026-03-19/
 
 # Count documents
 ls -1 docs/archive/3d-ecosystem-2026-03-19/ | wc -l
-# Should show: 15
+# Should show: 16
 
 # Verify active documents
 ls -lh docs/3D_ECOSYSTEM_*.md

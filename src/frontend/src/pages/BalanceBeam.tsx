@@ -241,7 +241,7 @@ export const BalanceBeamContent = memo(function BalanceBeamContent() {
                     coordinateSpace="normalized"
                     containerRef={gameAreaRef}
                     isPinching={false}
-                    isHandDetected={true}
+                    isHandDetected={poseDetected}
                     size={64}
                     color="#22c55e"
                 />

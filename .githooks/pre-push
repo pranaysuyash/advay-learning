@@ -54,7 +54,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     git_dir="$(git rev-parse --git-dir)"
     marker_file="$git_dir/WIP_BRANCH_AUTHORIZED"
     branch_name="${remote_ref#refs/heads/}"
-    if [[ "$remote_sha" =~ ^0+$ && "$branch_name" != "main" ]]; then
+    if [[ "$remote_ref" == refs/heads/* && "$remote_sha" =~ ^0+$ && "$branch_name" != "main" ]]; then
         if [[ ! -f "$marker_file" ]] || ! grep -qxF "$branch_name" "$marker_file"; then
             echo "❌ Push of new branch '$branch_name' is blocked." >&2
             echo "   Agents must not create branches manually." >&2

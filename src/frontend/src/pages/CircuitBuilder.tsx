@@ -67,6 +67,7 @@ export const CircuitBuilderContent = memo(function CircuitBuilderComponent() {
   const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
   const { isReady: isHandTrackingReady } = useGameHandTracking({
     gameName: 'CircuitBuilder',
+    webcamRef,
     targetFps: 30,
     isRunning: isPlaying,
     onFrame: handleFrame,

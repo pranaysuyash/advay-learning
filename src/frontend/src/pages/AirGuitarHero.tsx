@@ -22,7 +22,6 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { KenneyHandCursor } from '../components/game/KenneyHandCursor';
-import { GameCursor } from '../components/game/GameCursor';
 import Webcam from 'react-webcam';
 import type { Point, TrackedHandFrame } from '../types/tracking';
 import {
@@ -664,18 +663,6 @@ function AirGuitarHeroInner({
         </div>
       </div>
 
-      {/* GameCursor for CV control */}
-      {cursorPx && (
-        <GameCursor
-          position={cursorPx}
-          coordinateSpace="viewport"
-          containerRef={gameAreaRef}
-          isPinching={false}
-          isHandDetected={handDetected}
-          size={64}
-          color="#22c55e"
-        />
-      )}
     </GameContainer>
   );
 }

@@ -39,6 +39,7 @@ export const BridgeBuilderContent = memo(function BridgeBuilderComponent() {
   const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
   const { isReady: isHandTrackingReady } = useGameHandTracking({
     gameName: 'BridgeBuilder',
+    webcamRef,
     targetFps: 30,
     isRunning: isPlaying,
     onFrame: handleFrame,

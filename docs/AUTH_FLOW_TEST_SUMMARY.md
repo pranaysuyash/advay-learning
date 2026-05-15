@@ -55,8 +55,8 @@
 - `2.1.8` - Registration flow
 
 **Test Credentials:**
-- Email: `pranay.suyash@gmail.com`
-- Password: `Advay@2026!`
+- Email: `TEST_USER_EMAIL` (set via env)
+- Password: `TEST_USER_PASSWORD` (set via env)
 
 ### ❌ Cookie Tests
 - `2.2.1` - Cookies are set with correct security attributes
@@ -102,8 +102,8 @@ async function getCookies(page) {
    ```bash
    export BASE_URL="http://localhost:6173"
    export SKIP_COOKIE_TESTS="false"
-   export TEST_USER_EMAIL="pranay.suyash@gmail.com"
-   export TEST_USER_PASSWORD="Advay@2026!"
+   export TEST_USER_EMAIL="<your-test-email>"
+   export TEST_USER_PASSWORD="<your-test-password>"
    ```
 
 3. **Run Full Suite**

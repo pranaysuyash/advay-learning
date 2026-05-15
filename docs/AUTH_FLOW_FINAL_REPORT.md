@@ -100,8 +100,8 @@ await page.click('button:has-text("Sign Out")');
 
 ### 4. Login Flow ✅
 Working with credentials:
-- Email: `pranay.suyash@gmail.com`
-- Password: `Advay@2026!`
+- Email: `TEST_USER_EMAIL` (set via env)
+- Password: `TEST_USER_PASSWORD` (set via env)
 - Backend: `http://127.0.0.1:8001/api/v1/auth/login`
 
 ### 5. Rate Limiting
@@ -128,8 +128,8 @@ npm run dev  # Runs on :6173
 ```bash
 cd src/frontend
 BASE_URL="http://localhost:6173" \
-TEST_USER_EMAIL="pranay.suyash@gmail.com" \
-TEST_USER_PASSWORD="Advay@2026!" \
+TEST_USER_EMAIL="<your-test-email>" \
+TEST_USER_PASSWORD="<your-test-password>" \
 SKIP_COOKIE_TESTS="false" \
 npx playwright test auth_flow.spec.ts
 ```

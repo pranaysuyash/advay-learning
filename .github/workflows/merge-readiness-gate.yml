@@ -245,9 +245,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
-          cache-dependency-path: src/frontend/package.json
+          cache-dependency-path: src/frontend/pnpm-lock.yaml
 
       - name: Install frontend dependencies
         run: cd src/frontend && pnpm install --frozen-lockfile
@@ -256,7 +256,7 @@ jobs:
         run: cd src/frontend && pnpm run lint
 
       - name: Run frontend tests
-        run: cd src/frontend && pnpm test:dot
+        run: cd src/frontend && pnpm test -- --reporter=dot
 
       - name: Run frontend performance tests
         run: cd src/frontend && pnpm run test:perf
@@ -270,4 +270,3 @@ jobs:
       - name: Check Lighthouse Performance
         run: bash scripts/check_lighthouse_perf.sh
         continue-on-error: true # Don't block merge just yet as it might be flaky in CI environment
-

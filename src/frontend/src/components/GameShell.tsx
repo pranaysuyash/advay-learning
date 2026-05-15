@@ -87,7 +87,7 @@ export const GameShell: React.FC<GameShellProps> = ({
     update();
     const unsubscribe = progressQueue.subscribe(update);
     return unsubscribe;
-  }, []); // Empty deps - read location.state directly in update function to avoid infinite loop
+  }, [location.state]);
 
   useEffect(() => {
     const startedAt = Date.now();

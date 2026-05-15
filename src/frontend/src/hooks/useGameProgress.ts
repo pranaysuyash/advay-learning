@@ -66,10 +66,7 @@ export function useGameProgress(gameId: string): UseGameProgressReturn {
 
   const saveProgress = useCallback(async (data: GameProgressData) => {
     if (!currentProfile) {
-      // Guest user or no profile - silently skip progress saving
-      // This prevents unhandled promise rejections that cause React hooks order issues
-      console.debug('[useGameProgress] Skipping progress save: no profile selected (guest user)');
-      return;
+      throw new Error('Cannot save progress without an active profile');
     }
 
     const enqueueResult = progressQueue.add({

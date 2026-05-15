@@ -59,13 +59,15 @@ docs/
 ├── VISION_ALIGNMENT_AUDIT_COMPLETE.md           # Audit summary
 ├── VISION_SERVICE_REPURPOSING.md                # Service architecture
 ├──
-├── # === GAME DOCUMENTATION ===├── GAME_IDEAS_CATALOG.md                # All games list
+├── # === GAME DOCUMENTATION ===
+├── GAME_IDEAS_CATALOG.md                # All games list
 ├── GAME_LOGICAL_FINDINGS_AND_RESEARCH_2026-02-23.md  # Research findings
 ├── GAME_IMPROVEMENT_MEMORY_MATCH_ANALYSIS.md
 ├── GAME_IMPROVEMENT_AIR_GUITAR_HERO_ANALYSIS.md
 ├── ALL_GAMES_ASSET_IMPLEMENTATION_PLAN.md
 ├──
-├── # === RESEARCH ===├── research/
+├── # === RESEARCH ===
+├── research/
 ├──   ├── RESEARCH_COMPLETION_SUMMARY_2026-03-05.md
 ├──   ├── GAME_RESEARCH_MASTER_DOCUMENT.md
 ├──   ├── PHASE3_SERVICE_DESIGN_2026-03-05.md
@@ -76,7 +78,8 @@ docs/
 ├──   ├── INITIATIVE_01_VISUAL_TRANSFORMATION_2026-02-24.md
 ├──   └── [30+ more research documents]
 ├──
-├── # === IMPLEMENTATION ===├── IMPLEMENTATION_CHECKLIST_VISION_STACK.md    # CV implementation checklist
+├── # === IMPLEMENTATION ===
+├── IMPLEMENTATION_CHECKLIST_VISION_STACK.md    # CV implementation checklist
 ├── IMPLEMENTATION_PLAYBOOK.md                   # How we build features
 ├── IMPLEMENTATION_SUMMARY.md                    # Project status
 ├── IMPLEMENTATION_GAME_LESSON_PLAN.md
@@ -85,14 +88,17 @@ docs/
 ├── IMPLEMENTATION_LANDING_PAGE.md
 ├── [15+ more implementation docs]
 ├──
-├── # === WORKLOGS ===├── WORKLOG_ADDENDUM_BATCH6_GAMES.md
+├── # === WORKLOGS ===
+├── WORKLOG_ADDENDUM_BATCH6_GAMES.md
 ├── WORKLOG_ADDENDUM_GAME_UPGRADES_2026-03-11.md
 ├── [Other worklog files]
 ├──
-├── # === FIXES ===├── fixes/
+├── # === FIXES ===
+├── fixes/
 ├──   └── finger-number-success-detection-fix.md
 ├──
-└── # === EVALUATIONS ===└── evaluations/
+└── # === EVALUATIONS ===
+└── evaluations/
     ├── EMOJI_MATCH_ANALYSIS_README.md
     ├── angel-investor-evaluation.js
     └── [Other evaluation files]

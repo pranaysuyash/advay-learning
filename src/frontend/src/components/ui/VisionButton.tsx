@@ -53,8 +53,11 @@ export function VisionButton({
     const centerY = rect.top + rect.height / 2;
     const radius = (Math.max(rect.width, rect.height) / 2) * hitboxMultiplier;
 
+    const cursorPoint = (cursor.position.x <= 1 && cursor.position.y <= 1)
+      ? { x: cursor.position.x * window.innerWidth, y: cursor.position.y * window.innerHeight }
+      : cursor.position;
     const hit = isWithinTarget(
-      cursor.position,
+      cursorPoint,
       { x: centerX, y: centerY },
       radius
     );

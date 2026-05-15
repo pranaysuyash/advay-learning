@@ -40,7 +40,7 @@
 ### Runtime Test Execution
 **Status:** ⏳ **Framework Ready, Manual Testing Required**  
 **Issue:** Requires human with webcam to test hand tracking  
-**Framework:** Complete (`docs/RUNTIME_TEST_RESULTS.md` in archive)  
+**Framework:** Complete (`docs/archive/3d-ecosystem-2026-03-19/RUNTIME_TEST_RESULTS.md`)  
 **Effort:** 1-2 hours manual testing
 
 ### P1-P3 Conversions

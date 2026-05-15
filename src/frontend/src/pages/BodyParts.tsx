@@ -95,6 +95,7 @@ function BodyPartsGame({
   const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
     gameName: 'BodyParts',
+    webcamRef,
     targetFps: 30,
     isRunning: isPlaying,
     onFrame: handleFrame,

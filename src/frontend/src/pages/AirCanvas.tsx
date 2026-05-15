@@ -654,7 +654,7 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
           coordinateSpace="normalized"
           containerRef={gameAreaRef}
           isPinching={false}
-          isHandDetected={true}
+          isHandDetected={isHandReady}
           size={64}
           color="#22c55e"
         />

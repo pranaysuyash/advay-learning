@@ -14,10 +14,6 @@ def audit_file(filepath):
     with open(filepath, 'r') as f:
         content = f.read()
     
-    # Simple regex to find game objects
-    # This is a bit rough but should give us a good idea
-    game_blocks = re.findall(r'id:\s*\'([^\']+)\'[^}]*\}', content, re.DOTALL)
-    
     for block_match in re.finditer(r'\{[^{]*?id:\s*\'([^\']+)\'[^}]*?\}', content, re.DOTALL):
         block = block_match.group(0)
         game_id = block_match.group(1)

@@ -90,7 +90,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
           {onHome ? (
             <button
               onClick={onHome}
-              className='flex items-center gap-2 px-4 py-3 min-h-[80px] bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] focus:outline-none focus:border-[#3B82F6]'
+              className='flex items-center gap-2 px-3 py-2 h-[56px] bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] focus:outline-none focus:border-[#3B82F6]'
               type='button'
               aria-label='Exit Game'
             >
@@ -131,7 +131,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
             {onPause && (
               <button
                 onClick={onPause}
-                className='p-3 min-h-[80px] min-w-[80px] bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] flex items-center justify-center focus:outline-none focus:border-[#3B82F6]'
+                className='p-2 h-[56px] w-[56px] bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] flex items-center justify-center focus:outline-none focus:border-[#3B82F6]'
                 type='button'
                 aria-label='Pause Game'
               >
@@ -142,7 +142,7 @@ export const GameContainer: React.FC<GameContainerProps> = ({
             {onSettings && (
               <button
                 onClick={onSettings}
-                className='p-3 min-h-[80px] min-w-[80px] bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] flex items-center justify-center focus:outline-none focus:border-[#3B82F6]'
+                className='p-2 h-[56px] w-[56px] bg-slate-100 hover:bg-slate-200 text-advay-slate rounded-xl border-2 border-[#F2CC8F] transition-colors shadow-[0_4px_0_#E5B86E] flex items-center justify-center focus:outline-none focus:border-[#3B82F6]'
                 type='button'
                 aria-label='Game Settings'
               >

@@ -194,3 +194,7 @@ Priority: **P1**
 ### Status Updates
 
 - [2026-03-18 17:25] **OPEN** — Ticket created, awaiting implementation
+
+## 2026-05-15 PR #55 review-thread remediation
+- Fixed unresolved PR review findings across CV hook wiring, cursor visibility, Playwright scope, lockfile vulnerability updates, and documentation consistency.
+- Validation notes: lint/ts checks blocked in current env due missing frontend eslint/types deps.

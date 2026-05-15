@@ -91,7 +91,5 @@
 
 ## Memory Saved
 
-A memory entry was created to remember the "click play, jump to game" principle:
-`memory/feedback_ux_principle.md`
-
-This ensures future work considers time-to-gameplay as a critical metric.
+A memory entry was planned to remember the "click play, jump to game" principle.
+Current repo artifact: this audit index and linked UX docs.
