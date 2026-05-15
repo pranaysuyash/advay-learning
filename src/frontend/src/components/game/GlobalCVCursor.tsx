@@ -179,6 +179,7 @@ export function GlobalCVCursor({
       />
       <KenneyHandCursor
         position={cursor.position}
+        coordinateSpace='normalized'
         state={cursorState}
         isHandDetected={cursor.isActive}
         color={color}

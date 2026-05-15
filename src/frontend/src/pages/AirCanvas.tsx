@@ -329,11 +329,13 @@ const AirCanvasGame = memo(function AirCanvasGameComponent() {
     if (!isHandReady && !isHandLoading) {
       void startTracking();
     }
-    // Cleanup: stop tracking on unmount to avoid leaks
+  }, [isHandLoading, isHandReady, startTracking]);
+
+  useEffect(() => {
     return () => {
       stopTracking?.();
     };
-  }, [isHandLoading, isHandReady, startTracking, stopTracking]);
+  }, [stopTracking]);
 
   // Clear canvas
   const clearCanvas = () => {

@@ -49,3 +49,10 @@ Next actions:
 
 1. Re-run CI on PR #55 and confirm `regression-policy` and `code-scanning-policy` pass.
 2. Resolve remaining `review-policy` blocker (unresolved review threads) in PR UI.
+
+- 2026-05-15 10:59 UTC — Addressed remaining `review-policy` technical blockers from unresolved threads:
+  - `src/frontend/src/pages/AirCanvas.tsx`: split tracking lifecycle so cleanup `stopTracking` is unmount-only.
+  - `src/frontend/src/games/wordLadderLogic.ts`: replaced variable-length chain with same-length transitions.
+  - `src/frontend/src/components/game/GlobalCVCursor.tsx`: set `coordinateSpace='normalized'` for `KenneyHandCursor`.
+- 2026-05-15 11:01 UTC — Validation: `cd src/frontend && npm run lint` => pass (`0 errors`, `149 warnings`, threshold `150`).
+- 2026-05-15 11:05 UTC — Current blocker remains PR thread resolution (`review-policy` reports 3 unresolved non-bot threads).

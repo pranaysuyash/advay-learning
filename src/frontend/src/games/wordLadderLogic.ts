@@ -98,8 +98,8 @@ export const WORD_LADDERS: LadderWord[][] = [
   [
     { word: 'light', emoji: '💡', hint: 'Illuminates' },
     { word: 'night', emoji: '🌙', hint: 'After sunset' },
-    { word: 'knight', emoji: '🏰', hint: 'Medieval warrior' },
-    { word: 'knit', emoji: '🧶', hint: 'Make with yarn' },
+    { word: 'might', emoji: '💪', hint: 'Strength or power' },
+    { word: 'sight', emoji: '👀', hint: 'What you see' },
   ],
 ];
 
