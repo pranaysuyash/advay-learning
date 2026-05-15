@@ -45,7 +45,7 @@
 | 14 | **Sight Word Safari** | Word Workshop | Hand | 78% | ⚠️ Missing TTS |
 | 15 | **Vowel Voyager** | Word Workshop | Hand | 82% | ✅ Complete |
 
-### Phase 2 - Word Workshop Extended (16 games)
+### Phase 2 - Word Workshop Extended (14 games)
 
 | # | Game | World | CV Mode | Alignment | Status |
 |---|------|-------|---------|-----------|--------|
@@ -64,7 +64,7 @@
 | 28 | **Magic E** | Word Workshop | Hand | 0% | 📝 Design Spec |
 | 29 | **Number Ninja** | Number Jungle | Hand | 0% | 📝 Design Spec |
 
-### Phase 2 - 3D World (7 games)
+### Phase 2 - 3D World (6 games)
 
 | # | Game | World | CV Mode | Alignment | Status |
 |---|------|-------|---------|-----------|--------|
@@ -95,14 +95,14 @@
 | Wellness | 14 | 0 | 0% |
 | Story Corner | 2 | 1 | 50% |
 | Platform World | 2 | 0 | 0% |
-| **TOTAL** | **127** | **35** | **28%** |
+| **TOTAL** | **96** | **35** | **36%** |
 
 ### Quality Scores (Implemented Games)
 
 | Metric | Score | Notes |
 |--------|-------|-------|
 | Average Alignment | 76% | Range: 40%-95% |
-| Production Ready (90%+) | 5 games | Digital Jenga, Rhyme Time, Dress Up 3D, Virtual Bubbles, Vowel Voyager |
+| Production Ready (90%+) | 4 games | Digital Jenga, Rhyme Time, Dress Up 3D, Virtual Bubbles |
 | Drift Issues (<70%) | 2 games | Air Guitar Hero (40%), Obstacle Course 3D (65%) |
 | Design Specs Only | 15 games | Not yet implemented |
 
@@ -125,7 +125,7 @@
 
 | Status | Count | Games |
 |--------|-------|-------|
-| ✅ Production Ready (90%+) | 5 | Digital Jenga, Rhyme Time, Dress Up 3D, Virtual Bubbles, Vowel Voyager |
+| ✅ Production Ready (90%+) | 4 | Digital Jenga, Rhyme Time, Dress Up 3D, Virtual Bubbles |
 | ✅ Good (70-89%) | 12 | Emoji Match, Word Search, Story Builder, etc. |
 | ⚠️ Needs Work (50-69%) | 2 | Obstacle Course 3D, Air Guitar Hero |
 | 📝 Design Spec Only | 15 | Consonant Quest, Spelling Bee, Word Ladder, etc. |

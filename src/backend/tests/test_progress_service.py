@@ -252,7 +252,7 @@ class TestCreate:
 
     async def test_create_progress_with_timestamp(self, db_session: AsyncSession, test_profile: Profile, monkeypatch):
         """Test creating progress with client timestamp."""
-        monkeypatch.setattr("app.services.progress_service.settings.USE_CLIENT_EVENT_TIME", True)
+        monkeypatch.setattr("app.services.progress_service._settings.USE_CLIENT_EVENT_TIME", True)
 
         data = ProgressCreate(
             activity_type="game",

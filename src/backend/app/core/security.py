@@ -6,7 +6,11 @@ from typing import Any, Optional
 import bcrypt
 from jose import jwt
 
-from app.core.config import settings
+from app.core.config import get_settings
+
+
+def _cfg():
+    return get_settings()
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -31,7 +35,7 @@ def create_access_token(data: dict[str, Any], expires_delta: Optional[timedelta]
 
     The caller may pass a pre‑generated "jti" value in `data`; if absent,
     we generate a UUID.  A blacklist will rely on this value if
-    ``settings.ENABLE_ACCESS_TOKEN_BLACKLIST`` is true.
+    ``ENABLE_ACCESS_TOKEN_BLACKLIST`` is true.
     """
     from uuid import uuid4
 
@@ -40,19 +44,21 @@ def create_access_token(data: dict[str, Any], expires_delta: Optional[timedelta]
     if "jti" not in to_encode:
         to_encode["jti"] = str(uuid4())
 
+    s = _cfg()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+            minutes=s.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode.update({"exp": expire})
-    return str(jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256"))
+    return str(jwt.encode(to_encode, s.SECRET_KEY, algorithm=s.JWT_ALGORITHM))
 
 
 def create_refresh_token(data: dict[str, Any]) -> str:
     """Create a JWT refresh token."""
+    s = _cfg()
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(timezone.utc) + timedelta(days=s.REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode.update({"exp": expire})
-    return str(jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256"))
+    return str(jwt.encode(to_encode, s.SECRET_KEY, algorithm=s.JWT_ALGORITHM))

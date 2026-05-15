@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 
 import { GameContainer } from '../../components/GameContainer';
 import { GameControls } from '../../components/GameControls';
@@ -71,6 +72,7 @@ function generatePattern(level: number): Pattern {
 const PatternPop3D2Content = memo(function PatternPop3D2Component() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const webcamRef = useRef<Webcam>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -124,10 +126,6 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
 
     setTimeout(() => showPattern(0), 1000);
   }, [speak]);
-
-  useEffect(() => {
-    startLevel(1);
-  }, [startLevel]);
 
   // Handle frame updates for cursor tracking and pinch detection
   const handleFrame = useCallback((frame: TrackedHandFrame) => {
@@ -204,11 +202,12 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
     }
   }, [isPlaying, showingPattern, bubbles, pattern, playerIndex, level, score, playPop, playError, playFanfare, speak, triggerHaptic, startLevel, cursor]);
 
-  const { isReady, startTracking } = useGameHandTracking({
+  const { isReady, startTracking, stopTracking } = useGameHandTracking({
     gameName: 'PatternPop3D2',
     targetFps: 30,
     isRunning: isPlaying,
     onFrame: handleFrame,
+    webcamRef,
   });
 
   // Auto-start tracking when playing
@@ -217,6 +216,12 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
       void startTracking();
     }
   }, [isPlaying, isReady, startTracking]);
+
+  useEffect(() => {
+    return () => {
+      stopTracking();
+    };
+  }, [stopTracking]);
 
   // Render
   useEffect(() => {
@@ -321,7 +326,8 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
 
   const handleStart = useCallback(() => {
     setIsPlaying(true);
-  }, []);
+    startLevel(1);
+  }, [startLevel]);
 
   const handleExit = useCallback(() => {
     navigate('/dashboard');
@@ -334,7 +340,7 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
 
   return (
     <GameShell gameId="pattern-pop-3d-2" gameName="Pattern Pop 3D">
-      <GameContainer title="Pattern Pop 3D" onHome={handleExit}>
+      <GameContainer title="Pattern Pop 3D" onHome={handleExit} webcamRef={webcamRef} isHandDetected={!!cursor} isPlaying={isPlaying}>
         <div className="relative w-full h-full flex flex-col items-center justify-center p-4">
           {!isPlaying ? (
             <div className="text-center">

@@ -1,12 +1,12 @@
 Use sources in this order:
-1) /Users/pranay/AGENTS.md
-2) /Users/pranay/Projects/AGENTS.md
+1) ../AGENTS.md (user home-level agent rules)
+2) AGENTS.md in the Projects root
 3) learning_for_kids/AGENTS.md or learning_for_kids/CLAUDE.md (if present)
 4) Other repo-local agent instructions if present, including QWEN.md, CODEX.md, copilot-instructions.md, .cursorrules, and tool-specific guidance
 5) Project-local docs/prompts/worklogs under learning_for_kids
 6) learning_for_kids/docs/context/AGENT_INTELLIGENCE_GRAPH.md (if present)
 7) learning_for_kids/docs/context/agent-start/SESSION_CONTEXT.md
-8) /Users/pranay/Projects/workspace_memory/sources/...
+8) workspace_memory/sources/... under the shared Projects workspace
 
 Rules:
 - Cite concrete file paths for decisions or constraints.

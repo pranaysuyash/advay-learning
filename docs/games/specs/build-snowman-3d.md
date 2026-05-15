@@ -397,7 +397,8 @@ const SNOWMAN_SOCKETS = {
   'nose': { position: [0, 1.85, 0.28], allowedTypes: ['nose'] },
   'scarf': { position: [0, 1.4, 0], allowedTypes: ['scarf'] },
   'buttons': { position: [0, 1.1, 0.45], allowedTypes: ['buttons'] },
-  'arms': { position: [±0.5, 1.2, 0], allowedTypes: ['arms'] },
+  'arms-left': { position: [-0.5, 1.2, 0], allowedTypes: ['arms'] },
+  'arms-right': { position: [0.5, 1.2, 0], allowedTypes: ['arms'] },
 };
 ```
 

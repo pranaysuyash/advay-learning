@@ -105,6 +105,13 @@ interface ColorMatchGameState {
   foundTargets: number[];
 }
 
+function GardenTimer({ onTick }: { onTick: () => void }) {
+  useFrame(() => {
+    onTick();
+  });
+  return null;
+}
+
 // Main game component
 export default function ColorMatchGarden3D() {
   const webcamRef = useRef<Webcam>(null);
@@ -172,8 +179,8 @@ export default function ColorMatchGarden3D() {
           const newFoundTargets = [...prev.foundTargets, targetId];
           const newScore = prev.score + points;
 
-          // Check if round complete
-          if (newFoundTargets.length >= prev.targets.length) {
+          // Round uses a single prompted target; advance immediately on correct match.
+          if (newFoundTargets.length >= 1) {
             if (prev.level >= 3) {
               setShowCelebration(true);
               completeGame({
@@ -242,7 +249,7 @@ export default function ColorMatchGarden3D() {
     isRunning: !showStartScreen && !showCelebration,
   });
 
-  useFrame(() => {
+  const handleTick = useCallback(() => {
     if (showStartScreen || showCelebration) return;
 
     setGameState((prev) => {
@@ -252,7 +259,7 @@ export default function ColorMatchGarden3D() {
       }
       return { ...prev, timeLeft: Math.max(0, prev.timeLeft - 0.016) };
     });
-  });
+  }, [showStartScreen, showCelebration, completeGame]);
 
   useEffect(() => {
     return () => {
@@ -290,6 +297,7 @@ export default function ColorMatchGarden3D() {
                 isCorrect={gameState.foundTargets.includes(target.id)}
               />
             ))}
+          <GardenTimer onTick={handleTick} />
         </ThreeDGameCanvas>
 
         {isReady && cursor && (

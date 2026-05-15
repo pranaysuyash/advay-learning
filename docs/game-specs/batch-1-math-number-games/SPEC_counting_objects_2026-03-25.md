@@ -148,7 +148,8 @@ function calculateScore(streak: number, level: number): number {
 ### Completion Formula
 ```typescript
 const maxPossibleScore = 2000; // 20 rounds * 100 points baseline
-const finalScore = Math.round((score / maxPossibleScore) * 100); // Normalize to 0-100 scale
+const normalized = Math.round((score / maxPossibleScore) * 100);
+const finalScore = Math.min(100, Math.max(0, normalized)); // Clamp to 0-100
 await completeGame({ 
   score: finalScore, 
   completed: true, 
@@ -304,7 +305,7 @@ const CRITICAL_ASSETS = [
 ### Level Design Matrix
 | Level | Object Count | Target Item Types | Answer Options |
 |-------|--------------|-------------------|----------------|
-| 1 | 2 | Simple objects (apple, banana) | 3 options (1, 2, 3) |
+| 1 | 1 | Simple objects (apple, banana) | 3 options (1, 2, 3) |
 | 5 | 6 | Mixed items (carrot, dog, cat...) | 5 options (4, 5, 6, 7, 8) |
 | 10 | 10 | Complex scenes (10 different items) | 7 options (8-12) |
 

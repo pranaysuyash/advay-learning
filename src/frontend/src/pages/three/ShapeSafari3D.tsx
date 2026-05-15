@@ -129,6 +129,11 @@ export default function ShapeSafari3D() {
       }),
     );
 
+    // Guarantee at least one selectable target so rounds are always solvable.
+    if (!newShapes.some((shape) => shape.shape === target)) {
+      newShapes[0] = { ...newShapes[0], shape: target, name: target };
+    }
+
     setShapes(newShapes);
   }, []);
 

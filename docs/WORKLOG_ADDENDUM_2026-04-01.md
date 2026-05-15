@@ -1,5 +1,91 @@
 # Launch Readiness Critical Tasks - April 2026
 
+---
+
+### TCK-20260515-001 :: Config.py Production Hardening and Import-time Fix
+
+Ticket Stamp: STAMP-20260515T120000Z-opencode-config
+
+Type: HARDENING / REFACTOR
+Owner: Pranay
+Created: 2026-05-15 12:00 IST
+Status: **DONE**
+Priority: P0
+
+Description:
+Comprehensive production-hardening of config.py based on security/architecture review. Fixes import-time eager settings loading that contradicts the lazy-loading design, adds production safety gates, explicit media/upload config, Literal-typed enums, and migrates all 13 callers from module-level `settings` to `get_settings()`.
+
+Scope contract:
+- In-scope:
+  - Remove `settings = get_settings()` from config.py (the import-time eager load)
+  - Rewrite config.py with Literal types, model-level production validation, storage backend enum, MediaPipe config, upload limits, safe_dict()
+  - Migrate ALL callers from `from app.core.config import settings` to `get_settings()` pattern
+  - Add DEBUG=False default, APP_ENV as Literal, production safety gates
+  - Add S3 group validation, AI provider/key consistency validation
+  - Add explicit upload/media config (MAX_UPLOAD_BYTES, ALLOWED_IMAGE_MIME_TYPES, etc.)
+  - Update .env.test, test_config_import.py
+  - No behavior change for running features — only config loading pattern and validation
+- Out-of-scope:
+  - Frontend config changes
+  - Adding actual MediaPipe backend processing (none exists)
+  - Adding AI/LLM service implementation
+  - Changing storage implementation (only config)
+- Behavior change allowed: NO (only config loading pattern and validation hardening)
+
+Targets:
+- Repo: learning_for_kids
+- File(s):
+  - src/backend/app/core/config.py
+  - src/backend/app/db/session.py
+  - src/backend/app/core/security.py
+  - src/backend/app/core/email.py
+  - src/backend/app/api/deps.py
+  - src/backend/app/api/v1/endpoints/auth.py
+  - src/backend/app/api/v1/endpoints/games.py
+  - src/backend/app/api/v1/endpoints/profile_photos.py
+  - src/backend/app/services/refresh_token_service.py
+  - src/backend/app/services/progress_service.py
+  - src/backend/start.py
+  - src/backend/alembic/env.py
+  - src/backend/tests/conftest.py
+  - src/backend/tests/test_config_import.py
+  - src/backend/.env.test
+  - scripts/pre_deploy_check.py
+- Branch/PR: main (local work)
+
+Acceptance Criteria:
+- [x] config.py no longer has module-level `settings = get_settings()`
+- [x] DEBUG defaults to False
+- [x] APP_ENV is Literal["development", "test", "staging", "production"]
+- [x] Model-level validator enforces production safety (no DEBUG, HTTPS CORS, etc.)
+- [x] USE_LOCAL_STORAGE replaced with STORAGE_BACKEND: Literal["local", "s3"]
+- [x] AI provider is Literal enum with key consistency validation
+- [x] Explicit upload/media config added (MAX_UPLOAD_BYTES, ALLOWED_IMAGE_MIME_TYPES, etc.)
+- [x] Explicit MediaPipe config added
+- [x] All 13 callers migrated from `settings` to `get_settings()`
+- [x] All existing tests pass
+- [x] Lint/type checks pass
+
+Execution log:
+- 2026-05-15 12:00 IST — Created ticket
+- 2026-05-15 12:15 IST — Rewrote config.py with all improvements
+- 2026-05-15 12:30 IST — Migrated all 13 callers to get_settings()
+- 2026-05-15 12:40 IST — Updated .env.test, test_config_import.py
+- 2026-05-15 12:50 IST — Test, lint, type-check all pass
+
+Evidence:
+- Command: cd src/backend && python -m pytest tests/ -x -v
+- Command: cd src/backend && ruff check app/ tests/
+- Command: cd src/backend && mypy app/core/config.py
+
+Status updates:
+- 2026-05-15 12:00 IST **OPEN** — Ticket created
+- 2026-05-15 12:55 IST **DONE** — All changes verified
+
+---
+
+# Launch Readiness Critical Tasks - April 2026
+
 **Date:** 2026-04-01  
 **Scope:** Final launch preparation - operations readiness  
 **Status:** COMPLETE

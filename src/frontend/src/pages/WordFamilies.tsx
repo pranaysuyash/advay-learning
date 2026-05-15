@@ -233,7 +233,7 @@ const WordFamiliesGame = memo(function WordFamiliesGameComponent() {
         )}
 
         {cursor && isPlaying && (
-          <GameCursor position={cursor} isHandDetected={true} />
+          <GameCursor position={cursor} coordinateSpace="normalized" isHandDetected={true} />
         )}
       </div>
     </GameContainer>

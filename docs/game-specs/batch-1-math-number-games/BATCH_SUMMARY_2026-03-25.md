@@ -16,7 +16,7 @@ This batch focuses on **Math & Number Games** - educational experiences teaching
 | # | Game ID | Name | CV Mode | Status | Spec File |
 |---|---------|------|---------|--------|-----------|
 | 1 | `counting-objects` | Counting Objects | Hand | ✅ Complete | [SPEC_counting_objects_2026-03-25.md](./SPEC_counting_objects_2026-03-25.md) |
-| 2 | `bubble-count` | Bubble Count | Hand | ⏳ Pending | TBD |
+| 2 | `bubble-count` | Bubble Count | Hand | ✅ Complete | [SPEC_bubble_count_2026-03-25.md](./SPEC_bubble_count_2026-03-25.md) |
 | 3 | `color-by-number` | Color By Number | Hand | ⏳ Pending | TBD |
 | 4 | `counting-collectathon` | Counting Collectathon | Hand/Pose | ⏳ Pending | TBD |
 | 5 | `digital-jenga` | Digital Jenga | Hand (physics) | ✅ Completed | Critical drift case (see Batch 0) |

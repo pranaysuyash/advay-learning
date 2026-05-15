@@ -211,6 +211,32 @@ export function ThreeDGameCanvas({
 
   const CanvasContent = () => (
     <>
+      {enableAdaptiveQuality && (
+        <>
+          <PerformanceMonitor
+            factor={0.5}
+            onDecline={() => {
+              setQuality((prev) => {
+                if (prev === 'high') return 'medium';
+                if (prev === 'medium') return 'low';
+                if (prev === 'low') return 'minimal';
+                return 'minimal';
+              });
+            }}
+            onIncline={() => {
+              setQuality((prev) => {
+                if (prev === 'minimal') return 'low';
+                if (prev === 'low') return 'medium';
+                if (prev === 'medium') return 'high';
+                return 'high';
+              });
+            }}
+          />
+          <AdaptiveDpr pixelated />
+          <AdaptiveEvents />
+        </>
+      )}
+
       {/* Camera setup */}
       <PerspectiveCamera
         makeDefault
@@ -262,67 +288,26 @@ export function ThreeDGameCanvas({
   return (
     <ThreeErrorBoundary>
       <div className={`w-full h-full min-h-[400px] ${className}`}>
-        {enableAdaptiveQuality ? (
-          <PerformanceMonitor
-            factor={0.5}
-            onDecline={() => {
-              setQuality((prev) => {
-                if (prev === 'high') return 'medium';
-                if (prev === 'medium') return 'low';
-                if (prev === 'low') return 'minimal';
-                return 'minimal';
-              });
-            }}
-            onIncline={() => {
-              setQuality((prev) => {
-                if (prev === 'minimal') return 'low';
-                if (prev === 'low') return 'medium';
-                if (prev === 'medium') return 'high';
-                return 'high';
-              });
-            }}
-          >
-            <AdaptiveDpr pixelated />
-            <AdaptiveEvents />
-            <Canvas
-              shadows={shadows && currentSettings.shadows}
-              dpr={currentSettings.dpr}
-              gl={{
-                antialias: true,
-                alpha: true,
-                powerPreference: 'high-performance',
-              }}
-              onCreated={({ gl }) => {
-                gl.setClearColor(backgroundColor);
-                gl.shadowMap.enabled = shadows && currentSettings.shadows;
-                gl.shadowMap.type = THREE.PCFSoftShadowMap;
-              }}
-            >
-              <Suspense fallback={null}>
-                <CanvasContent />
-              </Suspense>
-            </Canvas>
-          </PerformanceMonitor>
-        ) : (
-          <Canvas
-            shadows={shadows}
-            dpr={dpr}
-            gl={{
-              antialias: true,
-              alpha: true,
-              powerPreference: 'high-performance',
-            }}
-            onCreated={({ gl }) => {
-              gl.setClearColor(backgroundColor);
-              gl.shadowMap.enabled = true;
-              gl.shadowMap.type = THREE.PCFSoftShadowMap;
-            }}
-          >
-            <Suspense fallback={null}>
-              <CanvasContent />
-            </Suspense>
-          </Canvas>
-        )}
+        <Canvas
+          shadows={enableAdaptiveQuality ? shadows && currentSettings.shadows : shadows}
+          dpr={enableAdaptiveQuality ? currentSettings.dpr : dpr}
+          gl={{
+            antialias: true,
+            alpha: true,
+            powerPreference: 'high-performance',
+          }}
+          onCreated={({ gl }) => {
+            gl.setClearColor(backgroundColor);
+            gl.shadowMap.enabled = enableAdaptiveQuality
+              ? shadows && currentSettings.shadows
+              : true;
+            gl.shadowMap.type = THREE.PCFSoftShadowMap;
+          }}
+        >
+          <Suspense fallback={null}>
+            <CanvasContent />
+          </Suspense>
+        </Canvas>
 
         {/* FPS Counter overlay */}
         {showFPS && (

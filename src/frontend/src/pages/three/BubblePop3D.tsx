@@ -160,6 +160,13 @@ interface Bubble3DProps {
   playPopSound: () => void;
 }
 
+function BubbleTimer({ onTick }: { onTick: () => void }) {
+  useFrame(() => {
+    onTick();
+  });
+  return null;
+}
+
 function Bubble3D({ bubble, onPop, cursor, playPopSound }: Bubble3DProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [popped, setPopped] = useState(false);
@@ -283,7 +290,7 @@ export default function BubblePop3D() {
     [completeGame],
   );
 
-  useFrame(() => {
+  const handleTick = useCallback(() => {
     if (showStartScreen) return;
 
     setGameState((prev) => {
@@ -299,7 +306,7 @@ export default function BubblePop3D() {
       }
       return updated;
     });
-  });
+  }, [showStartScreen, completeGame]);
 
   useEffect(() => {
     return () => {
@@ -327,6 +334,7 @@ export default function BubblePop3D() {
                 playPopSound={playPopSound}
               />
             ))}
+          <BubbleTimer onTick={handleTick} />
         </ThreeDGameCanvas>
 
         {isReady && cursor && (

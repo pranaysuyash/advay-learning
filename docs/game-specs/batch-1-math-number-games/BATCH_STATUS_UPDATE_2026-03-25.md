@@ -4,19 +4,19 @@
 **Date**: 2026-03-25 (Updated)  
 **Status**: IN PROGRESS  
 **Games in Batch**: 10 math/number games  
-**Completion**: 2/12 specs completed (Counting Objects, Bubble Count)
+**Completion**: 2/10 specs completed (Counting Objects, Bubble Count)
 
 ---
 
 ## Current Progress Status
 
-### ✅ Completed Specs (2/12 = 17%)
+### ✅ Completed Specs (2/10 = 20%)
 | # | Game ID | Spec File | Quality | Notes |
 |---|---------|-----------|---------|-------|
 | 1 | `counting-objects` | [SPEC_counting_objects_2026-03-25.md](./SPEC_counting_objects_2026-03-25.md) | ✅ Complete | Full 23-section spec, comprehensive coverage |
 | 2 | `bubble-count` | [SPEC_bubble_count_2026-03-25.md](./SPEC_bubble_count_2026-03-25.md) | ✅ Complete | Full 23-section spec with time-pressure mechanic documented |
 
-### 🔧 In Progress (0/12)
+### 🔧 In Progress (0/10)
 None currently - batch processing paused for review
 
 ### ⏳ Pending (8/10 = 80%)
@@ -130,7 +130,7 @@ All reviewed games demonstrate **excellent CV integration**:
 1. [ ] **Review completed specs** with product team for feedback on:
    - Time-pressure mechanic in Bubble Count (is 30s appropriate?)
    - Level cap decisions (why only 3 levels in Bubble Count?)
-2. [ ] **Continue batch processing**: Create specs for remaining 10 games
+2. [ ] **Continue batch processing**: Create specs for remaining 8 games
 3. [ ] **Standardize scoring formula** across all math games
 
 ### Short-Term Actions (This Week)
@@ -149,10 +149,10 @@ All reviewed games demonstrate **excellent CV integration**:
 - **Total elapsed**: ~175 minutes (~3 hours)
 
 ### Remaining Work Estimate
-- **10 games × 70 min/game** = ~700 minutes (~12 hours)
+- **8 games × 70 min/game** = ~560 minutes (~9.3 hours)
 - **Review cycle**: ~2 hours
 - **Standardization work**: ~4 hours
-- **Total remaining**: ~18 hours of focused work
+- **Total remaining**: ~15 hours of focused work
 
 ---
 
@@ -197,7 +197,7 @@ All reviewed games demonstrate **excellent CV integration**:
 
 ---
 
-**Batch Status**: 17% complete (2/12 specs)  
+**Batch Status**: 20% complete (2/10 specs)  
 **Next Review**: After completing next 3 games in batch  
 **Product Team Input Needed**: Time pressure mechanic, level cap decisions  
 **Owner**: AI Agent (Batch Processing)

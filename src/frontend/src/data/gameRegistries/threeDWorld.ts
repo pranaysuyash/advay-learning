@@ -161,6 +161,7 @@ export const THREE_D_WORLD_GAMES: GameManifest[] = [
     icon: 'numbers',
     vibe: 'educational',
     ageRange: '4-8',
+    listed: false,
     drops: [{ itemId: 'number-one', chance: 0.3 }, DROPS.starSilverEasy],
   }),
 

@@ -29,7 +29,7 @@ The SETUP.md file is comprehensive but contains **version inconsistencies** and 
 
 **Location:** Lines 10, 434  
 **Evidence (Before):**
-```markdown
+```text
 Line 10:  - **PostgreSQL**: 16+
 Line 434: brew install postgresql@14
 ```
@@ -42,7 +42,7 @@ Line 434: brew install postgresql@14
 - Updated CI workflow to: `postgres:17-alpine`
 
 **Status:** ✅ FIXED
-```markdown
+```text
 - **PostgreSQL**: 17+ (matches production Docker image)
 ```
 ```bash
@@ -71,7 +71,7 @@ Added complete Redis Setup section with:
 - Fallback option for development without Redis
 
 **Status:** ✅ FIXED Add Redis section:
-```markdown
+```text
 ## Redis Setup (Required for Caching)
 
 ```bash
@@ -101,7 +101,7 @@ Added complete Docker Compose Development section with:
 - Reset instructions
 
 **Status:** ✅ FIXED Add Docker Compose section:
-```markdown
+```text
 ## Docker Compose Development
 
 For production-like local development:
@@ -140,7 +140,7 @@ Added Database Operations section with:
 - Cross-reference to BACKUP_PROCEDURE.md runbook
 
 **Status:** ✅ FIXED Add reference:
-```markdown
+```text
 ## Database Operations
 
 See [Backup & Restore Runbook](runbooks/BACKUP_PROCEDURE.md) for:
@@ -164,7 +164,7 @@ Added Monitoring Setup section with:
 - Cross-reference to MONITORING.md runbook
 
 **Status:** ✅ FIXED Add reference:
-```markdown
+```text
 ## Monitoring Setup
 
 See [Monitoring Runbook](runbooks/MONITORING.md) for:
@@ -187,7 +187,7 @@ Updated environment variable documentation with:
 - Commands for generating secrets
 
 **Status:** ✅ FIXED Document key variables:
-```markdown
+```text
 Required environment variables:
 - `SECRET_KEY`: Generate with `openssl rand -hex 32`
 - `DATABASE_URL`: PostgreSQL connection string
@@ -220,7 +220,7 @@ gh api repos/pranaysuyash/advay-learning/actions/secrets
 **Issue:** No troubleshooting section for when hooks fail.
 
 **Fix:** Add:
-```markdown
+```text
 ### Hook Troubleshooting
 
 If commits fail due to hook errors:
@@ -244,7 +244,7 @@ git push --no-verify    # Bypasses pre-push only
 **Issue:** Only mentions nvm, but some developers use volta or asdf.
 
 **Fix:** Add alternatives:
-```markdown
+```text
 **Node.js version managers:**
 - nvm: `nvm use 22`
 - volta: `volta install node@22`
@@ -269,7 +269,7 @@ git push --no-verify    # Bypasses pre-push only
 **Issue:** Only shows `alembic upgrade head`, no downgrade instructions.
 
 **Fix:** Add:
-```markdown
+```text
 # Rollback one migration
 alembic downgrade -1
 

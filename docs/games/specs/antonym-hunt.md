@@ -774,7 +774,7 @@ const ANTONYM_PAIRS: AntonymPair[] = [
   { id: '19', wordA: 'before', wordB: 'after', emojiA: '⏮️', emojiB: '⏭️', 
     difficulty: 'hard', category: 'time', explanation: 'Before and after are opposite orders' },
   { id: '20', wordA: 'left', wordB: 'right', emojiA: '⬅️', emojiB: '➡️', 
-    difficulty: 'medium', category: 'direction', explanation: 'Left and right are opposite sides' },
+    difficulty: 'hard', category: 'direction', explanation: 'Left and right are opposite sides' },
   
   // Hard - Abstract
   { id: '21', wordA: 'always', wordB: 'never', emojiA: '♾️', emojiB: '🚫', 

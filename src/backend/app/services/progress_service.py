@@ -10,7 +10,7 @@ from app.core.config import get_settings
 from app.db.models.progress import Progress
 from app.schemas.progress import ProgressCreate, ProgressUpdate
 
-settings = get_settings()
+_settings = get_settings()
 
 
 class DuplicateProgressError(Exception):
@@ -106,7 +106,7 @@ class ProgressService:
             "completed": data.completed,
         }
 
-        if settings.USE_CLIENT_EVENT_TIME:
+        if _settings.USE_CLIENT_EVENT_TIME:
             parsed_completed_at = ProgressService._parse_client_timestamp(data.timestamp)
             if parsed_completed_at is not None:
                 progress_kwargs["completed_at"] = parsed_completed_at

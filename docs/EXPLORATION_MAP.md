@@ -13,7 +13,7 @@
 | **Target Age** | 2–8 years |
 | **Core Prop** | Camera-first, hands-free learning — kids interact via hand/face/pose/voice, not keyboard/mouse |
 | **License** | Private — built for Advay and young learners |
-| **Repo** | `/Users/pranay/Projects/learning_for_kids/` |
+| **Repo** | `learning_for_kids` (workspace project root) |
 
 ---
 

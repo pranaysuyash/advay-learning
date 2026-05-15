@@ -1156,7 +1156,7 @@ export const appRoutes: AppRoute[] = [
   },
   {
     path: '/games/pattern-pop-3d',
-    element: <ShapePop3D />,
+    element: <PatternPop3D2 />,
     protected: true,
     cameraSafe: true,
     gameName: 'Pattern Pop 3D',

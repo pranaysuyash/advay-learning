@@ -263,7 +263,7 @@ const { playSuccess, playClick, playError } = useAudio();
 if (checkAnswer(selectedGroupId, groups, targetCount)) {
   // Correct path
   if ((streak + 1) % 5 === 0) {
-    playCelebration(); // Special sound for streak milestones
+    playSuccess(); // Reuse success cue for streak milestones
   }
 } else {
   // Wrong path

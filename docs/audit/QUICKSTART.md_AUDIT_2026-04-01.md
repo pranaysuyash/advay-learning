@@ -175,7 +175,7 @@ Also added Docker Compose as primary quick option.
 
 ## Resolution Summary
 
-All issues have been resolved:
+Most issues are resolved, with one medium follow-up still open:
 
 ### Changes Made (2026-04-01)
 

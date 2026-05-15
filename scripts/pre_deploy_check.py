@@ -68,7 +68,8 @@ def check_settings() -> tuple[bool, list[str]]:
     errors = []
     
     try:
-        from app.core.config import settings
+        from app.core.config import get_settings
+        settings = get_settings()
         
         # Verify critical settings
         if not settings.SECRET_KEY or len(settings.SECRET_KEY) < 32:

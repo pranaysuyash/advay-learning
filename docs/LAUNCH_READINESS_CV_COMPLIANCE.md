@@ -268,7 +268,7 @@ From `AGENTS.md` Section "🎯 MULTI-MODAL VISION PLATFORM — TOP PRIORITY":
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
-| Every game MUST have at least one CV control mode | ⚠️ PARTIAL | 124/127 games have CV |
+| Every game MUST have at least one CV control mode | ❌ FAIL | 124/127 games have CV |
 | Check cv: [...] in game registry | ✅ PASS | All declarations match implementation |
 | Use appropriate hooks (useGameHandTracking, etc.) | ✅ PASS | 120+ games using hooks |
 | Camera gating with CameraSafeRoute | ✅ PASS | 138 routes with cameraSafe: true |

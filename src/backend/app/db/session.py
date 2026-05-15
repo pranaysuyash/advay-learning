@@ -4,7 +4,9 @@ from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.core.config import settings
+from app.core.config import get_settings
+
+settings = get_settings()
 
 # Connection pool configuration for PostgreSQL
 pool_config = {}

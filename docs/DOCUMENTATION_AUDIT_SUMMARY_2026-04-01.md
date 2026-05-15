@@ -159,7 +159,7 @@ grep "path: '/games/" src/frontend/src/routes/appRoutes.tsx | wc -l
 # Result: 127 (route-based playable games)
 
 # Count CV integration
-grep -l "useGameHandTracking" src/frontend/src/pages/*.tsx | wc -l
+find src/frontend/src/pages -name '*.tsx' -print0 | xargs -0 grep -l "useGameHandTracking" | wc -l
 # Result: 120
 
 # Test suite

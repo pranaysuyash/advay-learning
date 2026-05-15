@@ -6,8 +6,9 @@ from datetime import datetime, timedelta, timezone
 
 import resend
 
-from app.core.config import settings
+from app.core.config import get_settings
 
+_settings = get_settings()
 logger = logging.getLogger(__name__)
 
 BRAND_COLORS = {
@@ -39,7 +40,7 @@ class EmailService:
     @staticmethod
     async def send_verification_email(email: str, token: str) -> None:
         """Send email verification email via Resend."""
-        verification_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+        verification_url = f"{_settings.FRONTEND_URL}/verify-email?token={token}"
         subject = "Verify your email - Advay Vision Learning 👋"
         html_body = EmailService._verification_email_html(verification_url)
         await EmailService._send_email(email, subject, html_body)
@@ -47,7 +48,7 @@ class EmailService:
     @staticmethod
     async def send_password_reset_email(email: str, token: str) -> None:
         """Send password reset email via Resend."""
-        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+        reset_url = f"{_settings.FRONTEND_URL}/reset-password?token={token}"
         subject = "Reset your password - Advay Vision Learning 🔐"
         html_body = EmailService._password_reset_email_html(reset_url)
         await EmailService._send_email(email, subject, html_body)
@@ -235,7 +236,7 @@ class EmailService:
             logger.info("TESTING mode: Skipping actual email send")
             return
 
-        api_key = getattr(settings, "RESEND_API_KEY", None)
+        api_key = getattr(_settings, "RESEND_API_KEY", None)
 
         if not api_key:
             logger.warning(
@@ -253,7 +254,7 @@ class EmailService:
             resend.api_key = api_key
             response = resend.Emails.send(
                 {
-                    "from": settings.EMAIL_FROM,
+                    "from": _settings.EMAIL_FROM,
                     "to": to,
                     "subject": subject,
                     "html": html_body,
