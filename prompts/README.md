@@ -41,7 +41,7 @@ See `AGENTS.md` → "🎯 MULTI-MODAL VISION PLATFORM" section for full requirem
 
 ## 🚫 Critical Rules
 
-**Use short-lived PR branches for commits.** Iteration can happen locally on `main`, but commit on `codex/wip-<ticket-or-scope>` and merge back to `main` only after review.
+**All local work happens on `main`.** Commit directly to local `main`. When the user explicitly says "start git workflow" / "open a PR" / "create a branch", run `./scripts/start_wip_branch.sh <scope>` — it moves local-main commits to `codex/wip-<scope>`, resets `main` to `origin/main`, pushes the branch, and opens the PR. Agents MUST NOT create branches with any other command.
 
 **NEVER delete or revert files with unrecognized changes.** Unrecognized changes may be from parallel agents - always preserve them.
 

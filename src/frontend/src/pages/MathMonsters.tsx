@@ -36,6 +36,7 @@ import { useTTS } from '../hooks/useTTS';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameStartButton } from '../components/game/GameStartButton';
 import { GameHUD } from '../components/game/GameHUD';
+import { GameCursor } from '../components/game/GameCursor';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
@@ -231,6 +232,7 @@ function MathMonstersGame() {
   const lastFingerCountRef = useRef<number>(0);
   const fingerCountHistoryRef = useRef<number[]>([]);
   const lastSubmitTimeRef = useRef<number>(0);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   // ===== HAND TRACKING =====
   const handleHandFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
@@ -260,7 +262,7 @@ function MathMonstersGame() {
     }
   }, [fingerHoldStart, isSubmitting, showMenu]);
 
-  useGameHandTracking({
+  const { cursor, pinch } = useGameHandTracking({
     gameName: 'MathMonsters',
     isRunning: !showMenu && !showCelebration,
     webcamRef,
@@ -387,10 +389,10 @@ function MathMonstersGame() {
   // ===== RENDER =====
   return (
     <GameContainer webcamRef={webcamRef} title="Math Monsters" onHome={handleShowMenu}>
-      {/* Hidden webcam for hand tracking */}
-      <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
-
-      </div>
+      <div ref={gameAreaRef} className="relative w-full h-full">
+        {/* Hidden webcam for hand tracking */}
+        <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
+        </div>
 
       {showMenu ? (
         // ===== START MENU =====
@@ -667,6 +669,18 @@ function MathMonstersGame() {
         onComplete={() => setShowCelebration(false)}
         message="All Monsters Fed!"
       />
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={pinch.isPinching}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
+      </div>
     </GameContainer>
   );
 }

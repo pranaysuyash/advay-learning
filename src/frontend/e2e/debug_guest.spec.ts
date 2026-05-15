@@ -29,7 +29,7 @@ test.describe('Debug Guest Mode', () => {
     console.log(`URL before: ${urlBefore}`);
     
     // Check if button exists
-    const button = page.locator('button:has-text("Try without account")');
+    const button = page.locator('button:has-text("Try as Guest")');
     const buttonCount = await button.count();
     console.log(`Guest button found: ${buttonCount}`);
     

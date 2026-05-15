@@ -208,3 +208,9 @@ archive/backups/
 
 # Temporary pnpm directory
 .tmp-pnpm/
+
+# Chrome profile for testing
+.chrome-profile/
+
+# Test screenshots directory
+test-screenshots/

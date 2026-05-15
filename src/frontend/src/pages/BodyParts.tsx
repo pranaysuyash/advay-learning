@@ -4,17 +4,20 @@
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { GamePage } from '../components/GamePage';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { GameBackground } from '../components/game/GameBackground';
+import { GameCursor } from '../components/game/GameCursor';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import {
   LEVELS,
   getPartsForLevel,
@@ -23,6 +26,9 @@ import {
 } from '../games/bodyPartsLogic';
 import { triggerHaptic } from '../utils/haptics';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] = [
   { type: 'image', src: '/assets/kenney/platformer/hud/hud_heart.png', priority: 'critical' },
@@ -55,6 +61,9 @@ function BodyPartsGame({
   );
   const [feedback, setFeedback] = useState('');
   const [, setError] = useState<Error | null>(null);
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const {
     streak,
     maxStreak,
@@ -75,6 +84,26 @@ function BodyPartsGame({
     isPlaying: gameState === 'playing',
     metaData: { correct, round },
   });
+
+  // Hand tracking setup
+  const isPlaying = gameState === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'BodyParts',
+    webcamRef,
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) { void startTracking(); }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   // guard logic moved into wrapper (GamePage handles subscription, access, error)
 
@@ -169,8 +198,11 @@ function BodyPartsGame({
       title='Body Parts'
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='relative flex flex-col items-center gap-4 p-4'>
+      <div ref={gameAreaRef} className='relative flex flex-col items-center gap-4 p-4'>
         <GameBackground type="solid_sky" className="absolute inset-0 -z-10" />
         <div className='flex gap-2'>
           {LEVELS.map((l) => (
@@ -328,6 +360,9 @@ function BodyPartsGame({
           </div>
         )}
       </div>
+      {cursor && (
+        <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ec4899" />
+      )}
     </GameContainer>
   );
 }

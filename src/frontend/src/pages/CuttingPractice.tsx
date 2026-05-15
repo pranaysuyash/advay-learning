@@ -11,6 +11,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { GameBackground } from '../components/game/GameBackground';
@@ -74,6 +75,7 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
   } = useStreakTracking();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
@@ -475,8 +477,10 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isReady}
     >
-      <div className="relative flex flex-col items-center gap-4 p-4 h-full overflow-auto">
+      <div ref={gameAreaRef} className="relative flex flex-col items-center gap-4 p-4 h-full overflow-auto">
         <GameBackground type="solid_grass" className="absolute inset-0 -z-10" />
         {/* Level Selection */}
         {gameState === 'start' && (
@@ -722,6 +726,17 @@ const CuttingPracticeGame = memo(function CuttingPracticeGameComponent() {
           </div>
         )}
       </div>
+      {handCursor && (
+        <GameCursor
+          position={handCursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={isPinching}
+          isHandDetected={isReady}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameContainer>
   );
 });

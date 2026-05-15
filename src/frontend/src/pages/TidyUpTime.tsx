@@ -83,12 +83,13 @@ function TidyUpTimeGameContent() {
     setCursor(tip);
   }, []);
 
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
     gameName: 'TidyUpTime',
     targetFps: 30,
     isRunning: !showMenu && !gameState.isComplete && !gameState.isGameOver,
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   useEffect(() => {

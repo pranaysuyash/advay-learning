@@ -19,6 +19,8 @@ import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
 import { VoiceInstructions, useVoiceInstructions } from '../components/game/VoiceInstructions';
 import { GameStartButton } from '../components/game/GameStartButton';
 import { GameHUD } from '../components/game/GameHUD';
@@ -55,6 +57,8 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
   });
 
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [isHandDetected, setIsHandDetected] = useState(false);
   const lastHandStateRef = useRef(false);
   const { speak } = useVoiceInstructions();
@@ -101,6 +105,7 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
     const tip = frame.indexTip;
 
     if (tip) {
+      setCursor({ x: tip.x, y: tip.y });
       // Scale from [0..1] proportional to internal canvas
       pushSlicePoint(tip.x * CANVAS_WIDTH, tip.y * CANVAS_HEIGHT);
 
@@ -259,8 +264,8 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
   }, [score, completeGame, navigate, playClick, currentLevel]);
 
   return (
-    <GameContainer title="Fruit Ninja Air" onHome={() => navigate('/games')} reportSession={false}>
-      <div className="flex flex-col items-center gap-4 p-4 touch-none select-none">
+    <GameContainer title="Fruit Ninja Air" onHome={() => navigate('/games')} reportSession={false} webcamRef={webcamRef} isHandDetected={isHandDetected}>
+      <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 touch-none select-none relative">
 
         <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameState === 'playing'} />
 
@@ -377,6 +382,17 @@ const FruitNinjaAirGame = memo(function FruitNinjaAirGameComponent() {
           </div>
         )}
 
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
       </div>
     </GameContainer>
   );

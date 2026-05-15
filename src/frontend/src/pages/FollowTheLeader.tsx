@@ -28,6 +28,11 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   type GameState,
   MOVEMENT_PATTERNS,
@@ -52,6 +57,8 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
   const [error, setError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   // Streak tracking
   const { streak, showMilestone, incrementStreak, resetStreak } = useStreakTracking();
@@ -73,6 +80,30 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
     level: gameState?.level || 1,
     isPlaying: !showMenu && gameState?.gameActive && !isLoading,
   });
+
+  // ===== HAND TRACKING (Alternative input method) =====
+  const isPlaying = !showMenu && gameState?.gameActive && !isLoading;
+
+  const handleHandFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isHandModelLoading, isReady: isHandTrackingReady, startTracking: startHandTracking, webcamRef: handWebcamRef } = useGameHandTracking({
+    gameName: 'FollowTheLeader',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleHandFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isHandModelLoading) {
+      void startHandTracking();
+    }
+  }, [isPlaying, isHandTrackingReady, isHandModelLoading, startHandTracking]);
 
   // ===== POSE LANDMARKER INITIALIZATION =====
   useEffect(() => {
@@ -311,7 +342,7 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
 
   // ===== RENDER =====
   return (
-    <GameContainer webcamRef={webcamRef} title="Follow the Leader" onHome={handleShowMenu} reportSession={false}>
+    <GameContainer webcamRef={handWebcamRef} isHandDetected={isHandTrackingReady} isPlaying={isPlaying} title="Follow the Leader" onHome={handleShowMenu} reportSession={false}>
       {/* Hidden webcam for pose detection */}
       <div className="absolute top-0 right-0 w-40 h-32 opacity-0 pointer-events-none overflow-hidden">
         <Webcam
@@ -383,7 +414,7 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
         </div>
       ) : (
         // ===== GAME AREA =====
-        <div className="flex flex-col h-full">
+        <div ref={gameAreaRef} className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2 bg-white/50 border-b border-orange-200">
             <div>
@@ -479,6 +510,9 @@ const FollowTheLeaderGame = memo(function FollowTheLeaderGame() {
           </div>
         </motion.div>
       )}
+
+      {/* Hand tracking cursor */}
+      {cursor && <GameCursor position={cursor} coordinateSpace='normalized' containerRef={gameAreaRef} isPinching={false} isHandDetected={true} size={64} color='#f97316' />}
     </GameContainer>
   );
 });

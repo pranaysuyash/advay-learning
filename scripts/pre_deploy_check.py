@@ -33,7 +33,7 @@ def check_migrations() -> tuple[bool, list[str]]:
     
     try:
         result = subprocess.run(
-            ["alembic", "current"],
+            [sys.executable, "-m", "alembic", "current"],
             cwd=BACKEND_DIR,
             capture_output=True,
             text=True
@@ -45,7 +45,7 @@ def check_migrations() -> tuple[bool, list[str]]:
         
         # Check if current is head
         result = subprocess.run(
-            ["alembic", "history", "--indicate-current"],
+            [sys.executable, "-m", "alembic", "history", "--indicate-current"],
             cwd=BACKEND_DIR,
             capture_output=True,
             text=True
@@ -68,7 +68,8 @@ def check_settings() -> tuple[bool, list[str]]:
     errors = []
     
     try:
-        from app.core.config import settings
+        from app.core.config import get_settings
+        settings = get_settings()
         
         # Verify critical settings
         if not settings.SECRET_KEY or len(settings.SECRET_KEY) < 32:

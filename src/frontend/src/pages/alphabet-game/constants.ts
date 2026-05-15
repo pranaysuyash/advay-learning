@@ -23,6 +23,9 @@ export const POINT_MIN_DISTANCE = 0.002;
 export const TIP_SMOOTHING_ALPHA = 0.35;
 
 export const HAND_TRACKING_CONFIDENCE = 0.3;
+// Number of consecutive frames without hand detection before declaring hand lost
+// Prevents brief tracking dropouts from disrupting gameplay (60fps ≈ 0.5sec tolerance)
+export const HAND_LOSS_TOLERANCE_FRAMES = 30;
 
 export const WELLNESS_ACTIVE_THRESHOLD_MINUTES = 15;
 export const WELLNESS_HYDRATION_THRESHOLD_MINUTES = 10;

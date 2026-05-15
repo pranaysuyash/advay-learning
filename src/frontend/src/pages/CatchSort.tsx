@@ -2,11 +2,17 @@
  * Catch & Sort Game
  * Falling object sorting game
  */
-import { memo, useCallback, useState, useEffect } from 'react';
+import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
@@ -23,6 +29,24 @@ export const CatchSortContent = memo(function CatchSortComponent() {
   const hasAccess = canAccessGame('catch-sort');
   const { playSuccess, playError } = useAudio();
   const [state, setState] = useState(createInitialState());
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+
+  const isPlaying = state.status === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'CatchSort',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
   const currentChallenge = CHALLENGES.find(c => c.id === state.currentChallengeId);
   const { resetAutoCompletion } = useAutoGameCompletion('catch-sort', {
     when: state.status === 'failure',
@@ -89,8 +113,8 @@ export const CatchSortContent = memo(function CatchSortComponent() {
   const objectTypes = currentChallenge?.objectTypes || [];
 
   return (
-    <GameContainer title='Catch & Sort' onHome={() => navigate('/games')} score={state.score}>
-      <div className='p-4'>
+    <GameContainer title='Catch & Sort' onHome={() => navigate('/games')} score={state.score} webcamRef={webcamRef} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
+      <div ref={gameAreaRef} className='p-4 relative'>
         <div className='flex justify-between items-center mb-2 text-sm'>
           <div>Time: {state.timeLeft}s</div>
           <div>Level: {currentChallenge?.name}</div>
@@ -134,8 +158,11 @@ export const CatchSortContent = memo(function CatchSortComponent() {
             </motion.button>
           ))}
         </div>
-        
+
         <p className='text-center text-xs text-gray-500 mt-4'>Click falling objects or tap the matching bin below!</p>
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
+        )}
       </div>
     </GameContainer>
   );

@@ -20,6 +20,8 @@ import { triggerHaptic } from '../utils/haptics';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import type { TrackedHandFrame } from '../types/tracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
 import {
   DINOSAURS,
   type Dino,
@@ -49,6 +51,8 @@ function DinosaurDigGame() {
 
   // Hand tracking state
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [isHandDetected, setIsHandDetected] = useState(false);
   const lastHandStateRef = useRef(false);
   const handFrameCountRef = useRef(0);
@@ -196,6 +200,7 @@ function DinosaurDigGame() {
     const tip = frame.indexTip;
 
     if (tip) {
+      setCursor({ x: tip.x, y: tip.y });
       const canvasX = tip.x * CANVAS_W;
       const canvasY = tip.y * CANVAS_H;
       brushAt(canvasX, canvasY);
@@ -268,7 +273,8 @@ function DinosaurDigGame() {
 
   return (
     <div
-      className="fixed inset-0 overflow-hidden"
+      ref={gameAreaRef}
+      className="fixed inset-0 overflow-hidden relative"
       role="application"
       aria-label="Dinosaur Dig Game"
       style={{
@@ -508,6 +514,18 @@ function DinosaurDigGame() {
             </div>
           </motion.div>
         </div>
+      )}
+
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
       )}
     </div>
   );

@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { audioManager, SoundType } from '../audioManager';
 
 export function useAudio() {
-  const [isInitialized, setIsInitialized] = useState(false);
+  const isInitializedRef = useRef(false);
   const initializationPromiseRef = useRef<Promise<void> | null>(null);
   const initializeResolverRef = useRef<(() => void) | null>(null);
 
   // Initialize on first user interaction
   useEffect(() => {
-    const handleInteraction = async () => {
-      if (!isInitialized) {
+    const handleInteraction = () => {
+      if (!isInitializedRef.current) {
         try {
           audioManager.initialize();
-          setIsInitialized(true);
-          
+          isInitializedRef.current = true;
+
           // Resolve any waiting promises
           if (initializeResolverRef.current) {
             initializeResolverRef.current();
@@ -24,33 +24,30 @@ export function useAudio() {
         }
       }
     };
-    
-    const handleClick = () => handleInteraction();
-    const handleTouchStart = () => handleInteraction();
-    
-    document.addEventListener('click', handleClick);
-    document.addEventListener('touchstart', handleTouchStart);
-    
+
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
+
     return () => {
-      document.removeEventListener('click', handleClick);
-      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
     };
-  }, [isInitialized]);
+  }, []);
 
   // Wait for initialization if needed
   const waitForInitialization = useCallback(async (): Promise<void> => {
-    if (isInitialized) {
+    if (isInitializedRef.current) {
       return;
     }
-    
+
     if (!initializationPromiseRef.current) {
       initializationPromiseRef.current = new Promise<void>((resolve) => {
         initializeResolverRef.current = resolve;
       });
     }
-    
+
     return initializationPromiseRef.current;
-  }, [isInitialized]);
+  }, []);
 
   const play = useCallback(async (sound: SoundType) => {
     try {

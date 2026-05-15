@@ -6,10 +6,17 @@
  * @ticket TCK-20260310-013
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameShell } from '../components/GameShell';
+import Webcam from 'react-webcam';
+import { GameCursor } from '../components/game/GameCursor';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { GameContainer } from '../components/GameContainer';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -49,6 +56,28 @@ function PlantGardenGame() {
     isPlaying: gameState === 'playing',
     metaData: { plantsGrown: completedPlants },
   });
+
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+
+  const isPlaying = gameState === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'PlantGarden',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) { void startTracking(); }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   const speakText = useCallback((text: string) => {
     if (ttsEnabled) {
@@ -167,19 +196,21 @@ function PlantGardenGame() {
   const growthEmoji = currentPlant?.emoji || '🌱';
 
   return (
-    <div 
-      className="fixed inset-0 overflow-hidden"
-      role="application"
-      aria-label="Plant a Garden Game"
-      style={{
-        background: 'linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%)',
-      }}
-      onMouseDown={handleAction}
-      onMouseUp={handleActionStop}
-      onMouseLeave={handleActionStop}
-      onTouchStart={handleAction}
-      onTouchEnd={handleActionStop}
-    >
+    <GameContainer webcamRef={webcamRef} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
+      <div 
+        ref={gameAreaRef}
+        className="absolute inset-0 overflow-hidden"
+        role="application"
+        aria-label="Plant a Garden Game"
+        style={{
+          background: 'linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%)',
+        }}
+        onMouseDown={handleAction}
+        onMouseUp={handleActionStop}
+        onMouseLeave={handleActionStop}
+        onTouchStart={handleAction}
+        onTouchEnd={handleActionStop}
+      >
       {/* Start Screen */}
       {gameState === 'start' && (
         <div className="flex flex-col items-center justify-center h-full p-4">
@@ -427,7 +458,11 @@ function PlantGardenGame() {
           </motion.div>
         </div>
       )}
-    </div>
+      </div>
+      {cursor && (
+        <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#22c55e" />
+      )}
+    </GameContainer>
   );
 }
 

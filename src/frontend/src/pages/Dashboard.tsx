@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useMemo } from 'react';
+import { memo, useState, useEffect, useMemo, useRef } from 'react';
 
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -227,12 +227,23 @@ export const Dashboard = memo(function Dashboard() {
     return currentProfile || profiles[0] || null;
   }, [isGuest, guestSession, currentProfile, profiles]);
 
-  // Set initial profile
+  // Initialize current profile when available (guard against render loops)
+  const initializedProfileId = useRef<string | null>(null);
   useEffect(() => {
     if (defaultProfile && !currentProfile && !isGuest) {
-      setCurrentProfile(defaultProfile);
+      if (initializedProfileId.current !== defaultProfile.id) {
+        setCurrentProfile(defaultProfile);
+        initializedProfileId.current = defaultProfile.id;
+      }
     }
-  }, [defaultProfile, currentProfile, setCurrentProfile, isGuest]);
+  }, [defaultProfile, currentProfile, isGuest, setCurrentProfile]); // Include setter for lint
+
+  // Reset initialization guard when auth state resets (e.g., user logs out)
+  useEffect(() => {
+    if (!defaultProfile) {
+      initializedProfileId.current = null;
+    }
+  }, [defaultProfile]);
 
   // offline queue subscription effect
   useEffect(() => {
@@ -326,7 +337,9 @@ export const Dashboard = memo(function Dashboard() {
       const url = URL.createObjectURL(response.data);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `advay-export-${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `advay-export-${
+        new Date().toISOString().split('T')[0]
+      }.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -454,11 +467,35 @@ export const Dashboard = memo(function Dashboard() {
           </div>
         </div>
 
-        <div className='flex items-center gap-4'>
+        <div className='flex items-center gap-3 md:gap-4'>
+          {/* QUICK PLAY BUTTON - Skip dashboard, jump straight to game */}
+          <button
+            type='button'
+            onClick={() => {
+              const recommendedGame =
+                gameRecommendations[0]?.games[0]?.id || 'alphabet-tracing';
+              trackLaunchEvent('cta_clicked', {
+                cta: 'quick_play',
+                source: 'dashboard_header',
+                gameId: recommendedGame,
+              } as any);
+              navigate(`/games/${recommendedGame}`, {
+                state: { profileId: defaultProfile?.id },
+              });
+            }}
+            className='bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 md:px-6 py-2 rounded-full flex items-center gap-2 shadow-lg font-bold text-sm md:text-base transition-all hover:scale-105 active:scale-95'
+            title='Quick Play - Jump straight to a game!'
+          >
+            <span className='text-lg'>▶</span>
+            <span className='hidden sm:inline'>Quick Play</span>
+          </button>
+
           {/* STAR CURRENCY */}
-          <div className='bg-white border-2 border-yellow-200 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm font-bold text-yellow-600 cursor-pointer hover:bg-yellow-50 transition-colors'>
-            <KenneyIcon type='star' size={24} />
-            <span className='text-xl'>{totalStars.toLocaleString()}</span>
+          <div className='bg-white border-2 border-yellow-200 px-3 md:px-4 py-2 rounded-full flex items-center gap-2 shadow-sm font-bold text-yellow-600 cursor-pointer hover:bg-yellow-50 transition-colors'>
+            <KenneyIcon type='star' size={20} />
+            <span className='text-base md:text-xl'>
+              {totalStars.toLocaleString()}
+            </span>
           </div>
           {/* Offline progress badges */}
           {pendingCount > 0 && defaultProfile?.id && (
@@ -495,6 +532,7 @@ export const Dashboard = memo(function Dashboard() {
           {/* ACTION BUTTONS (Hidden on small mobile, moved to nav or menu) */}
           <div className='hidden md:flex gap-2'>
             <button
+              type='button'
               onClick={handleExport}
               disabled={exporting || profiles.length === 0}
               className='w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-200 rounded-full text-slate-500 hover:text-[#3B82F6] hover:border-[#3B82F6] transition shadow-sm disabled:opacity-50'
@@ -519,6 +557,7 @@ export const Dashboard = memo(function Dashboard() {
           <div className='inline-flex items-center gap-3 bg-white p-2 rounded-full border-2 border-slate-100 shadow-sm'>
             {profiles.map((p) => (
               <button
+                type='button'
                 key={p.id}
                 onClick={() => {
                   setCurrentProfile(p);
@@ -536,7 +575,9 @@ export const Dashboard = memo(function Dashboard() {
                     ? 'bg-[#3B82F6] text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-50'
                 }`}
-                title={`${p.name}${p.age ? ` (${p.age} years)` : ''} - Right-click to edit`}
+                title={`${p.name}${
+                  p.age ? ` (${p.age} years)` : ''
+                } - Right-click to edit`}
               >
                 <AvatarWithBadge
                   config={
@@ -552,6 +593,7 @@ export const Dashboard = memo(function Dashboard() {
             ))}
             {/* ADD CHILD BUTTON */}
             <button
+              type='button'
               onClick={() => setShowAddModal(true)}
               className='px-3 py-1.5 rounded-full text-sm font-bold text-slate-400 hover:bg-slate-50 hover:text-[#3B82F6] transition border-2 border-dashed border-slate-200 hover:border-[#3B82F6] flex items-center gap-1'
               title={t('dashboard:profile.addChild', 'Add Child')}
@@ -678,6 +720,7 @@ export const Dashboard = memo(function Dashboard() {
                 </p>
               </div>
               <button
+                type='button'
                 onClick={() => setShowAdventureMap(false)}
                 className='text-slate-400 hover:text-slate-600 transition-colors'
                 aria-label='Hide adventure map'
@@ -707,6 +750,7 @@ export const Dashboard = memo(function Dashboard() {
                 </div>
               </div>
               <button
+                type='button'
                 onClick={() => setShowAdventureMap(true)}
                 className='px-4 py-2 bg-amber-50 text-amber-600 rounded-full text-sm font-bold hover:bg-amber-100 transition-colors flex items-center gap-2'
               >
@@ -876,7 +920,11 @@ function SubscriptionCard() {
   return (
     <div className='px-6 lg:px-12 mb-6'>
       <div
-        className={`rounded-xl p-6 border-2 ${isExpiringSoon ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-slate-100'}`}
+        className={`rounded-xl p-6 border-2 ${
+          isExpiringSoon
+            ? 'bg-yellow-50 border-yellow-200'
+            : 'bg-white border-slate-100'
+        }`}
       >
         <div className='flex flex-wrap items-center justify-between gap-4'>
           <div>
@@ -885,7 +933,11 @@ function SubscriptionCard() {
               <div>
                 <h3 className='text-lg font-bold text-slate-900'>{planName}</h3>
                 <span
-                  className={`text-sm ${sub.status === 'active' ? 'text-green-600' : 'text-slate-500'}`}
+                  className={`text-sm ${
+                    sub.status === 'active'
+                      ? 'text-green-600'
+                      : 'text-slate-500'
+                  }`}
                 >
                   {sub.status === 'active' ? 'Active' : sub.status}
                 </span>
@@ -894,7 +946,11 @@ function SubscriptionCard() {
 
             {subscription.days_remaining !== null && (
               <p
-                className={`text-sm ${isExpiringSoon ? 'text-yellow-700 font-semibold' : 'text-slate-500'}`}
+                className={`text-sm ${
+                  isExpiringSoon
+                    ? 'text-yellow-700 font-semibold'
+                    : 'text-slate-500'
+                }`}
               >
                 {isExpiringSoon ? '⚠️ ' : ''}
                 {subscription.days_remaining} days remaining
@@ -910,7 +966,9 @@ function SubscriptionCard() {
                   {subscription.available_games.refresh_available
                     ? ' • Refresh available now'
                     : subscription.available_games.next_refresh_at
-                      ? ` • Next refresh opens ${new Date(subscription.available_games.next_refresh_at).toLocaleDateString()}`
+                      ? ` • Next refresh opens ${new Date(
+                          subscription.available_games.next_refresh_at,
+                        ).toLocaleDateString()}`
                       : ' • Final monthly set is active'}
                 </p>
               )}

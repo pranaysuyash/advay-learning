@@ -95,12 +95,15 @@ export const Home = memo(function Home() {
     });
   };
 
-  const startDemo = () => {
-    trackLaunchEvent('cta_clicked', { cta: 'try_magic', source: 'home_hero' });
+  // Removed: startDemo (now using quickPlay to bypass dashboard)
+  // Quick Play - skip dashboard, go directly to game
+  const quickPlay = () => {
+    trackLaunchEvent('cta_clicked', { cta: 'quick_play', source: 'home_hero' });
     trackSharedVisitCta('demo');
     loginAsGuest();
     setDemoMode(true);
-    navigate('/dashboard');
+    // Go directly to game, bypassing dashboard entirely
+    navigate('/games/alphabet-tracing');
   };
 
   const startRegistration = () => {
@@ -204,10 +207,10 @@ export const Home = memo(function Home() {
 
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
                 <button
-                  onClick={startDemo}
+                  onClick={quickPlay}
                   className="w-full bg-white text-[#3B82F6] border-3 border-[#3B82F6] px-10 py-5 rounded-full font-black text-2xl shadow-[0_6px_0_0_#2563EB] active:translate-y-[6px] active:shadow-none transition-all drop-shadow-[0_4px_0_#E5B86E] flex items-center justify-center gap-3"
                 >
-                  <Sparkles size={28} /> Try Demo — No Account Needed
+                  <Activity size={28} /> ▶ Quick Play — Start Instantly
                 </button>
               </motion.div>
             </div>

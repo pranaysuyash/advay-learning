@@ -66,9 +66,7 @@ export function useGameProgress(gameId: string): UseGameProgressReturn {
 
   const saveProgress = useCallback(async (data: GameProgressData) => {
     if (!currentProfile) {
-      const error = new Error('No profile selected');
-      console.warn('[useGameProgress] Cannot save progress: no profile selected');
-      throw error;
+      throw new Error('Cannot save progress without an active profile');
     }
 
     const enqueueResult = progressQueue.add({

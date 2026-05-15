@@ -50,7 +50,8 @@ def main():
     args = parser.parse_args()
 
     # Import after path setup
-    from app.core.config import settings
+    from app.core.config import get_settings
+    settings = get_settings()
 
     # Determine reload mode and workers
     reload_mode = not args.production and settings.DEBUG

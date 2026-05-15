@@ -21,7 +21,9 @@ import {
   PersonStanding,
 } from 'lucide-react';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
+import type { Point } from '../types/tracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import { useGameCompletion } from '../hooks/useGameCompletion';
@@ -69,6 +71,8 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
   const lastPoseRef = useRef<any>(null);
   const stabilityRef = useRef(0);
   const handCanvasRef = useRef<HTMLCanvasElement>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   const {
     playPop: playSuccess,
@@ -350,7 +354,17 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
 
   const handleFingerChallengeFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
-      if (!handCanvasRef.current || gamePhase !== 'fingerChallenge') return;
+      if (gamePhase !== 'fingerChallenge') return;
+
+      // Update cursor position from index tip
+      const tip = frame.indexTip;
+      if (tip) {
+        setCursor(tip);
+      } else {
+        setCursor(null);
+      }
+
+      if (!handCanvasRef.current) return;
 
       const canvas = handCanvasRef.current;
       const ctx = canvas.getContext('2d');
@@ -737,7 +751,7 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
               )}
             </motion.div>
 
-            <div className='relative rounded-[2.5rem] overflow-hidden bg-slate-100 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
+            <div ref={gameAreaRef} className='relative rounded-[2.5rem] overflow-hidden bg-slate-100 border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E]'>
               <canvas
                 ref={canvasRef}
                 className='absolute top-0 left-0 w-full h-[400px] pointer-events-none'
@@ -808,6 +822,18 @@ const FreezeDanceGame = memo(function FreezeDanceGameComponent() {
                 End Game
               </button>
             </div>
+
+            {cursor && (
+              <GameCursor
+                position={cursor}
+                coordinateSpace="normalized"
+                containerRef={gameAreaRef}
+                isPinching={false}
+                isHandDetected={true}
+                size={64}
+                color="#22c55e"
+              />
+            )}
           </div>
         )}
 

@@ -54,7 +54,7 @@ export function Mascot({
   const hasUserGestureRef = useRef<boolean>(false);
 
   // TTS integration
-  const { speakInLanguage, isEnabled: ttsEnabled } = useTTS();
+  const { speakInLanguage, isEnabled: ttsEnabled, stop: stopSpeaking } = useTTS();
 
   const getCleanMessage = useCallback((text: string) => {
     // Remove emojis for cleaner TTS (keep the text human-readable)
@@ -175,7 +175,16 @@ export function Mascot({
     if (!speakMessage || !ttsEnabled || !message) return;
     if (message === lastSpokenMessageRef.current) return;
 
-    // Debounce and rate-limit to avoid “auto changing” spam canceling speech.
+    // IMPORTANT: Immediately stop any in-flight speech when message changes
+    // This prevents the “voice lags behind screen transitions” issue where
+    // the previous step's voiceover continues while the new step is visible
+    stopSpeaking();
+
+    // Reset rate-limit on message change to allow immediate new speech
+    // This is intentional - step transitions should always speak immediately
+    lastSpokenAtRef.current = 0;
+
+    // Debounce to avoid “auto changing” spam canceling speech.
     if (speakDebounceRef.current) {
       clearTimeout(speakDebounceRef.current);
     }
@@ -187,13 +196,10 @@ export function Mascot({
       const cleanMessage = getCleanMessage(pendingMessage);
       if (!cleanMessage) return;
 
-      const now = Date.now();
-      if (now - lastSpokenAtRef.current < 1500) return;
-
-      lastSpokenAtRef.current = now;
+      lastSpokenAtRef.current = Date.now();
       lastSpokenMessageRef.current = pendingMessage;
       speakInLanguage(cleanMessage, language);
-    }, 400);
+    }, 200); // Reduced from 400ms for snappier response
 
     return () => {
       if (speakDebounceRef.current) {
@@ -208,6 +214,7 @@ export function Mascot({
     speakInLanguage,
     speakMessage,
     ttsEnabled,
+    stopSpeaking,
   ]);
 
   // Bounce animation trigger

@@ -260,9 +260,10 @@ chmod +x .githooks/* scripts/*.sh
 
 #### Branch Discipline
 
-- Use short-lived WIP branches: `codex/wip-<ticket-or-scope>`
-- Open PR for review before merging to `main`
-- Direct commits on `main` are blocked (emergency override: `ALLOW_MAIN_COMMIT=1`)
+- **All local work on `main`** — commit freely to local `main`.
+- **Never push to `origin/main` directly** — all code reaches `main` via merged PRs.
+- **Agents MUST NOT create branches** with `git switch -c` / `git checkout -b` / `git branch` — only `./scripts/start_wip_branch.sh <scope>`.
+- **Branch creation = explicit user trigger** ("start git workflow" / "open a PR" / "create a branch").
 - **Never delete unrecognized changes** from parallel agents
 
 ### Work Tracking

@@ -45,8 +45,10 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { WellnessMonitor } from '../components/game/WellnessMonitor';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import { GameCursor } from '../components/game/GameCursor';
 import { createDefaultPinchState } from '../utils/pinchDetection';
 import type { PinchState, Point } from '../types/tracking';
+import { trackGameActivity } from '../games/analytics';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   ALPHABET_GAME_TUTORIAL_KEY,
@@ -86,6 +88,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const markLetterAttempt = useProgressStore(
     (state) => state.markLetterAttempt,
   );
+  const fetchProfiles = useProfileStore((state) => state.fetchProfiles);
 
   const [error, setError] = useState<Error | null>(null);
 
@@ -99,6 +102,8 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const pinchStateRef = useRef<PinchState>(createDefaultPinchState());
   const smoothedTipRef = useRef<Point | null>(null);
   const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   const [isHandPresent, setIsHandPresent] = useState(false);
   const isHandPresentRef = useRef(isHandPresent);
   const latestTrackingFrameRef = useRef<TrackedHandFrame | null>(null);
@@ -112,15 +117,11 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   } = useAudio();
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
-  
+
   const { speak, isEnabled: ttsEnabled } = useTTS();
   const { completeGame } = useGameCompletion('alphabet-tracing');
   const { speakWordExample } = usePhonics();
-  
-  // Wrap completeGame to match useGameHandlers expected signature
-  const handleGameComplete = useCallback(() => {
-    void completeGame({ score, level: 1 });
-  }, [completeGame, score]);
+
   const [streak, setStreak] = useState<number>(0);
   const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
@@ -189,23 +190,35 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
     useState<number>(0); // Track hydration reminders
 
   // Wellness tracking hooks handled by <WellnessMonitor />
-  const handleAttentionAlert = useCallback((alert: { level: string; message: string; timestamp: number }) => {
-    if (alert.level === 'critical') {
-      setWellnessReminderType('inactive');
+  const handleAttentionAlert = useCallback(
+    (alert: { level: string; message: string; timestamp: number }) => {
+      if (alert.level === 'critical') {
+        setWellnessReminderType('inactive');
+        setShowWellnessReminder(true);
+        setFeedback(alert.message);
+      }
+    },
+    [],
+  );
+
+  const handlePostureAlert = useCallback(
+    (alert: { level: string; message: string; timestamp: number }) => {
+      setWellnessReminderType('break');
       setShowWellnessReminder(true);
       setFeedback(alert.message);
-    }
-  }, []);
-
-  const handlePostureAlert = useCallback((alert: { level: string; message: string; timestamp: number }) => {
-    setWellnessReminderType('break');
-    setShowWellnessReminder(true);
-    setFeedback(alert.message);
-  }, []);
+    },
+    [],
+  );
 
   const handleTrackingFrame = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
       latestTrackingFrameRef.current = frame;
+      // Update cursor position from index finger tip
+      if (frame.indexTip) {
+        setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
+      } else {
+        setCursor(null);
+      }
     },
     [],
   );
@@ -242,15 +255,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
     ) {
       void startTracking();
     }
-  }, [
-    isHandTrackingReady,
-    isModelLoading,
-    isPaused,
-    isPlaying,
-    startTracking,
-    useMouseMode,
-  ]);
-
+  }, [isHandTrackingReady, isModelLoading, isPaused, isPlaying, useMouseMode]); // Remove startTracking from deps to prevent infinite loop
 
   // All game handler functions from useGameHandlers (injected after full state is available below)
 
@@ -268,11 +273,17 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
       localStorage.getItem(ALPHABET_GAME_TUTORIAL_KEY) === 'true';
     setTutorialCompleted(hasCompletedTutorial);
 
-    if (!isGuest) {
-      // Fetch profiles to ensure we have the latest data for signed-in users.
-      useProfileStore.getState().fetchProfiles();
-    }
-  }, [isGuest]);
+    const loadProfiles = async () => {
+      if (!isGuest) {
+        try {
+          await fetchProfiles();
+        } catch {
+          // ignore error; store handles it
+        }
+      }
+    };
+    loadProfiles();
+  }, [isGuest, fetchProfiles]);
 
   // Bootstrap camera permission on mount (Permissions API + getUserMedia fallback)
   useInitialCameraPermission(
@@ -289,7 +300,6 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const profiles = useProfileStore((state) => state.profiles);
   const currentProfile = useProfileStore((state) => state.currentProfile);
   const isProfilesLoading = useProfileStore((state) => state.isLoading);
-  const fetchProfiles = useProfileStore((state) => state.fetchProfiles);
   const profilesError = useProfileStore((state) => state.error);
 
   // Single, stable initialization effect for profiles
@@ -301,7 +311,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
         // Error handled in store
       });
     }
-  }, [fetchProfiles, isGuest, profiles.length]);
+  }, [isGuest, profiles.length]); // Remove fetchProfiles from deps to prevent infinite loop
 
   // Auto-select first available profile if none provided
   const resolvedProfileId = profileId ?? currentProfile?.id ?? profiles[0]?.id;
@@ -394,6 +404,32 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
           : 'text-text-error',
     [accuracy],
   );
+
+  // Wrap completeGame to match useGameHandlers expected signature
+  // Moved here after all state declarations to avoid "used before declaration" errors
+  const handleGameComplete = useCallback(() => {
+    // Track analytics
+    trackGameActivity({
+      activityType: 'letter_tracing',
+      contentId: `letter-${currentLetter?.char || 'A'}`,
+      score: Math.round(score),
+      durationSeconds: 0, // gameTime tracking not implemented
+      metadata: {
+        language: selectedLanguage,
+        accuracy: accuracy,
+        streak,
+      },
+    });
+
+    void completeGame({ score, level: 1 });
+  }, [
+    completeGame,
+    score,
+    currentLetter,
+    selectedLanguage,
+    accuracy,
+    streak,
+  ]);
 
   // Restore session on mount (if valid)
   useEffect(() => {
@@ -584,16 +620,19 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   });
 
   // Pointer (mouse/touch) handlers
-  const { handleCanvasPointerDown, handleCanvasPointerMove, handleCanvasPointerUpOrCancel } =
-    usePointerHandlers({
-      isPlaying,
-      isDrawing,
-      canvasRef,
-      drawnPointsRef,
-      lastDrawPointRef,
-      pointerDownRef,
-      resetInactivityTimer,
-    });
+  const {
+    handleCanvasPointerDown,
+    handleCanvasPointerMove,
+    handleCanvasPointerUpOrCancel,
+  } = usePointerHandlers({
+    isPlaying,
+    isDrawing,
+    canvasRef,
+    drawnPointsRef,
+    lastDrawPointRef,
+    pointerDownRef,
+    resetInactivityTimer,
+  });
 
   // Define game controls
   const gameControls = useMemo<GameControl[]>(
@@ -768,7 +807,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
         onAttentionAlert={handleAttentionAlert}
         onPostureAlert={handlePostureAlert}
       />
-      <>
+      <div ref={gameAreaRef} className='relative w-full h-full'>
         {!tutorialCompleted && (
           <GameTutorial
             onComplete={handleTutorialComplete}
@@ -904,7 +943,9 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
           isOpen={showExitModal}
           onConfirmExit={handleConfirmExit}
           onCancelExit={handleCancelExit}
-          progressLabel={`${streak > 0 ? `${streak} streak! ` : ''}${score} points, Letter ${currentLetterIndex + 1}`}
+          progressLabel={`${
+            streak > 0 ? `${streak} streak! ` : ''
+          }${score} points, Letter ${currentLetterIndex + 1}`}
         />
 
         {/* Celebration Overlay */}
@@ -918,7 +959,20 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
             nextLetter();
           }}
         />
-      </>
+
+        {/* Hand tracking cursor */}
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={isPinching}
+            isHandDetected={isHandTrackingReady}
+            size={64}
+            color='#22c55e'
+          />
+        )}
+      </div>
     </GlobalErrorBoundary>
   );
 });

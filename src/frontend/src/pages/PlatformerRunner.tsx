@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameHUD } from '../components/game/GameHUD';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useStreakTracking } from '../hooks/useStreakTracking';
@@ -11,6 +12,8 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
+import { CelebrationEffects } from '../components/game/CelebrationEffects';
+import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
 import { VoiceInstructions, useVoiceInstructions } from '../components/game/VoiceInstructions';
@@ -50,6 +53,7 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
   const [gameState, setGameState] = useState<GameStateType>('start');
   const [score, setScore] = useState(0);
   const [coins, setCoins] = useState(0);
+  const [triggerCelebration, setTriggerCelebration] = useState(false);
 
   const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
   const { playClick, playSuccess, playError } = useAudio();
@@ -273,7 +277,13 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
           playSuccess();
           triggerHaptic('success');
 
-          // Milestone every 5 
+          // Trigger celebration for stars and milestone coins
+          if (collectible.type === 'star' || newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+            setTriggerCelebration(true);
+            setTimeout(() => setTriggerCelebration(false), 600);
+          }
+
+          // Milestone every 5
           if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
             triggerHaptic('celebration');
           }
@@ -385,6 +395,14 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
 
   return (
     <GameContainer title="Platform Runner" onHome={() => navigate('/games')} reportSession={false}>
+      {/* Celebration effects */}
+      <CelebrationEffects
+        trigger={triggerCelebration}
+        type="coins"
+        particleCount={15}
+        duration={1000}
+      />
+
       <div className="flex flex-col items-center gap-4 p-4 touch-none select-none">
 
         <CameraThumbnail webcamRef={webcamRef} isHandDetected={isHandDetected} visible={gameState === 'playing'} />
@@ -416,7 +434,18 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
 
         {gameState === 'playing' && (
           <>
-            <div className="relative w-full max-w-2xl mx-auto aspect-[4/3]">
+            <GameHUD
+              score={score}
+              streak={streak > 0 ? streak : undefined}
+              levelInfo="Level 1"
+              rightHeaderContent={
+                <div className="bg-yellow-100 px-3 py-1 rounded-lg font-bold text-yellow-700 text-sm flex items-center gap-1">
+                  🪙 {coins}
+                </div>
+              }
+            />
+
+            <div className="relative w-full max-w-2xl mx-auto aspect-[4/3] mt-4">
               <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}
                 onPointerDown={handlePointerDown}
                 className="w-full h-full touch-none cursor-pointer rounded-[2rem] shadow-2xl border-4 border-blue-300 object-cover bg-sky-300"
@@ -478,19 +507,29 @@ const PlatformerRunnerGame = memo(function PlatformerRunnerGameComponent() {
         )}
 
         {gameState === 'complete' && (
-          <div className="text-center bg-white p-12 rounded-[2rem] border-4 border-blue-300 shadow-xl max-w-xl mx-auto mt-10">
-            <p className="text-6xl mb-4">😵</p>
-            <h2 className="text-4xl font-black mb-2 text-blue-600">Game Over!</h2>
-            <p className="text-xl font-bold text-slate-600 mb-6">You grabbed {coins} coins!</p>
-            <div className="bg-slate-100 rounded-2xl p-6 mb-8 inline-block">
-              <p className="text-lg font-bold text-slate-500 mb-1">Final Score</p>
-              <p className="text-5xl font-black text-slate-800">{score}</p>
+          <>
+            <SuccessAnimation
+              show={gameState === 'complete'}
+              type="stars"
+              message="Good Run!"
+              characterEmoji="🏃"
+              particleCount={40}
+              duration={2000}
+            />
+            <div className="text-center bg-white p-12 rounded-[2rem] border-4 border-blue-300 shadow-xl max-w-xl mx-auto mt-10">
+              <p className="text-6xl mb-4">😵</p>
+              <h2 className="text-4xl font-black mb-2 text-blue-600">Game Over!</h2>
+              <p className="text-xl font-bold text-slate-600 mb-6">You grabbed {coins} coins!</p>
+              <div className="bg-slate-100 rounded-2xl p-6 mb-8 inline-block">
+                <p className="text-lg font-bold text-slate-500 mb-1">Final Score</p>
+                <p className="text-5xl font-black text-slate-800">{score}</p>
+              </div>
+              <div className="flex gap-4 justify-center">
+                <button type="button" onClick={handleFinish} className="px-8 py-4 bg-slate-200 border-2 border-slate-300 hover:bg-slate-300 text-slate-700 rounded-2xl font-black text-xl transition-all">Finish</button>
+                <button type="button" onClick={handleStart} className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-black text-xl shadow-[0_4px_0_#1D4ED8] active:translate-y-1 active:shadow-none">Play Again</button>
+              </div>
             </div>
-            <div className="flex gap-4 justify-center">
-              <button type="button" onClick={handleFinish} className="px-8 py-4 bg-slate-200 border-2 border-slate-300 hover:bg-slate-300 text-slate-700 rounded-2xl font-black text-xl transition-all">Finish</button>
-              <button type="button" onClick={handleStart} className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-black text-xl shadow-[0_4px_0_#1D4ED8] active:translate-y-1 active:shadow-none">Play Again</button>
-            </div>
-          </div>
+          </>
         )}
 
       </div>

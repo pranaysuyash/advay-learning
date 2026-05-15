@@ -4,79 +4,43 @@
 
 ### Branch Strategy
 
-We use a simplified Git Flow:
+This repo uses a **main-first workflow**. There is no `develop` branch, no `feature/*`, `fix/*`, or `hotfix/*` branches.
 
 ```
-main
-  ↑
-develop (integration branch)
-  ↑
-feature/hand-tracking
-feature/alphabet-module
+origin/main  ←  all merged work
+    ↑
+codex/wip-<scope>  ←  created only when a PR is needed
 ```
 
-**Branch Types:**
-
-- `main`: Production-ready code
-- `develop`: Integration branch for features
-- `feature/*`: New features or enhancements
-- `fix/*`: Bug fixes
-- `docs/*`: Documentation updates
+**All local work is committed directly to local `main`.** A branch is created only when the user explicitly asks to open a PR.
 
 ### Starting New Work
 
 ```bash
-# 1. Ensure you're on latest develop
-git checkout develop
-git pull origin develop
-
-# 2. Create feature branch
-git checkout -b feature/descriptive-name
-
-# 3. Work on your changes...
-
-# 4. Before committing, run quality checks
-./scripts/check.sh
-
-# 5. Commit with descriptive message
+# Work directly on local main — no branch needed
+git add -A
 git commit -m "feat(hand_tracking): add pinch gesture detection"
 
-# 6. Push and create PR
-git push -u origin feature/descriptive-name
+# When the user says "open a PR" / "start git workflow":
+./scripts/start_wip_branch.sh <ticket-or-scope>
+# This creates codex/wip-<scope>, resets local main, pushes, and opens the PR.
 ```
+
+**Agents MUST NOT run** `git switch -c`, `git checkout -b`, or `git branch <new>`. The `start_wip_branch.sh` script is the only approved way to create a branch.
 
 ### Commit Message Convention
 
 Format: `<type>(<scope>): <description>`
 
-**Types:**
+**Types:** `feat` · `fix` · `docs` · `style` · `refactor` · `test` · `chore`
 
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation only
-- `style`: Code style (formatting, no logic change)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
+**No `Co-authored-by:` trailers.** All commits belong to the repo owner (pranaysuyash) only.
 
-**Scopes (examples):**
-
-- `hand_tracking`
-- `face_tracking`
-- `ui`
-- `games`
-- `storage`
-- `alphabet`
-- `words`
-- `docs`
-
-**Examples:**
-
+**Always include a ticket reference:**
 ```
 feat(hand_tracking): implement pinch-to-draw gesture
-fix(ui): resolve canvas flickering issue
-docs(readme): update setup instructions
-test(games): add unit tests for scoring logic
+
+Refs: TCK-20260316-010
 ```
 
 ### Pull Request Guidelines
@@ -145,47 +109,33 @@ To ensure quality reviews:
 Before merging, verify change size:
 
 ```bash
-# Check LOC changed against develop
-./scripts/check_pr_size.sh
-
-# Manual check
-git diff --stat develop...HEAD
+# Check LOC changed against main
+git diff --stat main...HEAD
 ```
 
 **Guidelines:**
 
 - Prefer small, focused PRs
-- Large refactors should be discussed in issue first
+- Large refactors should be discussed in an issue first
 - Document architectural decisions for significant changes
 
 #### Quality Gates (Manual)
 
-Before merging to `develop`:
-
-- [ ] All tests pass
-- [ ] Type checking passes (`mypy src/`)
-- [ ] Linting passes (`ruff check src/`)
-- [ ] Formatting correct (`black --check src/`)
-- [ ] PR size acceptable
-- [ ] Review approval received
-
 Before merging to `main`:
 
-- [ ] All develop quality gates
-- [ ] Integration tests pass
-- [ ] Manual smoke test completed
-- [ ] Documentation updated
-- [ ] CHANGELOG updated
+- [ ] All tests pass (`cd src/frontend && npx vitest run` / `pytest`)
+- [ ] Type checking passes (`cd src/frontend && npx tsc --noEmit`)
+- [ ] Linting passes
+- [ ] PR review approval received
+- [ ] All review threads resolved
 
 ### Release Process
 
 1. Update version in `pyproject.toml`
 2. Update `CHANGELOG.md`
-3. Create release branch: `release/vX.Y.Z`
-4. Final testing on release branch
-5. Merge to `main`
-6. Tag release: `git tag -a vX.Y.Z -m "Release X.Y.Z"`
-7. Push tags: `git push origin vX.Y.Z`
+3. Commit to local `main`, then run `./scripts/start_wip_branch.sh release-vX.Y.Z`
+4. Merge the PR after final review
+5. Tag release on `main`: `git tag -a vX.Y.Z -m "Release X.Y.Z" && git push origin vX.Y.Z`
 
 ## Development Environment
 

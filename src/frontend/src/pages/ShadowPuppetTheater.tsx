@@ -4,11 +4,17 @@
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
@@ -34,9 +40,27 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent()
   const [feedback, setFeedback] = useState('Make the shape with your hands!');
   const [streak, setStreak] = useState(0);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   const { playClick, playSuccess, playCelebration } = useAudio();
   const { completeGame } = useGameCompletion('shadow-puppet-theater');
+
+  const isPlaying = gameState === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'ShadowPuppetTheater',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
 
   const levelConfig = useMemo(() => getLevelConfig(currentLevel), [currentLevel]);
 
@@ -142,8 +166,11 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent()
       title="Shadow Puppet Theater"
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className="flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto">
+      <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto relative">
         <div className="flex gap-2">
           {LEVELS.map((level) => (
             <button
@@ -255,6 +282,9 @@ const ShadowPuppetTheaterGame = memo(function ShadowPuppetTheaterGameComponent()
             Finish
           </button>
         </div>
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
+        )}
       </div>
     </GameContainer>
   );

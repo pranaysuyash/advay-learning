@@ -19,7 +19,7 @@ describe('drawing utilities', () => {
       expect(smoothPoints(points)).toEqual(points);
     });
     
-    it('smooths points with moving average', () => {
+    it('smooths points with Chaikin\'s corner cutting algorithm', () => {
       const points = [
         { x: 0, y: 0 },
         { x: 1, y: 1 },
@@ -27,11 +27,24 @@ describe('drawing utilities', () => {
         { x: 3, y: 3 },
         { x: 4, y: 4 },
       ];
-      const smoothed = smoothPoints(points, 3);
-      
-      // Middle points should be averaged
-      expect(smoothed[2].x).toBeCloseTo(2, 1);
-      expect(smoothed.length).toBe(points.length);
+      const smoothed = smoothPoints(points, 1);
+
+      // Chaikin's algorithm produces more points (corners are cut)
+      // Original: 5 points → After 1 iteration: more than 5 points
+      expect(smoothed.length).toBeGreaterThan(points.length);
+
+      // First point should be preserved
+      expect(smoothed[0].x).toBe(0);
+      expect(smoothed[0].y).toBe(0);
+
+      // Last point should be preserved
+      expect(smoothed[smoothed.length - 1].x).toBe(4);
+      expect(smoothed[smoothed.length - 1].y).toBe(4);
+
+      // Points should be on the line y=x (original was diagonal)
+      smoothed.forEach(p => {
+        expect(p.y).toBeCloseTo(p.x, 5);
+      });
     });
   });
   
@@ -82,6 +95,7 @@ describe('drawing utilities', () => {
         beginPath: () => calls.push(['beginPath']),
         moveTo: (x: number, y: number) => calls.push(['moveTo', x, y]),
         lineTo: (x: number, y: number) => calls.push(['lineTo', x, y]),
+        quadraticCurveTo: (cpx: number, cpy: number, x: number, y: number) => calls.push(['quadraticCurveTo', cpx, cpy, x, y]),
         stroke: () => calls.push(['stroke']),
         strokeStyle: '',
         lineWidth: 0,
@@ -101,15 +115,35 @@ describe('drawing utilities', () => {
 
       drawSegments(ctx, [segment], 100, 100, { color: '#fff', lineWidth: 10 });
 
-      const lineTos = calls.filter(([name]) => name === 'lineTo');
-      const xValues = lineTos.map(([, x]) => x as number);
+      // Collect all x coordinates from lineTo and quadraticCurveTo calls
+      const xValues: number[] = [];
+      calls.forEach(([name, ...args]) => {
+        if (name === 'lineTo') {
+          xValues.push(args[0] as number);
+        } else if (name === 'quadraticCurveTo') {
+          // quadraticCurveTo(cpx, cpy, x, y) - extract both control point and end point x
+          xValues.push(args[0] as number); // control point x
+          xValues.push(args[2] as number); // end point x
+        }
+      });
 
-      // Without smoothing we'd expect a lineTo at x=90. With smoothing that spike should be reduced.
+      // Without smoothing we'd expect a value at x=90 (from the 0.9 outlier)
+      // With Chaikin's smoothing, the extreme spike should be reduced or eliminated
+      // Check that 90 is NOT in the x values (smoothing worked)
       expect(xValues).not.toContain(90);
 
-      // The smoothed center point (avg of 0.1, 0.9, 0.2) => 0.4, so x ~= 40 should exist.
-      const hasNear40 = xValues.some((x) => Math.abs(x - 40) < 0.0001);
-      expect(hasNear40).toBe(true);
+      // The smoothing should produce intermediate values, not just the original points
+      // We should have more x values than the original 5 points due to smoothing
+      expect(xValues.length).toBeGreaterThan(5);
+
+      // The smoothing should produce intermediate values, not just the original points
+      // We should have more x values than the original 5 points due to smoothing
+      expect(xValues.length).toBeGreaterThan(5);
+
+      // All values should be non-negative
+      xValues.forEach(x => {
+        expect(x).toBeGreaterThanOrEqual(0);
+      });
     });
   });
   

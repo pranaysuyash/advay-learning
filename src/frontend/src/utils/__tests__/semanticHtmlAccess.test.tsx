@@ -82,6 +82,56 @@ vi.mock('../../components/ui/Toast', () => ({
   ToastContext: {},
 }));
 
+// Mock Canvas 2D context for jsdom which doesn't fully implement it
+const mockCanvasContext = {
+  fillStyle: '',
+  strokeStyle: '',
+  lineWidth: 1,
+  lineCap: 'butt',
+  lineJoin: 'miter',
+  font: '',
+  textAlign: 'start',
+  textBaseline: 'alphabetic',
+  fillRect: vi.fn(),
+  strokeRect: vi.fn(),
+  clearRect: vi.fn(),
+  fillText: vi.fn(),
+  strokeText: vi.fn(),
+  measureText: vi.fn(() => ({ width: 100 })),
+  beginPath: vi.fn(),
+  closePath: vi.fn(),
+  moveTo: vi.fn(),
+  lineTo: vi.fn(),
+  arc: vi.fn(),
+  arcTo: vi.fn(),
+  bezierCurveTo: vi.fn(),
+  quadraticCurveTo: vi.fn(),
+  fill: vi.fn(),
+  stroke: vi.fn(),
+  save: vi.fn(),
+  restore: vi.fn(),
+  translate: vi.fn(),
+  rotate: vi.fn(),
+  scale: vi.fn(),
+  transform: vi.fn(),
+  setTransform: vi.fn(),
+  resetTransform: vi.fn(),
+  drawImage: vi.fn(),
+  createImageData: vi.fn(() => ({ data: new Uint8ClampedArray(400) })),
+  putImageData: vi.fn(),
+  getImageData: vi.fn(() => ({ data: new Uint8ClampedArray(400) })),
+  createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+  createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+  createPattern: vi.fn(),
+  isPointInPath: vi.fn(),
+  isPointInStroke: vi.fn(),
+  clip: vi.fn(),
+  rect: vi.fn(),
+  ellipse: vi.fn(),
+};
+
+HTMLCanvasElement.prototype.getContext = vi.fn(() => mockCanvasContext);
+
 const renderWithRouter = (ui: ReactElement, entries: any[] = ['/']) =>
   render(<MemoryRouter initialEntries={entries}>{ui}</MemoryRouter>);
 

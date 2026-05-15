@@ -1,17 +1,26 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { LEVELS, getStoriesForLevel, type Story } from '../games/voiceStoriesLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 function VoiceStoriesContent() {
   const navigate = useNavigate();
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [currentStory, setCurrentStory] = useState<Story | null>(null);
   const [currentLine, setCurrentLine] = useState(0);
@@ -22,6 +31,33 @@ function VoiceStoriesContent() {
 
   const { playClick, playSuccess } = useAudio();
   const { completeGame } = useGameCompletion('voice-stories');
+
+  const isPlaying = gameState === 'reading';
+
+  // Hand tracking for cursor only (buttons work via click/tap)
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) {
+      setCursor(null);
+      return;
+    }
+    setCursor(tip);
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'VoiceStories',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   useGameSessionProgress({ gameName: 'Voice Stories', score, level: currentLevel, isPlaying: true, metaData: { currentLine } });
 
@@ -70,8 +106,15 @@ function VoiceStoriesContent() {
   const currentLineData = currentStory?.lines[currentLine];
 
   return (
-    <GameContainer title="Voice Stories" onHome={() => navigate('/games')} reportSession={false}>
-      <div className="flex flex-col items-center gap-4 p-4">
+    <GameContainer
+      title="Voice Stories"
+      onHome={() => navigate('/games')}
+      reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
+    >
+      <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 relative">
         <div className="flex gap-2">
           {LEVELS.map((l) => (
             <button type="button" key={l.level} onClick={() => { playClick(); setCurrentLevel(l.level); }}
@@ -134,6 +177,19 @@ function VoiceStoriesContent() {
             <button type="button" onClick={handleStart} className="px-6 py-3 bg-violet-500 text-white rounded-xl font-bold mr-4">Read Again</button>
             <button type="button" onClick={handleFinish} className="px-6 py-3 bg-gray-200 rounded-xl font-bold">Finish</button>
           </div>
+        )}
+
+        {/* GameCursor for hand tracking */}
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace="normalized"
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isHandTrackingReady}
+            size={64}
+            color="#9333ea"
+          />
         )}
       </div>
     </GameContainer>

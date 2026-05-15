@@ -2,11 +2,17 @@
  * Bridge Builder Game
  * Build bridges to help characters cross
  */
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
@@ -20,6 +26,25 @@ export const BridgeBuilderContent = memo(function BridgeBuilderComponent() {
   const hasAccess = canAccessGame('bridge-builder');
   const { playClick, playSuccess, playError } = useAudio();
   const [state, setState] = useState(createInitialState());
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+
+  const isPlaying = state.status === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'BridgeBuilder',
+    webcamRef,
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
   const [selectedType, setSelectedType] = useState<'plank' | 'rope' | 'support' | null>(null);
   const [simulationResult, setSimulationResult] = useState<{ valid: boolean; feedback: string } | null>(null);
   const currentChallenge = CHALLENGES.find(c => c.id === state.currentChallengeId) || CHALLENGES[0];
@@ -105,8 +130,8 @@ export const BridgeBuilderContent = memo(function BridgeBuilderComponent() {
   const challengeIndex = CHALLENGES.findIndex(c => c.id === state.currentChallengeId);
 
   return (
-    <GameContainer title='Bridge Builder' onHome={() => navigate('/games')} score={state.score}>
-      <div className='p-4'>
+    <GameContainer title='Bridge Builder' onHome={() => navigate('/games')} score={state.score} webcamRef={webcamRef} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
+      <div ref={gameAreaRef} className='p-4 relative'>
         <div className='flex justify-between items-center mb-4'>
           <div className='text-sm'>Challenge {challengeIndex + 1}: {currentChallenge.name}</div>
           <div className='text-sm'>Segments: {state.segments.length}/{currentChallenge.maxSegments}</div>
@@ -152,6 +177,9 @@ export const BridgeBuilderContent = memo(function BridgeBuilderComponent() {
           <div className={`mt-4 p-3 rounded-lg text-center ${simulationResult.valid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
             {simulationResult.feedback}
           </div>
+        )}
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
         )}
       </div>
     </GameContainer>

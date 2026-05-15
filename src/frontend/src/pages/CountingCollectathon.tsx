@@ -30,6 +30,8 @@ import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
 import { AssetPreloader } from '../components/AssetPreloader';
 import type { TrackedHandFrame } from '../types/tracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
 import {
   DEFAULT_CONFIG,
   type GameState,
@@ -71,6 +73,8 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const gameLoopRef = useRef<number | null>(null);
   const lastSpawnRef = useRef(0);
   const imagesRef = useRef<Record<string, HTMLImageElement>>({});
@@ -136,6 +140,8 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
 
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
     if (!frame.indexTip || gameStateRef.current.status !== 'PLAYING') return;
+
+    setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
 
     const x = frame.indexTip.x * GAME_CONFIG.canvasWidth;
     handXRef.current = x;
@@ -344,8 +350,8 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
   }
 
   return (
-    <GameContainer title="Counting Collect-a-thon" onHome={handleHome}>
-      <div className="relative">
+    <GameContainer title="Counting Collect-a-thon" onHome={handleHome} webcamRef={webcamRef} isHandDetected={handVisible}>
+      <div ref={gameAreaRef} className="relative">
         <GameBackground type="hills" variant="color" className="absolute inset-0 rounded-xl" />
         <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
           <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-xl shadow-lg flex items-center gap-3">
@@ -489,6 +495,18 @@ export const CountingCollectathonContent = memo(function CountingCollectathonGam
           />
         </div>
       </div>
+
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameContainer>
   );
 });

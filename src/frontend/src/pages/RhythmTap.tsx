@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
-import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
+import { GameCursor } from '../components/game/GameCursor';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -174,11 +174,17 @@ function RhythmTapContent() {
       isPlaying={isPlaying}
     >
       <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6'>
-        <CursorEmbodiment
-          position={cursor ?? { x: 0, y: 0 }}
-          coordinateSpace='normalized'
-          isHandDetected={isHandTrackingActive}
-        />
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isHandTrackingActive}
+            size={64}
+            color='#EC4899'
+          />
+        )}
         <div className='max-w-2xl mx-auto space-y-4'>
           {/* Level selector */}
           <div className='flex gap-2 justify-center'>

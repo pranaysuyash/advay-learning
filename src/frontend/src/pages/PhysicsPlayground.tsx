@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { AudioSystem } from '../features/physics-playground/audio/AudioSystem';
 import { Particle } from '../features/physics-playground/particles/Particle';
 import { ParticleSystem } from '../features/physics-playground/particles/ParticleSystem';
@@ -100,6 +101,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
     x: DEFAULT_CANVAS_WIDTH / 2,
     y: DEFAULT_CANVAS_HEIGHT / 2,
   });
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
   const [selectedType, setSelectedType] = useState<ParticleType>(ParticleType.SAND);
   const selectedTypeRef = useRef<ParticleType>(selectedType);
@@ -548,7 +550,7 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
 
           {/* Game Canvas */}
           <section className='grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]'>
-            <div className='border-white/80 bg-white/90 shadow-[0_20px_60px_rgba(30,41,59,0.12)] relative rounded-[2rem] border p-4'>
+            <div ref={gameAreaRef} className='border-white/80 bg-white/90 shadow-[0_20px_60px_rgba(30,41,59,0.12)] relative rounded-[2rem] border p-4'>
               {/* Embedded Camera feed for context */}
               <div className='pointer-events-none absolute bottom-6 right-6 z-20 h-36 w-48 overflow-hidden rounded-2xl border-4 border-white shadow-lg opacity-80'>
                 {!isReady && <div className="flex h-full w-full items-center justify-center bg-slate-800 p-2 text-center text-xs text-white">Starting Camera...</div>}
@@ -685,6 +687,17 @@ export const PhysicsPlayground = memo(function PhysicsPlaygroundComponent() {
           </section>
         </div>
       </div>
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={isPinching}
+          isHandDetected={isReady}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameShell>
   );
 });

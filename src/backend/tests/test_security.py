@@ -177,7 +177,8 @@ class TestAccessTokenRevocation:
         # create and verify a user directly
         from uuid import uuid4
 
-        from app.core.config import settings
+        from app.core.config import get_settings
+        settings = get_settings()
         from app.schemas.user import UserCreate
         from app.services.user_service import UserService
 

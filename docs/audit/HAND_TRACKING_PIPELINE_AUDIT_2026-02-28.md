@@ -1,5 +1,7 @@
 # Hand Tracking Pipeline Audit — FingerNumberShow & Camera Games
 
+**Ticket**: TCK-20260319-010
+
 **Date**: 2026-02-28  
 **Auditor**: Senior CV Engineer (AI)  
 **Scope**: `src/frontend/src` hand tracking stack only  

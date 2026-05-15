@@ -5,16 +5,22 @@
  * @ticket NASA-SKY-HUNT
  */
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   createInitialState,
   startChallenge,
@@ -98,6 +104,9 @@ export const NasaSkyHuntContent = memo(function NasaSkyHuntComponent() {
 
   const [state, setState] = useState<GameState>(createInitialState());
   const [feedback, setFeedback] = useState<string | null>(null);
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const { resetAutoCompletion } = useAutoGameCompletion('nasa-sky-hunt', {
     when: state.status === 'success',
     score: calculateFinalScore(state).totalScore,
@@ -107,6 +116,26 @@ export const NasaSkyHuntContent = memo(function NasaSkyHuntComponent() {
       foundObjects: state.foundObjects.length,
     },
   });
+
+  // Hand tracking
+  const isPlaying = state.status === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, pinch } = useGameHandTracking({
+    gameName: 'NasaSkyHunt',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+    webcamRef,
+  });
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) { void startTracking(); }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   // APOD state
   const [apodData, setApodData] = useState<ApodData | null>(null);
@@ -356,8 +385,11 @@ export const NasaSkyHuntContent = memo(function NasaSkyHuntComponent() {
       title={`NASA Sky Hunt: ${currentChallenge?.name || ''}`}
       onHome={() => navigate('/games')}
       score={state.score}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='flex flex-col lg:flex-row gap-4 p-4'>
+      <div ref={gameAreaRef} className='flex flex-col lg:flex-row gap-4 p-4 relative'>
         {/* Info Panel */}
         <div className='lg:w-64 bg-white rounded-xl shadow-md p-4'>
           <h3 className='font-bold text-indigo-700 mb-4'>Mission Status</h3>
@@ -573,6 +605,9 @@ export const NasaSkyHuntContent = memo(function NasaSkyHuntComponent() {
           )}
         </div>
       </div>
+      {cursor && (
+        <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={pinch.isPinching} isHandDetected={isHandTrackingReady} size={64} color="#6366f1" />
+      )}
     </GameContainer>
   );
 });

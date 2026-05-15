@@ -59,6 +59,9 @@ function PackLunchboxGame() {
   const [isPinching, setIsPinching] = useState(false);
 
   // Hand tracking state
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
   const [cursor, setCursor] = useState<Point | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const isPlaying = gameState === 'playing';
@@ -93,7 +96,7 @@ function PackLunchboxGame() {
     targetFps: 30,
     isRunning: isPlaying,
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   useEffect(() => {

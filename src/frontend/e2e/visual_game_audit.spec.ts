@@ -41,7 +41,7 @@ test.describe('Visual Game Audit - Real Login', () => {
     await page.waitForTimeout(500);
     
     // Click guest mode button
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")');
     
     // Wait for navigation
     await page.waitForTimeout(2000);

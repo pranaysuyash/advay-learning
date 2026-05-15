@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import select
 
 from app.db.models.progress import Progress
-from app.services.progress_service import settings as progress_service_settings
+from app.services.progress_service import _settings as progress_service_settings
 
 
 @pytest.mark.asyncio

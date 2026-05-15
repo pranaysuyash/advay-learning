@@ -8,9 +8,11 @@ from jose import jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import get_settings
 from app.db.models.refresh_token import RefreshToken
 from app.db.models.user import User
+
+_settings = get_settings()
 
 
 class RefreshTokenService:
@@ -26,9 +28,9 @@ class RefreshTokenService:
                 "sub": user_id,
                 "jti": token_uuid,
                 "exp": datetime.now(timezone.utc)
-                + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+                + timedelta(days=_settings.REFRESH_TOKEN_EXPIRE_DAYS),
             },
-            settings.SECRET_KEY,
+            _settings.SECRET_KEY,
             algorithm="HS256",
         )
 
@@ -37,7 +39,7 @@ class RefreshTokenService:
             token=token,
             user_id=user_id,
             expires_at=datetime.utcnow()
-            + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+            + timedelta(days=_settings.REFRESH_TOKEN_EXPIRE_DAYS),
         )
 
         db.add(refresh_token)

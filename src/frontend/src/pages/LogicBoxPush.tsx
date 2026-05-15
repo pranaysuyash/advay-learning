@@ -2,17 +2,23 @@
  * Logic Box Push Game
  * Sokoban-style puzzle game
  */
-import { memo, useCallback, useState, useEffect } from 'react';
+import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { AccessDenied } from '../components/ui/AccessDenied';
+import { GameCursor } from '../components/game/GameCursor';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { createInitialState, startLevel, movePlayer, checkWin, resetLevel, LEVELS, type CellType } from '../games/logicBoxPushLogic';
 import { useAudio } from '../utils/hooks/useAudio';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 const CELL_SIZE = 40;
 
@@ -31,6 +37,10 @@ export const LogicBoxPushContent = memo(function LogicBoxPushComponent() {
       moves: state.moves,
     },
   });
+
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   const handleMove = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
     setState((prev) => {
@@ -56,6 +66,24 @@ export const LogicBoxPushContent = memo(function LogicBoxPushComponent() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleMove, state.status]);
+
+  const isPlaying = state.status === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'LogicBoxPush',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) { void startTracking(); }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   if (subLoading) return <div className='flex items-center justify-center min-h-screen'><div className='animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500'></div></div>;
   if (!hasAccess) return <AccessDenied gameName='Logic Box Push' gameId='logic-box-push' />;
@@ -115,8 +143,8 @@ export const LogicBoxPushContent = memo(function LogicBoxPushComponent() {
   };
 
   return (
-    <GameContainer title='Logic Box Push' onHome={() => navigate('/games')}>
-      <div className='p-4'>
+    <GameContainer title='Logic Box Push' onHome={() => navigate('/games')} webcamRef={webcamRef} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
+      <div ref={gameAreaRef} className='p-4 relative'>
         <div className='flex justify-between items-center mb-4'>
           <div className='text-sm font-medium'>{level.name}</div>
           <div className='text-sm'>Moves: {state.moves} | Pushes: {state.pushes}</div>
@@ -158,6 +186,9 @@ export const LogicBoxPushContent = memo(function LogicBoxPushComponent() {
           <button onClick={() => { resetAutoCompletion(); setState(createInitialState()); }} className='px-4 py-2 bg-gray-400 text-white rounded-lg'>Select Level</button>
         </div>
       </div>
+      {cursor && (
+        <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#f97316" />
+      )}
     </GameContainer>
   );
 });

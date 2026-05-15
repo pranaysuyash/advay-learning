@@ -21,6 +21,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AssetPreloader } from '../components/AssetPreloader';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../games/shapeSafariLogic';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -468,6 +470,7 @@ function StorySequenceContent() {
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
   const poolRef = useRef<HTMLDivElement>(null);
   const isPinchingRef = useRef(false);
@@ -498,9 +501,13 @@ function StorySequenceContent() {
 
   // ===== HAND TRACKING =====
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
-    if (!frame.indexTip) return;
+    if (!frame.indexTip) {
+      setCursor(null);
+      return;
+    }
 
     const { x, y } = frame.indexTip;
+    setCursor({ x, y });
     const isPinching = frame.pinch?.state.isPinching || false;
 
     // Handle pinch state changes
@@ -767,7 +774,7 @@ function StorySequenceContent() {
     <div className="relative">
       <GameBackground type="clouds" variant="solid" className="absolute inset-0" />
       <div className="relative z-10">
-    <GameContainer webcamRef={webcamRef} title="Story Sequence" onHome={handleShowMenu}>
+    <GameContainer webcamRef={webcamRef} title="Story Sequence" onHome={handleShowMenu} isHandDetected={!!cursor}>
       {/* Hidden webcam for hand tracking */}
       <div className="absolute top-0 right-0 w-32 h-24 opacity-0 pointer-events-none overflow-hidden">
 
@@ -813,6 +820,17 @@ function StorySequenceContent() {
       />
 
       {showStreakMilestone && <StreakMilestoneOverlay streak={streak} />}
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameContainer>
       </div>
     </div>

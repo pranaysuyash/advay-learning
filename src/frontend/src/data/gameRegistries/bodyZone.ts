@@ -163,6 +163,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     isNew: true,
     cv: ['pose'],
     listed: true,
+    previewImage: '/assets/previews/freeze-dance-preview.png',
     drops: [
       { itemId: 'material-ice', chance: 0.15 },
       { itemId: 'emotion-happy', chance: 0.2 },
@@ -192,6 +193,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     isNew: true,
     cv: ['pose'],
     listed: true,
+    previewImage: '/assets/previews/simon-says-preview.png',
     drops: [
       { itemId: 'creature-lion', chance: 0.1 },
       { itemId: 'creature-owl', chance: 0.05, minScore: 85 },
@@ -221,6 +223,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     isNew: true,
     cv: ['face'],
     listed: true,
+    previewImage: '/assets/previews/mirror-maze-preview.png',
     drops: [
       { itemId: 'material-star', chance: 0.3 },
       { itemId: 'trophy-bronze', chance: 0.15 },
@@ -250,6 +253,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     isNew: true,
     cv: ['pose'],
     listed: true,
+    previewImage: '/assets/previews/balance-beam-preview.png',
     drops: [
       { itemId: 'material-star', chance: 0.2 },
       { itemId: 'trophy-silver', chance: 0.1 },
@@ -268,6 +272,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     isNew: true,
     cv: ['pose'],
     listed: true,
+    previewImage: '/assets/previews/mirror-duel-preview.png',
     drops: [
       { itemId: 'material-star', chance: 0.25 },
       { itemId: 'trophy-bronze', chance: 0.15 },
@@ -297,6 +302,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     isNew: true,
     cv: ['hand'],
     listed: true,
+    previewImage: '/assets/previews/virtual-archery-preview.png',
     drops: [
       { itemId: 'material-star', chance: 0.3 },
       { itemId: 'trophy-bronze', chance: 0.15 },
@@ -326,6 +332,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     isNew: true,
     cv: ['pose'],
     listed: true,
+    previewImage: '/assets/previews/midline-violator-preview.png',
     drops: [
       { itemId: 'material-star', chance: 0.3 },
       { itemId: 'trophy-silver', chance: 0.1 },

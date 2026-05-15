@@ -24,6 +24,8 @@ import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { countExtendedFingersFromLandmarks } from '../games/fingerCounting';
 import type { TrackedHandFrame } from '../utils/handTrackingFrame';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { GameShell } from '../components/GameShell';
 import { KenneyCharacter } from '../components/characters/KenneyCharacter';
@@ -590,6 +592,7 @@ const SimonSaysContent = memo(function SimonSays() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
   const animationRef = useRef<number>(0);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const { completeGame, triggerEasterEgg } = useGameCompletion('simon-says');
 
   const [isLoading, setIsLoading] = useState(true);
@@ -608,6 +611,7 @@ const SimonSaysContent = memo(function SimonSays() {
   const [gameMode, setGameMode] = useState<'classic' | 'combo'>('combo');
   const [targetFingers, setTargetFingers] = useState<number | null>(null);
   const [detectedFingers, setDetectedFingers] = useState(0);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   const { playPop, playFanfare } = useAudio();
 
@@ -626,10 +630,26 @@ const SimonSaysContent = memo(function SimonSays() {
 
   const handleHandFrame = useCallback(
     (frame: TrackedHandFrame) => {
-      if (!frame.primaryHand || gameMode !== 'combo' || !isPlaying) {
+      if (!frame.primaryHand || !isPlaying) {
+        setCursor(null);
+        if (gameMode !== 'combo') {
+          return;
+        }
         setDetectedFingers(0);
         return;
       }
+
+      // Set cursor position from index tip
+      if (frame.indexTip) {
+        setCursor(frame.indexTip);
+      } else {
+        setCursor(null);
+      }
+
+      if (gameMode !== 'combo') {
+        return;
+      }
+
       const count = countExtendedFingersFromLandmarks(frame.primaryHand);
       setDetectedFingers(count);
     },
@@ -638,7 +658,7 @@ const SimonSaysContent = memo(function SimonSays() {
 
   useGameHandTracking({
     gameName: 'SimonSays',
-    isRunning: isPlaying && gameMode === 'combo',
+    isRunning: isPlaying,
     webcamRef,
     targetFps: 15,
     onFrame: handleHandFrame,
@@ -882,7 +902,7 @@ const SimonSaysContent = memo(function SimonSays() {
   }
 
   return (
-    <div className='min-h-[100dvh] bg-[#FFF8F0] p-4 md:p-8 flex flex-col font-sans'>
+    <div ref={gameAreaRef} className='min-h-[100dvh] bg-[#FFF8F0] p-4 md:p-8 flex flex-col font-sans relative'>
       <SimonSaysHeader score={score} onBack={() => navigate('/dashboard')} />
       <SimonHudOverlays
         isPlaying={isPlaying}
@@ -925,6 +945,17 @@ const SimonSaysContent = memo(function SimonSays() {
         )}
         <SimonSaysCelebration showCelebration={showCelebration} />
       </div>
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace='normalized'
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color='#22c55e'
+        />
+      )}
     </div>
   );
 });

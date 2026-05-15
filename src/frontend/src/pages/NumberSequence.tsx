@@ -69,12 +69,13 @@ function NumberSequenceGame() {
   }, []);
 
   // Hand tracking hook
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking, webcamRef } = useGameHandTracking({
     gameName: 'Number Sequence',
     targetFps: 30,
     isRunning: Boolean(activeRound),
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   // Auto-start hand tracking when game is active

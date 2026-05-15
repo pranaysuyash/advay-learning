@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.api.permissions import require_roles
-from app.core.config import settings
+from app.core.config import get_settings
 from app.db.models.game import Game as GameModel
 from app.db.models.profile import Profile
 from app.db.models.progress import Progress
@@ -26,6 +26,8 @@ from app.schemas.game import (
 from app.schemas.user import User, UserRole
 from app.services.game_service import GameService
 from app.services.subscription_service import SubscriptionService
+
+_settings = get_settings()
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -271,7 +273,7 @@ async def check_game_access(
     # Get game
     game = await resolve_game_identifier(identifier=identifier, db=db)
 
-    if settings.BETA_FREE_ACCESS:
+    if _settings.BETA_FREE_ACCESS:
         return {
             "can_access": True,
             "reason": "Public beta free access enabled",

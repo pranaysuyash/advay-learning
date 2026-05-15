@@ -38,6 +38,9 @@ function EndingSoundsGame() {
   const { streak, incrementStreak, resetStreak } = useStreakTracking();
 
   // Hand tracking state
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
   const [cursor, setCursor] = useState<Point | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
@@ -65,7 +68,7 @@ function EndingSoundsGame() {
     targetFps: 30,
     isRunning: isPlaying,
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   useEffect(() => {

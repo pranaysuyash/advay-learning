@@ -53,6 +53,49 @@ Risks/notes:
 
 ---
 
+### TCK-20260318-001 :: CV Gating Audit for Odd One Out & Body Parts
+
+Ticket Stamp: STAMP-20260318T090000Z-codex-ppp
+
+Type: IMPROVEMENT
+Owner: Pranay
+Created: 2026-03-18 09:00 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Audit CV coverage for Odd One Out and Body Parts; verify manifest CV field; verify CameraSafeRoute gating.
+- Out-of-scope: Changes to game logic; asset migrations.
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): src/frontend/src/data/gameRegistries/wordWorkshop.ts, src/frontend/src/data/gameRegistries/bodyZone.ts, src/frontend/src/App.tsx
+- Branch/PR: main
+
+Source:
+
+- Audit: docs/audit/src**frontend**src\_\_... (placeholder)
+- Evidence: current manifest CV fields for Odd One Out and Body Parts show cv: ['hand']
+
+Acceptance Criteria:
+
+- [x] CV fields present for Odd One Out and Body Parts
+- [x] CameraSafeRoute gating in App.tsx is used for these routes
+- [x] Document any gaps or additional CV modes needed
+
+Execution log:
+
+- 2026-03-18 | Created worklog ticket skeleton entry in v3.md
+
+Next actions:
+
+1. Validate manifest CV values for all games; add new CV as needed.
+2. If gaps found, patch manifests or create follow-up tickets.
+
+---
 
 ### TCK-20260312-004 :: Enforce no-shortcut merge block policy
 
@@ -109,7 +152,6 @@ Status updates:
 - 2026-03-12 **IN_PROGRESS** — Branch-protection policy applied; pending PR review completion and merge.
 
 ---
-
 
 ### TCK-20260312-003 :: Post-merge review closure for PR #39 regression
 
@@ -708,6 +750,7 @@ Status: **DONE**
 Priority: P0 (Next Sprint from COMPLETE_GAME_ACTIVITIES_CATALOG.md)
 
 Evidence:
+
 - Command: `ls src/frontend/src/pages/FollowTheLeader.tsx` | Output: 498 lines
 - Command: `rg follow-the-leader src/frontend/src/data/gameRegistry.ts` | Output: Found at line 1361
 - Command: `rg follow-the-leader src/frontend/src/App.tsx` | Output: Found at line 726 (route)
@@ -11058,16 +11101,19 @@ Evidence:
 
 Command: `rg -n "ending-sounds|story-builder|shadow-match" src/frontend/src/App.tsx src/frontend/src/data/gameRegistry.ts`
 Output:
+
 - Route entries present in `App.tsx` for `/games/ending-sounds`, `/games/story-builder`, `/games/shadow-match`
 - Registry entries present in `gameRegistry.ts` for `id: 'ending-sounds'`, `id: 'story-builder'`, `id: 'shadow-match'`
 
 Command: `cd src/frontend && npm run -s test -- src/games/__tests__/endingSoundsLogic.test.ts src/games/__tests__/storyBuilderLogic.test.ts src/games/__tests__/shadowMatchLogic.test.ts`
 Output:
+
 - 3 test files passed
 - 9 tests passed
 
 Command: `cd src/frontend && npm run -s type-check`
 Output:
+
 - Exit code 0
 - Frontend TypeScript compilation passed
 
@@ -11910,6 +11956,7 @@ Risks/notes:
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
 Execution log:
+
 - [2026-03-06 09:15 IST] Batch 1: 13 files migrated | Evidence: CountingObjects, MoreOrLess, ColorSortGame, BeginningSounds, OddOneOut, BodyParts, AirGuitarHero, NumberSequence, SizeSorting, NumberBubblePop, WeatherMatch, MoneyMatch, AnimalSounds
 - [2026-03-06 09:30 IST] Hook enhanced | Evidence: ScorePopup interface updated with x?, y? optional for both popup patterns
 - [2026-03-06 09:45 IST] Batch 2: 20 more files migrated | Evidence: FeedTheMonster, FollowTheLeader, MathSmash, FractionPizza, FreezeDance, FruitNinjaAir, LetterCatcher, MazeRunner, and 12 more
@@ -11918,9 +11965,11 @@ Execution log:
 - [2026-03-06 10:10 IST] Type-check verified | Evidence: `npx tsc --noEmit` exits 0
 
 Status updates:
+
 - [2026-03-06 10:10 IST] **DONE** — All 33 game pages migrated to useStreakTracking hook
 
 Risks/notes:
+
 - Manual milestone detection code removed from all files (now handled by hook)
 - Manual milestone timeout code removed (hook handles auto-hide after 1200ms)
 - streakRef usage eliminated (hook handles closures properly)
@@ -11929,6 +11978,7 @@ Risks/notes:
 ---
 
 ### TCK-20260306-001 :: Clean-Slate New Games Batch (Reading Along, Letter Sound Match, Same & Different)
+
 Ticket Stamp: STAMP-20260306T172934Z-codex-digf
 
 Type: FEATURE_IMPLEMENTATION
@@ -11977,16 +12027,19 @@ Evidence:
 
 Command: `rg -n "reading-along|letter-sound-match|same-and-different" src/frontend/src/App.tsx src/frontend/src/data/gameRegistry.ts`
 Output:
+
 - Route entries present in `App.tsx` for all 3 paths
 - Registry entries present in `gameRegistry.ts` for all 3 IDs
 
 Command: `cd src/frontend && npm run -s test -- src/games/__tests__/readingAlongLogic.test.ts src/games/__tests__/letterSoundMatchLogic.test.ts src/games/__tests__/sameAndDifferentLogic.test.ts`
 Output:
+
 - 3 test files passed
 - 9 tests passed
 
 Command: `cd src/frontend && npm run -s type-check`
 Output:
+
 - Exit code 0
 - Frontend TypeScript compilation passed
 
@@ -12127,12 +12180,12 @@ Source:
 
 Performance Improvements:
 
-| Operation | Before | After | Speedup |
-|-----------|--------|-------|---------|
-| findById() | O(n) array scan | O(1) Map.get() | ~100x for 1000 items |
-| exists() | O(n) array scan | O(1) Map.has() | ~100x for 1000 items |
-| getByStatus() | O(n) filter | O(1) index lookup | ~100x for 1000 items |
-| getStats() | O(n) count | O(1) index size | ~100x for 1000 items |
+| Operation     | Before          | After             | Speedup              |
+| ------------- | --------------- | ----------------- | -------------------- |
+| findById()    | O(n) array scan | O(1) Map.get()    | ~100x for 1000 items |
+| exists()      | O(n) array scan | O(1) Map.has()    | ~100x for 1000 items |
+| getByStatus() | O(n) filter     | O(1) index lookup | ~100x for 1000 items |
+| getStats()    | O(n) count      | O(1) index size   | ~100x for 1000 items |
 
 Implementation:
 
@@ -12161,7 +12214,6 @@ Status updates:
 
 - [20:47 IST] **DONE** — Repository optimized, O(1) lookups achieved
 
-
 ---
 
 ### TCK-20260306-004 :: Add Offline UI / Sync Status Visibility (ISSUE-006)
@@ -12183,7 +12235,7 @@ Scope contract:
 Targets:
 
 - Repo: learning_for_kids
-- File(s): 
+- File(s):
   - `src/frontend/src/components/ui/SyncStatusIndicator.tsx` (new)
   - `src/frontend/src/components/ui/index.ts`
   - `src/frontend/src/pages/Settings.tsx`
@@ -12197,6 +12249,7 @@ Source:
 Implementation:
 
 **SyncStatusIndicator Component:**
+
 - Shows online/offline status with color-coded badge
 - Displays pending items count
 - Shows last sync attempt and success times
@@ -12205,6 +12258,7 @@ Implementation:
 - Real-time updates via queue subscription
 
 **Features:**
+
 - Compact badge view (always visible)
 - Detailed dropdown (click to expand)
 - Manual sync trigger
@@ -12212,6 +12266,7 @@ Implementation:
 - "Reconnected" badge after going offline
 
 **Integration:**
+
 - Added to Settings page in Account & Data section
 - Parents can monitor child's progress sync status
 - Uses existing useOnlineStatus and useSyncStatus hooks
@@ -12238,7 +12293,6 @@ Execution log:
 Status updates:
 
 - [20:55 IST] **DONE** — Sync status UI implemented and integrated
-
 
 ---
 
@@ -12276,22 +12330,22 @@ Implementation:
 
 **New Test Helpers (`repositories/__tests__/testHelpers.ts`):**
 
-| Helper | Purpose |
-|--------|---------|
-| `makeFreshQueue()` | Create isolated queue with fresh in-memory repo |
-| `makeQueueWithItems(items)` | Pre-populate queue with specific items |
-| `makeQueueWithState({pending, synced, error})` | Create queue with specific state |
-| `createValidItem(overrides)` | Generate valid test items |
-| `createMockApiClient()` | Mock API with configurable responses |
+| Helper                                         | Purpose                                         |
+| ---------------------------------------------- | ----------------------------------------------- |
+| `makeFreshQueue()`                             | Create isolated queue with fresh in-memory repo |
+| `makeQueueWithItems(items)`                    | Pre-populate queue with specific items          |
+| `makeQueueWithState({pending, synced, error})` | Create queue with specific state                |
+| `createValidItem(overrides)`                   | Generate valid test items                       |
+| `createMockApiClient()`                        | Mock API with configurable responses            |
 
 **Test Refactoring:**
 
-| Before | After |
-|--------|-------|
-| `progressQueue.clear()` in beforeEach | `makeFreshQueue()` per test |
-| localStorage dependency | Pure in-memory repository |
-| Global state risk | Complete isolation |
-| 35 tests | 39 tests (added DI-specific tests) |
+| Before                                | After                              |
+| ------------------------------------- | ---------------------------------- |
+| `progressQueue.clear()` in beforeEach | `makeFreshQueue()` per test        |
+| localStorage dependency               | Pure in-memory repository          |
+| Global state risk                     | Complete isolation                 |
+| 35 tests                              | 39 tests (added DI-specific tests) |
 
 **Benefits:**
 
@@ -12327,16 +12381,16 @@ Status updates:
 
 ## Progress Queue - ALL ISSUES RESOLVED ✅
 
-| Issue | Status | Description |
-|-------|--------|-------------|
-| ISSUE-001 | ✅ DONE | Duplicate prevention |
-| ISSUE-002 | ✅ DONE | Input validation |
-| ISSUE-003 | ✅ FIXED | Retry logic |
-| ISSUE-004 | ✅ OPTIMIZED | O(1) performance |
-| ISSUE-005 | ✅ RESOLVED | Dead letter queue |
-| ISSUE-006 | ✅ DONE | Offline UI |
-| ISSUE-007 | ✅ DONE | Circuit breaker |
-| ISSUE-008 | ✅ DONE | Testability refactor |
+| Issue     | Status       | Description          |
+| --------- | ------------ | -------------------- |
+| ISSUE-001 | ✅ DONE      | Duplicate prevention |
+| ISSUE-002 | ✅ DONE      | Input validation     |
+| ISSUE-003 | ✅ FIXED     | Retry logic          |
+| ISSUE-004 | ✅ OPTIMIZED | O(1) performance     |
+| ISSUE-005 | ✅ RESOLVED  | Dead letter queue    |
+| ISSUE-006 | ✅ DONE      | Offline UI           |
+| ISSUE-007 | ✅ DONE      | Circuit breaker      |
+| ISSUE-008 | ✅ DONE      | Testability refactor |
 
 **8/8 issues resolved!** 🎉
 
@@ -12497,7 +12551,7 @@ Acceptance Criteria:
 - [x] Console warning logged for debugging
 - [x] Decision comment explains why console.warn vs telemetry
 - [x] Test added: NaN input rejection
-- [x] Test added: Infinity input rejection  
+- [x] Test added: Infinity input rejection
 - [x] Test added: -Infinity input rejection
 - [x] All 30 tests pass
 
@@ -12654,13 +12708,13 @@ Test Results:
 
 Key Fixes:
 
-| Issue | Before | After |
-|-------|--------|-------|
-| foundShapes | Declared, never populated, used in scoring | Removed, scoring uses shapes[].isFound |
-| completed flag | Initialized false, never set | Set by markShapeFound() when all found |
-| getRandomScene | Could return undefined | Returns null on empty filter |
-| Point validation | No validation | Number.isFinite() checks with warnings |
-| Test coverage | 0 tests | 30 tests |
+| Issue            | Before                                     | After                                  |
+| ---------------- | ------------------------------------------ | -------------------------------------- |
+| foundShapes      | Declared, never populated, used in scoring | Removed, scoring uses shapes[].isFound |
+| completed flag   | Initialized false, never set               | Set by markShapeFound() when all found |
+| getRandomScene   | Could return undefined                     | Returns null on empty filter           |
+| Point validation | No validation                              | Number.isFinite() checks with warnings |
+| Test coverage    | 0 tests                                    | 30 tests                               |
 
 Risks/notes:
 
@@ -12720,12 +12774,12 @@ Execution log:
 
 Key Findings:
 
-| Challenge | Solution | Evidence |
-|-----------|----------|----------|
-| @/analytics alias fails | Use relative imports | `import from '../index'` |
-| Module-level function mocking | `vi.mock()` with factory | `vi.mock('../index', () => ({ logEvent: vi.fn() }))` |
-| Type-safe mock access | `vi.mocked()` | `vi.mocked(analytics.logEvent).mockReturnValue(...)` |
-| Test isolation | `beforeEach(vi.clearAllMocks())` | Verified in all 6 tests |
+| Challenge                     | Solution                         | Evidence                                             |
+| ----------------------------- | -------------------------------- | ---------------------------------------------------- |
+| @/analytics alias fails       | Use relative imports             | `import from '../index'`                             |
+| Module-level function mocking | `vi.mock()` with factory         | `vi.mock('../index', () => ({ logEvent: vi.fn() }))` |
+| Type-safe mock access         | `vi.mocked()`                    | `vi.mocked(analytics.logEvent).mockReturnValue(...)` |
+| Test isolation                | `beforeEach(vi.clearAllMocks())` | Verified in all 6 tests                              |
 
 Time Investment: 22 minutes (well under 90-min guardrail)
 
@@ -12830,7 +12884,6 @@ Prompt Trace: AGENTS.md §8 lifecycle, self-directed audit workflow
 
 ---
 
-
 ---
 
 ### TCK-20260310-002 :: Import Kenney UI Pack Assets
@@ -12841,6 +12894,7 @@ Type: IMPLEMENTATION
 Owner: Pranay
 Created: 2026-03-09 23:00 IST
 Status: **DONE**
+
 - Out-of-scope: Updating all games to use KenneyButton, emoji replacement
 - Behavior change allowed: YES (KenneyButton will become functional)
 
@@ -12864,8 +12918,8 @@ Execution log:
 
 - 2026-03-09 23:00 IST | Created implementation ticket | Evidence: TCK-20260310-002 created
 - 2026-03-09 23:10 IST | Created UI asset directories | Evidence: buttons/, panels/, progress/, icons/ created
-- 2026-03-09 23:14 IST | Imported button assets (21 files) | Evidence: button_{color}.png, button_{color}_square.png, button_{color}_gloss.png for all 5 colors
-- 2026-03-09 23:18 IST | Imported progress bar assets (30 files) | Evidence: barBack_*.png, bar{Color}_*.png (slider PNGs not in Kenney bundle — KenneySlider marked @deprecated)
+- 2026-03-09 23:14 IST | Imported button assets (21 files) | Evidence: button*{color}.png, button*{color}_square.png, button_{color}\_gloss.png for all 5 colors
+- 2026-03-09 23:18 IST | Imported progress bar assets (30 files) | Evidence: barBack*\*.png, bar{Color}*\*.png (slider PNGs not in Kenney bundle — KenneySlider marked @deprecated)
 - 2026-03-09 23:20 IST | Updated KenneyButton.tsx paths | Evidence: Changed from /assets/kenney/ui-pack/PNG/ to /assets/kenney/ui/{buttons,progress}/
 - 2026-03-09 23:22 IST | Verified asset paths | Evidence: All 51 button+progress UI assets accessible at runtime paths
 - 2026-03-09 23:23 IST | Type-check passed | Evidence: No KenneyButton errors (pre-existing errors in other files unchanged)
@@ -12885,6 +12939,7 @@ Prompt Trace: prompts/implementation/feature-implementation-v1.0.md
      A duplicate TCK-20260310-011 (Kenney Emoji Replacement Batch 3) exists at the correct
      end-of-file location. This block is a separate PLANNING entry and should be treated as
      a historical backfill, not the canonical ticket sequence. -->
+
 ### TCK-20260310-019 :: Modularization Planning Conversion to Ticket-Ready Backlog
 
 Ticket Stamp: STAMP-20260310T054725Z-amp-5ak1
@@ -12938,7 +12993,6 @@ Risks/notes:
 Prompt Trace: prompts/planning/implementation-planning-v1.0.md
 
 ---
-
 
 ---
 
@@ -13000,7 +13054,6 @@ Prompt Trace: prompts/implementation/feature-implementation-v1.0.md
 
 ---
 
-
 ---
 
 ### TCK-20260309-005 :: Gameplay Visual Rewards - Kenney Asset Integration
@@ -13060,7 +13113,6 @@ Risks/notes:
 Prompt Trace: prompts/implementation/feature-implementation-v1.0.md
 
 ---
-
 
 ---
 
@@ -13122,7 +13174,6 @@ Prompt Trace: prompts/implementation/feature-implementation-v1.0.md
 
 ---
 
-
 ### TCK-20260310-003 :: Delete dead services/gameRegistry.ts stub
 
 Ticket Stamp: STAMP-20260309T183700Z-copilot-a1b2
@@ -13134,16 +13185,19 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope: Delete `src/frontend/src/services/gameRegistry.ts` (dead stub, zero imports)
 - Out-of-scope: Any changes to canonical `src/frontend/src/data/gameRegistry.ts`
 - Behavior change allowed: NO
 
 Evidence:
+
 - Command: `grep -r "services/gameRegistry" src/frontend/src --include="*.ts" --include="*.tsx" -l`
 - Output: (no results — zero consumers confirmed)
 - Observed: File contained only a placeholder comment and a stub `getGameInfo` returning undefined. Canonical implementation is `src/data/gameRegistry.ts`.
 
 Execution log:
+
 - 2026-03-09T18:37Z | Deleted `src/frontend/src/services/gameRegistry.ts` | Evidence: zero import consumers, stub comment confirms intent was temporary
 
 ---
@@ -13199,7 +13253,6 @@ Risks/notes:
 Prompt Trace: prompts/implementation/feature-implementation-v1.0.md
 
 ---
-
 
 ---
 
@@ -13276,30 +13329,36 @@ Status: **DONE**
 Priority: P2
 
 Scope contract:
+
 - In-scope: Delete KenneyPanel + KenneySlider from KenneyButton.tsx and index.ts
 - Out-of-scope: KenneyButton, KenneyProgressBar (functional, keep)
 - Behavior change allowed: YES (deleting dead exports)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s): src/frontend/src/components/ui/KenneyButton.tsx, src/frontend/src/components/ui/index.ts
 
 Acceptance Criteria:
+
 - [x] KenneyPanel removed (CSS-only placeholder, no consumers, panel assets not imported)
 - [x] KenneySlider removed (sliderBack.png/sliderBlue.png absent from local Kenney bundle)
 - [x] KenneySlider removed from index.ts barrel export
 - [x] No TypeScript errors after removal
 
 Source:
+
 - Agent investigation: fleet agent-3 confirmed zero consumers, missing/partial assets
 - Evidence: panels/ dir in public assets is empty; no slider assets anywhere in bundle
 - Prior @deprecated markers in both components noted "scheduled for removal in dedicated cleanup commit"
 
 Execution log:
+
 - 2026-03-10 Removed KenneyPanel (86-112), KenneySlider (159-219) from KenneyButton.tsx | Evidence: Observed — zero grep hits for both identifiers outside ui/KenneyButton.tsx
 - 2026-03-10 Removed KenneySlider from index.ts barrel | Evidence: Observed — tsc --noEmit reports no errors
 
 Status updates:
+
 - 2026-03-10 **DONE** — Both deprecated components removed; TypeScript clean
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
@@ -13319,16 +13378,19 @@ Priority: P2
 Ticket Stamp: STAMP-20260310T000005Z-agent-washhandsdance
 
 Scope contract:
+
 - In-scope: Game page, App.tsx route, game spec doc, wellness registry entry
-- Out-of-scope: New test file (already existed at src/frontend/src/games/__tests__/washHandsDanceLogic.test.ts)
+- Out-of-scope: New test file (already existed at src/frontend/src/games/**tests**/washHandsDanceLogic.test.ts)
 - Behavior change allowed: YES (new feature)
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s): src/frontend/src/pages/WashHandsDance.tsx, src/frontend/src/App.tsx, src/frontend/src/data/gameRegistries/wellness.ts, src/frontend/src/data/gameRegistry.ts, docs/games/wash-hands-dance-spec.md
 - Branch/PR: codex/wip-wash-hands-dance -> main
 
 Acceptance Criteria:
+
 - [x] WashHandsDance.tsx created with two-component GameShell pattern (inner WashHandsDanceGame + outer WashHandsDance export)
 - [x] Hand tracking via useGameHandTracking; wave gesture advances steps
 - [x] 5 wash steps shown in sequence using washHandsDanceLogic.ts exports
@@ -13341,10 +13403,12 @@ Acceptance Criteria:
 - [x] 46 tests passing in washHandsDanceLogic.test.ts
 
 Source:
+
 - Logic file: src/frontend/src/games/washHandsDanceLogic.ts
 - Pattern reference: CuttingPractice.tsx, wellness.ts, App.tsx routing
 
 Execution log:
+
 - 2026-03-10 Created WashHandsDance.tsx with GameShell wrapper and hand-tracking gesture detection | Evidence: Observed — file created, tsc --noEmit reports no errors in WashHandsDance.tsx
 - 2026-03-10 Added lazy import and route in App.tsx | Evidence: Observed — grep confirms /games/wash-hands-dance route added
 - 2026-03-10 Added WELLNESS_GAMES export to wellness.ts, imported in gameRegistry.ts | Evidence: Observed — tsc clean
@@ -13352,6 +13416,7 @@ Execution log:
 - 2026-03-10 Confirmed test suite: 46 tests passed | Evidence: Command: `npx vitest run src/games/__tests__/washHandsDanceLogic.test.ts` → 46 passed
 
 Status updates:
+
 - 2026-03-10 **DONE** — All acceptance criteria met; TypeScript clean; tests passing
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
@@ -13432,21 +13497,25 @@ Status: **DONE**
 Ticket Stamp: STAMP-20260310T000004Z-agent-mathmonsters
 
 Scope contract:
+
 - In-scope: `src/frontend/src/pages/MathMonsters.tsx` — reduce CCN of Anonymous@274-628 from 73 to < 60
 - Out-of-scope: logic changes, game behavior changes, other files
 - Behavior change allowed: NO
 
 Targets:
+
 - Repo: learning_for_kids
 - File(s): `src/frontend/src/pages/MathMonsters.tsx`
 - Branch/PR: local (maintainability guard unblock)
 
 Acceptance Criteria:
+
 - [x] Max CCN in file < 60 (was 73)
 - [x] TypeScript clean (no new errors)
 - [x] Vitest passes (pre-existing failures only)
 
 Approach (module-level extractions above React component):
+
 1. `getMostCommonCount(counts)` — moved from inside component to module level
 2. `getKenneyCharacterType(monsterId)` — replaces 4-ternary monster→KenneyCharacter type chain (used 2×)
 3. `getMonsterAnimation(expression)` — replaces 3-ternary monster expression→animation chain
@@ -13457,7 +13526,7 @@ Approach (module-level extractions above React component):
 Evidence:
 Command: `python3 -m lizard src/frontend/src/pages/MathMonsters.tsx -l javascript`
 Before: Anonymous@274-628 CCN=73 (WARNING, maintainability guard blocked)
-After:  Anonymous@376-655 CCN=33 (no critical warnings, guard passes)
+After: Anonymous@376-655 CCN=33 (no critical warnings, guard passes)
 
 Command: `cd src/frontend && npx tsc --noEmit 2>&1 | grep MathMonsters`
 Output: (empty — zero TypeScript errors in MathMonsters.tsx)
@@ -13466,6 +13535,7 @@ Command: `cd src/frontend && npx vitest run 2>&1 | tail -5`
 Output: 1 failed (pre-existing circleDrawingLogic) | 6233 passed — MathMonsters unaffected
 
 Status updates:
+
 - 2026-03-10 **DONE** — CCN reduced 73→33; TypeScript clean; tests pass
 
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
@@ -13637,10 +13707,12 @@ Evidence (Observed):
 Command: `python3 -m lizard src/frontend/src/pages/BalloonPopFitness.tsx -l javascript 2>&1 | grep -E "CCN|Warning"`
 
 Before:
+
 - `(anonymous)@87-681` CCN=114 (the BalloonPopFitnessGame component)
 - 1 warning: CCN > 15
 
 After:
+
 - `(anonymous)@428-703` (BalloonPopFitnessGame component) CCN=1
 - `doGameLoop@506-688` CCN=18
 - Max CCN across all functions: **18** (down from 114)
@@ -14075,7 +14147,6 @@ Status updates:
 
 ---
 
-
 ### TCK-20260310-001 :: Implement Simple Addition Game (Number Jungle)
 
 Ticket Stamp: STAMP-20260310T152631Z-codex-rzt8
@@ -14133,7 +14204,6 @@ Next actions:
 - (Optional) Add sound effects for win/lose states
 
 ---
-
 
 ### TCK-20260310-031 :: Expand AssetPreloader to All Games
 
@@ -14204,7 +14274,6 @@ Scope contract:
 
 ---
 
-
 ### TCK-20260227-001 :: Fix or Remove PhysicsDemo Game
 
 Ticket Stamp: STAMP-20260311T065203Z-codex-9gsl
@@ -14224,6 +14293,7 @@ Scope contract:
 Decision: **REMOVE** (Option A)
 
 Rationale:
+
 - PhysicsDemo.tsx was orphaned - route `/games/physics-demo` already used PhysicsPlayground
 - Quality score 10/100 (lowest of all games)
 - PhysicsPlayground is the canonical implementation (670 lines, properly featured)
@@ -14251,7 +14321,6 @@ Status updates:
 - 2026-03-11 12:24 IST **DONE** — PhysicsDemo removed, alias preserved
 
 ---
-
 
 Execution log (continued - Final Expansion & Showcase):
 
@@ -14299,7 +14368,6 @@ Maintainability: Excellent
 Documentation: Excellent
 
 ---
-
 
 ### TCK-20260311-001 :: Implement Circuit Builder Game (Discovery Lab)
 
@@ -14355,8 +14423,6 @@ Status updates:
 
 ---
 
-
-
 ### TCK-20260311-002 :: Implement Weather Lab Game (Discovery Lab)
 
 Ticket Stamp: STAMP-20260311T075145Z-codex-2xrp
@@ -14409,7 +14475,6 @@ Status updates:
 
 ---
 
-
 ### TCK-20260310-035 :: Fix Hand Cursor - Rayman/Kenney Style
 
 Ticket Stamp: STAMP-20260312T060158Z-codex-k67r
@@ -14421,6 +14486,7 @@ Status: **DONE**
 Priority: P0
 
 Problem Reported:
+
 - EmojiMatch showing "horrendous hand shape" (SVG rectangles)
 - User wants Rayman-style floating animated hand
 - Need proper pinch action animations
@@ -14445,12 +14511,14 @@ Solution:
    - Pinch state clearly visible with green indicator
 
 Files Modified:
+
 - src/frontend/src/components/game/RaymanHand.tsx (NEW)
 - src/frontend/src/components/game/KenneyHandCursor.tsx (NEW)
 - src/frontend/src/components/game/index.ts (exports)
 - src/frontend/src/pages/EmojiMatch.tsx (integrated)
 
 Testing:
+
 - TypeScript: ✅ Passes
 - Visual: Rayman-style floating hand with pinch animation
 
@@ -14515,7 +14583,6 @@ Status updates:
 
 ---
 
-
 ### TCK-20260312-001 :: Implement NASA Sky Hunt Game (Discovery Lab)
 
 Ticket Stamp: STAMP-20260312T095904Z-codex-jawp
@@ -14570,3 +14637,616 @@ Status updates:
 - 2026-03-12 15:10 IST **DONE** — NASA Sky Hunt game fully implemented with 57 tests
 
 ---
+
+### TCK-20260318-W1-001 :: TTS & CV Runtime Bug Fixes
+
+Ticket Stamp: STAMP-20260318T165210Z-codex-adg8
+
+Type: BUG
+Owner: Pranay (execution: codex)
+Created: 2026-03-18 16:52 IST
+Status: **IN_PROGRESS**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Fix useTTS maximum update depth error, fix GlobalCVCursor SpatialInputProvider error, investigate "2 Number Tap Trails" duplicate
+- Out-of-scope: New features, refactoring other hooks
+- Behavior change allowed: YES (bug fixes)
+
+Targets:
+
+- Repo: pranaysuyash/advay-learning
+- File(s): `src/frontend/src/hooks/useTTS.ts`, `src/frontend/src/components/game/GlobalCVCursor.tsx`, `src/frontend/src/pages/NumberTapTrail.tsx`
+
+Source:
+
+- User report: Console errors on NumberTapTrail game page
+- Error 1: Maximum update depth exceeded from useTTS.ts:118 (checkSpeaking) + useGameHandTracking.ts:446 (game loop FPS state)
+- Error 2: useSpatialInput must be used within SpatialInputProvider from GlobalCVCursor.tsx
+- Question: "why are there 2 number tap trails?"
+- Feature request: "when pinching in order i think we should also join the numbers also as a new level is reached"
+- Issue: Voice model falls to fallback and doesn't keep Kokoro loaded
+
+Acceptance Criteria:
+
+- [ ] useTTS checkSpeaking interval no longer causes maximum update depth
+- [ ] GlobalCVCursor no longer throws SpatialInputProvider error
+- [ ] Clarify "2 Number Tap Trails" with user
+- [ ] Implement pinch-to-join numbers visual
+- [ ] Kokoro TTS stays loaded (no fallback loop)
+
+Execution log:
+
+- 2026-03-18 16:52 IST | Investigated codebase | Evidence: Only ONE NumberTapTrail in registry and ONE route; GlobalCVCursor inside SpatialInputProvider; useTTS checkSpeaking interval fires on every render
+
+Status updates:
+
+- 2026-03-18 16:52 IST **IN_PROGRESS** — Investigated codebase, found root causes
+
+Status updates:
+
+- 2026-03-18 17:15 IST **DONE** — Fixed 4 issues:
+  1. useTTS checkSpeaking: Changed interval from 100ms to 1000ms to prevent update depth cascade with high-frequency game loops
+  2. GlobalCVCursor: Fixed SpatialInputProvider error by exporting SpatialInputContext and using useContext with DEFAULT_CURSOR_STATE fallback
+  3. NumberTapTrail: Added clearedSequence state and SVG trail visualization connecting cleared numbers in order
+  4. TTSService: Fixed Kokoro fallback - now initializes Kokoro when idle, falls back gracefully while loading, and falls back to Web Speech when errored
+
+---
+
+### TCK-20260319-001 :: Activity Inventory Audit
+
+Ticket Stamp: STAMP-20260319T181442Z-activity-audit-z5vi
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:14 IST
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Verify accuracy of `docs/ACTIVITY_INVENTORY_GAMES_UX.md`, identify discrepancies, update documentation
+- Out-of-scope: Game implementation changes, new features
+- Behavior change allowed: NO (documentation accuracy only)
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/ACTIVITY_INVENTORY_GAMES_UX.md`, `docs/audit/ACTIVITY_INVENTORY_AUDIT_FINDINGS.md`
+- Branch: `main`
+
+Acceptance Criteria:
+
+- [x] Verify all games in Activity Inventory exist in registry
+- [x] Verify hand tracking implementation status
+- [x] Identify documentation discrepancies (priority levels, vision alignment)
+- [x] Update Activity Inventory to reflect vision-first parity (all games equal)
+- [x] Document findings in audit artifact
+
+Execution log:
+
+- 2026-03-19 22:30 IST | Executed 5 audit units | Evidence: 100% pass rate
+- 2026-03-19 22:35 IST | Updated ACTIVITY_INVENTORY_GAMES_UX.md | Evidence: Removed priority hierarchy, added vision-first alignment note
+- 2026-03-19 22:40 IST | Created audit findings document | Evidence: docs/audit/ACTIVITY_INVENTORY_AUDIT_FINDINGS.md
+
+Status updates:
+
+- 2026-03-19 22:45 IST **DONE** — All findings documented, documentation updated
+
+Risks/notes:
+
+- 2 critical issues identified: priority hierarchy contradicts vision-first parity, documentation implied tier system
+- All games confirmed to have equal CV integration status
+
+---
+
+### TCK-20260319-002 :: Game Upgrade Complete Honest Audit
+
+Ticket Stamp: STAMP-20260319T181647Z-audit-docs-2-4zma
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Document game upgrade completion status
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/GAME_UPGRADE_COMPLETE_HONEST_AUDIT.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: GAME_UPGRADE_COMPLETE_HONEST_AUDIT.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-003 :: Game Upgrade Complete Status
+
+Ticket Stamp: STAMP-20260319T181647Z-audit-docs-3-16cf
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Document game upgrade completion status
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/GAME_UPGRADE_COMPLETE_STATUS.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: GAME_UPGRADE_COMPLETE_STATUS.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-004 :: Game Upgrade Comprehensive Status
+
+Ticket Stamp: STAMP-20260319T181647Z-audit-docs-4-w18e
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Document comprehensive game upgrade status
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/GAME_UPGRADE_COMPREHENSIVE_STATUS.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: GAME_UPGRADE_COMPREHENSIVE_STATUS.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-005 :: Game Upgrade Final Comprehensive
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-5-6caz
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Document final comprehensive game upgrade status
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/GAME_UPGRADE_FINAL_COMPREHENSIVE.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: GAME_UPGRADE_FINAL_COMPREHENSIVE.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-006 :: Game Upgrade Final Status
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-6-uie6
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Document final game upgrade status
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/GAME_UPGRADE_FINAL_STATUS.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: GAME_UPGRADE_FINAL_STATUS.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-007 :: Game Upgrade Final Summary
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-7-guya
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Document final game upgrade summary
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/GAME_UPGRADE_FINAL_SUMMARY.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: GAME_UPGRADE_FINAL_SUMMARY.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-008 :: Game Upgrade Honest Status
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-8-98y1
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Document honest game upgrade status
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/GAME_UPGRADE_HONEST_STATUS.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: GAME_UPGRADE_HONEST_STATUS.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-009 :: Game Upgrade Session Complete
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-9-6lx6
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Document game upgrade session completion
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/GAME_UPGRADE_SESSION_COMPLETE.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: GAME_UPGRADE_SESSION_COMPLETE.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-010 :: Hand Tracking Pipeline Audit
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-10-uk0q
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Audit hand tracking pipeline implementation
+- Out-of-scope: Face/pose tracking
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/HAND_TRACKING_PIPELINE_AUDIT_2026-02-28.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-02-28 00:00 IST | Completed hand tracking pipeline audit | Evidence: HAND_TRACKING_PIPELINE_AUDIT_2026-02-28.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-011 :: P0 Complete Audit
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-11-64dc
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Document P0 priority completion status
+- Out-of-scope: Lower priority items
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/P0_COMPLETE.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: P0_COMPLETE.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-012 :: Real Progress Tracker
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-12-utpz
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Track real progress on development goals
+- Out-of-scope: Speculative features
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/REAL_PROGRESS_TRACKER.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created progress tracking document | Evidence: REAL_PROGRESS_TRACKER.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-013 :: Stub Register Audit
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-13-7c19
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Document stub register status
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/STUB_REGISTER.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: STUB_REGISTER.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-014 :: Video Audit Onboarding & Alphabet Tracing
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-14-967g
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+
+- In-scope: Full UX/UI analysis of onboarding flow via video audit
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/VIDEO_AUDIT_ONBOARDING_ALPHABET_TRACING_2026-03-17.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-17 00:00 IST | Completed video audit of onboarding flow | Evidence: 287 frames analyzed, 219-line audit report
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-015 :: Emoji Match Deep Audit
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-15-wijl
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P3
+
+Scope contract:
+
+- In-scope: Deep audit of Emoji Match game
+- Out-of-scope: Other games
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/emoji_match_deep_audit.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-19 18:00 IST | Created audit documentation | Evidence: emoji_match_deep_audit.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-016 :: Game CV Audit
+
+Ticket Stamp: STAMP-20260319T181648Z-audit-docs-16-xr8w
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Audit CV integration across games
+- Out-of-scope: Non-CV features
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/game_cv_audit-20260318.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-18 00:00 IST | Completed CV audit for representative games | Evidence: game_cv_audit-20260318.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented
+
+---
+
+### TCK-20260319-017 :: Game CV Coverage Audit
+
+Ticket Stamp: STAMP-20260319T181649Z-audit-docs-17-xx3o
+
+Type: AUDIT
+Owner: Pranay
+Created: 2026-03-19 18:16 IST
+Status: **DONE**
+Priority: P2
+
+Scope contract:
+
+- In-scope: Audit CV coverage across all games
+- Out-of-scope: Implementation changes
+- Behavior change allowed: NO
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `docs/audit/game_cv_coverage_20260318.md`
+- Branch: `main`
+
+Execution log:
+
+- 2026-03-18 00:00 IST | Completed CV coverage audit | Evidence: game_cv_coverage_20260318.md
+
+Status updates:
+
+- 2026-03-19 18:16 IST **DONE** — Audit documented

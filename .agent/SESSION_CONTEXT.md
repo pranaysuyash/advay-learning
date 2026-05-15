@@ -1,6 +1,6 @@
 # Session Context
 
-- Generated: 2026-03-16T06:39:05Z
+- Generated: 2026-05-15T09:52:07Z
 - Project: `learning_for_kids`
 - Provider: `local`
 - Model: `BAAI/bge-m3`
@@ -9,25 +9,7 @@
 
 ## Project-Focused Retrieval
 
-### Architecture Decisions
-- Collection: `projects_proj_learning_for_kids`
-- Query: `architecture decisions for learning_for_kids`
-_Fast mode (--skip-index): retrieval skipped to keep startup non-blocking. Run `/Users/pranay/Projects/agent-start --project learning_for_kids` for full retrieval, or set `AGENT_START_SKIP_INDEX_RETRIEVE=1` if you want retrieval with skip-index._
-
-### Project Management Workflow
-- Collection: `projects_proj_learning_for_kids`
-- Query: `project management workflow for learning_for_kids`
-_Fast mode (--skip-index): retrieval skipped to keep startup non-blocking. Run `/Users/pranay/Projects/agent-start --project learning_for_kids` for full retrieval, or set `AGENT_START_SKIP_INDEX_RETRIEVE=1` if you want retrieval with skip-index._
-
-### Known Issues and Worklogs
-- Collection: `projects_proj_learning_for_kids`
-- Query: `known issues and worklog for learning_for_kids`
-_Fast mode (--skip-index): retrieval skipped to keep startup non-blocking. Run `/Users/pranay/Projects/agent-start --project learning_for_kids` for full retrieval, or set `AGENT_START_SKIP_INDEX_RETRIEVE=1` if you want retrieval with skip-index._
-
-### Prompts and Guidelines
-- Collection: `projects_proj_learning_for_kids`
-- Query: `prompts and guidelines for learning_for_kids`
-_Fast mode (--skip-index): retrieval skipped to keep startup non-blocking. Run `/Users/pranay/Projects/agent-start --project learning_for_kids` for full retrieval, or set `AGENT_START_SKIP_INDEX_RETRIEVE=1` if you want retrieval with skip-index._
+> NOTE: Project collection check timed out; using shared workspace context for this run.
 
 ## Shared Cross-Project Retrieval
 
@@ -44,5 +26,10 @@ _Fast mode (--skip-index): retrieval skipped to keep startup non-blocking. Run `
 ### Common Failure Modes
 - Collection: `projects_workspace_shared`
 - Query: `lessons learned mistakes retrospectives postmortems`
+_Fast mode (--skip-index): retrieval skipped to keep startup non-blocking. Run `/Users/pranay/Projects/agent-start --project learning_for_kids` for full retrieval, or set `AGENT_START_SKIP_INDEX_RETRIEVE=1` if you want retrieval with skip-index._
+
+### System Learning Graph
+- Collection: `projects_workspace_shared`
+- Query: `knowledge graph memory learning feedback loops autoresearch semantic taste graph`
 _Fast mode (--skip-index): retrieval skipped to keep startup non-blocking. Run `/Users/pranay/Projects/agent-start --project learning_for_kids` for full retrieval, or set `AGENT_START_SKIP_INDEX_RETRIEVE=1` if you want retrieval with skip-index._
 

@@ -16,6 +16,7 @@ import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import { getAdaptiveHitRadius } from '../components/game/interactionAdapter';
 import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameContainer } from '../components/GameContainer';
 import { TrackingLossOverlay } from '../components/game/TrackingLossOverlay';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
@@ -82,7 +83,7 @@ const CRITICAL_ASSETS: import('../components/AssetPreloader').AssetToPreload[] =
 const EmojiMatchGame = memo(function EmojiMatchComponent() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const navigate = useNavigate();
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement | null>(null);
   const containerRectRef = useRef<DOMRect | null>(null);
   const startButtonRef = useRef<HTMLButtonElement | null>(null);
   const levelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -183,7 +184,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
 
   useEffect(() => {
     const updateRect = () => {
-      const rect = containerRef.current?.getBoundingClientRect() ?? null;
+      const rect = gameAreaRef.current?.getBoundingClientRect() ?? null;
       containerRectRef.current = rect;
       if (rect && cursor) {
         setCursorPx({
@@ -339,7 +340,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
 
       const containerRect =
         containerRectRef.current ??
-        containerRef.current?.getBoundingClientRect();
+        gameAreaRef.current?.getBoundingClientRect();
       const mappedTip = containerRect
         ? mapNormalizedPointToCover(
             tip,
@@ -659,7 +660,7 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
       score={score}
       level={level}
       onHome={goHome}
-      isHandDetected={isHandDetected}
+      isHandDetected={isHandTrackingReady}
       isPlaying={isPlaying}
       onPause={() => {
         if (!isPlaying) return;
@@ -668,8 +669,8 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
       }}
     >
       <div
-        ref={containerRef}
-        className='absolute inset-0 bg-discovery-cream overflow-hidden'
+        ref={gameAreaRef}
+        className='absolute inset-0 bg-discovery-cream overflow-hidden relative'
       >
         <div className='absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/40 backdrop-blur-sm pointer-events-none' />
 
@@ -951,6 +952,18 @@ const EmojiMatchGame = memo(function EmojiMatchComponent() {
         fallbackAvailable={fallbackEnabled}
         onExitToGames={goHome}
       />
+
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameContainer>
   );
 });

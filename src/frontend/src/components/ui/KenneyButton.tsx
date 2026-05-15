@@ -8,13 +8,13 @@
  * Styles: default, square, gloss
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, forwardRef } from 'react';
 
 export type KenneyButtonColor = 'blue' | 'green' | 'red' | 'yellow' | 'grey';
 export type KenneyButtonSize = 'small' | 'default' | 'large';
 export type KenneyButtonStyle = 'default' | 'square' | 'gloss';
 
-interface KenneyButtonProps {
+export interface KenneyButtonProps {
   children: ReactNode;
   color?: KenneyButtonColor;
   size?: KenneyButtonSize;
@@ -33,7 +33,7 @@ interface KenneyButtonProps {
  * - button_[color]_square.png - Square button
  * - button_[color]_gloss.png - Glossy button
  */
-export function KenneyButton({
+export const KenneyButton = forwardRef<HTMLButtonElement, KenneyButtonProps>(({
   children,
   color = 'blue',
   size = 'default',
@@ -42,7 +42,7 @@ export function KenneyButton({
   disabled = false,
   className = '',
   type = 'button',
-}: KenneyButtonProps) {
+}, ref) => {
   // Build the sprite path
   const getSpritePath = () => {
     const basePath = '/assets/kenney/ui/buttons';
@@ -59,6 +59,7 @@ export function KenneyButton({
 
   return (
     <button
+      ref={ref}
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -81,7 +82,7 @@ export function KenneyButton({
       {children}
     </button>
   );
-}
+});
 
 /**
  * Kenney UI Progress Bar

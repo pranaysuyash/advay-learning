@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Manual Game Testing - Launch Real Chrome</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: white; text-align: center; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: rgba(255,255,255,0.9); margin-bottom: 30px; }
+
+        .card {
+            background: white; border-radius: 20px; padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2); margin-bottom: 20px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; color: #2d3748; margin-bottom: 8px; }
+        input, select {
+            width: 100%; padding: 12px; border: 2px solid #e2e8f0;
+            border-radius: 10px; font-size: 16px;
+        }
+        input:focus, select:focus { outline: none; border-color: #667eea; }
+
+        .btn {
+            width: 100%; padding: 16px; border: none; border-radius: 12px;
+            font-size: 18px; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; margin-bottom: 15px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: #f7fafc; color: #4a5568; border: 2px solid #e2e8f0; }
+
+        .checklist {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            background: #f7fafc; padding: 20px; border-radius: 12px;
+        }
+        .checklist-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; background: white; border-radius: 8px;
+            cursor: pointer;
+        }
+        .checklist-item:hover { background: #ebf4ff; }
+        .checklist-item.checked { background: #c6f6d5; }
+
+        .rating-grid {
+            display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+            margin-bottom: 20px;
+        }
+        .rating-item { text-align: center; }
+        .rating-label { font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 8px; }
+        .rating-buttons { display: flex; gap: 4px; justify-content: center; }
+        .rating-btn {
+            width: 28px; height: 28px; border-radius: 6px; border: 1px solid #cbd5e0;
+            background: white; cursor: pointer; font-weight: 600; font-size: 12px;
+        }
+        .rating-btn.selected { background: #667eea; color: white; border-color: #667eea; }
+
+        .notes { width: 100%; min-height: 100px; padding: 12px;
+            border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; }
+
+        .credentials {
+            background: #fff5f5; border: 2px solid #fc8181;
+            padding: 15px; border-radius: 10px; margin-bottom: 20px;
+        }
+        .credentials h3 { color: #c53030; margin-bottom: 10px; font-size: 16px; }
+        .credentials code {
+            background: white; padding: 4px 8px; border-radius: 4px;
+            font-family: monospace; color: #c53030;
+        }
+
+        .game-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px; max-height: 300px; overflow-y: auto;
+        }
+        .game-btn {
+            padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px;
+            background: white; cursor: pointer; text-align: center;
+            transition: all 0.2s;
+        }
+        .game-btn:hover { border-color: #667eea; background: #ebf4ff; }
+        .game-btn.played { border-color: #48bb78; background: #c6f6d5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Manual Game Testing</h1>
+        <p class="subtitle">Play games in YOUR Chrome browser with YOUR account</p>
+
+        <div class="card">
+            <h2 style="margin-bottom: 20px;">🚀 Launch Game to Test</h2>
+
+            <div class="form-group">
+                <label>Dev Server URL</label>
+                <input type="text" id="serverUrl" value="http://localhost:3000">
+            </div>
+
+            <div class="credentials">
+                <h3>🔐 Your Login Credentials</h3>
+                <p style="margin-bottom: 5px;">Email: <code>pranay.suyash@gmail.com</code></p>
+                <p>Password: <code>Advay@2026!</code></p>
+                <p style="margin-top: 10px; font-size: 14px; color: #718096;">
+                    Or play as <strong>guest</strong> (no login required)
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>Click a game to open in Chrome:</label>
+                <div class="game-grid" id="gameGrid"></div>
+            </div>
+
+            <button class="btn btn-primary" id="openAllBtn">🔓 Open Games List in New Tab</button>
+        </div>
+
+        <div class="card" id="evalCard" style="display:none;">
+            <h2 style="margin-bottom: 15px;">📝 Evaluate: <span id="currentGameName">-</span></h2>
+            <p style="color: #718096; margin-bottom: 20px;">
+                Play the game in the opened tab, then come back and rate your experience.
+            </p>
+
+            <div class="rating-grid">
+                <div class="rating-item">
+                    <div class="rating-label">🎨 Visuals</div>
+                    <div class="rating-buttons" data-criteria="visuals">
+                        <button class="rating-btn">1</button><button class="rating-btn">2</button><button class="rating-btn">3</button><button class="rating-btn">4</button><button class="rating-btn">5</button>
+                    </div>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-label">✨ Appeal</div>
+                    <div class="rating-buttons" data-criteria="appeal">
+                        <button class="rating-btn">1</button><button class="rating-btn">2</button><button class="rating-btn">3</button><button class="rating-btn">4</button><button class="rating-btn">5</button>
+                    </div>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-label">⚙️ Controls</div>
+                    <div class="rating-buttons" data-criteria="controls">
+                        <button class="rating-btn">1</button><button class="rating-btn">2</button><button class="rating-btn">3</button><button class="rating-btn">4</button><button class="rating-btn">5</button>
+                    </div>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-label">📜 Rules</div>
+                    <div class="rating-buttons" data-criteria="rules">
+                        <button class="rating-btn">1</button><button class="rating-btn">2</button><button class="rating-btn">3</button><button class="rating-btn">4</button><button class="rating-btn">5</button>
+                    </div>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-label">🧠 Learning</div>
+                    <div class="rating-buttons" data-criteria="learning">
+                        <button class="rating-btn">1</button><button class="rating-btn">2</button><button class="rating-btn">3</button><button class="rating-btn">4</button><button class="rating-btn">5</button>
+                    </div>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-label">🎉 Fun</div>
+                    <div class="rating-buttons" data-criteria="fun">
+                        <button class="rating-btn">1</button><button class="rating-btn">2</button><button class="rating-btn">3</button><button class="rating-btn">4</button><button class="rating-btn">5</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Checklist (what you observed):</label>
+                <div class="checklist">
+                    <label class="checklist-item"><input type="checkbox" id="ck-cv"> ✅ CV/Hand tracking works</label>
+                    <label class="checklist-item"><input type="checkbox" id="ck-callouts"> ✅ Call outs / celebrations</label>
+                    <label class="checklist-item"><input type="checkbox" id="ck-3d"> ✅ 3D elements (Three.js)</label>
+                    <label class="checklist-item"><input type="checkbox" id="ck-assets"> ✅ Kenney assets visible</label>
+                    <label class="checklist-item"><input type="checkbox" id="ck-instructions"> ✅ Clear instructions</label>
+                    <label class="checklist-item"><input type="checkbox" id="ck-feedback"> ✅ Visual/audio feedback</label>
+                    <label class="checklist-item"><input type="checkbox" id="ck-progress"> ✅ Progress/score visible</label>
+                    <label class="checklist-item"><input type="checkbox" id="ck-replay"> ✅ Would replay</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notes & Issues:</label>
+                <textarea class="notes" id="notes" placeholder="What did you notice? Any bugs? What could be better?"></textarea>
+            </div>
+
+            <button class="btn btn-primary" id="saveBtn">💾 Save Evaluation</button>
+            <button class="btn btn-secondary" id="nextBtn">➡️ Next Game</button>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">📊 Testing Progress</h3>
+            <div id="progress" style="display:flex; gap:20px;">
+                <div><strong>Total:</strong> <span id="statTotal">0</span></div>
+                <div><strong>Tested:</strong> <span id="statTested">0</span></div>
+                <div><strong>Avg Score:</strong> <span id="statAvg">-</span></div>
+            </div>
+            <button class="btn btn-secondary" id="exportBtn" style="margin-top:15px;">📥 Export Results</button>
+        </div>
+    </div>
+
+    <script>
+        const GAMES = [
+            { id: 'odd-one-out', name: 'Odd One Out', category: 'Word Workshop' },
+            { id: 'alphabet-tracing', name: 'Draw Letters', category: 'Letter Land' },
+            { id: 'letter-hunt', name: 'Find the Letter', category: 'Letter Land' },
+            { id: 'number-tracing', name: 'Number Tracing', category: 'Number Jungle' },
+            { id: 'math-monsters', name: 'Math Monsters', category: 'Number Jungle' },
+            { id: 'math-jumpers', name: 'Math Jumpers', category: 'Number Jungle' },
+            { id: 'simple-addition', name: 'Simple Addition', category: 'Number Jungle' },
+            { id: 'word-search', name: 'Word Search', category: 'Word Workshop' },
+            { id: 'spelling-run', name: 'Spelling Run', category: 'Word Workshop' },
+            { id: 'shape-safari', name: 'Shape Safari', category: 'Shape Garden' },
+            { id: 'shape-stacker', name: 'Shape Stacker', category: 'Shape Garden' },
+            { id: 'color-match-garden', name: 'Color Match Garden', category: 'Color Splash' },
+            { id: 'platformer-runner', name: 'Platformer Runner', category: 'Platform World' },
+            { id: 'obstacle-course', name: 'Obstacle Course', category: 'Platform World' },
+            { id: 'mirror-duel', name: 'Mirror Duel', category: 'Platform World' },
+            { id: 'yoga-animals', name: 'Yoga Animals', category: 'Wellness' },
+            { id: 'breathing-bubbles', name: 'Breathing Bubbles', category: 'Wellness' },
+            { id: 'music-conductor', name: 'Music Conductor', category: 'Sound Studio' },
+            { id: 'beat-bounce', name: 'Beat Bounce', category: 'Sound Studio' },
+            { id: 'mirror-maze', name: 'Mirror Maze', category: 'Body Zone' },
+            { id: 'balance-beam', name: 'Balance Beam', category: 'Body Zone' },
+        ];
+
+        let evaluations = {};
+        let currentGame = null;
+        let currentRatings = {};
+
+        function renderGames() {
+            const grid = document.getElementById('gameGrid');
+            const serverUrl = document.getElementById('serverUrl').value;
+            grid.innerHTML = GAMES.map(g => {
+                const tested = evaluations[g.id];
+                return `
+                    <div class="game-btn ${tested ? 'played' : ''}" data-id="${g.id}">
+                        <div style="font-weight:600;">${g.name}</div>
+                        <div style="font-size:11px;color:#718096;">${g.category}</div>
+                        ${tested ? `<div style="font-size:11px;color:#48bb78;">✓ ${tested.overall}/5</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            grid.querySelectorAll('.game-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const game = GAMES.find(g => g.id === id);
+                    const url = `${serverUrl}/games/${id}`;
+                    window.open(url, '_blank');
+                    selectGame(game);
+                });
+            });
+        }
+
+        function selectGame(game) {
+            currentGame = game;
+            currentRatings = {};
+            document.getElementById('evalCard').style.display = 'block';
+            document.getElementById('currentGameName').textContent = game.name;
+
+            // Reset form
+            document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.checklist-item').forEach(c => {
+                c.classList.remove('checked');
+                c.querySelector('input').checked = false;
+            });
+            document.getElementById('notes').value = '';
+        }
+
+        // Rating buttons
+        document.querySelectorAll('.rating-buttons').forEach(group => {
+            group.querySelectorAll('.rating-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const criteria = group.dataset.criteria;
+                    group.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    currentRatings[criteria] = parseInt(btn.textContent);
+                });
+            });
+        });
+
+        // Checklist
+        document.querySelectorAll('.checklist-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.tagName === 'INPUT') return;
+                const input = item.querySelector('input');
+                input.checked = !input.checked;
+                item.classList.toggle('checked', input.checked);
+            });
+        });
+
+        // Save
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            if (!currentGame) return;
+
+            const scores = Object.values(currentRatings);
+            const overall = scores.length > 0 ? (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(1) : 0;
+
+            evaluations[currentGame.id] = {
+                name: currentGame.name,
+                category: currentGame.category,
+                ratings: {...currentRatings},
+                overall: parseFloat(overall),
+                checks: {
+                    cv: document.getElementById('ck-cv').checked,
+                    callouts: document.getElementById('ck-callouts').checked,
+                    '3d': document.getElementById('ck-3d').checked,
+                    assets: document.getElementById('ck-assets').checked,
+                    instructions: document.getElementById('ck-instructions').checked,
+                    feedback: document.getElementById('ck-feedback').checked,
+                    progress: document.getElementById('ck-progress').checked,
+                    replay: document.getElementById('ck-replay').checked,
+                },
+                notes: document.getElementById('notes').value,
+                timestamp: new Date().toISOString()
+            };
+
+            renderGames();
+            updateStats();
+            alert('Saved! Keep playing or select another game.');
+        });
+
+        function updateStats() {
+            const total = GAMES.length;
+            const tested = Object.keys(evaluations).length;
+            const scores = Object.values(evaluations).map(e => e.overall);
+            const avg = scores.length > 0 ? (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(1) : '-';
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statTested').textContent = tested;
+            document.getElementById('statAvg').textContent = avg;
+        }
+
+        // Export
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const data = {
+                exportDate: new Date().toISOString(),
+                evaluations: Object.values(evaluations)
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `manual-evaluations-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        });
+
+        // Open games list
+        document.getElementById('openAllBtn').addEventListener('click', () => {
+            const url = document.getElementById('serverUrl').value + '/games';
+            window.open(url, '_blank');
+        });
+
+        document.getElementById('serverUrl').addEventListener('change', renderGames);
+
+        // Init
+        renderGames();
+        updateStats();
+    </script>
+</body>
+</html>

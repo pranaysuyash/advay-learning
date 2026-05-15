@@ -406,6 +406,10 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
     [completeWord, cursor, playError, playPop, speak, ttsEnabled, word],
   );
 
+  const handleNoVideoFrame = useCallback(() => {
+    if (cursor !== null) setCursor(null);
+  }, [cursor]);
+
   const {
     isLoading: isModelLoading,
     isReady: isHandTrackingReady,
@@ -416,9 +420,7 @@ const WordBuilderContent = memo(function WordBuilderComponent() {
     targetFps: 30,
     isRunning: isPlaying && !gameCompleted,
     onFrame: handleFrame,
-    onNoVideoFrame: () => {
-      if (cursor !== null) setCursor(null);
-    },
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   useEffect(() => {

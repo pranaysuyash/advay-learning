@@ -14,6 +14,8 @@ import Webcam from 'react-webcam';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../games/shapeSafariLogic';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
@@ -44,6 +46,8 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
   const webcamRef = useRef<Webcam>(null);
   const gameLoopRef = useRef<number | null>(null);
   const lastTimeRef = useRef(0);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
 
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [gameState, setGameState] = useState<GameState>(() => createInitialState());
@@ -185,8 +189,12 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
     (frame: TrackedHandFrame) => {
       if (!frame.indexTip) {
         setSilhouetteRegions([]);
+        setCursor(null);
         return;
       }
+
+      // Set cursor position
+      setCursor({ x: frame.indexTip.x, y: frame.indexTip.y });
 
       // Create silhouette region based on hand position
       // In a real implementation, this would use body segmentation
@@ -334,7 +342,7 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
       isHandDetected={handVisible}
       webcamRef={webcamRef}
     >
-      <div className="relative w-full h-full flex flex-col items-center justify-center">
+      <div ref={gameAreaRef} className="relative w-full h-full flex flex-col items-center justify-center">
         {gameState.status === 'idle' ? (
           <div className="flex flex-col items-center gap-6">
             <h2 className="text-3xl font-bold text-white drop-shadow-lg">Shadow Portal</h2>
@@ -500,6 +508,17 @@ export const ShadowPortalContent = memo(function ShadowPortalGame() {
             </motion.div>
           )}
         </AnimatePresence>
+        {cursor && (
+          <GameCursor
+            position={cursor}
+            coordinateSpace="normalized"
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={true}
+            size={64}
+            color="#22c55e"
+          />
+        )}
       </div>
     </GameContainer>
   );

@@ -1,11 +1,16 @@
 import { memo, useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import { useGamePoseTracking } from '../hooks/useGamePoseTracking';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { GameShell } from '../components/GameShell';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   Cat,
   TreeDeciduous,
@@ -106,12 +111,12 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
-  const animationRef = useRef<number>(0);
   const continuousHoldRef = useRef(0);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [currentPoseIndex, setCurrentPoseIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [matchProgress, setMatchProgress] = useState(0);
@@ -127,6 +132,21 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
 
   const currentPose = ANIMAL_POSES[currentPoseIndex];
   const HOLD_DURATION = 2000;
+
+  const handleHandFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'YogaAnimals',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleHandFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
 
   // Show loading while checking subscription
   if (subLoading) {
@@ -197,221 +217,6 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
     isPlaying,
   });
 
-  // Initialize Pose Landmarker
-  useEffect(() => {
-    async function initPose() {
-      try {
-        const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm',
-        );
-        let landmarker: PoseLandmarker;
-        try {
-          landmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath:
-                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
-              delegate: 'GPU',
-            },
-            runningMode: 'VIDEO',
-            numPoses: 1,
-          });
-        } catch (e) {
-          console.warn(
-            'GPU delegate failed for PoseLandmarker, falling back to CPU:',
-            e,
-          );
-          landmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath:
-                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
-              delegate: 'CPU',
-            },
-            runningMode: 'VIDEO',
-            numPoses: 1,
-          });
-        }
-        poseLandmarkerRef.current = landmarker;
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Failed to initialize pose landmarker:', err);
-        setError(
-          'Could not load pose detection. This might be a network issue. Try refreshing or check your internet connection.',
-        );
-        setIsLoading(false);
-      }
-    }
-    initPose();
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
-
-  // Game loop for pose detection
-  const detectPose = useCallback(() => {
-    try {
-      if (
-        !webcamRef.current ||
-        !canvasRef.current ||
-        !poseLandmarkerRef.current
-      )
-        return;
-
-      const video = webcamRef.current.video;
-      if (!video || video.readyState !== 4) {
-        animationRef.current = requestAnimationFrame(detectPose);
-        return;
-      }
-      if (!cameraReady) {
-        setCameraReady(true);
-      }
-
-      const results = poseLandmarkerRef.current.detectForVideo(
-        video,
-        performance.now(),
-      );
-
-      if (results.landmarks && results.landmarks.length > 0) {
-        const landmarks = results.landmarks[0];
-
-        // Get key body points
-        const leftShoulder = landmarks[11];
-        const rightShoulder = landmarks[12];
-        const leftElbow = landmarks[13];
-        const rightElbow = landmarks[14];
-        const leftWrist = landmarks[15];
-        const rightWrist = landmarks[16];
-        const leftHip = landmarks[23];
-        const rightHip = landmarks[24];
-        const leftKnee = landmarks[25];
-        const rightKnee = landmarks[26];
-        const leftAnkle = landmarks[27];
-        const rightAnkle = landmarks[28];
-
-        // Calculate arm angles
-        const leftArmAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
-        const rightArmAngle = calculateAngle(
-          rightShoulder,
-          rightElbow,
-          rightWrist,
-        );
-
-        // Calculate leg angles
-        const leftLegAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
-        const rightLegAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
-
-        // Calculate torso angle
-        const torsoAngle =
-          calculateAngle(
-            leftShoulder,
-            {
-              x: (leftShoulder.x + rightShoulder.x) / 2,
-              y: (leftShoulder.y + rightShoulder.y) / 2,
-            },
-            leftHip,
-          ) - 90;
-
-        // Calculate match score
-        let totalScore = 0;
-        let targetCount = 0;
-
-        if (currentPose.targets.leftArmAngle !== undefined) {
-          const diff = Math.abs(
-            leftArmAngle - currentPose.targets.leftArmAngle,
-          );
-          totalScore += Math.max(0, 100 - diff);
-          targetCount++;
-        }
-        if (currentPose.targets.rightArmAngle !== undefined) {
-          const diff = Math.abs(
-            rightArmAngle - currentPose.targets.rightArmAngle,
-          );
-          totalScore += Math.max(0, 100 - diff);
-          targetCount++;
-        }
-        if (currentPose.targets.leftLegAngle !== undefined) {
-          const diff = Math.abs(
-            leftLegAngle - currentPose.targets.leftLegAngle,
-          );
-          totalScore += Math.max(0, 100 - diff);
-          targetCount++;
-        }
-        if (currentPose.targets.rightLegAngle !== undefined) {
-          const diff = Math.abs(
-            rightLegAngle - currentPose.targets.rightLegAngle,
-          );
-          totalScore += Math.max(0, 100 - diff);
-          targetCount++;
-        }
-        if (currentPose.targets.torsoAngle !== undefined) {
-          const diff = Math.abs(torsoAngle - currentPose.targets.torsoAngle);
-          totalScore += Math.max(0, 100 - diff);
-          targetCount++;
-        }
-
-        const matchScore = targetCount > 0 ? totalScore / targetCount : 0;
-        setMatchProgress(matchScore);
-
-        // Check if pose is matched
-        if (matchScore > 70) {
-          continuousHoldRef.current += 50;
-          if (continuousHoldRef.current >= 10000) {
-            triggerEasterEgg('egg-spirit-animal');
-            continuousHoldRef.current = 0;
-          }
-          setHoldTime((prev) => {
-            const newTime = prev + 50;
-            if (newTime >= HOLD_DURATION && !showCelebration) {
-              // Streak and scoring
-              const newStreak = streak + 1;
-              setStreak(newStreak);
-              const basePoints = 100;
-              const streakBonus = Math.min(newStreak * 10, 50);
-
-              playFanfare();
-              triggerHaptic('success');
-              setScore((s) => s + basePoints + streakBonus);
-              setShowCelebration(true);
-
-              // Milestone every 5
-              if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
-                setShowStreakMilestone(true);
-                triggerHaptic('celebration');
-                setTimeout(() => setShowStreakMilestone(false), 1500);
-              }
-
-              setTimeout(() => {
-                setShowCelebration(false);
-                setCurrentPoseIndex((i) => (i + 1) % ANIMAL_POSES.length);
-                setHoldTime(0);
-              }, 2000);
-            }
-            return newTime;
-          });
-        } else {
-          continuousHoldRef.current = 0;
-          setHoldTime(0);
-        }
-
-        // Draw skeleton
-        drawSkeleton(landmarks);
-      }
-
-      animationRef.current = requestAnimationFrame(detectPose);
-    } catch (err) {
-      console.error('Pose detection failed:', err);
-      setError('Pose detection error. Please try again.');
-    }
-  }, [
-    cameraReady,
-    currentPose,
-    showCelebration,
-    triggerEasterEgg,
-    playFanfare,
-  ]);
-
   // Draw skeleton overlay
   function drawSkeleton(landmarks: any[]) {
     try {
@@ -466,6 +271,151 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
     }
   }
 
+  // Pose tracking onFrame callback
+  const handlePoseFrame = useCallback((landmarks: any[]) => {
+    if (!canvasRef.current) return;
+    if (!cameraReady) {
+      setCameraReady(true);
+    }
+
+    // Get key body points
+    const leftShoulder = landmarks[11];
+    const rightShoulder = landmarks[12];
+    const leftElbow = landmarks[13];
+    const rightElbow = landmarks[14];
+    const leftWrist = landmarks[15];
+    const rightWrist = landmarks[16];
+    const leftHip = landmarks[23];
+    const rightHip = landmarks[24];
+    const leftKnee = landmarks[25];
+    const rightKnee = landmarks[26];
+    const leftAnkle = landmarks[27];
+    const rightAnkle = landmarks[28];
+
+    // Calculate arm angles
+    const leftArmAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+    const rightArmAngle = calculateAngle(
+      rightShoulder,
+      rightElbow,
+      rightWrist,
+    );
+
+    // Calculate leg angles
+    const leftLegAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+    const rightLegAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+
+    // Calculate torso angle
+    const torsoAngle =
+      calculateAngle(
+        leftShoulder,
+        {
+          x: (leftShoulder.x + rightShoulder.x) / 2,
+          y: (leftShoulder.y + rightShoulder.y) / 2,
+        },
+        leftHip,
+      ) - 90;
+
+    // Calculate match score
+    let totalScore = 0;
+    let targetCount = 0;
+
+    if (currentPose.targets.leftArmAngle !== undefined) {
+      const diff = Math.abs(
+        leftArmAngle - currentPose.targets.leftArmAngle,
+      );
+      totalScore += Math.max(0, 100 - diff);
+      targetCount++;
+    }
+    if (currentPose.targets.rightArmAngle !== undefined) {
+      const diff = Math.abs(
+        rightArmAngle - currentPose.targets.rightArmAngle,
+      );
+      totalScore += Math.max(0, 100 - diff);
+      targetCount++;
+    }
+    if (currentPose.targets.leftLegAngle !== undefined) {
+      const diff = Math.abs(
+        leftLegAngle - currentPose.targets.leftLegAngle,
+      );
+      totalScore += Math.max(0, 100 - diff);
+      targetCount++;
+    }
+    if (currentPose.targets.rightLegAngle !== undefined) {
+      const diff = Math.abs(
+        rightLegAngle - currentPose.targets.rightLegAngle,
+      );
+      totalScore += Math.max(0, 100 - diff);
+      targetCount++;
+    }
+    if (currentPose.targets.torsoAngle !== undefined) {
+      const diff = Math.abs(torsoAngle - currentPose.targets.torsoAngle);
+      totalScore += Math.max(0, 100 - diff);
+      targetCount++;
+    }
+
+    const matchScore = targetCount > 0 ? totalScore / targetCount : 0;
+    setMatchProgress(matchScore);
+
+    // Check if pose is matched
+    if (matchScore > 70) {
+      continuousHoldRef.current += 50;
+      if (continuousHoldRef.current >= 10000) {
+        triggerEasterEgg('egg-spirit-animal');
+        continuousHoldRef.current = 0;
+      }
+      setHoldTime((prev) => {
+        const newTime = prev + 50;
+        if (newTime >= HOLD_DURATION && !showCelebration) {
+          // Streak and scoring
+          const newStreak = streak + 1;
+          setStreak(newStreak);
+          const basePoints = 100;
+          const streakBonus = Math.min(newStreak * 10, 50);
+
+          playFanfare();
+          triggerHaptic('success');
+          setScore((s) => s + basePoints + streakBonus);
+          setShowCelebration(true);
+
+          // Milestone every 5
+          if (newStreak > 0 && newStreak % STREAK_MILESTONE_INTERVAL === 0) {
+            setShowStreakMilestone(true);
+            triggerHaptic('celebration');
+            setTimeout(() => setShowStreakMilestone(false), 1500);
+          }
+
+          setTimeout(() => {
+            setShowCelebration(false);
+            setCurrentPoseIndex((i) => (i + 1) % ANIMAL_POSES.length);
+            setHoldTime(0);
+          }, 2000);
+        }
+        return newTime;
+      });
+    } else {
+      continuousHoldRef.current = 0;
+      setHoldTime(0);
+    }
+
+    // Draw skeleton
+    drawSkeleton(landmarks);
+  }, [cameraReady, currentPose, showCelebration, streak, triggerEasterEgg, playFanfare]);
+
+  // Use the pose tracking hook
+  const { isLoading: isPoseLoading, error: poseError, poseDetected: _poseDetected } = useGamePoseTracking({
+    gameName: 'YogaAnimals',
+    webcamRef,
+    onFrame: handlePoseFrame,
+    enabled: isPlaying,
+  });
+
+  // Update error state if pose tracking fails
+  useEffect(() => {
+    if (poseError) {
+      setError(poseError);
+    }
+  }, [poseError]);
+
   // Start/stop game
   const startGame = useCallback(() => {
     playPop();
@@ -482,20 +432,17 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
     playPop();
     await handleGameComplete(score);
     setIsPlaying(false);
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
   }, [playPop, handleGameComplete, score]);
 
-  // Start detection when playing
+  // Auto-start hand tracking when game is playing
   useEffect(() => {
-    if (isPlaying) {
-      detectPose();
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      startTracking();
     }
-  }, [isPlaying, detectPose]);
+  }, [isPlaying, isHandTrackingReady, isModelLoading, startTracking]);
 
   // Render loading state
-  if (isLoading) {
+  if (isLoading || isPoseLoading) {
     return (
       <div className='min-h-[100dvh] bg-[#FFF8F0] flex items-center justify-center p-4'>
         <motion.div
@@ -656,7 +603,7 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
               </motion.div>
 
               <div className='flex flex-col gap-6 flex-1 lg:w-2/3'>
-                <div className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
+                <div ref={gameAreaRef} className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
                   <canvas
                     ref={canvasRef}
                     className='absolute top-0 left-0 w-full h-64 pointer-events-none'
@@ -680,6 +627,16 @@ const YogaAnimalsContent = memo(function YogaAnimalsComponent() {
                   </div>
 
                   <MatchStatusBadge matchProgress={matchProgress} />
+                  
+                  {cursor && (
+                    <GameCursor
+                      position={cursor}
+                      coordinateSpace='normalized'
+                      containerRef={gameAreaRef}
+                      isPinching={false}
+                      isHandDetected={cursor !== null}
+                    />
+                  )}
                 </div>
 
                 <div className='flex gap-4'>

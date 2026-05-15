@@ -10,6 +10,9 @@ export interface OddItem {
   name: string;
   emoji: string;
   category: string;
+  image?: string; // Path to Kenney asset image
+  kenneyType?: string; // Kenney asset type (e.g., 'creatures', 'food')
+  kenneyName?: string; // Kenney asset name (e.g., 'dog', 'apple')
 }
 
 export interface OddOneOutRound {
@@ -31,10 +34,10 @@ export const LEVELS: LevelConfig[] = [
   { level: 3, roundCount: 10, timePerRound: 15, passThreshold: 8 },
 ];
 
-// Category-based item banks
+// Category-based item banks with Kenney/asset icon references where available
 export const CATEGORY_BANKS: Record<string, OddItem[]> = {
   fruits: [
-    { name: 'Apple', emoji: '🍎', category: 'fruit' },
+    { name: 'Apple', emoji: '🍎', category: 'fruit' },  // TODO: add fruit assets
     { name: 'Banana', emoji: '🍌', category: 'fruit' },
     { name: 'Orange', emoji: '🍊', category: 'fruit' },
     { name: 'Grapes', emoji: '🍇', category: 'fruit' },
@@ -44,13 +47,13 @@ export const CATEGORY_BANKS: Record<string, OddItem[]> = {
     { name: 'Mango', emoji: '🥭', category: 'fruit' },
   ],
   animals: [
-    { name: 'Dog', emoji: '🐕', category: 'animal' },
-    { name: 'Cat', emoji: '🐱', category: 'animal' },
-    { name: 'Bird', emoji: '🐦', category: 'animal' },
+    { name: 'Dog', emoji: '🐕', category: 'animal', image: '/assets/items/creatures/dog.png' },
+    { name: 'Cat', emoji: '🐱', category: 'animal', image: '/assets/items/creatures/cat.png' },
+    { name: 'Bird', emoji: '🐦', category: 'animal', image: '/assets/items/creatures/bird.png' },
     { name: 'Fish', emoji: '🐟', category: 'animal' },
     { name: 'Rabbit', emoji: '🐰', category: 'animal' },
     { name: 'Elephant', emoji: '🐘', category: 'animal' },
-    { name: 'Lion', emoji: '🦁', category: 'animal' },
+    { name: 'Lion', emoji: '🦁', category: 'animal', image: '/assets/items/creatures/lion.png' },
     { name: 'Monkey', emoji: '🐵', category: 'animal' },
   ],
   colors: [
@@ -70,7 +73,7 @@ export const CATEGORY_BANKS: Record<string, OddItem[]> = {
     { name: 'Diamond', emoji: '💎', category: 'shape' },
   ],
   vehicles: [
-    { name: 'Car', emoji: '🚗', category: 'vehicle' },
+    { name: 'Car', emoji: '🚗', category: 'vehicle' },  // TODO: add vehicle assets
     { name: 'Bus', emoji: '🚌', category: 'vehicle' },
     { name: 'Train', emoji: '🚂', category: 'vehicle' },
     { name: 'Airplane', emoji: '✈️', category: 'vehicle' },
@@ -78,7 +81,7 @@ export const CATEGORY_BANKS: Record<string, OddItem[]> = {
     { name: 'Bicycle', emoji: '🚲', category: 'vehicle' },
   ],
   food: [
-    { name: 'Pizza', emoji: '🍕', category: 'food' },
+    { name: 'Pizza', emoji: '🍕', category: 'food' },  // TODO: add food assets
     { name: 'Burger', emoji: '🍔', category: 'food' },
     { name: 'Ice Cream', emoji: '🍦', category: 'food' },
     { name: 'Cake', emoji: '🎂', category: 'food' },
@@ -99,7 +102,7 @@ export const CATEGORY_BANKS: Record<string, OddItem[]> = {
     { name: 'Star', emoji: '⭐', category: 'nature' },
     { name: 'Cloud', emoji: '☁️', category: 'nature' },
     { name: 'Rain', emoji: '🌧️', category: 'nature' },
-    { name: 'Tree', emoji: '🌳', category: 'nature' },
+    { name: 'Tree', emoji: '🌳', category: 'nature', image: '/assets/items/creatures/tree.png' },
   ],
 };
 

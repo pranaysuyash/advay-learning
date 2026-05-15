@@ -24,7 +24,8 @@ import {
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
-import type { TrackedHandFrame } from '../types/tracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { TrackedHandFrame, Point } from '../types/tracking';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import Webcam from 'react-webcam';
@@ -41,7 +42,9 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
   const { completeGame } = useGameCompletion('virtual-bubbles');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [poppedCount, setPoppedCount] = useState(0);
   const [score, setScore] = useState(0);
@@ -73,12 +76,14 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
 
     if (tip) {
       setHandPosition({ x: tip.x, y: tip.y });
+      setCursor(tip);
 
       if (!lastHandStateRef.current) {
         setIsHandDetected(true);
         lastHandStateRef.current = true;
       }
     } else {
+      setCursor(null);
       if (lastHandStateRef.current) {
         setIsHandDetected(false);
         lastHandStateRef.current = false;
@@ -392,8 +397,10 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
         level={currentLevel}
         onHome={() => navigate('/games')}
         reportSession={false}
+        webcamRef={webcamRef}
+        isHandDetected={isHandDetected}
       >
-        <div className='flex flex-col h-full bg-slate-50'>
+        <div ref={gameAreaRef} className='flex flex-col h-full bg-slate-50 relative'>
           {/* Stats Bar */}
           <div className='flex justify-between items-center p-4 bg-white shadow-[0_4px_0_#E5B86F]'>
             <div className='flex gap-6'>
@@ -568,6 +575,18 @@ export const VirtualBubblesContent = memo(function VirtualBubblesComponent() {
 
           {/* Wellness timer */}
           <WellnessTimer />
+
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace="normalized"
+              containerRef={gameAreaRef}
+              isPinching={false}
+              isHandDetected={isHandDetected}
+              size={64}
+              color="#22c55e"
+            />
+          )}
         </div>
       </GameContainer>
     </GlobalErrorBoundary>

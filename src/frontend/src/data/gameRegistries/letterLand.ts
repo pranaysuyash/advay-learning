@@ -12,7 +12,7 @@ export const LETTER_LAND_GAMES: GameManifest[] = [
     worldId: 'letter-land',
     vibe: 'chill',
     ageRange: '2-8',
-    cv: ['hand', 'face'],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'color-rainbow', chance: 0.01, minScore: 95 },

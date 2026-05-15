@@ -17,12 +17,14 @@ import { KenneyIcon } from '../components/ui/KenneyIcon';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
 import type { TrackedHandFrame } from '../types/tracking';
+import type { Point } from '../types/tracking';
 import {
   LEVEL_CONFIGS,
   type Difficulty,
@@ -47,12 +49,14 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
   const webcamRef = useRef<Webcam>(null);
   const gameLoopRef = useRef<number | null>(null);
   const lastTimeRef = useRef(0);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [gameState, setGameState] = useState<GameState>(() => createInitialState());
   const [showCelebration, setShowCelebration] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; emoji: string } | null>(null);
   const [isLoading] = useState(false);
+  const [cursor, setCursor] = useState<Point | null>(null);
   
   const { completeGame } = useGameCompletion('math-jumpers');
   const { playSuccess, playError, playCelebration } = useAudio();
@@ -63,9 +67,16 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
   
   // Handle hand tracking - move player based on hand X position
   const handleHandFrame = useCallback((frame: TrackedHandFrame) => {
-    if (!frame.indexTip || gameStateRef.current.status !== 'playing') return;
+    const tip = frame.indexTip;
+    if (!tip) {
+      setCursor(null);
+      return;
+    }
+    setCursor(tip);
     
-    const handX = frame.indexTip.x;
+    if (gameStateRef.current.status !== 'playing') return;
+    
+    const handX = tip.x;
     
     // Find nearest platform to hand position
     const platforms = gameStateRef.current.platforms;
@@ -279,7 +290,7 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
       isHandDetected={handVisible}
       webcamRef={webcamRef}
     >
-      <div className="relative w-full h-full flex flex-col items-center justify-center">
+      <div ref={gameAreaRef} className="relative w-full h-full flex flex-col items-center justify-center">
         {isLoading ? (
           <div className="text-2xl text-white">Loading...</div>
         ) : gameState.status === 'idle' ? (
@@ -423,6 +434,17 @@ export const MathJumpersContent = memo(function MathJumpersGame() {
           )}
         </AnimatePresence>
       </div>
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameContainer>
   );
 });

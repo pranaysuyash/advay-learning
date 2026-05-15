@@ -12,10 +12,13 @@ import { GameShell } from '../components/GameShell';
 import { GameHUD } from '../components/game/GameHUD';
 import { GameContainer } from '../components/GameContainer';
 import { CursorEmbodiment } from '../components/game/CursorEmbodiment';
+import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { CelebrationEffects } from '../components/game/CelebrationEffects';
+import { SuccessAnimation } from '../components/game/SuccessAnimation';
 import {
   LEVELS,
   buildOddOneOutRound,
@@ -46,6 +49,11 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
   const [feedback, setFeedback] = useState('Tap the one that does NOT belong!');
   const [cursor, setCursor] = useState<Point | null>(null);
   const [isHandTrackingActive, setIsHandTrackingActive] = useState(false);
+  const [triggerCelebration, setTriggerCelebration] = useState(false);
+  const [hoveredAnswer, setHoveredAnswer] = useState<string | null>(null);
+  const [hoverProgress, setHoverProgress] = useState(0);
+  const [voicePrompt, setVoicePrompt] = useState('');
+  const POINT_HOLD_DURATION = 30; // Frames to hold pointer for selection
   const {
     streak,
     maxStreak,
@@ -65,6 +73,8 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
       if (!hand || !hand.indexTip) {
         setCursor(null);
         setIsHandTrackingActive(false);
+        setHoveredAnswer(null);
+        setHoverProgress(0);
         return;
       }
 
@@ -74,8 +84,40 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
       };
       setCursor(newCursor);
       setIsHandTrackingActive(true);
+
+      // Check if cursor is pointing at an answer button
+      if (gameAreaRef.current && !showResult && currentRound) {
+        const rect = gameAreaRef.current.getBoundingClientRect();
+        const x = newCursor.x * rect.width + rect.left;
+        const y = newCursor.y * rect.height + rect.top;
+        const el = document.elementFromPoint(x, y);
+        const btn = el?.closest('button[data-answer]');
+
+        if (btn) {
+          const answer = btn.getAttribute('data-answer');
+          if (answer && answer === hoveredAnswer) {
+            // Already hovering, increment progress
+            setHoverProgress((prev) => {
+              const newProgress = prev + 1;
+              if (newProgress >= POINT_HOLD_DURATION) {
+                // Trigger selection
+                handleAnswer(answer);
+                return 0;
+              }
+              return newProgress;
+            });
+          } else {
+            // New answer or first hover
+            setHoveredAnswer(answer || null);
+            setHoverProgress(1);
+          }
+        } else {
+          setHoveredAnswer(null);
+          setHoverProgress(0);
+        }
+      }
     },
-    [],
+    [showResult, currentRound, hoveredAnswer],
   );
 
   const {
@@ -96,6 +138,19 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
       setUsedCategories((prev) => [...prev, round.category]);
     }
   }, [gameState, currentLevel, currentRound, usedCategories]);
+
+  // Update voice prompt based on streak and game state
+  useEffect(() => {
+    if (gameState === 'playing' && currentRound) {
+      if (streak >= 5) {
+        setVoicePrompt(`Amazing! You're on fire with a ${streak} streak! Find the odd one out!`);
+      } else if (streak >= 3) {
+        setVoicePrompt(`Great job! Keep going! Find the item that doesn't belong!`);
+      } else {
+        setVoicePrompt(`Find the ${currentRound.category} that doesn't belong!`);
+      }
+    }
+  }, [gameState, currentRound, streak]);
 
   // Calculate score with streak bonus
   const calculateRoundScore = (isCorrect: boolean, currentStreak: number): number => {
@@ -131,6 +186,10 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
 
       // Haptic feedback
       triggerHaptic('success');
+
+      // Trigger celebration effects
+      setTriggerCelebration(true);
+      setTimeout(() => setTriggerCelebration(false), 800);
 
       playSuccess();
       setCorrectCount((prev) => prev + 1);
@@ -216,6 +275,14 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
       isHandDetected={isHandTrackingActive}
       isPlaying={gameState === 'playing'}
     >
+      {/* Celebration effects */}
+      <CelebrationEffects
+        trigger={triggerCelebration}
+        type="stars"
+        particleCount={20}
+        duration={1500}
+      />
+
       <div ref={gameAreaRef} className="flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto relative">
         {/* Hand cursor */}
         {cursor && isHandTrackingActive && (
@@ -259,29 +326,75 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
 
             <div className="text-center">
               <p className="text-lg text-gray-700 font-medium">{feedback}</p>
+              {isHandTrackingActive && !showResult && (
+                <p className="text-sm text-gray-500 mt-1">
+                  {hoveredAnswer ? 'Keep pointing to select!' : 'Point at an answer with your finger'}
+                </p>
+              )}
             </div>
+
+            {/* Voice instructions with dynamic prompts */}
+            <VoiceInstructions
+              instructions={voicePrompt || "Find the item that doesn't belong!"}
+              autoSpeak={true}
+            />
 
             <div className="grid grid-cols-2 gap-3 w-full max-w-md">
               {currentRound.items.map((item) => {
-                let buttonClass = 'bg-white border-4 border-gray-200 hover:border-green-300';
+                const isHovered = hoveredAnswer === item.name && !showResult;
+                const progressPercent = isHovered ? (hoverProgress / POINT_HOLD_DURATION) * 100 : 0;
+                let buttonClass = 'bg-white border-4 border-gray-200 hover:border-green-300 relative';
 
                 if (showResult) {
                   if (item.name === currentRound.oddItem.name) {
-                    buttonClass = 'bg-yellow-100 border-4 border-yellow-400 animate-pulse';
+                    buttonClass = 'bg-yellow-100 border-4 border-yellow-400 animate-pulse relative';
                   } else if (selectedAnswer === item.name && item.name !== currentRound.oddItem.name) {
-                    buttonClass = 'bg-red-100 border-4 border-red-400';
+                    buttonClass = 'bg-red-100 border-4 border-red-400 relative';
                   }
+                } else if (isHovered) {
+                  buttonClass = 'bg-green-50 border-4 border-green-400 relative';
                 }
 
                 return (
                   <button
                     type="button"
                     key={item.name}
+                    data-answer={item.name}
                     onClick={() => handleAnswer(item.name)}
                     disabled={showResult}
-                    className={`${buttonClass} p-4 rounded-2xl font-bold text-5xl transition-all disabled:cursor-not-allowed`}
+                    className={`${buttonClass} p-4 rounded-2xl font-bold transition-all disabled:cursor-not-allowed`}
                   >
-                    {item.emoji}
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-16 h-16 object-contain mx-auto"
+                      />
+                    ) : (
+                      <span className="text-5xl">{item.emoji}</span>
+                    )}
+
+                    {/* Hover progress ring */}
+                    {isHovered && (
+                      <div className="absolute inset-0 rounded-2xl pointer-events-none">
+                        <svg
+                          className="absolute inset-0 w-full h-full -rotate-90"
+                          viewBox="0 0 100 100"
+                        >
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="48"
+                            fill="none"
+                            stroke="#22c55e"
+                            strokeWidth="4"
+                            strokeDasharray={`${2 * Math.PI * 48}`}
+                            strokeDashoffset={`${2 * Math.PI * 48 * (1 - progressPercent / 100)}`}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -301,7 +414,16 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
         )}
 
         {gameState === 'complete' && (
-          <div className="text-center">
+          <>
+            <SuccessAnimation
+              show={gameState === 'complete'}
+              type="stars"
+              message="Great Job!"
+              characterEmoji="🎉"
+              particleCount={50}
+              duration={2500}
+            />
+            <div className="text-center">
             <p className="text-4xl mb-4">🎉</p>
             <h2 className="text-3xl font-bold text-gray-800 mb-2">Great Job!</h2>
             <p className="text-xl text-gray-600 mb-4">
@@ -331,6 +453,7 @@ const OddOneOutGame = memo(function OddOneOutGameComponent({ completeGame: compl
               </div>
             </div>
           </div>
+          </>
         )}
 
         <div className="flex gap-3">

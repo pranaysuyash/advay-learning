@@ -4,11 +4,16 @@
  * @ticket GQ-002, GQ-003, GQ-004, GQ-005, GQ-007
  */
 
-import { memo, useState, useMemo, useCallback } from 'react';
+import { memo, useState, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { AccessDenied } from '../components/ui/AccessDenied';
 import { useSubscription } from '../hooks/useSubscription';
 import { useProgressStore } from '../store';
@@ -35,6 +40,23 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
   const { completeGame, savePartialProgress } = useGameCompletion('discovery-lab');
 
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+  const [isPlaying] = useState(true); // DiscoveryLab is always interactive
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'DiscoveryLab',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
   const currentProfileId = useProgressStore(
     (state) => state.currentProfile?.id,
   );
@@ -176,7 +198,7 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
 
   return (
     <GlobalErrorBoundary>
-      <div className='min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 p-4 sm:p-8'>
+      <div ref={gameAreaRef} className='min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 p-4 sm:p-8 relative'>
         <motion.div
           className='max-w-5xl mx-auto'
           initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
@@ -497,6 +519,9 @@ const DiscoveryLabGame = memo(function DiscoveryLabGameComponent() {
             </motion.div>
           )}
         </AnimatePresence>
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
+        )}
       </div>
     </GlobalErrorBoundary>
   );

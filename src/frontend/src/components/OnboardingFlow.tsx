@@ -20,11 +20,21 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
   const [visible, setVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const steps: Step[] = ['welcome', 'magicVision', 'gesture'];
   const currentIndex = steps.indexOf(currentStep);
 
   const cleanup = useCallback(() => {
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -54,18 +64,57 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
   }, [currentIndex, steps, handleComplete]);
 
   const testCamera = useCallback(async () => {
+    let pendingStream: MediaStream | null = null;
+    const isAborted = () => abortControllerRef.current === null;
+
+    // HTTPS enforcement - getUserMedia requires secure context (HTTPS or localhost/file)
+    if (typeof window !== 'undefined' && window.location.protocol !== 'https:' && window.location.protocol !== 'file:' && !window.location.hostname.includes('localhost')) {
+      console.error('[OnboardingFlow] Camera requires HTTPS:', { protocol: window.location.protocol, hostname: window.location.hostname });
+      updateSettings({ cameraPermissionState: 'denied' });
+      setCameraStatus('error');
+      return;
+    }
+
     try {
       setCameraStatus('pending');
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      streamRef.current = stream;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+      const controller = abortControllerRef.current;
+      // Optimized video constraints: 640x480 is sufficient for preview and faster to acquire
+      pendingStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+      });
+      if (isAborted() || controller.signal.aborted) {
+        pendingStream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      streamRef.current = pendingStream;
+      pendingStream = null;
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+        videoRef.current.srcObject = streamRef.current;
       }
       updateSettings({ cameraPermissionState: 'granted', cameraEnabled: true });
       setCameraStatus('success');
-    } catch {
+    } catch (error) {
+      if (isAborted()) {
+        return;
+      }
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('[OnboardingFlow] Camera error:', {
+        name: err.name,
+        message: err.message,
+        isNotAllowedError: err.name === 'NotAllowedError',
+        isNotFoundError: err.name === 'NotFoundError',
+        isNotSupportedError: err.name === 'NotSupportedError',
+      });
       updateSettings({ cameraPermissionState: 'denied' });
       setCameraStatus('error');
+    } finally {
+      if (pendingStream) {
+        pendingStream.getTracks().forEach(track => track.stop());
+      }
     }
   }, [updateSettings]);
 
@@ -197,6 +246,17 @@ function MagicVisionStep({
   onNext: () => void;
   onSkip: () => void;
 }) {
+  // Auto-advance when camera is successfully granted
+  useEffect(() => {
+    if (status === 'success') {
+      // Show the success state briefly, then auto-advance
+      const timer = setTimeout(() => {
+        onNext();
+      }, 2000); // 2 seconds to see the success state
+      return () => clearTimeout(timer);
+    }
+  }, [status, onNext]);
+
   return (
     <>
       <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-[1.5rem] flex items-center justify-center text-4xl mx-auto mb-6 shadow-[0_4px_0_#E5B86E] border-2 border-white">
@@ -251,7 +311,7 @@ function MagicVisionStep({
               animate={{ opacity: 1, y: 0 }}
               className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-xl p-3 border-2 border-purple-200 shadow-lg"
             >
-              <p className="text-purple-700 font-black text-sm text-center">✨ Magic Vision Activated! You can see yourself!</p>
+              <p className="text-purple-700 font-black text-sm text-center">✨ Magic Vision Activated! Moving to next step...</p>
             </motion.div>
           </>
         )}
@@ -276,7 +336,7 @@ function MagicVisionStep({
             size="lg"
             fullWidth
           >
-            Magic is Ready! Next →
+            Magic is Ready! Auto-advancing... ⏳
           </Button>
         )}
         {status === 'error' && (

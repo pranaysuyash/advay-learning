@@ -17,10 +17,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.core.config import settings
+from app.core.config import get_settings
 from app.db.models.profile import Profile
 from app.db.models.user import User
 from app.schemas.profile import ProfilePhotoResponse
+
+_settings = get_settings()
 
 router = APIRouter()
 
@@ -91,7 +93,7 @@ def resolve_storage_path(filename: str) -> Path:
 
 def ensure_profile_photo_uploads_enabled() -> None:
     """Public beta does not allow persisted child photo uploads."""
-    if not settings.CHILD_PHOTO_UPLOADS_ENABLED:
+    if not _settings.CHILD_PHOTO_UPLOADS_ENABLED:
         raise HTTPException(
             status_code=410,
             detail=(

@@ -23,6 +23,7 @@ export default defineConfig({
       name: 'chromium-fake-camera',
       use: {
         ...devices['Desktop Chrome'],
+        channel: 'chrome',
         permissions: ['camera'],
         launchOptions: {
           args: fakeCameraArgs,

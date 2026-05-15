@@ -19,6 +19,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
 import { GameControls } from '../components/GameControls';
 import type { GameControl } from '../components/GameControls';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
@@ -29,7 +31,10 @@ import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
 import { useGameFaceTracking } from '../hooks/useGameFaceTracking';
 import { VoiceInstructions } from '../components/game/VoiceInstructions';
+import { ThreeDGameCanvas } from '../components/game/three/ThreeDGameCanvas';
 import Webcam from 'react-webcam';
+import { useFrame } from '@react-three/fiber';
+import type { Mesh } from 'three';
 import {
   initializeGame,
   updateBall,
@@ -54,6 +59,10 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [showCelebration, setShowCelebration] = useState(false);
   const [feedback, setFeedback] = useState('Tilt your head to steer the ball!');
+  const [cursor, setCursor] = useState<Point | null>(null);
+
+  // Rendering mode (2D or 3D)
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
   // Streak tracking
   const { streak, incrementStreak } = useStreakTracking();
@@ -66,6 +75,28 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
   // Get current maze
   const maze = getCurrentMaze(gameState.level);
 
+  // Conversion helpers for 3D view
+  const WORLD_SCALE = 0.01; // pixels -> world units
+  const to3D = (x: number, y: number): [number, number, number] => {
+    // Convert 2D maze coordinates (0..width, 0..height) into centered 3D coordinates
+    return [
+      (x - maze.width / 2) * WORLD_SCALE,
+      0.25,
+      (y - maze.height / 2) * WORLD_SCALE,
+    ];
+  };
+
+  const to3DWall = (wall: { x: number; y: number; width: number; height: number }) => {
+    return {
+      position: [
+        (wall.x + wall.width / 2 - maze.width / 2) * WORLD_SCALE,
+        0.25,
+        (wall.y + wall.height / 2 - maze.height / 2) * WORLD_SCALE,
+      ] as [number, number, number],
+      size: [wall.width * WORLD_SCALE, 0.5, wall.height * WORLD_SCALE] as [number, number, number],
+    };
+  };
+
   // Handle Face Frame
   const handleFaceFrame = useCallback((pose: HeadPose) => {
     if (!gameState.isPlaying) return;
@@ -73,6 +104,11 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
     // Convert roll (tilt) and pitch (up/down) to game tilt
     // Roll is head tilt side-to-side (-90 to 90)
     // Pitch is up/down (-90 to 90)
+
+    // Calculate cursor from tilt for GameCursor display
+    const cursorX = 0.5 + (pose.roll / 90) * 0.4;
+    const cursorY = 0.5 + (pose.pitch / 90) * 0.4;
+    setCursor({ x: Math.max(0, Math.min(1, cursorX)), y: Math.max(0, Math.min(1, cursorY)) });
 
     // Sensitivity adjustment
     const sensitivity = 0.05;
@@ -97,7 +133,7 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
     gameName: 'Mirror Maze',
     webcamRef,
     onFrame: handleFaceFrame,
-    enabled: gameState.isPlaying,
+    enabled: true,
   });
 
   // Game loop
@@ -266,12 +302,15 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
       {maze.walls.map((wall) => (
         <div
           key={`wall-${wall.x}-${wall.y}`}
-          className="absolute bg-gradient-to-br from-gray-700 to-gray-800 rounded shadow-lg"
+          className="absolute rounded shadow-lg"
           style={{
             left: wall.x,
             top: wall.y,
             width: wall.width,
             height: wall.height,
+            backgroundImage: 'url(/assets/kenney/platformer/tiles/brick_grey.png)',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
           }}
         />
       ))}
@@ -281,7 +320,7 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
   // Render ball
   const renderBall = () => (
     <motion.div
-      className="absolute rounded-full bg-gradient-to-br from-blue-400 to-blue-600 shadow-xl"
+      className="absolute rounded-full shadow-xl overflow-hidden"
       style={{
         left: gameState.ball.x - gameState.ball.radius,
         top: gameState.ball.y - gameState.ball.radius,
@@ -297,14 +336,19 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
         ease: 'easeInOut',
       }}
     >
-      <div className="w-full h-full rounded-full bg-white/30 absolute top-0 left-0" />
+      <img
+        src="/assets/kenney/platformer/collectibles/coin_gold.png"
+        alt="Ball"
+        className="w-full h-full object-contain"
+        draggable={false}
+      />
     </motion.div>
   );
 
   // Render goal
   const renderGoal = () => (
     <motion.div
-      className="absolute rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-xl"
+      className="absolute rounded-full shadow-xl overflow-hidden"
       style={{
         left: maze.goal.x - maze.goal.radius,
         top: maze.goal.y - maze.goal.radius,
@@ -321,10 +365,67 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
         ease: 'easeInOut',
       }}
     >
-      <div className="w-full h-full rounded-full flex items-center justify-center text-2xl">
-        ⭐
-      </div>
+      <img
+        src="/assets/kenney/platformer/collectibles/star.png"
+        alt="Goal"
+        className="w-full h-full object-contain"
+        draggable={false}
+      />
     </motion.div>
+  );
+
+  const Ball3D = ({ position }: { position: [number, number, number] }) => {
+    const meshRef = useRef<Mesh>(null);
+
+    useFrame(() => {
+      if (meshRef.current) {
+        meshRef.current.position.set(position[0], position[1], position[2]);
+      }
+    });
+
+    return (
+      <mesh ref={meshRef} castShadow>
+        <sphereGeometry args={[0.25, 32, 32]} />
+        <meshStandardMaterial color="#3b82f6" emissive="#60a5fa" emissiveIntensity={0.4} />
+      </mesh>
+    );
+  };
+
+  const render3DScene = () => (
+    <ThreeDGameCanvas
+      cameraPosition={[0, 5, 8]}
+      cameraTarget={[0, 0, 0]}
+      enableOrbit={false}
+      backgroundColor="#e0f7ff"
+      environment="studio"
+      className="w-full h-full"
+    >
+      {/* Floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.25, 0]} receiveShadow>
+        <planeGeometry args={[maze.width * WORLD_SCALE, maze.height * WORLD_SCALE]} />
+        <meshStandardMaterial color="#bfdbfe" />
+      </mesh>
+
+      {/* Maze walls */}
+      {maze.walls.map((wall) => {
+        const { position, size } = to3DWall(wall);
+        return (
+          <mesh key={`wall3d-${wall.x}-${wall.y}`} position={position} receiveShadow castShadow>
+            <boxGeometry args={size} />
+            <meshStandardMaterial color="#334155" />
+          </mesh>
+        );
+      })}
+
+      {/* Goal */}
+      <mesh position={to3D(maze.goal.x, maze.goal.y)} castShadow>
+        <sphereGeometry args={[maze.goal.radius * WORLD_SCALE, 32, 32]} />
+        <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.6} />
+      </mesh>
+
+      {/* Ball */}
+      <Ball3D position={to3D(gameState.ball.x, gameState.ball.y)} />
+    </ThreeDGameCanvas>
   );
 
   return (
@@ -334,6 +435,16 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
       isHandDetected={faceDetected}
       webcamRef={webcamRef}
     >
+      {/* Hidden webcam feed used for face tracking */}
+      <div className="sr-only">
+        <Webcam
+          ref={webcamRef}
+          audio={false}
+          mirrored
+          videoConstraints={{ facingMode: 'user' }}
+        />
+      </div>
+
       <VoiceInstructions
         instructions="Tilt your head to steer the ball to the star!"
       />
@@ -387,9 +498,35 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
           <h1 className="text-4xl font-bold text-blue-900 mb-4">
             Mirror Maze 🎯
           </h1>
-          <p className="text-lg text-blue-800 mb-8 text-center max-w-md">
+          <p className="text-lg text-blue-800 mb-4 text-center max-w-md">
             Tilt your head to steer the ball to the star!
           </p>
+
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <button
+              type="button"
+              onClick={() => setViewMode('2d')}
+              className={`px-4 py-2 rounded-full border-2 transition ${
+                viewMode === '2d'
+                  ? 'bg-blue-500 text-white border-blue-600'
+                  : 'bg-white text-blue-800 border-blue-200 hover:bg-blue-50'
+              }`}
+            >
+              2D Mode
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('3d')}
+              className={`px-4 py-2 rounded-full border-2 transition ${
+                viewMode === '3d'
+                  ? 'bg-blue-500 text-white border-blue-600'
+                  : 'bg-white text-blue-800 border-blue-200 hover:bg-blue-50'
+              }`}
+            >
+              3D Mode
+            </button>
+          </div>
+
           <div className="flex gap-8 mb-4">
             <div className="text-center">
               <div className="text-4xl mb-2">🔵</div>
@@ -414,9 +551,15 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
             maxHeight: '100%',
           }}
         >
-          {renderWalls()}
-          {renderGoal()}
-          {renderBall()}
+          {viewMode === '2d' ? (
+            <>
+              {renderWalls()}
+              {renderGoal()}
+              {renderBall()}
+            </>
+          ) : (
+            render3DScene()
+          )}
         </div>
       )}
 
@@ -431,6 +574,18 @@ const MirrorMazeContent = memo(function MirrorMazeContent() {
         message={gameState.completed ? `Level ${gameState.level} Complete!` : ''}
         onComplete={() => setShowCelebration(false)}
       />
+
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={canvasRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameContainer>
   );
 });

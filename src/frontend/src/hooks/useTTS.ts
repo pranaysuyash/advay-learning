@@ -69,6 +69,7 @@ export function useTTS(): UseTTSReturn {
   const [modelLoadProgress, setModelLoadProgress] = useState(0);
   const [activeEngine, setActiveEngine] = useState<ActiveEngine>('web-speech');
   const mountedRef = useRef(true);
+  const prevIsSpeakingRef = useRef(false);
 
   // Sync settings store with TTS service
   useEffect(() => {
@@ -110,16 +111,18 @@ export function useTTS(): UseTTSReturn {
     }
   }, [effectiveEngine]);
 
-  // Track speaking state
+  // Track speaking state — throttle to 1s to avoid update cascade with high-frequency game loops
   useEffect(() => {
     const checkSpeaking = () => {
-      if (mountedRef.current) {
-        const currentlySpeaking = ttsService.isSpeaking();
-        setIsSpeaking((prev) => (prev !== currentlySpeaking ? currentlySpeaking : prev));
+      if (!mountedRef.current) return;
+      const currentlySpeaking = ttsService.isSpeaking();
+      if (prevIsSpeakingRef.current !== currentlySpeaking) {
+        prevIsSpeakingRef.current = currentlySpeaking;
+        setIsSpeaking(currentlySpeaking);
       }
     };
 
-    const interval = setInterval(checkSpeaking, 100);
+    const interval = setInterval(checkSpeaking, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -136,6 +139,7 @@ export function useTTS(): UseTTSReturn {
     async (text: string, options?: TTSOptions) => {
       if (!soundEnabled) return;
 
+      prevIsSpeakingRef.current = true;
       setIsSpeaking(true);
       try {
         await ttsService.speak(text, options);
@@ -144,6 +148,7 @@ export function useTTS(): UseTTSReturn {
         }
       } finally {
         if (mountedRef.current) {
+          prevIsSpeakingRef.current = false;
           setIsSpeaking(false);
         }
       }
@@ -155,6 +160,7 @@ export function useTTS(): UseTTSReturn {
     async (text: string, languageCode: string) => {
       if (!soundEnabled) return;
 
+      prevIsSpeakingRef.current = true;
       setIsSpeaking(true);
       try {
         await ttsService.speakInLanguage(text, languageCode);
@@ -163,6 +169,7 @@ export function useTTS(): UseTTSReturn {
         }
       } finally {
         if (mountedRef.current) {
+          prevIsSpeakingRef.current = false;
           setIsSpeaking(false);
         }
       }
@@ -173,6 +180,7 @@ export function useTTS(): UseTTSReturn {
   const speakLetter = useCallback(
     async (letter: string, ttsText: string) => {
       if (!soundEnabled) return;
+      prevIsSpeakingRef.current = true;
       setIsSpeaking(true);
       try {
         await ttsService.speakLetter(letter, ttsText);
@@ -181,6 +189,7 @@ export function useTTS(): UseTTSReturn {
         }
       } finally {
         if (mountedRef.current) {
+          prevIsSpeakingRef.current = false;
           setIsSpeaking(false);
         }
       }
@@ -190,6 +199,7 @@ export function useTTS(): UseTTSReturn {
 
   const stop = useCallback(() => {
     ttsService.stop();
+    prevIsSpeakingRef.current = false;
     setIsSpeaking(false);
   }, []);
 

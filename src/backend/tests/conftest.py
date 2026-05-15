@@ -20,7 +20,9 @@ os.environ["TESTING"] = "true"
 
 # Import and patch BEFORE creating app instance
 # ruff: noqa: E402 - Intentional imports after environment setup for test mocking
-from app.core.config import settings
+from app.core.config import get_settings
+
+settings = get_settings()
 from app.db import session as db_session_module
 from app.db.base_class import Base
 

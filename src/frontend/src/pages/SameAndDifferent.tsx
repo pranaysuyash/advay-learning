@@ -30,6 +30,9 @@ function SameAndDifferentGame() {
   );
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState('Are these the same or different?');
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
   const [cursor, setCursor] = useState<Point | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
@@ -67,7 +70,7 @@ function SameAndDifferentGame() {
     targetFps: 30,
     isRunning: Boolean(activeRound),
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   // Auto-start hand tracking when game is active

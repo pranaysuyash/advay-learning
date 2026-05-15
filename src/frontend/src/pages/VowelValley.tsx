@@ -11,6 +11,7 @@ import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
 import { useTTS } from '../hooks/useTTS';
 import type { TrackedHandFrame } from '../types/tracking';
+import { GameCursor } from '../components/game/GameCursor';
 import {
     createInitialState,
     getRandomWord,
@@ -22,6 +23,7 @@ import {
 export const VowelValleyContent = memo(function VowelValleyContent() {
     const navigate = useNavigate();
     const webcamRef = useRef<Webcam>(null);
+    const gameAreaRef = useRef<HTMLDivElement>(null);
 
     const [gameState, setGameState] = useState<GameState>(() => createInitialState());
     const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
@@ -150,7 +152,7 @@ export const VowelValleyContent = memo(function VowelValleyContent() {
             isHandDetected={handVisible}
             webcamRef={webcamRef}
         >
-            <div className="relative w-full h-full bg-gradient-to-b from-blue-300 to-green-200 overflow-hidden flex flex-col items-center justify-center">
+            <div ref={gameAreaRef} className="relative w-full h-full bg-gradient-to-b from-blue-300 to-green-200 overflow-hidden flex flex-col items-center justify-center">
                 {gameState.status === 'idle' ? (
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
@@ -284,6 +286,17 @@ export const VowelValleyContent = memo(function VowelValleyContent() {
                         </motion.div>
                     )}
                 </AnimatePresence>
+                {cursorPos && (
+                  <GameCursor
+                    position={cursorPos}
+                    coordinateSpace="normalized"
+                    containerRef={gameAreaRef}
+                    isPinching={false}
+                    isHandDetected={handVisible}
+                    size={64}
+                    color="#22c55e"
+                  />
+                )}
             </div>
         </GameContainer>
     );

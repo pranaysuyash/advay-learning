@@ -15,6 +15,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
 import { GlobalErrorBoundary } from '../components/errors/GlobalErrorBoundary';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import { GameCursor } from '../components/game/GameCursor';
 import type { Point } from '../types/tracking';
 import {
   ERAS,
@@ -193,20 +194,6 @@ function EarthTimeMachineContent() {
         isPlaying={state.status === 'playing'}
       >
         <div ref={gameAreaRef} className='flex-1 relative'>
-          {/* Hand cursor */}
-          {cursor && isHandTrackingActive && (
-            <div
-              className='fixed pointer-events-none z-50'
-              style={{
-                left: cursor.x * window.innerWidth,
-                top: cursor.y * window.innerHeight,
-                transform: 'translate(-50%, -50%)',
-              }}
-            >
-              <div className='w-16 h-16 bg-yellow-400 rounded-full opacity-50' />
-            </div>
-          )}
-
           <AnimatePresence mode='wait'>
             {state.status === 'menu' && (
               <motion.div
@@ -432,6 +419,18 @@ function EarthTimeMachineContent() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace='normalized'
+              containerRef={gameAreaRef}
+              isPinching={false}
+              isHandDetected={true}
+              size={64}
+              color='#22c55e'
+            />
+          )}
         </div>
       </GameContainer>
     </GameShell>

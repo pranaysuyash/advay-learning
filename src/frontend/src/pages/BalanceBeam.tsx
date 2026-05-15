@@ -5,7 +5,9 @@ import Webcam from 'react-webcam';
 
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { useGamePoseTracking } from '../hooks/useGamePoseTracking';
+import type { Point } from '../types/tracking';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { triggerHaptic } from '../utils/haptics';
@@ -20,9 +22,11 @@ import {
 export const BalanceBeamContent = memo(function BalanceBeamContent() {
     const navigate = useNavigate();
     const webcamRef = useRef<Webcam>(null);
+    const gameAreaRef = useRef<HTMLDivElement>(null);
     const [gameState, setGameState] = useState<GameState>(() => createInitialState());
     const [alignment, setAlignment] = useState(0); // -1 to 1
     const [showCelebration, setShowCelebration] = useState(false);
+    const [cursor, setCursor] = useState<Point | null>(null);
 
     const { completeGame } = useGameCompletion('balance-beam');
     const { playSuccess, playError, playCelebration } = useAudio();
@@ -39,6 +43,11 @@ export const BalanceBeamContent = memo(function BalanceBeamContent() {
         const nose = landmarks[0];
         const leftShoulder = landmarks[11];
         const rightShoulder = landmarks[12];
+
+        // Set cursor from nose position for GameCursor
+        if (nose) {
+            setCursor({ x: nose.x, y: nose.y });
+        }
 
         // Blend nose and shoulder midpoint for more responsive tracking
         const shoulderMidX = (leftShoulder.x + rightShoulder.x) / 2;
@@ -120,7 +129,7 @@ export const BalanceBeamContent = memo(function BalanceBeamContent() {
             isHandDetected={poseDetected}
             webcamRef={webcamRef}
         >
-            <div className="relative w-full h-full bg-sky-300 overflow-hidden flex flex-col items-center justify-end">
+            <div ref={gameAreaRef} className="relative w-full h-full bg-sky-300 overflow-hidden flex flex-col items-center justify-end">
                 {/* Background Clouds */}
                 <div className="absolute top-20 left-10 text-8xl opacity-50">☁️</div>
                 <div className="absolute top-40 right-20 text-7xl opacity-40">☁️</div>
@@ -226,6 +235,17 @@ export const BalanceBeamContent = memo(function BalanceBeamContent() {
                     )}
                 </AnimatePresence>
             </div>
+            {cursor && (
+                <GameCursor
+                    position={cursor}
+                    coordinateSpace="normalized"
+                    containerRef={gameAreaRef}
+                    isPinching={false}
+                    isHandDetected={poseDetected}
+                    size={64}
+                    color="#22c55e"
+                />
+            )}
         </GameContainer>
     );
 });

@@ -56,7 +56,7 @@ describe('GameShell', () => {
         </GameShell>
       </MemoryRouter>,
     );
-    expect(screen.getByText(/Premium Game/)).toBeInTheDocument();
+    expect(screen.getByText(/Locked Game/)).toBeInTheDocument();
     expect(screen.queryByText(/child/)).toBeNull();
   });
 

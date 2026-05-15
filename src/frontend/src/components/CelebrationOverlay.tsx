@@ -1,10 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CelebrationOverlayProps {
   show: boolean;
   letter: React.ReactNode;
-  accuracy: number;
+  accuracy?: number;
   onComplete: () => void;
   /** Optional: custom message from Pip */
   message?: string;
@@ -121,42 +121,10 @@ function StarBurst({ letter }: { letter: React.ReactNode }) {
   );
 }
 
-// Accuracy badge
-function AccuracyBadge({ accuracy }: { accuracy: number }) {
-  const stars = accuracy >= 90 ? 3 : accuracy >= 75 ? 2 : 1;
-  const color =
-    accuracy >= 90
-      ? 'text-yellow-500'
-      : accuracy >= 75
-        ? 'text-gray-400'
-        : 'text-orange-400';
-
-  return (
-    <motion.div
-      className='flex items-center gap-1'
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
-    >
-      {[...Array(3)].map((_, i) => (
-        <motion.span
-          key={i}
-          className={`text-3xl ${i < stars ? color : 'text-gray-300'}`}
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ delay: 0.6 + i * 0.1, type: 'spring' }}
-        >
-          ★
-        </motion.span>
-      ))}
-    </motion.div>
-  );
-}
-
 export function CelebrationOverlay({
   show,
   letter,
-  accuracy,
+  accuracy: _accuracy,
   onComplete,
   message,
 }: CelebrationOverlayProps) {
@@ -169,16 +137,7 @@ export function CelebrationOverlay({
     '#3b82f6',
   ]);
 
-  // Auto-dismiss after animation completes (2.5s for confetti + text to finish)
-  useEffect(() => {
-    if (show) {
-      // Auto-complete after animation finishes (2.5s for confetti + text)
-      const timer = setTimeout(() => {
-        onComplete();
-      }, 2500);
-      return () => clearTimeout(timer);
-    }
-  }, [show, onComplete]);
+  // No auto-dismiss — child controls pace via tap (UX-013)
 
   // Handle tap to dismiss early
   const handleDismiss = useCallback(() => {
@@ -245,9 +204,6 @@ export function CelebrationOverlay({
                 You traced {letter} beautifully!
               </p>
             </motion.div>
-
-            {/* Accuracy stars */}
-            <AccuracyBadge accuracy={accuracy} />
 
             {/* Mascot Integration with Glowing Backdrop */}
             <motion.div

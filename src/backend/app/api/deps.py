@@ -8,14 +8,16 @@ from jose import JWTError, jwt
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import get_settings
 from app.db.models.user import User
 from app.db.session import async_session
 from app.schemas.token import TokenPayload
 from app.services.token_service import TokenService
 
+_settings = get_settings()
+
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_PREFIX}/auth/login",
+    tokenUrl=f"{_settings.API_V1_PREFIX}/auth/login",
     auto_error=False,  # Don't auto-error, we'll check cookies too
 )
 
@@ -57,7 +59,7 @@ async def get_current_user(
         raise credentials_exception
 
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, _settings.SECRET_KEY, algorithms=["HS256"])
         token_data = TokenPayload(**payload)
 
         if token_data.sub is None:
@@ -66,7 +68,7 @@ async def get_current_user(
         raise credentials_exception
 
     # check revocation if enabled
-    if settings.ENABLE_ACCESS_TOKEN_BLACKLIST:
+    if _settings.ENABLE_ACCESS_TOKEN_BLACKLIST:
         jti = payload.get("jti")
         if jti:
             revoked = await TokenService.is_token_revoked(db, jti)

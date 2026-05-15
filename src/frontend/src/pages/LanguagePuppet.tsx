@@ -5,11 +5,17 @@
  * @ticket LANGUAGE-PUPPET
  */
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import Webcam from 'react-webcam';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import { useAutoGameCompletion } from '../hooks/useAutoGameCompletion';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useTTS } from '../hooks/useTTS';
@@ -36,6 +42,26 @@ function LanguagePuppetContent() {
   const [state, setState] = useState<GameState>(createInitialState());
   const [handPosition, setHandPosition] = useState({ x: 0.5, y: 0.5 });
   const [isHandDetected, setIsHandDetected] = useState(false);
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
+
+  const isPlaying = state.status === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); setIsHandDetected(false); return; }
+    setCursor(tip);
+    setHandPosition({ x: tip.x, y: tip.y });
+    setIsHandDetected(true);
+  }, []);
+  const { isReady: isHandTrackingReady } = useGameHandTracking({
+    gameName: 'LanguagePuppet',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: () => { setCursor(null); setIsHandDetected(false); },
+  });
+
   const { resetAutoCompletion } = useAutoGameCompletion('language-puppet', {
     when: state.status === 'success',
     score: state.score,
@@ -129,7 +155,7 @@ function LanguagePuppetContent() {
 
   return (
     <GameShell gameId='language-puppet' gameName='Language Puppet'>
-      <GameContainer onHome={() => navigate('/games')}>
+      <GameContainer onHome={() => navigate('/games')} webcamRef={webcamRef} isHandDetected={isHandTrackingReady} isPlaying={isPlaying}>
         <AnimatePresence mode='wait'>
           {state.status === 'menu' && (
             <motion.div
@@ -186,7 +212,8 @@ function LanguagePuppetContent() {
                 <p className='text-white/80 mb-2'>{currentChallenge.hint}</p>
               </div>
 
-              <div 
+              <div
+                ref={gameAreaRef}
                 id='puppet-game-area'
                 className='relative w-full max-w-lg aspect-square bg-gradient-to-b from-sky-300 to-sky-100 rounded-3xl overflow-hidden cursor-crosshair'
               >
@@ -308,6 +335,9 @@ function LanguagePuppetContent() {
             </motion.div>
           )}
         </AnimatePresence>
+        {cursor && (
+          <GameCursor position={cursor} coordinateSpace="normalized" containerRef={gameAreaRef} isPinching={false} isHandDetected={isHandTrackingReady} size={64} color="#ef4444" />
+        )}
       </GameContainer>
     </GameShell>
   );

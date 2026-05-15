@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../games/shapeSafariLogic';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { IssueReportFlowModal } from '../components/issue-reporting/IssueReportFlowModal';
@@ -109,6 +111,8 @@ export function VirtualChemistryLabContent() {
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedChemical, setSelectedChemical] = useState<Chemical | null>(null);
   const [beakerContents, setBeakerContents] = useState<BeakerContent[]>([]);
@@ -212,12 +216,18 @@ export function VirtualChemistryLabContent() {
 
   const detectHand = useCallback(
     (frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
-      if (!isPlaying) return;
+      if (!isPlaying) {
+        setCursor(null);
+        return;
+      }
 
       if (frame.hands.length > 0) {
         const landmarks = frame.hands[0];
         const indexFinger = landmarks[8]; // Index finger tip
         const thumb = landmarks[4]; // Thumb tip
+
+        // Set cursor for GameCursor
+        setCursor({ x: indexFinger.x, y: indexFinger.y });
 
         // Check if hand is over beaker area (bottom center of screen)
         const isOverBeaker =
@@ -269,6 +279,8 @@ export function VirtualChemistryLabContent() {
             }
           }
         }
+      } else {
+        setCursor(null);
       }
     },
     [isPlaying, selectedChemical, isPouring, bubbles],
@@ -498,8 +510,19 @@ export function VirtualChemistryLabContent() {
                       <div className='text-sm font-bold text-emerald-600/80 mt-1'>
                         {reaction.description}
                       </div>
-                    )}
-                  </div>
+                )}
+                {cursor && (
+                  <GameCursor
+                    position={cursor}
+                    coordinateSpace="normalized"
+                    containerRef={gameAreaRef}
+                    isPinching={false}
+                    isHandDetected={true}
+                    size={64}
+                    color="#22c55e"
+                  />
+                )}
+              </div>
                 );
               })}
             </div>
@@ -542,7 +565,7 @@ export function VirtualChemistryLabContent() {
           ) : (
             <div className='flex flex-col h-full space-y-6'>
               {/* Camera + Canvas */}
-              <div className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
+              <div ref={gameAreaRef} className='relative rounded-[2.5rem] overflow-hidden border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] bg-slate-100 flex-1 min-h-[400px]'>
 
                 <canvas
                   ref={canvasRef}

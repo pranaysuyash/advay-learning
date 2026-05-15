@@ -27,7 +27,7 @@ import {
 } from 'react';
 import { motion } from 'framer-motion';
 import Webcam from 'react-webcam';
-import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import { useGamePoseTracking } from '../hooks/useGamePoseTracking';
 import { GameShell } from '../components/GameShell';
 import { GameContainer } from '../components/GameContainer';
 import { CelebrationOverlay } from '../components/CelebrationOverlay';
@@ -456,8 +456,6 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
   // ===== REFS =====
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
-  const animationRef = useRef<number>(0);
   const lastFrameTimeRef = useRef<number>(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
@@ -473,64 +471,97 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     isPlaying: !showMenu && gameState?.gameActive && !isLoading,
   });
 
-  // ===== POSE LANDMARKER INITIALIZATION =====
+  // ===== CANVAS RENDERING =====
+  const renderCanvasFrame = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !gameState) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    renderGameFrame(ctx, gameState, currentAction);
+  }, [gameState, currentAction]);
+
+  // ===== POSE TRACKING =====
+  const { isLoading: poseLoading, error: poseError } = useGamePoseTracking({
+    gameName: 'BalloonPopFitness',
+    webcamRef,
+    onFrame: useCallback(
+      (landmarks: any[]) => {
+        if (!gameState?.gameActive || showMenu) return;
+
+        const currentTime = performance.now();
+        const deltaTime = currentTime - lastFrameTimeRef.current;
+        lastFrameTimeRef.current = currentTime;
+
+        setGameState((prevState) => {
+          if (!prevState) return prevState;
+
+          const {
+            nextState,
+            poppedBalloons,
+            detectedActionText,
+            levelAdvanced,
+            gameEnded,
+            newSpawnTime,
+          } = computeGameFrameUpdate(prevState, landmarks, deltaTime, lastSpawnTime);
+
+          if (newSpawnTime !== null) setLastSpawnTime(newSpawnTime);
+          setCurrentAction(detectedActionText);
+
+          poppedBalloons.forEach((balloon) => {
+            playPop();
+            const newStreak = incrementStreak();
+            const streakBonus = Math.min(newStreak * 2, 15);
+            setScorePopup({
+              points: 15 + streakBonus,
+              x: balloon.x * 100,
+              y: balloon.y * 100,
+            });
+            triggerHaptic('success');
+          });
+
+          if (poppedBalloons.length > 0) playSuccess();
+          if (levelAdvanced) playCelebration();
+
+          if (gameEnded && !showCelebration) {
+            const finalScore = nextState.score;
+            const finalLevel = nextState.level;
+            setTimeout(async () => {
+              setShowCelebration(true);
+              playCelebration();
+              await completeGame({
+                score: finalScore,
+                level: finalLevel,
+              });
+            }, 500);
+          }
+
+          return nextState;
+        });
+
+        renderCanvasFrame();
+      },
+      [
+        gameState?.gameActive,
+        showMenu,
+        lastSpawnTime,
+        completeGame,
+        playCelebration,
+        playPop,
+        playSuccess,
+        showCelebration,
+        incrementStreak,
+        setScorePopup,
+        renderCanvasFrame,
+      ],
+    ),
+    enabled: cameraReady,
+  });
+
+  // Update loading/error state from pose tracking
   useEffect(() => {
-    async function initPose() {
-      try {
-        const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm',
-        );
-
-        let landmarker: PoseLandmarker;
-        try {
-          landmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath:
-                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
-              delegate: 'GPU',
-            },
-            runningMode: 'VIDEO',
-            numPoses: 1,
-          });
-        } catch (e) {
-          console.warn(
-            'GPU delegate failed for PoseLandmarker, falling back to CPU:',
-            e,
-          );
-          landmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath:
-                'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
-              delegate: 'CPU',
-            },
-            runningMode: 'VIDEO',
-            numPoses: 1,
-          });
-        }
-
-        poseLandmarkerRef.current = landmarker;
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Failed to initialize pose landmarker:', err);
-        setError(
-          'Could not load pose detection. Try refreshing or check your internet connection.',
-        );
-        setIsLoading(false);
-      }
-    }
-
-    initPose();
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-      if (poseLandmarkerRef.current) {
-        poseLandmarkerRef.current.close();
-        poseLandmarkerRef.current = null;
-      }
-    };
-  }, []);
+    setIsLoading(poseLoading);
+    setError(poseError);
+  }, [poseLoading, poseError]);
 
   // Keep canvas backing resolution in sync with displayed size.
   useEffect(() => {
@@ -550,131 +581,6 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
     window.addEventListener('resize', syncCanvasSize);
     return () => window.removeEventListener('resize', syncCanvasSize);
   }, []);
-
-  // ===== GAME LOOP =====
-  function doGameLoop() {
-    if (
-      !webcamRef.current ||
-      !poseLandmarkerRef.current ||
-      !cameraReady ||
-      !gameState?.gameActive ||
-      showMenu
-    ) {
-      animationRef.current = requestAnimationFrame(doGameLoop);
-      return;
-    }
-
-    const video = webcamRef.current.video;
-    if (!video || video.readyState !== 4) {
-      animationRef.current = requestAnimationFrame(doGameLoop);
-      return;
-    }
-
-    const currentTime = performance.now();
-    const deltaTime = currentTime - lastFrameTimeRef.current;
-    lastFrameTimeRef.current = currentTime;
-
-    const results = poseLandmarkerRef.current.detectForVideo(
-      video,
-      currentTime,
-    );
-    const landmarks =
-      results.landmarks && results.landmarks.length > 0
-        ? (results.landmarks[0] as any[])
-        : null;
-
-    setGameState((prevState) => {
-      if (!prevState) return prevState;
-
-      const {
-        nextState,
-        poppedBalloons,
-        detectedActionText,
-        levelAdvanced,
-        gameEnded,
-        newSpawnTime,
-      } = computeGameFrameUpdate(
-        prevState,
-        landmarks,
-        deltaTime,
-        lastSpawnTime,
-      );
-
-      if (newSpawnTime !== null) setLastSpawnTime(newSpawnTime);
-      setCurrentAction(detectedActionText);
-
-      poppedBalloons.forEach((balloon) => {
-        playPop();
-        const newStreak = incrementStreak();
-        const streakBonus = Math.min(newStreak * 2, 15);
-        setScorePopup({
-          points: 15 + streakBonus,
-          x: balloon.x * 100,
-          y: balloon.y * 100,
-        });
-        triggerHaptic('success');
-      });
-
-      if (poppedBalloons.length > 0) playSuccess();
-      if (levelAdvanced) playCelebration();
-
-      if (gameEnded && !showCelebration) {
-        // Capture final values before state update
-        const finalScore = nextState.score;
-        const finalLevel = nextState.level;
-        setTimeout(async () => {
-          setShowCelebration(true);
-          playCelebration();
-          await completeGame({
-            score: finalScore,
-            level: finalLevel,
-          });
-        }, 500);
-      }
-
-      return nextState;
-    });
-
-    renderCanvasFrame();
-
-    animationRef.current = requestAnimationFrame(doGameLoop);
-  }
-
-  const gameLoop = useCallback(doGameLoop, [
-    cameraReady,
-    gameState?.gameActive,
-    incrementStreak,
-    lastSpawnTime,
-    completeGame,
-    playCelebration,
-    playPop,
-    playSuccess,
-    showMenu,
-    showCelebration,
-  ]);
-
-  // Start game loop when ready
-  useEffect(() => {
-    if (!isLoading && !showMenu && gameState?.gameActive) {
-      lastFrameTimeRef.current = performance.now();
-      gameLoop();
-    }
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [isLoading, showMenu, gameState?.gameActive, gameLoop]);
-
-  // ===== CANVAS RENDERING =====
-  function renderCanvasFrame() {
-    const canvas = canvasRef.current;
-    if (!canvas || !gameState) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    renderGameFrame(ctx, gameState, currentAction);
-  }
 
   // ===== GAME FLOW =====
   const startGame = () => {

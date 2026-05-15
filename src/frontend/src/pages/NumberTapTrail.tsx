@@ -63,12 +63,14 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
   const [streak, setStreak] = useState(0);
   const [scorePopup, setScorePopup] = useState<{ points: number; x: number; y: number } | null>(null);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
+  const [clearedSequence, setClearedSequence] = useState<Point[]>([]);
 
   const targetsRef = useRef<TrailTarget[]>(targets);
   const expectedIndexRef = useRef(expectedIndex);
   const levelRef = useRef(level);
   const timeLeftRef = useRef(timeLeft);
   const scoreRef = useRef(score);
+  const clearedSequenceRef = useRef<Point[]>([]);
 
   const { playPop, playError, playFanfare } = useAudio();
   const { speak, isEnabled: ttsEnabled } = useTTS();
@@ -95,6 +97,10 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
   }, [score]);
 
   useEffect(() => {
+    clearedSequenceRef.current = clearedSequence;
+  }, [clearedSequence]);
+
+  useEffect(() => {
     if (!isPlaying || gameCompleted) return;
 
     const timer = setInterval(() => {
@@ -116,6 +122,7 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
     const roundTargets = createRoundTargets(level);
     setTargets(roundTargets);
     setExpectedIndex(0);
+    setClearedSequence([]);
     setFeedback(`Find number 1 of ${roundTargets.length}`);
     if (ttsEnabled) {
       void speak(`Find the numbers in order. Start with one!`);
@@ -198,6 +205,9 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
         ),
       );
 
+      // Add to cleared sequence for trail visualization
+      setClearedSequence((prev) => [...prev, hit.position]);
+
       const nextIndex = expectedIndexRef.current + 1;
       setExpectedIndex(nextIndex);
 
@@ -270,6 +280,7 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
     setStreak(0);
     setScorePopup(null);
     setShowStreakMilestone(false);
+    setClearedSequence([]);
     setIsPlaying(true);
     if (ttsEnabled) {
       void speak('Pinch the numbers in order from one to ten!');
@@ -294,6 +305,7 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
     setCursor(null);
     setFeedback('Pinch numbers in order: 1, 2, 3...');
     setTimeLeft(90);
+    setClearedSequence([]);
   };
 
   const goHome = () => {
@@ -378,6 +390,56 @@ const NumberTapTrailContent = memo(function NumberTapTrailComponent() {
             </div>
           </div>
         ))}
+
+        {/* Trail lines connecting cleared numbers */}
+        {clearedSequence.length > 1 && (
+          <svg
+            className='absolute inset-0 w-full h-full pointer-events-none'
+            style={{ zIndex: 5 }}
+            viewBox='0 0 100 100'
+            preserveAspectRatio='none'
+          >
+            <defs>
+              <linearGradient id='trailGradient' x1='0%' y1='0%' x2='100%' y2='0%'>
+                <stop offset='0%' stopColor='#10B981' stopOpacity='0.6' />
+                <stop offset='100%' stopColor='#3B82F6' stopOpacity='0.8' />
+              </linearGradient>
+              <filter id='trailGlow'>
+                <feGaussianBlur stdDeviation='0.5' result='coloredBlur' />
+                <feMerge>
+                  <feMergeNode in='coloredBlur' />
+                  <feMergeNode in='SourceGraphic' />
+                </feMerge>
+              </filter>
+            </defs>
+            <polyline
+              points={clearedSequence.map((p) => `${p.x * 100},${p.y * 100}`).join(' ')}
+              fill='none'
+              stroke='url(#trailGradient)'
+              strokeWidth='0.8'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              filter='url(#trailGlow)'
+              className='animate-draw-trail'
+            />
+            {/* Animated dots along the trail */}
+            {clearedSequence.slice(0, -1).map((p, i) => {
+              const next = clearedSequence[i + 1];
+              const midX = ((p.x + next.x) / 2) * 100;
+              const midY = ((p.y + next.y) / 2) * 100;
+              return (
+                <circle
+                  key={`${p.x}-${p.y}-${i}`}
+                  cx={midX}
+                  cy={midY}
+                  r='0.4'
+                  fill='#F59E0B'
+                  className='animate-pulse opacity-70'
+                />
+              );
+            })}
+          </svg>
+        )}
 
         {cursor && (
           <CursorEmbodiment

@@ -8,6 +8,7 @@ import { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContainer } from '../components/GameContainer';
 import { GameShell } from '../components/GameShell';
+import { GameCursor } from '../components/game/GameCursor';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
@@ -309,18 +310,17 @@ const BubbleCountGame = memo(function BubbleCountGameComponent() {
         className='relative w-full h-full'
         style={{ backgroundColor: GAME_COLORS.background }}
       >
-        {/* Hand cursor */}
+        {/* GameCursor */}
         {cursor && isHandTrackingActive && (
-          <div
-            className='fixed pointer-events-none z-50'
-            style={{
-              left: cursor.x * window.innerWidth,
-              top: cursor.y * window.innerHeight,
-              transform: 'translate(-50%, -50%)',
-            }}
-          >
-            <div className='w-16 h-16 bg-yellow-400 rounded-full opacity-50' />
-          </div>
+          <GameCursor
+            position={cursor}
+            coordinateSpace='normalized'
+            containerRef={gameAreaRef}
+            isPinching={false}
+            isHandDetected={isHandTrackingActive}
+            size={64}
+            color='#3B82F6'
+          />
         )}
 
         <div className='absolute top-4 left-4 right-4 flex justify-between'>

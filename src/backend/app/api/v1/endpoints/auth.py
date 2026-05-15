@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
-from app.core.config import settings
+from app.core.config import get_settings
 from app.core.email import EmailService
 from app.core.exceptions import (
     AccountLockedError,
@@ -26,13 +26,15 @@ from app.services.refresh_token_service import RefreshTokenService
 from app.services.token_service import TokenService
 from app.services.user_service import UserService
 
+_settings = get_settings()
+
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 # Cookie settings
 COOKIE_DOMAIN = None  # Use default (current domain)
 COOKIE_PATH = "/"
-COOKIE_SECURE = settings.APP_ENV == "production"  # Secure in production
+COOKIE_SECURE = _settings.APP_ENV == "production"  # Secure in production
 # same‑site setting: `strict` provides stronger CSRF protection
 COOKIE_SAMESITE = "strict"
 ACCESS_TOKEN_COOKIE = "access_token"
@@ -41,7 +43,7 @@ REGISTRATION_SUCCESS_MESSAGE = "If an account is eligible, a verification email 
 
 
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
-    """Set authentication cookies with proper security settings.
+    """Set authentication cookies with proper security _settings.
 
     Cookies configured by Unit-1:
     * HttpOnly
@@ -57,7 +59,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         samesite=COOKIE_SAMESITE,  # type: ignore
         path=COOKIE_PATH,
         domain=COOKIE_DOMAIN,
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        max_age=_settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
 
     # Refresh token - longer lived
@@ -69,7 +71,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         samesite=COOKIE_SAMESITE,  # type: ignore
         path=COOKIE_PATH,
         domain=COOKIE_DOMAIN,
-        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        max_age=_settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
     )
 
 
@@ -180,11 +182,11 @@ async def logout(request: Request, response: Response, db: AsyncSession = Depend
         await RefreshTokenService.revoke_refresh_token(db, refresh_token)
 
     # Also revoke current access token if blacklist enabled
-    if settings.ENABLE_ACCESS_TOKEN_BLACKLIST:
+    if _settings.ENABLE_ACCESS_TOKEN_BLACKLIST:
         access_token = request.cookies.get(ACCESS_TOKEN_COOKIE)
         if access_token:
             try:
-                payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=["HS256"])
+                payload = jwt.decode(access_token, _settings.SECRET_KEY, algorithms=["HS256"])
                 jti = payload.get("jti")
                 exp = payload.get("exp")
                 if jti and exp:
@@ -284,7 +286,7 @@ async def refresh_token(
         raise TokenInvalidError("No refresh token provided")
 
     try:
-        payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(refresh_token, _settings.SECRET_KEY, algorithms=["HS256"])
         user_id: str | None = payload.get("sub")
         if user_id is None:
             raise TokenInvalidError()
@@ -307,11 +309,11 @@ async def refresh_token(
     await RefreshTokenService.revoke_refresh_token(db, refresh_token)
 
     # Also revoke the current access token if blacklisting enabled
-    if settings.ENABLE_ACCESS_TOKEN_BLACKLIST:
+    if _settings.ENABLE_ACCESS_TOKEN_BLACKLIST:
         access_token = request.cookies.get(ACCESS_TOKEN_COOKIE)
         if access_token:
             try:
-                payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=["HS256"])
+                payload = jwt.decode(access_token, _settings.SECRET_KEY, algorithms=["HS256"])
                 jti = payload.get("jti")
                 exp = payload.get("exp")
                 if jti and exp:

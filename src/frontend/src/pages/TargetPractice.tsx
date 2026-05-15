@@ -21,6 +21,7 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { KenneyHandCursor } from '../components/game/KenneyHandCursor';
+import { GameCursor } from '../components/game/GameCursor';
 import type { Point } from '../types/tracking';
 import {
   pickSpacedPoints,
@@ -93,7 +94,7 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
   const [bestCombo, setBestCombo] = useState(0);
 
   // CV Hand tracking state
-  const [, setCursor] = useState<Point | null>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [cursorPx, setCursorPx] = useState<Point | null>(null);
   const [isPinching, setIsPinching] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
@@ -455,6 +456,8 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={handDetected}
     >
       {/* Hidden webcam for hand tracking */}
       <Webcam
@@ -712,6 +715,17 @@ const TargetPracticeGame = memo(function TargetPracticeGameComponent() {
           </div>
         )}
       </div>
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={isPinching}
+          isHandDetected={handDetected}
+          size={64}
+          color="#22c55e"
+        />
+      )}
     </GameContainer>
   );
 });

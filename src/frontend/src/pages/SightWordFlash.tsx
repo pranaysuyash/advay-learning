@@ -1,18 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Webcam from 'react-webcam';
 import { GameContainer } from '../components/GameContainer';
+import { GameCursor } from '../components/game/GameCursor';
 import { GameShell } from '../components/GameShell';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { GameHUD } from '../components/game/GameHUD';
 import { LEVELS, getWordsForLevel, type SightWord } from '../games/sightWordFlashLogic';
 import { STREAK_MILESTONE_INTERVAL, STREAK_MILESTONE_DURATION_MS } from '../games/constants';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 
 function SightWordFlashContent() {
   const navigate = useNavigate();
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [words, setWords] = useState<SightWord[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -37,6 +46,33 @@ function SightWordFlashContent() {
     isPlaying: gameState !== 'start' && gameState !== 'complete',
     metaData: { correct, round },
   });
+
+  // Hand tracking for cursor
+  const isPlaying = gameState !== 'start' && gameState !== 'complete';
+
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) {
+      setCursor(null);
+      return;
+    }
+    setCursor(tip);
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'SightWordFlash',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   // Flash word for 2s then move to answering
   useEffect(() => {
@@ -137,8 +173,11 @@ function SightWordFlashContent() {
       showScore
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='h-full overflow-auto p-4 md:p-6'>
+      <div ref={gameAreaRef} className='h-full overflow-auto p-4 md:p-6 relative'>
         <div className='max-w-2xl mx-auto space-y-4'>
 
           {/* Level selector */}
@@ -326,6 +365,19 @@ function SightWordFlashContent() {
                 </button>
               </div>
             </div>
+          )}
+
+          {/* GameCursor for hand tracking */}
+          {cursor && (
+            <GameCursor
+              position={cursor}
+              coordinateSpace="normalized"
+              containerRef={gameAreaRef}
+              isPinching={false}
+              isHandDetected={isHandTrackingReady}
+              size={64}
+              color="#8b5cf6"
+            />
           )}
         </div>
       </div>

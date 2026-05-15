@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { UIIcon } from './Icon';
 import { useVoicePrompt } from '../../hooks/useVoicePrompt';
@@ -16,7 +16,7 @@ interface VoiceButtonProps {
 /**
  * Voice Button Component
  * Provides text-to-speech for pre-readers
- * 
+ *
  * Usage:
  * <VoiceButton text="Click Allow to use your camera" label="Listen" />
  */
@@ -31,12 +31,56 @@ export function VoiceButton({
   const {
     speak,
     stop,
-    isSpeaking,
+    isSpeaking: isTTSspeaking,
     isSupported,
     requiresCloudConsent,
     approveCloudConsent,
   } = useVoicePrompt();
   const [showCloudConsentGate, setShowCloudConsentGate] = useState(false);
+  const [showSpeakingLabel, setShowSpeakingLabel] = useState(false);
+  const speakingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync "Speaking..." label with actual audio output
+  // The TTS sets isSpeaking=true immediately, but audio starts after ~300ms delay
+  useEffect(() => {
+    if (isTTSspeaking) {
+      // Delay showing "Speaking..." to match when audio actually starts
+      speakingTimerRef.current = setTimeout(() => {
+        setShowSpeakingLabel(true);
+      }, 300); // Wait for TTS to actually start producing audio
+
+      // Clear any pending stop timer
+      if (stopTimerRef.current) {
+        clearTimeout(stopTimerRef.current);
+        stopTimerRef.current = null;
+      }
+    } else {
+      // Clear speaking timer if speech was stopped before audio started
+      if (speakingTimerRef.current) {
+        clearTimeout(speakingTimerRef.current);
+        speakingTimerRef.current = null;
+      }
+
+      // Keep showing "Speaking..." briefly after speech ends for smoother UX
+      if (showSpeakingLabel) {
+        stopTimerRef.current = setTimeout(() => {
+          setShowSpeakingLabel(false);
+        }, 200);
+      } else {
+        setShowSpeakingLabel(false);
+      }
+    }
+
+    return () => {
+      if (speakingTimerRef.current) {
+        clearTimeout(speakingTimerRef.current);
+      }
+      if (stopTimerRef.current) {
+        clearTimeout(stopTimerRef.current);
+      }
+    };
+  }, [isTTSspeaking, showSpeakingLabel]);
 
   // Auto-play on mount if enabled
   useEffect(() => {
@@ -77,7 +121,7 @@ export function VoiceButton({
       <motion.button
         type="button"
         onClick={() => {
-          if (isSpeaking) {
+          if (isTTSspeaking) {
             stop();
           } else {
             if (requiresCloudConsent) {
@@ -92,24 +136,24 @@ export function VoiceButton({
           inline-flex items-center justify-center rounded-lg font-medium transition-colors
           ${sizeClasses[size]}
           ${variantClasses[variant]}
-          ${isSpeaking ? 'ring-2 ring-brand-primary ring-offset-2' : ''}
+          ${showSpeakingLabel ? 'ring-2 ring-brand-primary ring-offset-2' : ''}
           ${className}
         `}
-        aria-label={isSpeaking ? 'Stop speaking' : `Listen: ${text}`}
-        title={isSpeaking ? 'Click to stop' : 'Click to listen'}
+        aria-label={isTTSspeaking ? 'Stop speaking' : `Listen: ${text}`}
+        title={isTTSspeaking ? 'Click to stop' : 'Click to listen'}
       >
         <motion.div
-          animate={isSpeaking ? {
+          animate={showSpeakingLabel ? {
             scale: [1, 1.2, 1],
             transition: { repeat: Infinity, duration: 0.5 }
           } : {}}
         >
-          <UIIcon 
-            name={isSpeaking ? 'volume' : 'volume-off'} 
-            size={iconSizes[size]} 
+          <UIIcon
+            name={showSpeakingLabel ? 'volume' : 'volume-off'}
+            size={iconSizes[size]}
           />
         </motion.div>
-        {label && <span>{isSpeaking ? 'Speaking...' : label}</span>}
+        {label && <span>{showSpeakingLabel ? 'Speaking...' : label}</span>}
       </motion.button>
 
       <ParentGate

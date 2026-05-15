@@ -34,10 +34,10 @@ describe('Home landing', () => {
     expect(
       screen.getAllByRole('button', { name: /Start Free/i }).length,
     ).toBeGreaterThan(0);
-    expect(screen.getByRole('button', { name: /Try Demo/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Quick Play/i })).toBeDefined();
   });
 
-  it('clicking Try The Magic creates a guest demo session and does not request camera permission', async () => {
+  it('clicking Quick Play creates a guest demo session and does not request camera permission', async () => {
     // Mock getUserMedia to fail loudly if called
     const mockGetUserMedia = vi.fn(() =>
       Promise.reject(new Error('should not be called')),
@@ -55,7 +55,7 @@ describe('Home landing', () => {
     );
 
     const btn = screen.getByRole('button', {
-      name: /Try Demo — No Account Needed/i,
+      name: /Quick Play — Start Instantly/i,
     });
     fireEvent.click(btn);
 
@@ -94,7 +94,7 @@ describe('Home landing', () => {
     expect(screen.getByText(/Shared by a parent/i)).toBeDefined();
 
     fireEvent.click(
-      screen.getByRole('button', { name: /Try Demo — No Account Needed/i }),
+      screen.getByRole('button', { name: /Quick Play — Start Instantly/i }),
     );
 
     const events = getGrowthEvents();

@@ -17,7 +17,7 @@ import { VoiceInstructions } from '../components/game/VoiceInstructions';
 import { KenneyIcon } from '../components/ui/KenneyIcon';
 import { triggerHaptic } from '../utils/haptics';
 import { GameBackground } from '../components/game/GameBackground';
-import { GameHUD } from '../components/game/GameHUD';
+
 import { isPointInCircle, pickRandomPoint } from '../games/targetPracticeLogic';
 import type { Point } from '../types/tracking';
 import { randomFloat01 } from '../utils/random';
@@ -91,7 +91,7 @@ const ShapePopContent = memo(function ShapePopComponent() {
   // Combo/scoring system
   const [streak, setStreak] = useState(0);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
-  const [showMenu, setShowMenu] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
 
   // Visual feedback system - Unit 2
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -323,6 +323,15 @@ const ShapePopContent = memo(function ShapePopComponent() {
     }
   }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking, showMenu]);
 
+  // Auto-start at medium difficulty (no pre-play menu — UX-001/UX-005)
+  const hasAutoStarted = useRef(false);
+  useEffect(() => {
+    if (assetsLoaded && !hasAutoStarted.current) {
+      hasAutoStarted.current = true;
+      void startGame('medium');
+    }
+  }, [assetsLoaded]);
+
   const TUTORIAL_STEPS = [
     {
       title: 'Move Your Finger',
@@ -350,7 +359,7 @@ const ShapePopContent = memo(function ShapePopComponent() {
     setScore(0);
     setStreak(0);
     setDifficulty(selectedDifficulty);
-    setFeedback(`Pinch inside the shape! ${selectedDifficulty.toUpperCase()} mode`);
+    setFeedback('Pinch inside the shape!');
     setCursor(null);
     spawnTarget();
     setIsPlaying(true);
@@ -363,7 +372,7 @@ const ShapePopContent = memo(function ShapePopComponent() {
     }
 
     if (ttsEnabled) {
-      void speak(`Let's pop some shapes on ${selectedDifficulty} mode! Show me your hand!`);
+      void speak("Let's pop some shapes! Show me your hand!");
     }
     playPop();
 
@@ -404,7 +413,7 @@ const ShapePopContent = memo(function ShapePopComponent() {
 
   const goHome = () => {
     resetGame();
-    navigate('/dashboard');
+    navigate('/games');
   };
 
   const controls: GameControl[] = [
@@ -456,16 +465,7 @@ const ShapePopContent = memo(function ShapePopComponent() {
       >
         <div className='absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-fuchsia-100/40 backdrop-blur-sm pointer-events-none' />
 
-        {isPlaying && (
-          <GameHUD
-            score={score}
-            streak={streak}
-            level={Math.max(1, Math.floor(score / 120) + 1)}
-            showHearts={true}
-          />
-        )}
-
-        <div className='absolute top-24 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px]'>
+        <div className='absolute top-4 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full bg-white/95 backdrop-blur-sm border-3 border-[#F2CC8F] shadow-[0_4px_0_#E5B86E] text-advay-slate font-bold text-lg text-center min-w-[320px] z-20'>
           {feedback}
         </div>
 

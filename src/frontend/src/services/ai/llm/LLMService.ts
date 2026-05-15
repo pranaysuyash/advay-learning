@@ -21,6 +21,7 @@ export type LLMProvider =
   | 'web-llm'
   | 'ollama'
   | 'hf-inference'
+  | 'lm-studio'
   | 'mock';
 
 export type LLMModel =
@@ -98,6 +99,7 @@ const VALID_PROVIDERS: LLMProvider[] = [
   'web-llm',
   'ollama',
   'hf-inference',
+  'lm-studio',
   'mock',
 ];
 
@@ -270,6 +272,11 @@ export class LLMService {
           model,
           (import.meta as any).env?.VITE_HF_API_KEY,
         );
+      }
+      case 'lm-studio': {
+        const lmStudioUrl = (import.meta as any).env?.VITE_LM_STUDIO_BASE_URL;
+        const module = await import('./providers/LMStudioProvider');
+        return new module.LMStudioProvider(model, lmStudioUrl);
       }
       case 'mock':
       default:

@@ -1,5 +1,6 @@
 import { memo, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import Webcam from 'react-webcam';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useFallbackControls } from '../hooks/useFallbackControls';
 import { GameCursor } from '../components/game/GameCursor';
@@ -10,9 +11,13 @@ import { GameShell } from '../components/GameShell';
 import { useProgressStore } from '../store';
 import { useAudio } from '../utils/hooks/useAudio';
 import { useGameCompletion } from '../hooks/useGameCompletion';
+import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { triggerHaptic } from '../utils/haptics';
 import { GameBackground } from '../components/game/GameBackground';
+import type { Point } from '../types/tracking';
+import type { HandTrackingRuntimeMeta } from '../hooks/useHandTrackingRuntime';
+import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 import {
   LEVELS,
   buildBeginningSoundsRound,
@@ -28,7 +33,7 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
   const { completeGame } = useGameCompletion('beginning-sounds');
   const { currentProfile } = useProgressStore();
 
-  const [currentLevel, setCurrentLevel] = useState(1);
+  const [currentLevel] = useState(1);
   const [currentRound, setCurrentRound] = useState<BeginningSoundsRound | null>(
     null,
   );
@@ -63,7 +68,9 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
 
   // voice fallback flag (placeholder)
   const voiceFallback = useFeatureFlag('controls.voiceFallbackV1');
-  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -103,6 +110,31 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
       setCursor(null);
     }
   }, [voiceFallback, fallback]);
+
+  // Hand tracking
+  const isPlaying = gameState === 'playing';
+  const handleFrame = useCallback((frame: TrackedHandFrame, _meta: HandTrackingRuntimeMeta) => {
+    const tip = frame.indexTip;
+    if (!tip) {
+      setCursor(null);
+      return;
+    }
+    setCursor(tip);
+  }, []);
+  const handleNoVideoFrame = useCallback(() => { setCursor(null); }, []);
+  const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'BeginningSounds',
+    targetFps: 30,
+    webcamRef,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+  useEffect(() => {
+    if (isPlaying && !isHandTrackingReady && !isModelLoading) {
+      void startTracking();
+    }
+  }, [isHandTrackingReady, isModelLoading, isPlaying, startTracking]);
 
   // Save progress on game complete
   const handleGameComplete = useCallback(
@@ -297,24 +329,6 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
     }
   }, [currentRound, speakWord]);
 
-  const handleLevelChange = useCallback(
-    (level: number) => {
-      playClick();
-      setCurrentLevel(level);
-      setRoundIndex(0);
-      setScore(0);
-      setCorrectCount(0);
-      setUsedWords([]);
-      setCurrentRound(null);
-      setGameState('playing');
-      setSelectedAnswer(null);
-      setShowResult(false);
-      setFeedback('Tap the sound you hear at the start!');
-      resetStreak();
-    },
-    [playClick, resetStreak],
-  );
-
   const handleRestart = useCallback(() => {
     playClick();
     setRoundIndex(0);
@@ -343,8 +357,11 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
       level={currentLevel}
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandTrackingReady}
+      isPlaying={isPlaying}
     >
-      <div className='relative flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto'>
+      <div ref={gameAreaRef} className='relative flex flex-col items-center gap-4 p-4 max-w-2xl mx-auto'>
         <GameBackground type='solid_cloud' className='absolute inset-0 -z-10' />
         {voiceFallback && (
           <div className='w-full bg-yellow-100 text-yellow-800 p-2 rounded text-center'>
@@ -352,26 +369,6 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
             fails.
           </div>
         )}
-        {/* Level selector */}
-        <div className='flex gap-2'>
-          {LEVELS.map((level) => (
-            <motion.button
-              type='button'
-              key={level.level}
-              onClick={() => handleLevelChange(level.level)}
-              whileHover={reducedMotion ? {} : { scale: 1.05 }}
-              whileTap={reducedMotion ? {} : { scale: 0.95 }}
-              className={`px-4 py-2 rounded-full font-bold transition-all ${
-                currentLevel === level.level
-                  ? 'bg-blue-500 text-white shadow-lg'
-                  : 'bg-slate-50 border-2 border-slate-200 text-slate-700 hover:border-slate-400'
-              }`}
-            >
-              Level {level.level}
-            </motion.button>
-          ))}
-        </div>
-
         {gameState === 'playing' && currentRound && (
           <>
             <div className='text-center'>
@@ -449,11 +446,12 @@ const BeginningSoundsGame = memo(function BeginningSoundsGameComponent() {
             {cursor && (
               <GameCursor
                 position={cursor}
+                coordinateSpace="normalized"
+                containerRef={gameAreaRef}
                 isPinching={false}
-                isHandDetected={false}
-                size={48}
-                highContrast={true}
-                icon='👆'
+                isHandDetected={isHandTrackingReady}
+                size={64}
+                color="#22c55e"
               />
             )}
 

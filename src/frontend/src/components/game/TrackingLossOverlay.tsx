@@ -120,7 +120,7 @@ export const TrackingLossOverlay: React.FC<TrackingLossOverlayProps> = React.mem
                 <button
                   type="button"
                   onClick={onRetryCamera}
-                  className="w-full px-6 py-4 min-h-[64px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#059669] transition-all hover:scale-105 flex items-center justify-center gap-3"
+                  className="w-full px-6 py-4 min-h-[80px] bg-[#10B981] hover:bg-emerald-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#059669] transition-all hover:scale-105 flex items-center justify-center gap-3"
                 >
                   <UIIcon name="refresh" size={28} />
                   Try Camera Again
@@ -131,7 +131,7 @@ export const TrackingLossOverlay: React.FC<TrackingLossOverlayProps> = React.mem
                   <button
                     type="button"
                     onClick={onSwitchToTapMode}
-                    className="w-full px-6 py-4 min-h-[64px] bg-[#F59E0B] hover:bg-amber-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#D97706] transition-all hover:scale-105 flex items-center justify-center gap-3"
+                    className="w-full px-6 py-4 min-h-[80px] bg-[#F59E0B] hover:bg-amber-600 text-white rounded-[1.5rem] font-black text-xl shadow-[0_4px_0_#D97706] transition-all hover:scale-105 flex items-center justify-center gap-3"
                   >
                     <UIIcon name="hand" size={28} />
                     Switch to Tap Mode
@@ -148,7 +148,7 @@ export const TrackingLossOverlay: React.FC<TrackingLossOverlayProps> = React.mem
                     }
                     window.location.assign('/games');
                   }}
-                  className="w-full px-6 py-4 min-h-[64px] bg-slate-50 text-advay-slate border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-3"
+                  className="w-full px-6 py-4 min-h-[80px] bg-slate-50 text-advay-slate border-3 border-[#F2CC8F] rounded-[1.5rem] font-black text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-3"
                 >
                   <UIIcon name="home" size={24} />
                   Exit to Games

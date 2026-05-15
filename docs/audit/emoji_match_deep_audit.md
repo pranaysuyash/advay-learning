@@ -1,4 +1,6 @@
 # UI/UX & QA Deep Audit — Emoji Match (7-Angle Review)
+
+**Ticket**: TCK-20260319-015
 **Video:** `emoji_match.mov` | **Date:** 2026-02-20 | **Reviewer:** Senior UX + QA + Child Dev Psychology
 
 ---

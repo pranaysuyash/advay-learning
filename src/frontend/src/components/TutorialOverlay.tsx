@@ -164,7 +164,7 @@ export function TutorialOverlay({ onDismiss }: TutorialOverlayProps) {
 
           <button
             onClick={handleDismiss}
-            className="w-full px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition shadow-lg"
+            className="w-full px-6 py-4 min-h-[80px] bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition shadow-lg"
           >
             Got it!
           </button>

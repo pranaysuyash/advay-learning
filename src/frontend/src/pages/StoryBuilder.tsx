@@ -20,6 +20,9 @@ import type { TrackedHandFrame } from '../utils/handTrackingFrame';
 function StoryBuilderGame() {
   const navigate = useNavigate();
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
   const [cursor, setCursor] = useState<Point | null>(null);
   const { playClick, playSuccess, playError, playCelebration } = useAudio();
   const { completeGame } = useGameCompletion('story-builder');
@@ -125,7 +128,7 @@ function StoryBuilderGame() {
     targetFps: 30,
     isRunning: Boolean(activeRound),
     onFrame: handleFrame,
-    onNoVideoFrame: () => setCursor(null),
+    onNoVideoFrame: handleNoVideoFrame,
   });
 
   useEffect(() => {

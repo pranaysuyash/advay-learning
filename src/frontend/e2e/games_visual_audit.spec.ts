@@ -16,7 +16,7 @@ test.describe('Game Visual Audit - Debug', () => {
     await page.screenshot({ path: `${outDir}/debug_01_login.png`, fullPage: true });
     
     // Click guest login
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")');
     console.log('2. Clicked guest login button');
     
     // Wait a bit and check URL

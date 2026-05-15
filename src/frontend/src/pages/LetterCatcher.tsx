@@ -18,6 +18,8 @@ import { useGameSessionProgress } from '../hooks/useGameSessionProgress';
 import { triggerHaptic } from '../utils/haptics';
 import { useGameHandTracking } from '../hooks/useGameHandTracking';
 import type { TrackedHandFrame } from '../types/tracking';
+import { GameCursor } from '../components/game/GameCursor';
+import type { Point } from '../types/tracking';
 import { CameraThumbnail } from '../components/game/CameraThumbnail';
 import { HandTrackingStatus } from '../components/game/HandTrackingStatus';
 import {
@@ -45,6 +47,8 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
   const { streak, showMilestone, scorePopup, incrementStreak, resetStreak, setScorePopup } = useStreakTracking();
 
   const webcamRef = useRef<Webcam>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<Point | null>(null);
   const [isHandDetected, setIsHandDetected] = useState(false);
   const lastHandStateRef = useRef(false);
   const lastCatchTimeRef = useRef(0);
@@ -179,6 +183,8 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
 
       if (!tip) return;
 
+      setCursor({ x: tip.x, y: tip.y });
+
       // Convert normalized coords to game area (350px wide, bucket 20-330)
       const x = tip.x * 350;
       setBucketX(Math.max(20, Math.min(330, x)));
@@ -243,8 +249,10 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
       title='Letter Catcher'
       onHome={() => navigate('/games')}
       reportSession={false}
+      webcamRef={webcamRef}
+      isHandDetected={isHandDetected}
     >
-      <div className='flex flex-col items-center gap-4 p-4'>
+      <div ref={gameAreaRef} className='flex flex-col items-center gap-4 p-4 relative'>
         <div className='flex gap-2'>
           {LEVELS.map((l) => (
             <button
@@ -371,6 +379,18 @@ const LetterCatcherGame = memo(function LetterCatcherGameComponent() {
             </button>
           </div>
         )}
+
+      {cursor && (
+        <GameCursor
+          position={cursor}
+          coordinateSpace="normalized"
+          containerRef={gameAreaRef}
+          isPinching={false}
+          isHandDetected={true}
+          size={64}
+          color="#22c55e"
+        />
+      )}
       </div>
     </GameContainer>
   );

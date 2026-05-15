@@ -1,0 +1,234 @@
+{
+  "timestamp": "2026-03-19T13:07:43.845789",
+  "total_games": 10,
+  "passed": 0,
+  "results": [
+    {
+      "game_id": "alphabet-tracing",
+      "game_name": "Alphabet Tracing",
+      "passed": false,
+      "screenshot": "screenshots/game-test/alphabet-tracing.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_cv_elements": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 282
+    },
+    {
+      "game_id": "odd-one-out",
+      "game_name": "Odd One Out",
+      "passed": false,
+      "screenshot": "screenshots/game-test/odd-one-out.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_cv_elements": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 112
+    },
+    {
+      "game_id": "spelling-run",
+      "game_name": "Spelling Run",
+      "passed": false,
+      "screenshot": "screenshots/game-test/spelling-run.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 89
+    },
+    {
+      "game_id": "math-jumpers",
+      "game_name": "Math Jumpers",
+      "passed": false,
+      "screenshot": "screenshots/game-test/math-jumpers.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_cv_elements": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 92
+    },
+    {
+      "game_id": "shadow-match",
+      "game_name": "Shadow Match",
+      "passed": false,
+      "screenshot": "screenshots/game-test/shadow-match.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 90
+    },
+    {
+      "game_id": "balloon-pop-fitness",
+      "game_name": "Balloon Pop Fitness",
+      "passed": false,
+      "screenshot": "screenshots/game-test/balloon-pop-fitness.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_cv_elements": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 87
+    },
+    {
+      "game_id": "catch-sort",
+      "game_name": "Catch Sort",
+      "passed": false,
+      "screenshot": "screenshots/game-test/catch-sort.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_cv_elements": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 82
+    },
+    {
+      "game_id": "maze-runner",
+      "game_name": "Maze Runner",
+      "passed": false,
+      "screenshot": "screenshots/game-test/maze-runner.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_cv_elements": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 82
+    },
+    {
+      "game_id": "animal-sounds",
+      "game_name": "Animal Sounds",
+      "passed": false,
+      "screenshot": "screenshots/game-test/animal-sounds.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 91
+    },
+    {
+      "game_id": "virtual-bubbles",
+      "game_name": "Virtual Bubbles",
+      "passed": false,
+      "screenshot": "screenshots/game-test/virtual-bubbles.png",
+      "issues": [
+        "Found 3 buttons smaller than 80px"
+      ],
+      "warnings": [
+        "  Small button: 28px - ''",
+        "  Small button: 60px - 'Let's Go! '",
+        "  Small button: 64px - '\ud83c\udf92'"
+      ],
+      "ui_checks": {
+        "all_buttons_large_enough": false,
+        "color_contrast_ok": true,
+        "prefers_assets_over_emoji": true,
+        "has_cv_elements": true,
+        "has_feedback_animations": true,
+        "touch_target_spacing": true
+      },
+      "load_time_ms": 87
+    }
+  ]
+}

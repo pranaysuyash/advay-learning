@@ -6,6 +6,7 @@ import {
   drawLetterHint,
   addBreakPoint,
   shouldAddPoint,
+  drawDirectionArrow,
 } from '../../utils/drawing';
 import { detectPinch, createDefaultPinchState } from '../../utils/pinchDetection';
 import type { PinchState, Point } from '../../types/tracking';
@@ -71,15 +72,22 @@ export function useDrawingLoop({
       const video = webcam?.video;
 
       if (!canvas) {
-        rafIdRef.current = requestAnimationFrame(loop);
+        if (!cancelled) {
+          rafIdRef.current = requestAnimationFrame(loop);
+        }
         return;
       }
 
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        rafIdRef.current = requestAnimationFrame(loop);
+        if (!cancelled) {
+          rafIdRef.current = requestAnimationFrame(loop);
+        }
         return;
       }
+
+      // Double-check cancelled before any drawing operations
+      if (cancelled) return;
 
       const hasVideoFrame =
         !!video &&
@@ -105,15 +113,25 @@ export function useDrawingLoop({
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Animation progress for direction arrow
+      const time = Date.now() / 1000;
+      const animationProgress = (Math.sin(time) + 1) / 2; // 0 to 1 oscillating
+
       // Draw hint with better visibility
       if (showHints) {
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        ctx.shadowBlur = 4;
-        drawLetterHint(ctx, currentLetterChar, canvas.width, canvas.height);
-        ctx.shadowBlur = 0;
+        // Guard: ensure canvas is still in DOM and context is valid
+        if (!cancelled && canvas.isConnected && typeof ctx.translate === 'function') {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 4;
+          drawLetterHint(ctx, currentLetterChar, canvas.width, canvas.height);
+          ctx.shadowBlur = 0;
+
+          // Draw animated direction arrow to guide tracing
+          drawDirectionArrow(ctx, canvas.width, canvas.height, currentLetterChar, animationProgress, currentLetterColor);
+        }
       }
 
-      // Draw all segments (now smoothed in drawSegments)
+      // Draw all segments with improved smoothing (quadratic bezier)
       if (drawnPointsRef.current.length > 0) {
         const segments = buildSegments(drawnPointsRef.current);
         drawSegments(ctx, segments, canvas.width, canvas.height, {
@@ -238,7 +256,9 @@ export function useDrawingLoop({
         smoothedTipRef.current = null;
       }
 
-      rafIdRef.current = requestAnimationFrame(loop);
+      if (!cancelled) {
+        rafIdRef.current = requestAnimationFrame(loop);
+      }
     };
 
     rafIdRef.current = requestAnimationFrame(loop);
