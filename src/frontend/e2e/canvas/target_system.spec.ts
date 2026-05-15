@@ -21,7 +21,7 @@ test.describe('TargetSystem Component', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${BASE}/login`);
     await page.waitForLoadState('networkidle');
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")');
     await page.waitForURL('**/dashboard', { timeout: 15000 });
   });
 
@@ -148,7 +148,7 @@ test.describe('Target Collision Detection', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${BASE}/login`);
     await page.waitForLoadState('networkidle');
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")');
     await page.waitForURL('**/dashboard', { timeout: 15000 });
   });
 

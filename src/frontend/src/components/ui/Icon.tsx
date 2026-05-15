@@ -58,7 +58,27 @@ export type IconName =
   | 'box'
   | 'shirt'
   | 'gamepad'
-  | 'utensils';
+  | 'utensils'
+  | 'flask';
+
+// Flask icon component (not in lucide-react)
+const FlaskIcon: React.FC<{ size?: number; color?: string; className?: string }> = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M10 2v8L6 20h12l-4-10V2" />
+    <path d="M8 12h8" />
+  </svg>
+);
 
 type UIIconNamedProps = {
   name: IconName | string; // loosen to string due to 'as any' coercions
@@ -124,6 +144,7 @@ const LucideMap: Record<string, React.ElementType> = {
   shirt: Shirt,
   gamepad: Gamepad2,
   utensils: Utensils,
+  flask: FlaskIcon,
 };
 
 export function UIIcon(props: UIIconProps) {

@@ -1,15 +1,13 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { CelebrationOverlay } from '../../components/CelebrationOverlay';
-import { CursorEmbodiment } from '../../components/game/CursorEmbodiment';
 import { GameContainer } from '../../components/GameContainer';
 import { GameControls } from '../../components/GameControls';
 import type { GameControl } from '../../components/GameControls';
 import { GameShell } from '../../components/GameShell';
+import { GameCursor } from '../../components/game/GameCursor';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
 import { useGameHandTracking } from '../../hooks/useGameHandTracking';
-import type { HandTrackingRuntimeMeta } from '../../hooks/useHandTrackingRuntime';
 import { useAudio } from '../../utils/hooks/useAudio';
 import { useTTS } from '../../hooks/useTTS';
 import { VoiceInstructions } from '../../components/game/VoiceInstructions';
@@ -75,7 +73,6 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [gameCompleted, setGameCompleted] = useState(false);
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [bubbles, setBubbles] = useState<Bubble3D[]>(createBubbles());
@@ -84,7 +81,7 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
   const [showingPattern, setShowingPattern] = useState(true);
   const [patternIndex, setPatternIndex] = useState(0);
   const [feedback, setFeedback] = useState('Watch the pattern...');
-  const [showCelebration, setShowCelebration] = useState(false);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   const { playPop, playFanfare, playError } = useAudio();
   const { speak } = useTTS();
@@ -132,15 +129,24 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
     startLevel(1);
   }, [startLevel]);
 
-  // Handle pinch for popping
-  const onPinch = useCallback((pinching: boolean, frame: TrackedHandFrame) => {
-    if (!isPlaying || showingPattern || !pinching || !frame.indexTip) return;
+  // Handle frame updates for cursor tracking and pinch detection
+  const handleFrame = useCallback((frame: TrackedHandFrame) => {
+    // Update cursor position
+    const tip = frame.indexTip;
+    if (tip) {
+      setCursor(tip);
+    } else if (cursor !== null) {
+      setCursor(null);
+    }
+
+    // Handle pinch for popping bubbles
+    if (!isPlaying || showingPattern || frame.pinch.transition !== 'start' || !tip) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const x = frame.indexTip.x * canvas.width;
-    const y = frame.indexTip.y * canvas.height;
+    const x = tip.x * canvas.width;
+    const y = tip.y * canvas.height;
 
     // Find bubble under cursor
     const clickedBubble = bubbles.find(b => {
@@ -169,15 +175,12 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
           setFeedback('Perfect! Next level!');
           playFanfare();
           triggerHaptic('success');
-          setShowCelebration(true);
           setScore(prev => prev + pattern.sequence.length * 10);
           speak('Amazing!');
 
           setTimeout(() => {
-            setShowCelebration(false);
             if (level >= 5) {
-              setGameCompleted(true);
-              completeGame({ score: score + pattern.sequence.length * 10, accuracy: 100 });
+              completeGame({ score: score + pattern.sequence.length * 10 });
             } else {
               const newLevel = level + 1;
               setLevel(newLevel);
@@ -199,12 +202,21 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
         }, 1500);
       }
     }
-  }, [isPlaying, showingPattern, bubbles, pattern, playerIndex, level, score, playPop, playError, playFanfare, speak, triggerHaptic, startLevel]);
+  }, [isPlaying, showingPattern, bubbles, pattern, playerIndex, level, score, playPop, playError, playFanfare, speak, triggerHaptic, startLevel, cursor]);
 
-  const { cursor, pinchState } = useGameHandTracking({
-    onPinch,
-    showCursor: true,
+  const { isReady, startTracking } = useGameHandTracking({
+    gameName: 'PatternPop3D2',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
   });
+
+  // Auto-start tracking when playing
+  useEffect(() => {
+    if (isPlaying && isReady) {
+      void startTracking();
+    }
+  }, [isPlaying, isReady, startTracking]);
 
   // Render
   useEffect(() => {
@@ -312,13 +324,13 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
   }, [navigate]);
 
   const controls: GameControl[] = [
-    { icon: 'play', label: 'Start', action: handleStart, primary: !isPlaying },
-    { icon: 'home', label: 'Exit', action: handleExit },
+    { id: 'start', icon: 'play', label: 'Start', onClick: handleStart, variant: 'primary' },
+    { id: 'exit', icon: 'home', label: 'Exit', onClick: handleExit },
   ];
 
   return (
-    <GameShell>
-      <GameContainer cv={['hand']}>
+    <GameShell gameId="pattern-pop-3d-2" gameName="Pattern Pop 3D">
+      <GameContainer title="Pattern Pop 3D" onHome={handleExit}>
         <div className="relative w-full h-full flex flex-col items-center justify-center p-4">
           {!isPlaying ? (
             <div className="text-center">
@@ -351,13 +363,7 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
             </>
           )}
 
-          <CelebrationOverlay
-            isVisible={showCelebration}
-            message="Level Complete!"
-            onComplete={() => setShowCelebration(false)}
-          />
-
-          <CursorEmbodiment cursor={cursor} pinchState={pinchState} />
+          {cursor && <GameCursor position={cursor} coordinateSpace="normalized" />}
         </div>
 
         <GameControls controls={controls} />
@@ -367,9 +373,5 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
 });
 
 export default function PatternPop3D2() {
-  return (
-    <GameContainer cv={['hand']}>
-      <PatternPop3D2Content />
-    </GameContainer>
-  );
+  return <PatternPop3D2Content />;
 }

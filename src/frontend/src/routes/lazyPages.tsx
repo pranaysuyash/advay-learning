@@ -421,6 +421,64 @@ export const NumberBubblePop = lazyNamed(
   'NumberBubblePop',
 );
 
+// Word Workshop - New Literacy Games (Phase 1, 2, 3)
+export const WordFamilies = lazyNamed(
+  () => import('../pages/WordFamilies'),
+  'WordFamiliesGame',
+);
+export const SpellingBee = lazyNamed(
+  () => import('../pages/SpellingBee'),
+  'SpellingBeeGame',
+);
+export const WordScramble = lazyNamed(
+  () => import('../pages/WordScramble'),
+  'WordScrambleGame',
+);
+export const LetterMatch = lazyNamed(
+  () => import('../pages/LetterMatch'),
+  'LetterMatchGame',
+);
+export const PhonicsFun = lazyNamed(
+  () => import('../pages/PhonicsFun'),
+  'PhonicsFunGame',
+);
+export const CompoundWords = lazyNamed(
+  () => import('../pages/CompoundWords'),
+  'CompoundWordsGame',
+);
+export const WordLadder = lazyNamed(
+  () => import('../pages/WordLadder'),
+  'WordLadderGame',
+);
+export const SentenceBuilder = lazyNamed(
+  () => import('../pages/SentenceBuilder'),
+  'SentenceBuilderGame',
+);
+export const MagicE = lazyNamed(
+  () => import('../pages/MagicE'),
+  'MagicEGame',
+);
+export const OppositesAttract = lazyNamed(
+  () => import('../pages/OppositesAttract'),
+  'OppositesAttractGame',
+);
+export const SynonymMatch = lazyNamed(
+  () => import('../pages/SynonymMatch'),
+  'SynonymMatchGame',
+);
+export const AntonymHunt = lazyNamed(
+  () => import('../pages/AntonymHunt'),
+  'AntonymHuntGame',
+);
+export const ConsonantQuest = lazyNamed(
+  () => import('../pages/ConsonantQuest'),
+  'ConsonantQuestGame',
+);
+export const NumberNinja = lazyNamed(
+  () => import('../pages/NumberNinja'),
+  'NumberNinjaGame',
+);
+
 export const WeatherMatch = lazyNamed(
   () => import('../pages/WeatherMatch'),
   'WeatherMatch',

@@ -82,8 +82,8 @@ async function getAuthState(page) {
 
 test.describe('Auth Flow - Debug', () => {
   test('debug: inspect login page and guest button', async ({ page }) => {
-    await page.goto(`${BASE_URL}/login`);
-    await page.waitForTimeout(1000);
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('button[type="submit"]', { timeout: 15000 });
 
     // Get all button text
     const buttons = await page.locator('button').allTextContents();
@@ -91,11 +91,11 @@ test.describe('Auth Flow - Debug', () => {
 
     // Check for guest button variations
     const guestSelectors = [
-      'button:has-text("Try without account")',
+      'button:has-text("Try as Guest")',
       'button:has-text("Play as Guest")',
       'button:has-text("Guest")',
       'button[aria-label*="guest" i]',
-      'button:has(.sr-only:has-text("Try without account"))',
+      'button:has(.sr-only:has-text("Try as Guest"))',
     ];
 
     for (const selector of guestSelectors) {
@@ -108,11 +108,11 @@ test.describe('Auth Flow - Debug', () => {
   });
 
   test('debug: guest mode click and inspect state', async ({ page }) => {
-    await page.goto(`${BASE_URL}/login`);
-    await page.waitForTimeout(1000);
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('button[type="submit"]', { timeout: 15000 });
 
     // Click guest button
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")', { timeout: 10000 });
     await page.waitForTimeout(3000);
 
     // Check URL
@@ -131,9 +131,9 @@ test.describe('Auth Flow - Debug', () => {
 
   test('debug: find logout button on dashboard', async ({ page }) => {
     // Login as guest
-    await page.goto(`${BASE_URL}/login`);
-    await page.click('button:has-text("Try without account")');
-    await page.waitForURL(/\/dashboard/, { timeout: 5000 });
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' });
+    await page.click('button:has-text("Try as Guest")', { timeout: 15000 });
+    await page.waitForURL(/\/dashboard/, { timeout: 10000 });
 
     // Look for logout button
     const logoutSelectors = [
@@ -162,9 +162,9 @@ test.describe('Auth Flow - Debug', () => {
 
   test('debug: find sign out button on settings for guest', async ({ page }) => {
     // Login as guest
-    await page.goto(`${BASE_URL}/login`);
-    await page.click('button:has-text("Try without account")');
-    await page.waitForURL(/\/dashboard/, { timeout: 5000 });
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded' });
+    await page.click('button:has-text("Try as Guest")', { timeout: 15000 });
+    await page.waitForURL(/\/dashboard/, { timeout: 10000 });
 
     // Go to settings
     await page.goto(`${BASE_URL}/settings`);
@@ -249,6 +249,17 @@ test.describe('Auth Flow - Login to Logout', () => {
   });
 
   test('2.1.1: complete login → dashboard → logout flow', async ({ page }) => {
+    // Pre-flight: verify backend is reachable before attempting real login
+    try {
+      const health = await page.request.get(`${BASE_URL}/api/v1/auth/me`, { timeout: 3000 });
+      // 401 is fine (means backend answered), anything else is okay too — we just need a response
+      if (!health) {
+        test.skip(true, 'Backend unreachable — cannot test real login');
+      }
+    } catch {
+      test.skip(true, 'Backend unreachable — cannot test real login');
+    }
+
     // Add delay to avoid rate limiting
     await delayLogin(page);
 
@@ -264,15 +275,18 @@ test.describe('Auth Flow - Login to Logout', () => {
     await page.click('button[type="submit"]');
 
     // Step 4: Verify redirect to dashboard (protected route)
-    // Check for rate limiting error first
-    await page.waitForTimeout(2000);
-    const pageText = await page.textContent('body');
+    // Check for rate limiting or login error first
+    await page.waitForTimeout(3000);
+    const pageText = (await page.textContent('body') ?? '').toLowerCase();
 
-    if (pageText?.includes('429')) {
+    if (pageText.includes('429') || pageText.includes('rate limit') || pageText.includes('too many')) {
       test.skip(true, 'Rate limited by backend - retry test later');
     }
+    if (pageText.includes('locked') || pageText.includes('account locked')) {
+      test.skip(true, 'Account locked from previous failed attempts');
+    }
 
-    await page.waitForURL(/\/dashboard/, { timeout: 5000 });
+    await page.waitForURL(/\/dashboard/, { timeout: 10000 });
     await expect(page).toHaveURL(/\/dashboard/);
 
     // Step 5: Verify auth state
@@ -381,7 +395,7 @@ test.describe('Auth Flow - Login to Logout', () => {
     await page.waitForTimeout(2000); // Wait for page to fully load
 
     // Step 2: Click guest mode button - simpler approach
-    await page.click('button:has-text("Try without account")', { timeout: 10000 });
+    await page.click('button:has-text("Try as Guest")', { timeout: 10000 });
 
     // Step 3: Verify redirect to dashboard
     await page.waitForURL(/\/dashboard/, { timeout: 3000 });
@@ -698,7 +712,7 @@ test.describe('Auth State Persistence', () => {
     await page.goto(`${BASE_URL}/login`);
 
     // Enter guest mode
-    await page.click('button:has-text("Try without account")', { timeout: 10000 });
+    await page.click('button:has-text("Try as Guest")', { timeout: 10000 });
     await page.waitForURL(/\/dashboard/, { timeout: 5000 });
 
     // Check localStorage has guest data
@@ -766,8 +780,8 @@ test.describe('Auth State Persistence', () => {
 
 test.describe('Auth Error Handling', () => {
   test('2.1.11: handles network errors gracefully', async ({ page }) => {
-    // Simulate network failure by going to an unreachable endpoint
-    await page.route('**/api/auth/login', route => route.abort());
+    // Simulate network failure — intercept any auth/login request regardless of API version
+    await page.route('**/auth/login', route => route.abort());
 
     await page.goto(`${BASE_URL}/login`);
     await page.fill('#login-email-input', TEST_USER.email);
@@ -778,14 +792,15 @@ test.describe('Auth Error Handling', () => {
     await page.waitForTimeout(2000);
 
     // Should show error message or remain on login page (not redirected)
-    const pageText = await page.textContent('body');
+    const pageText = (await page.textContent('body') ?? '').toLowerCase();
     const hasError =
-      pageText?.includes('Network') ||
-      pageText?.includes('connect') ||
-      pageText?.includes('try again') ||
-      pageText?.includes('error') ||
-      pageText?.includes('Failed') ||
-      pageText?.includes('fetch');
+      pageText.includes('network') ||
+      pageText.includes('connect') ||
+      pageText.includes('try again') ||
+      pageText.includes('error') ||
+      pageText.includes('failed') ||
+      pageText.includes('fetch') ||
+      pageText.includes('unable');
 
     // Alternatively, verify we're still on login page (network error prevented login)
     const stillOnLoginPage = page.url().includes('/login');
@@ -839,7 +854,7 @@ test.describe('Route Protection', () => {
 
     // Login as guest (simpler than real user login)
     await page.goto(`${BASE_URL}/login`);
-    await page.click('button:has-text("Try without account")', { timeout: 10000 });
+    await page.click('button:has-text("Try as Guest")', { timeout: 10000 });
     await page.waitForURL(/\/dashboard/, { timeout: 5000 });
 
     const accessibleRoutes = ['/dashboard', '/games', '/profile'];

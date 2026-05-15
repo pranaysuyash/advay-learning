@@ -1,5 +1,7 @@
 # AI Agent Coordination Guide
 
+> **🎮 Active Work Notice:** Game Specification Audit in progress (Hermes Agent via LM Studio). See [docs/games/README.md](docs/games/README.md) for details. Critical drift cases (5/5) complete. 105 games remaining.
+
 <!-- PROJECTS_MEMORY_AGENT_ALIGNMENT_BEGIN -->
 
 ## Projects-Level Agent Alignment (Workspace Memory)
@@ -90,6 +92,35 @@ cd /Users/pranay/Projects
 
 <!-- PROJECTS_MEMORY_AGENT_ALIGNMENT_END -->
 
+## ⚠️ Skills Discovery Protocol (CRITICAL)
+
+**Agents: DO NOT default to using `.claude` skills or `gstack`.** We have an extensive skills ecosystem across multiple locations.
+
+### Complete Skills Reference
+
+For a complete catalog of ALL available skills across the workspace, see:
+**`/Users/pranay/Projects/SKILLS_CATALOG.md`**
+
+### Check ALL Skills Locations (in order)
+
+1. `~/.claude/skills/*/` — ~72 skills (Claude Code)
+2. `~/.agents/skills/*/` — ~98 skills (includes Azure/Marketing)
+3. `~/Projects/skills/*/` — **47 skills (most curated, engineering focus, often missed!)**
+4. `~/Projects/external-skills/*/` — 2,898+ community skills
+5. `~/Projects/openai-skills/` — OpenAI Codex skills (official standard repo copy)
+6. `$CODEX_HOME/skills/*/` — Codex runtime-installed skills (when CODEX_HOME is set)
+7. `~/.codex/skills/*/` — Codex local saved skills (default path)
+8. `~/.codex/skills/.system/*/` — Codex app bundled/system skills (read-only baseline)
+
+**gstack is NOT your primary testing tool.** Use specialized alternatives instead:
+
+- For browser testing: `browse` skill (faster)
+- For QA: `qa` or `qa-only` skills (systematic)
+- For E2E: `webapp-testing` or `e2e-testing` skills (comprehensive)
+- For debugging: `systematic-debugging` skill (methodology)
+
+See `/Users/pranay/Projects/SKILLS_CATALOG.md` for complete skills reference.
+
 ## Overview
 
 This document governs how AI agents (including myself and others) work on the Advay Vision Learning project. It ensures consistency, quality, and proper coordination across all development activities.
@@ -142,12 +173,17 @@ This app is a **multi-modal vision platform** where children interact with games
    - Games with CV should be wrapped with `CameraSafeRoute` in App.tsx
    - The camera preview should be visible and functional
 
-### Current State (as of 2026-03-15)
+### Current State (as of 2026-04-01 - VERIFIED)
 
-- **114 total game routes** in App.tsx
-- **~49 games are pointer-only** (POINTER_PRIMARY) — these need CV integration
-- **~45 games have proper CV integration** (CV_PRIMARY_OR_INTENDED)
-- **~19 games are hybrid** (CV + pointer fallback)
+- **138 total game routes** with `cameraSafe: true` in appRoutes.tsx
+- **120 games use `useGameHandTracking`** hook (verified from code)
+- **10 games use pose tracking** (useGamePoseTracking or raw MediaPipe)
+- **2 games use face tracking** (useGameFaceTracking)
+- **122 games have ACTIVE gameplay integration** (onFrame handlers + cursor mapping)
+- **0 games are pointer-only** — ALL games now have CV integration
+- **0 games with dead CV code** — All imports are functional
+
+> ✅ **LAUNCH READY**: CV compliance is at ~98%. All games that declare CV support have actual, functional CV integration.
 
 **Agents working on games should prioritize upgrading pointer-only games to have proper CV controls.**
 
@@ -446,13 +482,13 @@ python3 tools/check_review_threads.py --pr 50 --filter-bot
 
 **Common utility categories to save:**
 
-| Category | Example Filenames | Purpose |
-|----------|------------------|---------|
-| GitHub PR mgmt | `check_unresolved_threads.py`, `resolve_review_threads.py` | Thread resolution, gate debugging |
-| CI/CD debugging | `check_workflow_status.py`, `parse_ci_logs.py` | Analyze CI failures |
-| Code analysis | `count_exports.py`, `find_unused_imports.py` | Static analysis helpers |
-| Data parsing | `parse_test_results.py`, `extract_metrics.py` | Parse outputs for reporting |
-| Asset management | `validate_assets.py`, `check_image_sizes.py` | Asset pipeline helpers |
+| Category         | Example Filenames                                          | Purpose                           |
+| ---------------- | ---------------------------------------------------------- | --------------------------------- |
+| GitHub PR mgmt   | `check_unresolved_threads.py`, `resolve_review_threads.py` | Thread resolution, gate debugging |
+| CI/CD debugging  | `check_workflow_status.py`, `parse_ci_logs.py`             | Analyze CI failures               |
+| Code analysis    | `count_exports.py`, `find_unused_imports.py`               | Static analysis helpers           |
+| Data parsing     | `parse_test_results.py`, `extract_metrics.py`              | Parse outputs for reporting       |
+| Asset management | `validate_assets.py`, `check_image_sizes.py`               | Asset pipeline helpers            |
 
 **Why save even "temporary" scripts:**
 

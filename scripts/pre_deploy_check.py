@@ -33,7 +33,7 @@ def check_migrations() -> tuple[bool, list[str]]:
     
     try:
         result = subprocess.run(
-            ["alembic", "current"],
+            [sys.executable, "-m", "alembic", "current"],
             cwd=BACKEND_DIR,
             capture_output=True,
             text=True
@@ -45,7 +45,7 @@ def check_migrations() -> tuple[bool, list[str]]:
         
         # Check if current is head
         result = subprocess.run(
-            ["alembic", "history", "--indicate-current"],
+            [sys.executable, "-m", "alembic", "history", "--indicate-current"],
             cwd=BACKEND_DIR,
             capture_output=True,
             text=True

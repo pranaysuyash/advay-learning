@@ -19,8 +19,10 @@ AI-powered interactive learning platform for young children (2-8 years) using co
 
 - Python 3.13+
 - Node.js 22+
-- PostgreSQL 14+
+- PostgreSQL 17+
+- Redis 7+ (for caching/sessions)
 - uv (Python package manager)
+- Docker & Docker Compose (for production-like local dev)
 
 ### Setup
 
@@ -54,7 +56,7 @@ pnpm dev
 
 Access:
 
-- Frontend: <http://localhost:5173>
+- Frontend: <http://localhost:6173> (Vite dev server)
 - Backend API: <http://localhost:8001>
 - API Docs: <http://localhost:8001/docs>
 
@@ -73,12 +75,14 @@ Use locally seeded development accounts only. Keep test credentials in local env
 
 ## 🏗️ Tech Stack
 
-- **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
-- **Backend**: Python 3.13+, FastAPI, SQLAlchemy
+- **Frontend**: React 19, TypeScript, Tailwind CSS, Vite
+- **Backend**: Python 3.13+, FastAPI, SQLAlchemy, Alembic
 - **CV Engine**: MediaPipe, TensorFlow.js, OpenCV
 - **3D Engine**: Three.js + React Three Fiber + Rapier Physics
-- **Database**: PostgreSQL (both dev and production)
+- **Database**: PostgreSQL 17
+- **Cache**: Redis 7 (sessions, caching)
 - **Storage**: AWS S3 / Local filesystem
+- **Deployment**: Docker Compose
 
 ### Game Development Stack
 
@@ -95,9 +99,35 @@ See [docs/architecture/GAME_ENGINES_AND_PHYSICS.md](docs/architecture/GAME_ENGIN
 
 ## 📚 Documentation
 
+### Getting Started
 - [AGENTS.md](AGENTS.md) - AI agent coordination guide
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System design
-- [docs/SETUP.md](docs/SETUP.md) - Detailed setup
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System architecture & design
+- [docs/SETUP.md](docs/SETUP.md) - Development environment setup
+- [docs/QUICKSTART.md](docs/QUICKSTART.md) - Quick start guide
+
+### Operations & Deployment
+- [docs/runbooks/BACKUP_PROCEDURE.md](docs/runbooks/BACKUP_PROCEDURE.md) - Database backup & restore
+- [docs/runbooks/MONITORING.md](docs/runbooks/MONITORING.md) - Uptime monitoring setup
+- [docs/runbooks/ROLLBACK_PROCEDURE.md](docs/runbooks/ROLLBACK_PROCEDURE.md) - Deployment rollback
+
+### Security & Compliance  
+- [docs/security/SECURITY.md](docs/security/SECURITY.md) - Security guidelines & privacy policy
+- [docs/LINTING_GUIDELINES.md](docs/LINTING_GUIDELINES.md) - Code quality guidelines
+
+### Games
+- [docs/games/README.md](docs/games/README.md) - Game specifications & audit documentation
+
+### 🎮 Game Specification Audit (In Progress)
+
+**Status:** Critical drift cases complete (5/5), 105 games remaining  
+**Agent:** Hermes Agent (LM Studio)  
+**Started:** March 20, 2026
+
+Comprehensive reverse-engineering audit of all 110+ educational games. Each game receives a 23-section specification covering current implementation, intended design, drift analysis, and recommendations.
+
+**Key Finding:** Word Builder requires phonics audio implementation (critical educational gap).
+
+See [docs/games/CRITICAL_DRIFT_CASES_COMPLETE_REPORT.md](docs/games/CRITICAL_DRIFT_CASES_COMPLETE_REPORT.md) for audit summary.
 - [docs/SECURITY.md](docs/security/SECURITY.md) - Security guidelines
 - [docs/LINTING_GUIDELINES.md](docs/LINTING_GUIDELINES.md) - Linting guidelines
 - [docs/POST_ERROR_RESOLUTION_PLAN.md](docs/POST_ERROR_RESOLUTION_PLAN.md) - Post-resolution work plan
@@ -125,6 +155,15 @@ See [docs/architecture/GAME_ENGINES_AND_PHYSICS.md](docs/architecture/GAME_ENGIN
 **Evidence**: TCK-20260131-008 (Priority 8) updated settings and both frontend and backend linters working correctly.
 
 ### Common Development Issues
+
+See [docs/SETUP.md#troubleshooting](docs/SETUP.md#troubleshooting) for comprehensive troubleshooting guide covering:
+- Git hooks failures
+- Database connection issues
+- Redis connection issues
+- Port conflicts
+- uv command failures
+
+**Quick fixes:**
 
 **Problem**: Frontend tests failing due to vite/dependency issues
 **Solution**: Always run `pnpm install` after package.json changes, clear `node_modules/.vite` cache if needed

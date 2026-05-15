@@ -198,7 +198,7 @@ describe('Game pages smoke tests', () => {
     it('renders without throwing and shows key UI', () => {
       expect(() => renderInRouter(<ObstacleCourse />)).not.toThrow();
       expect(
-        screen.queryByText('Obstacle Course') ||
+        screen.queryAllByText('Obstacle Course').length > 0 ||
           screen.queryByText(/Loading Obstacle Course/),
       ).toBeTruthy();
     });

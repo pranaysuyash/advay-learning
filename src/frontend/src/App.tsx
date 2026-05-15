@@ -19,6 +19,13 @@ import './styles/cv-cursor.css';
 
 import { appRoutes } from './routes/appRoutes';
 
+/** Only mount GlobalCVCursor on game routes to avoid heavy CV init on non-game pages */
+function GlobalCVCursorGate() {
+  const location = useLocation();
+  if (!location.pathname.startsWith('/games/')) return null;
+  return <GlobalCVCursor />;
+}
+
 // Loading component for suspense boundaries
 const PageLoader = () => (
   <div className='flex items-center justify-center min-h-screen'>
@@ -103,7 +110,7 @@ function App() {
           </CalmModeProvider>
         </ConfirmProvider>
       </ToastProvider>
-      <GlobalCVCursor />
+      <GlobalCVCursorGate />
     </SpatialInputProvider>
   );
 }

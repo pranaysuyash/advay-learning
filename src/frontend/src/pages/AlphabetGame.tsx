@@ -88,6 +88,7 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const markLetterAttempt = useProgressStore(
     (state) => state.markLetterAttempt,
   );
+  const fetchProfiles = useProfileStore((state) => state.fetchProfiles);
 
   const [error, setError] = useState<Error | null>(null);
 
@@ -121,31 +122,6 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const { completeGame } = useGameCompletion('alphabet-tracing');
   const { speakWordExample } = usePhonics();
 
-  // Wrap completeGame to match useGameHandlers expected signature
-  const handleGameComplete = useCallback(() => {
-    // Track analytics
-    trackGameActivity({
-      activityType: 'letter_tracing',
-      contentId: `letter-${currentLetter || 'A'}`,
-      score: Math.round(score),
-      durationSeconds: Math.round(gameTime),
-      metadata: {
-        language: selectedLanguage,
-        accuracy: accuracy,
-        streak,
-      },
-    });
-
-    void completeGame({ score, level: 1 });
-  }, [
-    completeGame,
-    score,
-    currentLetter,
-    gameTime,
-    selectedLanguage,
-    accuracy,
-    streak,
-  ]);
   const [streak, setStreak] = useState<number>(0);
   const [scorePopup, setScorePopup] = useState<{ points: number } | null>(null);
   const [showStreakMilestone, setShowStreakMilestone] = useState(false);
@@ -293,7 +269,6 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   }, [isPlaying, isHandTrackingReady]);
 
   useEffect(() => {
-    let cancelled = false;
     const hasCompletedTutorial =
       localStorage.getItem(ALPHABET_GAME_TUTORIAL_KEY) === 'true';
     setTutorialCompleted(hasCompletedTutorial);
@@ -308,9 +283,6 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
       }
     };
     loadProfiles();
-    return () => {
-      cancelled = true;
-    };
   }, [isGuest, fetchProfiles]);
 
   // Bootstrap camera permission on mount (Permissions API + getUserMedia fallback)
@@ -328,7 +300,6 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
   const profiles = useProfileStore((state) => state.profiles);
   const currentProfile = useProfileStore((state) => state.currentProfile);
   const isProfilesLoading = useProfileStore((state) => state.isLoading);
-  const fetchProfiles = useProfileStore((state) => state.fetchProfiles);
   const profilesError = useProfileStore((state) => state.error);
 
   // Single, stable initialization effect for profiles
@@ -433,6 +404,32 @@ const AlphabetGameGame = React.memo(function AlphabetGameComponent() {
           : 'text-text-error',
     [accuracy],
   );
+
+  // Wrap completeGame to match useGameHandlers expected signature
+  // Moved here after all state declarations to avoid "used before declaration" errors
+  const handleGameComplete = useCallback(() => {
+    // Track analytics
+    trackGameActivity({
+      activityType: 'letter_tracing',
+      contentId: `letter-${currentLetter || 'A'}`,
+      score: Math.round(score),
+      durationSeconds: 0, // gameTime tracking not implemented
+      metadata: {
+        language: selectedLanguage,
+        accuracy: accuracy,
+        streak,
+      },
+    });
+
+    void completeGame({ score, level: 1 });
+  }, [
+    completeGame,
+    score,
+    currentLetter,
+    selectedLanguage,
+    accuracy,
+    streak,
+  ]);
 
   // Restore session on mount (if valid)
   useEffect(() => {

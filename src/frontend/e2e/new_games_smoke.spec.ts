@@ -29,7 +29,7 @@ test.describe('New Games Smoke Tests', () => {
     await page.waitForLoadState('networkidle');
     
     // Click guest login
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")');
     await page.waitForURL('**/dashboard', { timeout: 15000 });
     await page.waitForLoadState('networkidle');
   });
@@ -130,7 +130,7 @@ test.describe('New Games Visual Smoke Tests', () => {
     
     // Login
     await page.goto(`${BASE}/login`);
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")');
     await page.waitForURL('**/dashboard', { timeout: 15000 });
     
     for (const game of NEW_GAMES) {

@@ -108,7 +108,7 @@ describe('useGameProgress', () => {
 
       await expect(
         result.current.saveProgress({ score: 10, completed: true }),
-      ).rejects.toThrow('No profile selected');
+      ).rejects.toThrow('Cannot save progress without an active profile');
     });
 
     it('throws when queue returns failure', async () => {

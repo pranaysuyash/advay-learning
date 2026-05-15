@@ -1,0 +1,24 @@
+AGENT PIPELINE TEST STATUS
+===========================
+Date: 2026-04-19
+
+PROJECT: learning_for_kids backend agent pipeline
+
+CURRENT STATE:
+- No existing agent pipeline implementation found in src/backend
+- No suitability/decision modules found
+- Backend has services for: account, achievement, audit, cache, game, profile, etc.
+- No vision/object detection services found
+
+PROPOSED TEST STRUCTURE:
+1. Stage 1: Image Input Agent (load & validate bottle.jpeg)
+2. Stage 2: Vision Agent (detect objects using local model/API)
+3. Stage 3: Classification Agent (classify object type)
+4. Stage 4: Decision Agent (decide what to do with classification)
+5. Stage 5 (Gemini): LLM Agent (generate contextual response)
+
+NEXT STEPS:
+- Create bottle.jpeg test image
+- Implement minimal agent pipeline
+- Test each stage with real input/output
+- Integrate Gemini for Stage 5

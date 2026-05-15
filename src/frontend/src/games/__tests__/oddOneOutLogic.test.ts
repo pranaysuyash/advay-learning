@@ -516,10 +516,10 @@ describe('category validation', () => {
 
   it('animals category has expected items', () => {
     expect(CATEGORY_BANKS.animals).toContainEqual(
-      { name: 'Dog', emoji: '🐕', category: 'animal' }
+      { name: 'Dog', emoji: '🐕', category: 'animal', image: '/assets/items/creatures/dog.png' }
     );
     expect(CATEGORY_BANKS.animals).toContainEqual(
-      { name: 'Cat', emoji: '🐱', category: 'animal' }
+      { name: 'Cat', emoji: '🐱', category: 'animal', image: '/assets/items/creatures/cat.png' }
     );
   });
 });

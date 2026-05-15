@@ -6,8 +6,6 @@
  */
 
 import type { ReactNode } from 'react';
-import * as lazyPages from './lazyPages';
-import { VerifyEmail } from './lazyPages';
 
 // ── TYPES ─────────────────────────────────────────────────────────────
 
@@ -23,7 +21,7 @@ export interface AppRoute {
   redirectTo?: string;
 }
 
-// ── GAME COMPONENT IMPORTS ──────────────────────────────────────────
+// ── GAME COMPONENT IMPORTS (all lazy-loaded for code splitting) ──────
 
 import {
   Home,
@@ -113,7 +111,6 @@ import {
   FeedTheMonster,
   ShapeStacker,
   SizeSorting,
-  DigitalJenga3D,
   WeatherMatch,
   FractionPizza,
   TimeTell,
@@ -150,6 +147,19 @@ import {
   DinosaurDig,
   LightPainter,
   TidyUpTime,
+  DiscoveryLab,
+  SpellPainter,
+  MusicConductor,
+  BubbleBiology,
+  MirrorMaze,
+  FingerPaintingMadness,
+  MazeRunner,
+  MidlineViolator,
+  BubblePop,
+  RhymeTime,
+  PhysicsPlayground,
+  CircuitBuilder,
+  DigitalJenga3D,
   DressForWeather3D,
   ObstacleCourse3D,
   FeedTheMonster3D,
@@ -161,28 +171,30 @@ import {
   ShapePop3D,
   CountingCollectathon3D,
   PatternPop3D2,
+  ISSDocking3D,
   Progress,
   Settings,
-  StyleTest,
   MediaPipeTest,
-  InventoryPage,
-  DiscoveryLab,
-  SpellPainter,
-  MusicConductor,
-  BubbleBiology,
-  MirrorMaze,
+  VerifyEmail,
   FingerNumberShow,
-  FingerPaintingMadness,
-  ISSDocking3D,
-  MazeRunner,
-  MidlineViolator,
-  BubblePop,
-  RhymeTime,
-  PhysicsPlayground,
-  CircuitBuilder,
-} from '../pages';
-
-const { Progress, Settings, StyleTest, MediaPipeTest } = lazyPages;
+  StyleTest,
+  InventoryPage,
+  // Word Workshop - New Literacy Games
+  WordFamilies,
+  SpellingBee,
+  WordScramble,
+  LetterMatch,
+  PhonicsFun,
+  CompoundWords,
+  WordLadder,
+  SentenceBuilder,
+  MagicE,
+  OppositesAttract,
+  SynonymMatch,
+  AntonymHunt,
+  ConsonantQuest,
+  NumberNinja,
+} from './lazyPages';
 
 // ── ROUTE DEFINITIONS ────────────────────────────────────────────────
 
@@ -870,7 +882,7 @@ export const appRoutes: AppRoute[] = [
     element: <CountingCollectathon />,
     protected: true,
     cameraSafe: true,
-    gameName: 'Counting Collect-a-thon',
+    gameName: 'Counting Collectathon',
   },
   {
     path: '/games/iss-docking-3d',
@@ -1142,6 +1154,20 @@ export const appRoutes: AppRoute[] = [
     cameraSafe: true,
     gameName: 'Pattern Pop 3D - Extra',
   },
+  {
+    path: '/games/pattern-pop-3d',
+    element: <ShapePop3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Pattern Pop 3D',
+  },
+  {
+    path: '/games/pattern-cut-3d',
+    element: <CuttingPractice3D />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Pattern Cut 3D',
+  },
 
   // User Pages
   { path: '/progress', element: <Progress />, protected: true, layout: true },
@@ -1204,5 +1230,105 @@ export const appRoutes: AppRoute[] = [
     protected: true,
     cameraSafe: true,
     gameName: 'Finger Painting Madness',
+  },
+
+  // Word Workshop - New Literacy Games
+  {
+    path: '/games/word-families',
+    element: <WordFamilies />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Word Families',
+  },
+  {
+    path: '/games/spelling-bee',
+    element: <SpellingBee />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Spelling Bee',
+  },
+  {
+    path: '/games/word-scramble',
+    element: <WordScramble />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Word Scramble',
+  },
+  {
+    path: '/games/letter-match',
+    element: <LetterMatch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Letter Match',
+  },
+  {
+    path: '/games/phonics-fun',
+    element: <PhonicsFun />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Phonics Fun',
+  },
+  {
+    path: '/games/compound-words',
+    element: <CompoundWords />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Compound Words',
+  },
+  {
+    path: '/games/word-ladder',
+    element: <WordLadder />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Word Ladder',
+  },
+  {
+    path: '/games/sentence-builder',
+    element: <SentenceBuilder />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Sentence Builder',
+  },
+  {
+    path: '/games/magic-e',
+    element: <MagicE />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Magic E',
+  },
+  {
+    path: '/games/opposites-attract',
+    element: <OppositesAttract />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Opposites Attract',
+  },
+  {
+    path: '/games/synonym-match',
+    element: <SynonymMatch />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Synonym Match',
+  },
+  {
+    path: '/games/antonym-hunt',
+    element: <AntonymHunt />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Antonym Hunt',
+  },
+  {
+    path: '/games/consonant-quest',
+    element: <ConsonantQuest />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Consonant Quest',
+  },
+  {
+    path: '/games/number-ninja',
+    element: <NumberNinja />,
+    protected: true,
+    cameraSafe: true,
+    gameName: 'Number Ninja',
   },
 ];

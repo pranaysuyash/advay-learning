@@ -52,7 +52,9 @@ if command -v gitleaks >/dev/null 2>&1; then
 fi
 
 has_docker=false
-if command -v docker >/dev/null 2>&1; then
+# Avoid probing Docker when local gitleaks is available; docker info can hang
+# on machines where the daemon is unavailable.
+if [[ "$has_local_gitleaks" != true ]] && command -v docker >/dev/null 2>&1; then
   if docker info >/dev/null 2>&1; then
     has_docker=true
   fi

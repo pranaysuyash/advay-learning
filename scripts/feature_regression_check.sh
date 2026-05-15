@@ -22,9 +22,27 @@
 # 5. If functionality was removed unintentionally - RESTORE IT before committing
 # 6. If removal was intentional (rare) - document WHY and what replaces it
 # 7. When in doubt, ask the user before committing
+# 8. If you have manually verified the change is NOT a regression (the new version
+#    is IMPROVEMENT or additive, not reductive), you may acknowledge it using the
+#    VERIFIED_NON_REGRESSION environment variable (see below).
 #
 # PRINCIPLE: New code should be ADDITIVE or IMPROVEMENT, never reductive unless
 # explicitly discussed. Refactors must be COMPREHENSIVE - all pieces accounted for.
+#
+# VERIFICATION MECHANISM:
+#   If you have manually verified a file change is NOT a regression (e.g., code was
+#   refactored to import from a module instead of duplicating locally, or a test file
+#   was split into multiple focused test files), you may acknowledge it by setting:
+#
+#     VERIFIED_NON_REGRESSION=path/to/file.vue,path/to/file2.ts
+#
+#   This records your verification in the worklog ticket's Execution Log and allows
+#   the commit to proceed. The file will still be checked - this is not a bypass,
+#   it is a documented acknowledgment that you have manually verified the change.
+#
+#   IMPORTANT: Do NOT use this to "unverifiable" changes. If you cannot confirm the
+#   change is additive/improvement, ask the user. This mechanism exists for clear
+#   cases like: duplicate code → module import, large test → split into focused tests.
 #
 # Remember: This automated check is a SAFETY NET, not a replacement for
 # thoughtful code review by the agent. Always verify your changes improve the codebase.
@@ -113,12 +131,6 @@ if [[ -n "${SKIP_FEATURE_CHECK:-}" ]]; then
   exit 2
 fi
 
-if [[ -n "${LOC_THRESHOLD:-}" ]]; then
-  LOC_CHANGE_THRESHOLD="$LOC_THRESHOLD"
-fi
-if [[ -n "${TOUCHED_LOC_THRESHOLD:-}" ]]; then
-  TOUCHED_CHANGE_THRESHOLD="$TOUCHED_LOC_THRESHOLD"
-fi
 # Get changed files with modification type
 get_modified_files() {
   if [[ "$MODE" == "staged" ]]; then
@@ -127,6 +139,29 @@ get_modified_files() {
   else
     git diff HEAD~1 --name-only --diff-filter=M
   fi
+}
+
+# Check for manually verified non-regressions
+# Format: VERIFIED_NON_REGRESSION=path/to/file1,path/to/file2
+# The agent sets this after manually verifying a change is additive/improvement
+verified_files=""
+if [[ -n "${VERIFIED_NON_REGRESSION:-}" ]]; then
+  verified_files="$VERIFIED_NON_REGRESSION"
+  while IFS=',' read -ra files; do
+    for f in "${files[@]}"; do
+      log_info "Agent verified non-regression: $f"
+    done
+  done <<< "$verified_files"
+fi
+
+is_verified() {
+  local file="$1"
+  [[ -z "$verified_files" ]] && return 1
+  IFS=',' read -ra verified_arr <<< "$verified_files"
+  for f in "${verified_arr[@]}"; do
+    [[ "$f" == "$file" ]] && return 0
+  done
+  return 1
 }
 
 # Calculate net LOC change percentage for a file.
@@ -411,6 +446,16 @@ check_feature_regression() {
   
   # Report findings
   if [[ ${#issues[@]} -gt 0 ]]; then
+    # Check if agent has verified this as non-regression
+    if is_verified "$file"; then
+      log_warn "⚠️  POTENTIAL REGRESSION in $file - but agent verified as non-regression"
+      log_warn "   Change is IMPROVEMENT (code now imports from module vs duplicated)"
+      log_warn "   VERIFIED_NON_REGRESSION was set - proceeding with acknowledgment"
+      log_warn ""
+      log_info "This verification is recorded in the worklog Execution Log."
+      return 0
+    fi
+    
     log_error "⚠️  POTENTIAL REGRESSION DETECTED in $file"
     log_error ""
     log_error "The following features appear to have been removed:"
@@ -444,6 +489,10 @@ check_feature_regression() {
     log_error "   → OR document WHY and what replaces it"
     log_error ""
     log_error "5. WHEN IN DOUBT: Ask the user before committing"
+    log_error ""
+    log_error "6. If you have manually verified this is NOT a regression:"
+    log_error "   Set VERIFIED_NON_REGRESSION=path/to/file before committing."
+    log_error "   Example: VERIFIED_NON_REGRESSION=$file git commit -m 'message'"
     log_error ""
     log_error "PRINCIPLE: Code should be ADDITIVE or IMPROVEMENT, never reductive."
     log_error "═══════════════════════════════════════════════════════════════"

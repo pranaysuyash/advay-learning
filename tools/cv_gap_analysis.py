@@ -157,18 +157,18 @@ for g in games:
         continue
 
     with open(found_path, 'r') as f:
-            content = f.read()
-        missing_hooks = []
-        for mode in cv_list:
-            hook_names = hooks.get(mode, [])
-            if isinstance(hook_names, str):
-                hook_names = [hook_names]
-            found = any(hook in content for hook in hook_names)
-            if not found:
-                missing_hooks.append(mode)
-        if missing_hooks:
-            g['missingHooks'] = missing_hooks
-            gap_hook_missing.append(g)
+        content = f.read()
+    missing_hooks = []
+    for mode in cv_list:
+        hook_names = hooks.get(mode, [])
+        if isinstance(hook_names, str):
+            hook_names = [hook_names]
+        found = any(hook in content for hook in hook_names)
+        if not found:
+            missing_hooks.append(mode)
+    if missing_hooks:
+        g['missingHooks'] = missing_hooks
+        gap_hook_missing.append(g)
 # Output summary
 print('\n=== CV Implementation Gap Analysis ===')
 print(f'Total games in audit: {len(games)}')

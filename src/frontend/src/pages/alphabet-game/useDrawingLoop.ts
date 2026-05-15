@@ -72,15 +72,22 @@ export function useDrawingLoop({
       const video = webcam?.video;
 
       if (!canvas) {
-        rafIdRef.current = requestAnimationFrame(loop);
+        if (!cancelled) {
+          rafIdRef.current = requestAnimationFrame(loop);
+        }
         return;
       }
 
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        rafIdRef.current = requestAnimationFrame(loop);
+        if (!cancelled) {
+          rafIdRef.current = requestAnimationFrame(loop);
+        }
         return;
       }
+
+      // Double-check cancelled before any drawing operations
+      if (cancelled) return;
 
       const hasVideoFrame =
         !!video &&
@@ -112,13 +119,16 @@ export function useDrawingLoop({
 
       // Draw hint with better visibility
       if (showHints) {
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        ctx.shadowBlur = 4;
-        drawLetterHint(ctx, currentLetterChar, canvas.width, canvas.height);
-        ctx.shadowBlur = 0;
+        // Guard: ensure canvas is still in DOM and context is valid
+        if (!cancelled && canvas.isConnected && typeof ctx.translate === 'function') {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 4;
+          drawLetterHint(ctx, currentLetterChar, canvas.width, canvas.height);
+          ctx.shadowBlur = 0;
 
-        // Draw animated direction arrow to guide tracing
-        drawDirectionArrow(ctx, canvas.width, canvas.height, currentLetterChar, animationProgress, currentLetterColor);
+          // Draw animated direction arrow to guide tracing
+          drawDirectionArrow(ctx, canvas.width, canvas.height, currentLetterChar, animationProgress, currentLetterColor);
+        }
       }
 
       // Draw all segments with improved smoothing (quadratic bezier)
@@ -246,7 +256,9 @@ export function useDrawingLoop({
         smoothedTipRef.current = null;
       }
 
-      rafIdRef.current = requestAnimationFrame(loop);
+      if (!cancelled) {
+        rafIdRef.current = requestAnimationFrame(loop);
+      }
     };
 
     rafIdRef.current = requestAnimationFrame(loop);

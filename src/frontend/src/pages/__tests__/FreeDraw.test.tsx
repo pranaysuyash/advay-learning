@@ -63,7 +63,7 @@ describe('FreeDraw page', () => {
       </MemoryRouter>,
     );
 
-    // the component renders a premium game message when access is denied
-    expect(screen.getByText(/Premium Game/i)).toBeInTheDocument();
+    // the component renders a locked game message when access is denied
+    expect(screen.getByText(/Locked Game/i)).toBeInTheDocument();
   });
 });

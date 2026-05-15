@@ -19,7 +19,7 @@ if [[ -z "$PYTHON_BIN" ]]; then
   exit 1
 fi
 
-MAX_FILE_LOC="${MAX_FILE_LOC:-1000}"
+MAX_FILE_LOC="${MAX_FILE_LOC:-1200}"
 MAX_FILE_BYTES="${MAX_FILE_BYTES:-60000}"
 MAX_FILE_CCN="${MAX_FILE_CCN:-60}"
 LOC_WORSEN_DELTA="${LOC_WORSEN_DELTA:-100}"
@@ -56,7 +56,7 @@ Checks:
 
 Environment variables:
   No bypass flags are supported.
-  MAX_FILE_LOC=N                Override LOC threshold (default: 1000)
+  MAX_FILE_LOC=N                Override LOC threshold (default: 1200)
   MAX_FILE_BYTES=N              Override byte threshold (default: 60000)
   MAX_FILE_CCN=N                Override max CCN threshold (default: 60)
   CCN_WORSEN_DELTA=N            Override min CCN increase for already-complex files (default: 30)

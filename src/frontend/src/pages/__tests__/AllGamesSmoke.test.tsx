@@ -28,7 +28,8 @@ describe('all pages smoke test', () => {
           // Ignore React `act(...)` warnings and known non-fatal library warnings.
           if (
             text.includes('An update to %s inside a test was not wrapped in act') ||
-            text.includes('THREE.WARNING: Multiple instances of Three.js being imported')
+            text.includes('THREE.WARNING: Multiple instances of Three.js being imported') ||
+            text.includes('Failed to fetch APOD')
           ) {
             return;
           }

@@ -14,7 +14,7 @@
  * - Mouse Mode: Arrow keys or WASD to steer
  */
 
-import { memo, useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { GameShell } from '../components/GameShell';

@@ -25,7 +25,7 @@ test.describe('Canvas Visual Regression', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${BASE}/login`);
     await page.waitForLoadState('networkidle');
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")');
     await page.waitForURL('**/dashboard', { timeout: 15000 });
   });
 
@@ -101,7 +101,7 @@ test.describe('Canvas Performance Metrics', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${BASE}/login`);
     await page.waitForLoadState('networkidle');
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")');
     await page.waitForURL('**/dashboard', { timeout: 15000 });
   });
 
@@ -210,7 +210,7 @@ test.describe('Canvas Error Handling', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${BASE}/login`);
     await page.waitForLoadState('networkidle');
-    await page.click('button:has-text("Try without account")');
+    await page.click('button:has-text("Try as Guest")');
     await page.waitForURL('**/dashboard', { timeout: 15000 });
   });
 

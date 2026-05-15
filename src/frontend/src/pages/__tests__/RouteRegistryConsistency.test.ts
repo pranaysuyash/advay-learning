@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { GAME_REGISTRY } from '../../data/gameRegistry';
 
 const APP_SOURCE = fs.readFileSync(
-  path.resolve(__dirname, '../../App.tsx'),
+  path.resolve(__dirname, '../../routes/appRoutes.tsx'),
   'utf8',
 );
 
@@ -31,7 +31,9 @@ describe('Route and registry consistency', () => {
       (game) => game.path,
     );
 
-    const missingRoutes = listedGamePaths.filter((path) => !appRoutes.has(path));
+    const missingRoutes = listedGamePaths.filter(
+      (path) => !appRoutes.has(path),
+    );
 
     expect(missingRoutes).toEqual([]);
   });
