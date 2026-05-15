@@ -55,7 +55,7 @@
 ### Controls
 - **Hand pinch:** Start/stop drawing
 - **Hand movement:** Trace letter shape
-- **CV only:** No mouse/keyboard fallback (CV-primary design)
+- **Primary controls:** Hand pinch drawing with mouse/touch fallback and keyboard pause/escape support
 
 ### Mechanics
 - Pinch to start drawing
@@ -118,7 +118,7 @@ Based on manifest and code evidence:
 🌟 Multiple icon choices per letter  
 
 ### Where Implementation Falls Short
-⚠️ No phonics audio feedback (mentioned in docs but not implemented)  
+✅ Phonics audio feedback is implemented via usePhonics (spoken examples and prompts)  
 ⚠️ Limited error correction guidance  
 ⚠️ No collaborative/multiplayer mode  
 

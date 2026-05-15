@@ -7,6 +7,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import Webcam from 'react-webcam';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
@@ -106,13 +107,10 @@ interface ColorMatchGameState {
 
 // Main game component
 export default function ColorMatchGarden3D() {
+  const webcamRef = useRef<Webcam>(null);
   const { playSFX } = use3DGameAudio();
   const { completeGame } = useGameCompletion('color-match-garden-3d');
-
-  const { cursor, isReady, startTracking, stopTracking } = useGameHandTracking({
-    gameName: 'ColorMatchGarden3D',
-    targetFps: 30,
-  });
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   const [gameState, setGameState] = useState<ColorMatchGameState>({
     targets: [],
@@ -151,8 +149,7 @@ export default function ColorMatchGarden3D() {
     }));
     setShowStartScreen(false);
     playSFX('start');
-    startTracking();
-  }, [playSFX, startTracking, initializeRound]);
+  }, [playSFX, initializeRound]);
 
   const handleSelectFlower = useCallback(
     (targetId: number) => {
@@ -216,6 +213,35 @@ export default function ColorMatchGarden3D() {
     [playSFX, completeGame],
   );
 
+  const handleCvFrame = useCallback((frame: any) => {
+    const tip = frame.indexTip;
+    if (!tip) {
+      setCursor(null);
+      return;
+    }
+    setCursor(tip);
+    if (showStartScreen || showCelebration || frame.pinch?.transition !== 'start') return;
+    const nearest = gameState.targets
+      .filter((t) => !gameState.foundTargets.includes(t.id))
+      .map((t) => {
+        const dx = tip.x - t.position.x;
+        const dy = tip.y - t.position.y;
+        return { id: t.id, dist: Math.sqrt(dx * dx + dy * dy) };
+      })
+      .sort((a, b) => a.dist - b.dist)[0];
+    if (nearest && nearest.dist < GAME_CONFIG.TARGET_RADIUS) {
+      handleSelectFlower(nearest.id);
+    }
+  }, [gameState.targets, gameState.foundTargets, handleSelectFlower, showStartScreen, showCelebration]);
+
+  const { isReady, stopTracking } = useGameHandTracking({
+    gameName: 'ColorMatchGarden3D',
+    targetFps: 30,
+    webcamRef,
+    onFrame: handleCvFrame,
+    isRunning: !showStartScreen && !showCelebration,
+  });
+
   useFrame(() => {
     if (showStartScreen || showCelebration) return;
 
@@ -238,7 +264,7 @@ export default function ColorMatchGarden3D() {
 
   return (
     <GameShell gameId='color-match-garden-3d' gameName='Color Match Garden 3D'>
-      <GameContainer>
+      <GameContainer webcamRef={webcamRef} isHandDetected={!!cursor} isPlaying={!showStartScreen && !showCelebration}>
         <ThreeDGameCanvas
           environment='forest'
           showFPS={import.meta.env.DEV}

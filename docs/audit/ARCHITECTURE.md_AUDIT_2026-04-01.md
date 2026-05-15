@@ -15,9 +15,9 @@
 |--------|-------|
 | **Critical Issues** | 0 ✅ |
 | **High Issues** | 0 ✅ |
-| **Medium Issues** | 0 ✅ |
+| **Medium Issues** | 2 ⚠️ |
 | **Low Issues** | 0 ✅ |
-| **Overall Status** | ✅ **RESOLVED** |
+| **Overall Status** | ⚠️ **PARTIALLY RESOLVED** |
 
 The ARCHITECTURE.md has **significant inaccuracies** that could mislead developers. Most critical: documents Node.js/Express backend when actual backend is **Python/FastAPI**.
 

@@ -15,9 +15,9 @@
 |--------|-------|
 | **Critical Issues** | 0 ✅ |
 | **High Issues** | 0 ✅ |
-| **Medium Issues** | 0 ✅ |
+| **Medium Issues** | 1 ⚠️ |
 | **Low Issues** | 0 ✅ |
-| **Overall Status** | ✅ **RESOLVED** |
+| **Overall Status** | ⚠️ **PARTIALLY RESOLVED** |
 
 QUICKSTART.md is **outdated compared to SETUP.md**. It has incorrect Node.js version, missing database prerequisites, and incorrect setup commands.
 

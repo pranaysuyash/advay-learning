@@ -100,15 +100,15 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
     setBubbles(createBubbles());
 
     // Show pattern
-    const showPattern = () => {
-      if (patternIndex >= newPattern.sequence.length) {
+    const showPattern = (idx: number) => {
+      if (idx >= newPattern.sequence.length) {
         setShowingPattern(false);
         setFeedback('Your turn! Pop the bubbles in order.');
         speak('Your turn!');
         return;
       }
 
-      const bubbleId = newPattern.sequence[patternIndex];
+      const bubbleId = newPattern.sequence[idx];
       setBubbles(prev => prev.map(b =>
         b.id === bubbleId ? { ...b, popping: true } : b
       ));
@@ -117,12 +117,12 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
         setBubbles(prev => prev.map(b =>
           b.id === bubbleId ? { ...b, popping: false } : b
         ));
-        setPatternIndex(prev => prev + 1);
-        setTimeout(showPattern, 500);
+        setPatternIndex(idx + 1);
+        setTimeout(() => showPattern(idx + 1), 500);
       }, 600);
     };
 
-    setTimeout(showPattern, 1000);
+    setTimeout(() => showPattern(0), 1000);
   }, [speak]);
 
   useEffect(() => {
@@ -308,11 +308,15 @@ const PatternPop3D2Content = memo(function PatternPop3D2Component() {
       }
     };
 
+    let rafId = 0;
     const animate = () => {
       render();
-      requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(animate);
     };
     animate();
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [bubbles, pattern, showingPattern, patternIndex, playerIndex]);
 
   const handleStart = useCallback(() => {

@@ -19,6 +19,7 @@
  */
 
 import { useEffect, useRef, useContext } from 'react';
+import Webcam from 'react-webcam';
 import { SpatialInputContext, DEFAULT_CURSOR_STATE } from '../../context/SpatialInputContext';
 import { KenneyHandCursor } from './KenneyHandCursor';
 import { useCommonCvController } from '../../controllers/commonCvController';
@@ -38,7 +39,7 @@ export function GlobalCVCursor({
   showTrail = true,
   clickDebounceMs = 500,
 }: GlobalCVCursorProps) {
-  const { isReady, cursor: _cvCursor, startTracking, stopTracking } = useCommonCvController('GlobalCVCursor');
+  const { isReady, cursor: _cvCursor, startTracking, stopTracking, webcamRef } = useCommonCvController('GlobalCVCursor');
   // cvCursor is the 2D coordinate produced by the CV hook; actual rendering
   // still relies on SpatialInputContext's cursor state which is updated by the common controller.
   const { cursor } = useContext(SpatialInputContext) ?? { cursor: DEFAULT_CURSOR_STATE };
@@ -97,7 +98,11 @@ export function GlobalCVCursor({
       if (cursorRef.current) {
         cursorRef.current.style.pointerEvents = 'none';
       }
-      const el = document.elementFromPoint(cur.position.x, cur.position.y);
+      const point =
+        cur.position.x <= 1 && cur.position.y <= 1
+          ? { x: cur.position.x * window.innerWidth, y: cur.position.y * window.innerHeight }
+          : cur.position;
+      const el = document.elementFromPoint(point.x, point.y);
       if (cursorRef.current) {
         cursorRef.current.style.pointerEvents = '';
       }
@@ -163,6 +168,15 @@ export function GlobalCVCursor({
         zIndex: 9999,
       }}
     >
+      <Webcam
+        ref={webcamRef}
+        audio={false}
+        mirrored
+        screenshotFormat='image/jpeg'
+        videoConstraints={{ facingMode: 'user' }}
+        className='sr-only'
+        style={{ position: 'fixed', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+      />
       <KenneyHandCursor
         position={cursor.position}
         state={cursorState}

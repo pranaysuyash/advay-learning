@@ -3,8 +3,8 @@
 **Batch ID**: MATH-001  
 **Date**: 2026-03-25  
 **Status**: IN PROGRESS  
-**Games in Batch**: 12 math/number games  
-**Completion**: 1/12 specs completed (Counting Objects)
+**Games in Batch**: 10 math/number games  
+**Completion**: 2/10 specs completed (Counting Objects, Bubble Count)
 
 ---
 
@@ -19,7 +19,7 @@ This batch focuses on **Math & Number Games** - educational experiences teaching
 | 2 | `bubble-count` | Bubble Count | Hand | ⏳ Pending | TBD |
 | 3 | `color-by-number` | Color By Number | Hand | ⏳ Pending | TBD |
 | 4 | `counting-collectathon` | Counting Collectathon | Hand/Pose | ⏳ Pending | TBD |
-| 5 | `digital-jenga` | Digital Jenga | Hand (physics) | ⏳ Pending | TBD |
+| 5 | `digital-jenga` | Digital Jenga | Hand (physics) | ✅ Completed | Critical drift case (see Batch 0) |
 | 6 | `egg-addition-whiz` | Egg Addition Whiz | Hand | ⏳ Pending | TBD |
 | 7 | `math-smash` | Math Smash | Hand | ⏳ Pending | TBD |
 | 8 | `number-bubble-pop` | Number Bubble Pop | Hand | ⏳ Pending | TBD |

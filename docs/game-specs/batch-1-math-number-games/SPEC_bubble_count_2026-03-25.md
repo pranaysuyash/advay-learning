@@ -104,7 +104,7 @@ const { webcamRef: _webcamRef } = useGameHandTracking({
 ### CV Mode Classification: **POINTER_PRIMARY** ✅
 - Hand tracking is the **primary interaction method** for selecting bubble groups
 - Cursor follows finger tip (indexTip) position
-- No fallback to touch/mouse required for core gameplay
+- Touch/mouse fallback exists, but hand tracking remains the primary interaction method
 - Camera preview should be visible and functional
 
 ### CV Integration Quality Assessment

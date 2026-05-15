@@ -554,7 +554,7 @@ const BalloonPopFitnessGame = memo(function BalloonPopFitnessGame() {
         renderCanvasFrame,
       ],
     ),
-    enabled: cameraReady && !showMenu,
+    enabled: cameraReady,
   });
 
   // Update loading/error state from pose tracking

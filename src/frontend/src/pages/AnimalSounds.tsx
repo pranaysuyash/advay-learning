@@ -131,6 +131,7 @@ function AnimalSoundsGame({
   const { isLoading: isModelLoading, isReady: isHandTrackingReady, startTracking } = useGameHandTracking({
     gameName: 'AnimalSounds',
     targetFps: 30,
+    webcamRef,
     isRunning: isPlaying,
     onFrame: handleFrame,
     onNoVideoFrame: handleNoVideoFrame,

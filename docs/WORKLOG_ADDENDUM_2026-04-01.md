@@ -1189,3 +1189,16 @@ Status updates:
 Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
 
 - Maintainability gate justification (2026-05-15): raised default MAX_FILE_LOC from 1000 to 1200 to accommodate canonical high-density registry modules (e.g., wordWorkshop.ts) while retaining byte/complexity checks and no-bypass enforcement.
+
+### TCK-20260515-TRIVY-PR55 :: PR55 security + open-review remediation
+
+Type: AUDIT_FINDING
+Owner: Pranay
+Created: 2026-05-15
+Status: **IN PROGRESS**
+Priority: P1
+
+Execution log:
+- 2026-05-15: remediated Trivy-reported dependency vulnerabilities in frontend lockfiles and addressed open PR review threads (CV cursor/tracking, docs consistency, voice restart).
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md

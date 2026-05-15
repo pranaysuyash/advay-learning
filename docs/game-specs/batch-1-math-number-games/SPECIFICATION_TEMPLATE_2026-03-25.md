@@ -17,7 +17,7 @@ Before creating a spec:
 ## Template Structure
 
 ### Section 1: Game Metadata (Fill from Registry)
-```markdown
+```text
 **Ticket**: SPEC-20260325-MATH-XXX  
 **Date**: 2026-03-25  
 **Status**: DRAFT  

@@ -26,7 +26,7 @@ export function useCommonCvController(
   );
 
   // Shared webcam ref for pose/face hooks (called unconditionally per React rules)
-  const webcamRef = useRef(null);
+  const webcamRef = useRef<any>(null);
 
   const handCV = useGameHandTracking(cfg);
   const poseCV = useGamePoseTracking({ gameName: cfg.gameName, webcamRef, enabled: modality === 'pose' });
@@ -63,5 +63,8 @@ export function useCommonCvController(
   // Always return hand tracking result — it has the full interface
   // (isReady, cursor, startTracking, stopTracking) that consumers expect.
   // Pose/face modalities are bridged via SpatialInputContext above.
-  return handCV;
+  return {
+    ...handCV,
+    webcamRef,
+  };
 }

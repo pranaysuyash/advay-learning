@@ -429,7 +429,7 @@ Streak Multiplier:
   - 1-2 pairs: 1.0x
   - 3-5 pairs: 1.2x
   - 6+ pairs: 1.5x
-Escape Penalty: -10 per escaped word
+Escape Penalty: difficulty-based (-5 easy, -10 medium, -15 hard, -20 expert)
 
 Total = (Base + Speed - EscapePenalty) × StreakMultiplier
 ```

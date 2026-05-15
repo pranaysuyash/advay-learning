@@ -256,7 +256,7 @@ Lean into sequential learning model:
 | **Camera view** | Hidden webcam (tracking only) | Camera thumbnail overlay |
 | **Art style** | Kenney platformer assets | Custom guitar/rock themed |
 | **Mood** | Cheerful, encouraging | Energetic, rockstar-exciting |
-| **Primary colors** | Purple (E), Pink (A), Blue (D), Green (G), Yellow (B), Red (e) | Same (keep string colors) |
+| **Primary colors** | Follow canonical note/string color mapping defined in gameplay section | Same (keep string colors) |
 | **Background** | Mushroom fantasy | Stage with crowd/speakers |
 | **UI style** | Rounded cards, soft shadows | Edgier, stage-lighting effects |
 

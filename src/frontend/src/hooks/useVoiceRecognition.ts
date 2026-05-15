@@ -215,14 +215,16 @@ export function useVoiceRecognition(
 
     recognition.onend = () => {
       console.log(`[${gameName}] Listening ended`);
+      const shouldRestart = continuous && isListeningRef.current;
       setIsListening(false);
       isListeningRef.current = false;
       onListeningEnd?.();
 
       // Auto-restart if continuous mode and still should be listening
-      if (continuous && isListeningRef.current) {
+      if (shouldRestart) {
         try {
           recognition.start();
+          isListeningRef.current = true;
         } catch (e) {
           // Ignore restart errors
         }

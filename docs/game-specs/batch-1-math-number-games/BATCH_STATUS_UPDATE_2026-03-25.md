@@ -3,7 +3,7 @@
 **Batch ID**: MATH-001  
 **Date**: 2026-03-25 (Updated)  
 **Status**: IN PROGRESS  
-**Games in Batch**: 12 math/number games  
+**Games in Batch**: 10 math/number games  
 **Completion**: 2/12 specs completed (Counting Objects, Bubble Count)
 
 ---
@@ -19,13 +19,13 @@
 ### 🔧 In Progress (0/12)
 None currently - batch processing paused for review
 
-### ⏳ Pending (10/12 = 83%)
+### ⏳ Pending (8/10 = 80%)
 | # | Game ID | Name | Priority | Est. Time |
 |---|---------|------|----------|-----------|
 | 3 | `color-by-number` | Color By Number | High | ~70 min |
 | 4 | `counting-collectathon` | Counting Collectathon (2D) | High | ~70 min |
 | 5 | `counting-collectathon-3d` | Counting Collectathon 3D | Medium | ~70 min |
-| 6 | `digital-jenga` | Digital Jenga | Low | ⚠️ Already done as critical drift case |
+| 6 | `digital-jenga` | Digital Jenga | Low | ✅ Already done as critical drift case |
 | 7 | `egg-addition-whiz` | Egg Addition Whiz | High | ~70 min |
 | 8 | `math-smash` | Math Smash | Medium | ~70 min |
 | 9 | `number-bubble-pop` | Number Bubble Pop | Medium | ~70 min |

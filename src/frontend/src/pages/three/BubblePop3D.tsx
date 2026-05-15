@@ -8,6 +8,7 @@
  */
 
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import Webcam from 'react-webcam';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
@@ -187,7 +188,8 @@ function Bubble3D({ bubble, onPop, cursor, playPopSound }: Bubble3DProps) {
       const dy = cursor.y - bubble.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < bubble.size * 0.5) {
+      const hitRadiusNormalized = Math.max(0.03, bubble.size / 800);
+      if (distance < hitRadiusNormalized) {
         setPopped(true);
         setShowPopEffect(true);
         playPopSound();
@@ -230,12 +232,14 @@ function Bubble3D({ bubble, onPop, cursor, playPopSound }: Bubble3DProps) {
 
 // Main game component
 export default function BubblePop3D() {
+  const webcamRef = useRef<Webcam>(null);
   const { playSFX } = use3DGameAudio();
   const { completeGame } = useGameCompletion('bubble-pop-3d');
 
   const { cursor, isReady, startTracking, stopTracking } = useGameHandTracking({
     gameName: 'BubblePop3D',
     targetFps: 30,
+    webcamRef,
   });
 
   const [gameState, setGameState] = useState<GameState>(initializeGame());
@@ -305,7 +309,7 @@ export default function BubblePop3D() {
 
   return (
     <GameShell gameId='bubble-pop-3d' gameName='Bubble Pop 3D'>
-      <GameContainer>
+      <GameContainer webcamRef={webcamRef} isHandDetected={!!cursor} isPlaying={!showStartScreen}>
         <ThreeDGameCanvas
           environment='studio'
           showFPS={import.meta.env.DEV}

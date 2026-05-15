@@ -156,7 +156,7 @@ The following docs were NOT audited in this pass but may have outdated informati
 ```bash
 # Count games
 grep "path: '/games/" src/frontend/src/routes/appRoutes.tsx | wc -l
-# Result: 139
+# Result: 127 (route-based playable games)
 
 # Count CV integration
 grep -l "useGameHandTracking" src/frontend/src/pages/*.tsx | wc -l

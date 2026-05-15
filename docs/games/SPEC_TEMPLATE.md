@@ -56,9 +56,11 @@
 
 ### Section 8: Screen Map
 | Screen | Purpose | Elements |
+|--------|---------|----------|
 
 ### Section 9: Controls
 | Action | Input | Feedback |
+|--------|-------|----------|
 
 ### Section 10: Core Mechanics
 - Detailed mechanics
@@ -75,6 +77,7 @@
 
 ### Section 12: HUD / Gameplay UI
 | Element | Purpose | Update |
+|---------|---------|--------|
 - Layout diagram
 
 ### Section 13: Feedback and Feel
@@ -118,6 +121,7 @@
 
 ### Section 20: Gaps and Unknowns
 | Gap | Inference | Confidence |
+|-----|-----------|------------|
 
 ### Section 21: Implementation Notes
 - Strengths to Preserve

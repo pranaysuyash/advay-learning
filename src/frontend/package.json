@@ -38,7 +38,7 @@
     "@tanstack/react-query": "^5.17.0",
     "@tensorflow/tfjs": "^4.15.0",
     "@types/three": "^0.183.1",
-    "axios": "^1.13.6",
+    "axios": "^1.16.1",
     "canvas-confetti": "^1.9.4",
     "chart.js": "^4.5.1",
     "framer-motion": "^12.35.1",
@@ -82,7 +82,7 @@
     "picomatch": "^4.0.3",
     "playwright": "^1.58.0",
     "postcss": "^8.5.8",
-    "puppeteer": "^24.38.0",
+    "puppeteer": "^24.39.1",
     "react-scan": "^0.5.3",
     "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "^3.4.1",
@@ -99,6 +99,14 @@
   "overrides": {
     "fdir": {
       "picomatch": "^4.0.3"
+    },
+    "basic-ftp": "^5.3.1",
+    "protobufjs": "7.5.6"
+  },
+  "pnpm": {
+    "overrides": {
+      "basic-ftp": "^5.3.1",
+      "protobufjs": "7.5.6"
     }
   }
 }

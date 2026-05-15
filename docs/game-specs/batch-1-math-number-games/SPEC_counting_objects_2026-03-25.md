@@ -88,7 +88,7 @@ const handleFrame = useCallback(
 ### CV Mode Classification: **POINTER_PRIMARY** ✅
 - Hand tracking is the **primary interaction method** for selecting answers
 - Cursor follows finger tip (indexTip) position
-- No fallback to touch/mouse required for core gameplay
+- Touch/mouse fallback exists, but hand tracking remains the primary interaction method
 - Camera preview should be visible and functional
 
 ### CV Integration Quality Assessment
@@ -147,7 +147,8 @@ function calculateScore(streak: number, level: number): number {
 
 ### Completion Formula
 ```typescript
-const finalScore = Math.round(score / 20); // Normalize to 0-100 scale
+const maxPossibleScore = 2000; // 20 rounds * 100 points baseline
+const finalScore = Math.round((score / maxPossibleScore) * 100); // Normalize to 0-100 scale
 await completeGame({ 
   score: finalScore, 
   completed: true, 
