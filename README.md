@@ -4,6 +4,41 @@
 
 AI-powered interactive learning platform for young children (2-8 years) using computer vision for hand tracking, drawing, and language recognition.
 
+## ⚡ Start Here by Role
+
+- **Product/education reviewer**
+  - `Features`
+  - `Quick Start`
+  - `Games` docs under `docs/games/`
+- **Backend engineer**
+  - `Quick Start` (backend setup)
+  - `docs/ARCHITECTURE.md`
+  - `docs/SETUP.md`
+- **Frontend engineer**
+  - `Quick Start` (frontend setup)
+  - `docs/QUICKSTART.md`
+  - `docs/LINTING_GUIDELINES.md`
+- **Coding agent**
+  - `AGENTS.md`
+  - `docs/context/agent-start/AGENT_KICKOFF_PROMPT.txt`
+  - `docs/context/agent-start/SESSION_CONTEXT.md`
+
+## ✅ 10-minute sanity verification
+
+```bash
+# Backend (from repo root)
+cd src/backend
+uv pip install -e ".[dev]"
+pytest -q
+
+# Frontend
+cd ../frontend
+pnpm install
+pnpm test -- --run
+```
+
+Use this as a minimum pre-PR baseline before broader CI/full-suite runs.
+
 ## 🌟 Features
 
 - **Hand & Face Tracking**: Real-time gesture recognition for drawing and interaction
