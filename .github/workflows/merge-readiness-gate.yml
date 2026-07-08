@@ -267,6 +267,9 @@ jobs:
       - name: Check Bundle Size
         run: bash scripts/check_bundle_size.sh
 
+      - name: Install Lighthouse CLI
+        run: npm install -g lighthouse
+
       - name: Check Lighthouse Performance
         run: bash scripts/check_lighthouse_perf.sh
         continue-on-error: true # Don't block merge just yet as it might be flaky in CI environment
