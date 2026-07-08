@@ -15250,3 +15250,37 @@ Execution log:
 Status updates:
 
 - 2026-03-19 18:16 IST **DONE** — Audit documented
+
+## TCK-20260708-001 :: Refresh README onboarding, agent context, and tooling docs
+Ticket Stamp: STAMP-20260708T072237Z-opencode
+Type: DOCS_REFRESH
+Owner: Pranay
+Created: 2026-07-08 12:52 IST
+Status: IN_PROGRESS
+
+Scope contract:
+- In-scope: Refresh README.md onboarding, sync .agent/ and docs/context/agent-start/ packs, update .githooks/commit-msg and pre-commit with motto_v3 attestation gates, align .github/copilot-instructions.md and AGENTS.md, document tools in tools/README.md, remove superseded motto_v2.md, add game-design/UI brainstorm doc, add tests for cv_gap_analysis and latency_log_helper.
+- Out-of-scope: Runtime feature changes, backend API changes, CV model changes, auth/payment paths.
+- Behavior change allowed: YES (documentation and process only).
+
+Targets:
+- Repo: learning_for_kids
+- Branch/PR: codex/wip-readme-refresh -> main
+
+Prompt Trace: prompts/review/local-pre-commit-review-v1.0.md
+
+Execution log:
+- 2026-07-08 12:52 IST Staged docs/hooks/tools/tests refresh and neutralized doc examples to satisfy pre-commit coauthor scan.
+
+Status updates:
+- 2026-07-08 12:52 IST IN_PROGRESS — awaiting commit/push/PR.
+
+Next actions:
+1. Push branch and open PR.
+2. Run AI review and address comments.
+3. Merge to main and verify.
+
+Risks/notes:
+- Low risk: docs/hooks/tools/tests only.
+- Hook changes will be exercised by CI and PR review.
+
