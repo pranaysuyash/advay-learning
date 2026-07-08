@@ -28,13 +28,15 @@ AI-powered interactive learning platform for young children (2-8 years) using co
 ```bash
 # Backend (from repo root)
 cd src/backend
+uv venv
+source .venv/bin/activate
 uv pip install -e ".[dev]"
 pytest -q
 
 # Frontend
 cd ../frontend
 pnpm install
-pnpm test -- --run
+pnpm test  # already runs vitest --run
 ```
 
 Use this as a minimum pre-PR baseline before broader CI/full-suite runs.

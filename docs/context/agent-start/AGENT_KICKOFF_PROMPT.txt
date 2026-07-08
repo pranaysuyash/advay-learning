@@ -1,14 +1,14 @@
 Use sources in this order:
-1) /Users/pranay/AGENTS.md
-2) /Users/pranay/Projects/AGENTS.md
+1) $HOME/AGENTS.md (or /Users/pranay/AGENTS.md on this machine)
+2) $HOME/Projects/AGENTS.md (or /Users/pranay/Projects/AGENTS.md on this machine)
 3) learning_for_kids/AGENTS.md or learning_for_kids/CLAUDE.md (if present)
 4) learning_for_kids/motto_v3.md (canonical project operating motto synced from /Users/pranay/Downloads/motto_v3.md, if present)
 5) learning_for_kids/motto_v2.md (legacy compatibility bridge to motto_v3.md, if present)
 6) Other repo-local agent instructions if present, including QWEN.md, CODEX.md, copilot-instructions.md, .cursorrules, and tool-specific guidance
 7) Project-local docs/prompts/worklogs under learning_for_kids
-8) learning_for_kids/Docs/context/AGENT_INTELLIGENCE_GRAPH.md (if present)
-9) learning_for_kids/Docs/context/agent-start/SESSION_CONTEXT.md
-10) /Users/pranay/Projects/workspace_memory/sources/...
+8) learning_for_kids/docs/context/AGENT_INTELLIGENCE_GRAPH.md (if present)
+9) learning_for_kids/docs/context/agent-start/SESSION_CONTEXT.md
+10) $PM/sources/... (where $PM defaults to $HOME/Projects/projects-memory)
 
 Rules:
 - Cite concrete file paths for decisions or constraints.
