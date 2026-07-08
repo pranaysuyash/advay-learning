@@ -95,7 +95,7 @@ Do not hide uncertainty behind confident language.
 - If any critical requirement is still open, explicitly report confidence below `1.00` and continue as not complete.
 - If required validation cannot be run in-session, list the exact missing check and next execution step.
 - "Done" is allowed only when both the acceptance contract and this confidence gate are satisfied.
-- Avoid git commands unless explicitly requested by the user. (Read-only checks are allowed only with explicit approval.)
+- Avoid mutating git commands unless explicitly requested by the user. Read-only git commands are allowed per §3 without additional approval.
 
 ### 0.4.2 Multi-Pass Review (Required)
 

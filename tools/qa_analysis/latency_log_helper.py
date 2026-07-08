@@ -135,7 +135,13 @@ def parse_entry_payload(payload: Dict[str, object]) -> LatencyLogEntry:
         or payload.get("Cursor_Move_Start_Frame")
         or payload.get("cursor_move_start_frame")
         or 0,
-        "fps": payload.get("fps") or payload.get("FPS") or 30.0,
+        "fps": (
+            payload.get("fps")
+            if payload.get("fps") is not None
+            else payload.get("FPS")
+            if payload.get("FPS") is not None
+            else 30.0
+        ),
         "notes": payload.get("notes")
         or payload.get("Notes")
         or "",
@@ -364,7 +370,8 @@ def run(argv: Sequence[str] | None = None) -> int:
                 fps=validate_fps(args.fps),
                 notes=args.notes.strip(),
             )
-            ensure_log(args.csv_path, force=args.force)
+            if not args.dry_run:
+                ensure_log(args.csv_path, force=args.force)
             count = append_entry_rows(args.csv_path, [entry], dry_run=args.dry_run)
             if args.json:
                 payload = {
@@ -382,7 +389,8 @@ def run(argv: Sequence[str] | None = None) -> int:
             entries = parse_json_import(args.from_json)
             if not entries:
                 raise ValueError("JSON import is empty")
-            ensure_log(args.csv_path, force=args.force)
+            if not args.dry_run:
+                ensure_log(args.csv_path, force=args.force)
             count = append_entry_rows(args.csv_path, entries, dry_run=args.dry_run)
             if args.json:
                 print(
@@ -403,7 +411,8 @@ def run(argv: Sequence[str] | None = None) -> int:
             entries = parse_csv_import(args.from_csv)
             if not entries:
                 raise ValueError("CSV import is empty")
-            ensure_log(args.csv_path, force=args.force)
+            if not args.dry_run:
+                ensure_log(args.csv_path, force=args.force)
             count = append_entry_rows(args.csv_path, entries, dry_run=args.dry_run)
             if args.json:
                 print(
