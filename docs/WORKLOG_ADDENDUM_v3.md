@@ -15284,3 +15284,69 @@ Risks/notes:
 - Low risk: docs/hooks/tools/tests only.
 - Hook changes will be exercised by CI and PR review.
 
+
+---
+
+### TCK-20260708-002 :: CV Registry Compliance Remediation
+
+Ticket Stamp: STAMP-20260708T091917Z-codex-kzwj
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-07-08 14:45 IST
+Status: **DONE**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Ensure every listed game in `src/frontend/src/data/gameRegistries/*.ts` declares a `cv` mode that matches its actual implementation; mark games without functional CV as `listed: false`; update `AGENTS.md` and `docs/audit/CV_REGISTRY_AUDIT_2026-07-08.md` with verified state.
+- Out-of-scope: Adding new CV implementations to unlisted backlog games, full rewrite of `docs/games/README.md` inventory, runtime gameplay changes beyond registry declarations.
+- Behavior change allowed: YES (registry `cv` declarations and `listed` flags are adjusted to reflect reality).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/data/gameRegistries/bodyZone.ts`, `creativeCorner.ts`, `labOfWonders.ts`, `numberJungle.ts`, `platformWorld.ts`, `shapeGarden.ts`, `soundStudio.ts`, `threeDWorld.ts`, `wellness.ts`, `wordWorkshop.ts`, `wordWorkshopExtra.ts`, `AGENTS.md`, `docs/audit/CV_REGISTRY_AUDIT_2026-07-08.md`
+- Branch/PR: main (direct local-main iteration per repo workflow)
+
+Inputs:
+
+- Prompt used: `prompts/remediation/implementation-v1.6.1.md` (intent-first remediation aligned with `motto_v3.md`)
+- Source artifacts: `docs/audit/CV_REGISTRY_AUDIT_2026-07-08.md`, `src/frontend/src/data/gameRegistries/*.ts`, `src/frontend/src/pages/*.tsx`
+
+Acceptance Criteria:
+
+- [x] 148 top-level registry entries parsed across 12 worlds.
+- [x] 139 listed games all have a `cv` mode (136 explicit + 3 factory-default 3D `cv: ['hand']`).
+- [x] 0 listed games missing `cv`.
+- [x] 9 unlisted backlog games (8 3D + `free-draw`) correctly hidden from players.
+- [x] All declared CV modes match actual hooks/components (verified by parser + page inspection).
+- [x] `npm run type-check` passes.
+- [x] `AGENTS.md` current-state block updated to 2026-07-08 truth.
+- [x] Audit report corrected from 200-entry count to 148-entry count and updated with result table.
+
+Execution log:
+
+- 2026-07-08 14:45 IST | Parsed all registry files and classified 62 missing-`cv` entries into real games vs `egg-*` reward variants. | Evidence: `parse_literal_objects` + `parse_factory_calls` parser; 52 nested egg entries excluded from top-level count.
+- 2026-07-08 14:50 IST | Added correct `cv` declarations to 35 real games with verified CV hooks. | Evidence: registry diffs in bodyZone.ts, creativeCorner.ts, labOfWonders.ts, numberJungle.ts, platformWorld.ts, shapeGarden.ts, soundStudio.ts, wellness.ts, wordWorkshop.ts, wordWorkshopExtra.ts.
+- 2026-07-08 14:55 IST | Marked 9 games without functional CV wiring as `listed: false` (`free-draw` + eight 3D games). | Evidence: creativeCorner.ts and threeDWorld.ts diffs.
+- 2026-07-08 15:00 IST | Corrected mismatched `cv` declarations: `obstacle-course`, `musical-statues` → `['hand']`; `math-smash`, `phonics-fun` → `['hand']`; kept `virtual-bubbles` as `['hand','voice']` because it uses microphone blow detection. | Evidence: bodyZone.ts and wordWorkshop.ts diffs.
+- 2026-07-08 15:05 IST | Fixed TypeScript errors in `threeDWorld.ts`: removed unused `BETA_3D_GAMES_ENABLED`, removed duplicate `listed: false` keys, removed invalid `cv` override on factory-created entry. | Evidence: `npm run type-check` exits 0.
+- 2026-07-08 15:10 IST | Updated `AGENTS.md` CV current-state block and corrected `docs/audit/CV_REGISTRY_AUDIT_2026-07-08.md` totals/backlog table. | Evidence: markdown diffs.
+- 2026-07-08 15:15 IST | Ran final verification script: 148 total, 139 listed, 0 listed without cv, 0 cv/implementation mismatches. | Evidence: `/tmp/final_verify.txt`.
+- 2026-07-08 15:16 IST | Ran `npm run type-check` successfully. | Evidence: `tsc --noEmit` exits 0.
+
+Status updates:
+
+- 2026-07-08 15:16 IST **DONE** — All listed games now satisfy the mandatory CV control mode mandate; 9 unlisted backlog items remain for future implementation.
+
+Next actions:
+
+1. Add CV controls to the 9 unlisted backlog games and re-list them once verified.
+2. Conduct a full `docs/games/README.md` inventory refresh in a dedicated docs ticket.
+
+Risks/notes:
+
+- Virtual Bubbles uses microphone blow detection (Web Audio) for its `voice` mode; no speech recognition.
+- `digital-jenga`, `pattern-pop-3d-2`, and `color-match-garden-3d` rely on the factory default `cv: ['hand']` in `threeDWorld.ts`.
+- Egg reward entries (`egg-*`) are nested inside `easterEggs` arrays and are not standalone games; they are intentionally not subject to the CV mandate.

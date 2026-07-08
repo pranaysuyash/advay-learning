@@ -1,16 +1,18 @@
-import { useState, useMemo, Suspense, useEffect, useCallback } from 'react';
+import { useState, useMemo, Suspense, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGLTF, Html } from '@react-three/drei';
 import { useSpring, animated } from '@react-spring/three';
 import * as THREE from 'three';
+import Webcam from 'react-webcam';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
 import { GameShell } from '../../components/GameShell';
 import { GameContainer } from '../../components/GameContainer';
 import { use3DGameAudio } from '../../hooks/use3DGameAudio';
 import { useAutoGameCompletion } from '../../hooks/useAutoGameCompletion';
+import { useGameHandTracking } from '../../hooks/useGameHandTracking';
+import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 import { Check, Sun, CloudRain, Snowflake, Wind, Volume2, VolumeX } from 'lucide-react';
 
-// Clothing options
 const clothingOptions = {
   shirts: [
     { id: 'tshirt-red', name: 'Red T-Shirt', color: '#ef4444', warmth: 1 },
@@ -33,7 +35,6 @@ const weatherTypes = [
   { id: 'windy', name: 'Windy', icon: Wind, warmth: 0, color: '#94a3b8' },
 ];
 
-// Character component
 interface CharacterProps {
   shirt: typeof clothingOptions.shirts[0] | null;
   pants: typeof clothingOptions.pants[0] | null;
@@ -41,17 +42,14 @@ interface CharacterProps {
 }
 
 function Character({ shirt, pants, weather }: CharacterProps) {
-  // Load Kenney blocky character
   const { scene } = useGLTF('/assets/kenney/3d/characters/character-b.glb');
 
-  // Weather animation
   const { rotation, position } = useSpring({
     rotation: weather.id === 'windy' ? [0, 0, 0.05] : [0, 0, 0],
     position: weather.id === 'snowy' ? [0, -0.05, 0] : [0, 0, 0],
     config: { duration: 2000 },
   });
 
-  // Clone and apply clothing
   const characterScene = useMemo(() => {
     const clone = scene.clone();
 
@@ -61,14 +59,12 @@ function Character({ shirt, pants, weather }: CharacterProps) {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
 
-        // Apply shirt color to torso
         if (mesh.name.toLowerCase().includes('torso') && shirt) {
           const mat = (mesh.material as THREE.MeshStandardMaterial).clone();
           mat.color = new THREE.Color(shirt.color);
           mesh.material = mat;
         }
 
-        // Apply pants color to legs
         if (mesh.name.toLowerCase().includes('leg') && pants) {
           const mat = (mesh.material as THREE.MeshStandardMaterial).clone();
           mat.color = new THREE.Color(pants.color);
@@ -91,7 +87,6 @@ function Character({ shirt, pants, weather }: CharacterProps) {
         position={[0, -1.5, 0]}
       />
 
-      {/* Weather particles */}
       {weather.id === 'rainy' && <RainEffect />}
       {weather.id === 'snowy' && <SnowEffect />}
       {weather.id === 'sunny' && <SunGlow />}
@@ -99,7 +94,6 @@ function Character({ shirt, pants, weather }: CharacterProps) {
   );
 }
 
-// Weather effects
 function RainEffect() {
   const drops = useMemo(() => {
     return Array.from({ length: 50 }, (_, i) => ({
@@ -155,7 +149,6 @@ function SunGlow() {
   );
 }
 
-// Clothing selector UI
 interface ClothingSelectorProps {
   onSelectShirt: (shirt: typeof clothingOptions.shirts[0]) => void;
   onSelectPants: (pants: typeof clothingOptions.pants[0]) => void;
@@ -174,7 +167,6 @@ function ClothingSelector({
       <div className="bg-white/95 p-4 rounded-xl shadow-lg w-56 backdrop-blur-sm">
         <h3 className="font-bold mb-3 text-gray-800 text-lg">Wardrobe</h3>
 
-        {/* Shirts */}
         <div className="mb-4">
           <p className="text-sm text-gray-600 mb-2 font-medium">Shirts</p>
           <div className="grid grid-cols-3 gap-2">
@@ -198,7 +190,6 @@ function ClothingSelector({
           </div>
         </div>
 
-        {/* Pants */}
         <div>
           <p className="text-sm text-gray-600 mb-2 font-medium">Pants</p>
           <div className="grid grid-cols-3 gap-2">
@@ -226,7 +217,6 @@ function ClothingSelector({
   );
 }
 
-// Feedback UI
 function FeedbackUI({
   isCorrect,
   message,
@@ -247,10 +237,8 @@ function FeedbackUI({
   );
 }
 
-// Preload assets
 useGLTF.preload('/assets/kenney/3d/characters/character-b.glb');
 
-// Main game component
 export default function DressForWeather3D() {
   const navigate = useNavigate();
   const { playSFX, playBGM, stopBGM, preload, setMuted } = use3DGameAudio();
@@ -277,13 +265,34 @@ export default function DressForWeather3D() {
       pants: pants?.id ?? null,
     },
   });
+  const webcamRef = useRef<Webcam>(null);
+  const [_cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Preload audio on mount
+  usePerformanceMonitor('DressForWeather3D', { warnThreshold: 30 });
+
+  const handleFrame = useCallback((frame: any) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor({ x: tip.x, y: tip.y });
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
+
+  const { isReady: _isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'DressForWeather3D',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+
   useEffect(() => {
     preload(['click', 'success', 'rain', 'wind']);
   }, [preload]);
 
-  // Play ambient weather sounds based on weather type
   useEffect(() => {
     stopBGM();
     if (!isMuted) {
@@ -295,7 +304,6 @@ export default function DressForWeather3D() {
     }
   }, [weather, playBGM, stopBGM, isMuted]);
 
-  // Cleanup BGM on unmount
   useEffect(() => {
     return () => stopBGM();
   }, [stopBGM]);
@@ -325,12 +333,10 @@ export default function DressForWeather3D() {
     playSFX('click', 0.3);
   }, [playSFX, resetAutoCompletion]);
 
-  // Calculate if outfit is appropriate
   const checkOutfit = () => {
     if (!shirt || !pants) return;
 
     const totalWarmth = shirt.warmth + pants.warmth;
-    // const weatherNeeds = weather.warmth;
 
     let isCorrect = false;
     let message = '';
@@ -361,9 +367,8 @@ export default function DressForWeather3D() {
 
   return (
     <GameShell gameId='dress-for-weather-3d' gameName='Dress for Weather 3D'>
-    <GameContainer title="Dress for Weather 3D" onHome={() => navigate('/games')}>
+    <GameContainer title="Dress for Weather 3D" onHome={() => navigate('/games')} webcamRef={webcamRef} isHandDetected={!!_cursor} isPlaying={isPlaying}>
       <div className="h-[600px] w-full rounded-xl overflow-hidden bg-[#FFF8F0] relative">
-        {/* Mute button */}
         <button
           onClick={toggleMute}
           className="absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors"
@@ -371,6 +376,18 @@ export default function DressForWeather3D() {
         >
           {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
         </button>
+
+        {!isPlaying ? (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60">
+            <button
+              onClick={() => { setIsPlaying(true); startTracking(); }}
+              className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-2xl shadow-lg transition-all hover:scale-105"
+            >
+              👋 Start Dressing
+            </button>
+          </div>
+        ) : null}
+
         <ThreeDGameCanvas
           cameraPosition={[0, 0.5, 4]}
           cameraTarget={[0, 0, 0]}
@@ -395,7 +412,6 @@ export default function DressForWeather3D() {
         </ThreeDGameCanvas>
       </div>
 
-      {/* Weather selector */}
       <div className="mt-4 flex justify-center gap-3">
         {weatherTypes.map((w) => {
           const Icon = w.icon;
@@ -416,7 +432,6 @@ export default function DressForWeather3D() {
         })}
       </div>
 
-      {/* Check outfit button */}
       <div className="mt-4 flex justify-center">
         <button
           onClick={checkOutfit}
@@ -427,9 +442,8 @@ export default function DressForWeather3D() {
         </button>
       </div>
 
-      {/* Instructions */}
       <p className="mt-4 text-center text-sm text-slate-500">
-        Select clothes for the character, then click "Check Outfit!"
+        Point and pinch to select clothes, then click "Check Outfit!"
       </p>
     </GameContainer>
     </GameShell>

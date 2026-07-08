@@ -381,7 +381,7 @@ export const LAB_OF_WONDERS_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '3-8',
     isNew: true,
-    cv: ['voice'],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'color-blue', chance: 0.2 },

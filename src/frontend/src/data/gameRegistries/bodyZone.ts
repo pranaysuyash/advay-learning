@@ -74,7 +74,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '4-7',
     isNew: true,
-    cv: ['pose'],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'material-star', chance: 0.25 },
@@ -133,7 +133,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '3-8',
     isNew: true,
-    cv: ['pose'],
+    cv: ['hand'],
     listed: true,
     drops: [
       { itemId: 'material-star', chance: 0.3 },
@@ -191,7 +191,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '3-8',
     isNew: true,
-    cv: ['pose'],
+    cv: ['hand', 'pose'],
     listed: true,
     previewImage: '/assets/previews/simon-says-preview.png',
     drops: [
@@ -270,7 +270,7 @@ export const BODY_ZONE_GAMES: GameManifest[] = [
     vibe: 'active',
     ageRange: '4-8',
     isNew: true,
-    cv: ['pose'],
+    cv: ['hand', 'pose'],
     listed: true,
     previewImage: '/assets/previews/mirror-duel-preview.png',
     drops: [

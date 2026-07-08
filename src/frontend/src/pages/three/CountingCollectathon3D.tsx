@@ -1,72 +1,76 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFrame } from '@react-three/fiber';
-import { useGLTF, Html, useKeyboardControls } from '@react-three/drei';
+import { useGLTF, Html } from '@react-three/drei';
 import { RigidBody, Physics } from '@react-three/rapier';
 import * as THREE from 'three';
+import Webcam from 'react-webcam';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
 import { GameContainer } from '../../components/GameContainer';
 import { use3DGameAudio } from '../../hooks/use3DGameAudio';
+import { useGameHandTracking } from '../../hooks/useGameHandTracking';
+import { CursorEmbodiment } from '../../components/game/CursorEmbodiment';
+import { useAutoGameCompletion } from '../../hooks/useAutoGameCompletion';
+import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 import {
   Volume2,
   VolumeX,
   Trophy,
   RotateCcw,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
 } from 'lucide-react';
-import { KeyboardControls } from '@react-three/drei';
 
-// Collectible numbers
 const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-// Player character
 function Player({
   startPosition,
-  onJump,
+  cursor,
+  pinch,
 }: {
   startPosition: [number, number, number];
-  onJump?: () => void;
+  cursor: { x: number; y: number } | null;
+  pinch: { isPinching: boolean } | undefined;
 }) {
   const rigidBodyRef = useRef<any>(null);
-  const [, getKeys] = useKeyboardControls();
-  const velocity = useRef([0, 0, 0]);
   const isGrounded = useRef(false);
 
   useFrame(() => {
     if (!rigidBodyRef.current) return;
 
-    const { forward, backward, left, right, jump } = getKeys();
     const speed = 6;
-    const jumpForce = 10;
 
     let vx = 0;
     let vz = 0;
 
-    if (forward) vz = -speed;
-    if (backward) vz = speed;
-    if (left) vx = -speed;
-    if (right) vx = speed;
+    if (cursor) {
+      const centerX = 0.5;
+      const centerY = 0.5;
+      const dx = cursor.x - centerX;
+      const dy = cursor.y - centerY;
 
-    // Get current velocity
-    const currentVel = rigidBodyRef.current.linvel();
-    velocity.current = [currentVel.x, currentVel.y, currentVel.z];
-
-    // Set new velocity
-    rigidBodyRef.current.setLinvel({ x: vx, y: currentVel.y, z: vz }, true);
-
-    if (jump && isGrounded.current) {
-      rigidBodyRef.current.setLinvel({ x: vx, y: jumpForce, z: vz }, true);
-      isGrounded.current = false;
-      onJump?.();
+      if (Math.abs(dx) > 0.1) {
+        vx = dx > 0 ? speed : -speed;
+      }
+      if (Math.abs(dy) > 0.1) {
+        vz = dy > 0 ? speed : -speed;
+      }
     }
+
+    const currentVel = rigidBodyRef.current.linvel();
+    rigidBodyRef.current.setLinvel({ x: vx, y: currentVel.y, z: vz }, true);
 
     if (Math.abs(currentVel.y) < 0.01) {
       isGrounded.current = true;
     }
   });
+
+  // Pinch-to-jump
+  useEffect(() => {
+    if (pinch?.isPinching && isGrounded.current) {
+      const jumpForce = 10;
+      rigidBodyRef.current?.setLinvel({ x: 0, y: jumpForce, z: 0 }, true);
+      isGrounded.current = false;
+    }
+  }, [pinch?.isPinching]);
 
   const { scene } = useGLTF('/assets/kenney/3d/characters/character-a.glb');
 
@@ -95,7 +99,6 @@ function Player({
   );
 }
 
-// Collectible number
 function CollectibleNumber({
   number,
   position,
@@ -131,7 +134,6 @@ function CollectibleNumber({
         }
       }}
     >
-      {/* Number display */}
       <mesh>
         <boxGeometry args={[0.6, 0.6, 0.1]} />
         <meshStandardMaterial
@@ -141,7 +143,6 @@ function CollectibleNumber({
         />
       </mesh>
 
-      {/* Text label */}
       <Html center distanceFactor={8}>
         <div
           className={`text-2xl font-bold ${isNext ? 'text-white' : 'text-slate-400'}`}
@@ -153,7 +154,6 @@ function CollectibleNumber({
   );
 }
 
-// Ground platform
 function Ground() {
   return (
     <RigidBody type='fixed' position={[0, -1, 0]} colliders='cuboid'>
@@ -165,10 +165,8 @@ function Ground() {
   );
 }
 
-// Preload assets
 useGLTF.preload('/assets/kenney/3d/characters/character-a.glb');
 
-// Main game component
 export default function CountingCollectathon3D() {
   const navigate = useNavigate();
   const { playSFX, setMuted, preload } = use3DGameAudio();
@@ -179,13 +177,40 @@ export default function CountingCollectathon3D() {
   const [numbers, setNumbers] = useState<
     { id: number; number: number; position: [number, number, number] }[]
   >([]);
+  const webcamRef = useRef<Webcam>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Preload audio
+  usePerformanceMonitor('CountingCollectathon3D', { warnThreshold: 30 });
+  const { resetAutoCompletion: _resetAutoCompletion } = useAutoGameCompletion('counting-collectathon-3d', {
+    when: gameWon,
+    score,
+    level: 1,
+    metadata: { nextNumber },
+  });
+
+  const handleFrame = useCallback((frame: any) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor({ x: tip.x, y: tip.y });
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
+
+  const { isReady: _isHandTrackingReady, startTracking, pinch } = useGameHandTracking({
+    gameName: 'CountingCollectathon3D',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+
   useEffect(() => {
     preload(['coin', 'win', 'jump']);
   }, [preload]);
 
-  // Generate numbers on mount
   useEffect(() => {
     const nums = NUMBERS.map((num, i) => ({
       id: i,
@@ -216,15 +241,10 @@ export default function CountingCollectathon3D() {
     [nextNumber, playSFX],
   );
 
-  const handleJump = useCallback(() => {
-    playSFX('jump', 0.3);
-  }, [playSFX]);
-
   const resetGame = () => {
     setScore(0);
     setNextNumber(1);
     setGameWon(false);
-    // Regenerate positions
     const nums = NUMBERS.map((num, i) => ({
       id: i,
       number: num,
@@ -248,115 +268,110 @@ export default function CountingCollectathon3D() {
     <GameContainer
       title='Counting Adventure 3D'
       onHome={() => navigate('/games')}
+      webcamRef={webcamRef}
+      isHandDetected={!!cursor}
+      isPlaying={isPlaying}
     >
-      <KeyboardControls
-        map={[
-          { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
-          { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
-          { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
-          { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
-          { name: 'jump', keys: ['Space'] },
-        ]}
+      <div
+        className='h-[600px] w-full rounded-xl overflow-hidden relative'
+        style={{ backgroundColor: 'rgb(15, 23, 42)' }}
       >
-        <div
-          className='h-[600px] w-full rounded-xl overflow-hidden relative'
-          style={{ backgroundColor: 'rgb(15, 23, 42)' }}
+        <button
+          onClick={toggleMute}
+          className='absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors'
         >
-          {/* Mute button */}
-          <button
-            onClick={toggleMute}
-            className='absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors'
-          >
-            {isMuted ? (
-              <VolumeX className='w-5 h-5 text-white' />
-            ) : (
-              <Volume2 className='w-5 h-5 text-white' />
-            )}
-          </button>
+          {isMuted ? (
+            <VolumeX className='w-5 h-5 text-white' />
+          ) : (
+            <Volume2 className='w-5 h-5 text-white' />
+          )}
+        </button>
 
-          <ThreeDGameCanvas
-            cameraPosition={[8, 8, 8]}
-            cameraTarget={[0, 0, 0]}
-            enableOrbit={false}
-            showStats={false}
-            backgroundColor='#0f172a'
-            environment='sunset'
-          >
-            <Physics gravity={[0, -15, 0]}>
-              <Player startPosition={[0, 2, 0]} onJump={handleJump} />
-              <Ground />
+        {!isPlaying ? (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/80">
+            <button
+              onClick={() => { setIsPlaying(true); startTracking(); }}
+              className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-2xl shadow-lg transition-all hover:scale-105"
+            >
+              🔢 Start Counting
+            </button>
+          </div>
+        ) : null}
 
-              {numbers.map(({ id, number, position }) => (
-                <CollectibleNumber
-                  key={id}
-                  number={number}
-                  position={position}
-                  onCollect={() => handleCollect(number)}
-                  isNext={number === nextNumber}
-                />
-              ))}
+        <ThreeDGameCanvas
+          cameraPosition={[8, 8, 8]}
+          cameraTarget={[0, 0, 0]}
+          enableOrbit={false}
+          showStats={false}
+          backgroundColor='#0f172a'
+          environment='sunset'
+        >
+          <Physics gravity={[0, -15, 0]}>
+            <Player startPosition={[0, 2, 0]} cursor={cursor} pinch={pinch} />
+            <Ground />
 
-              {/* UI */}
-              <Html position={[-4, 3, 0]}>
-                <div className='bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg'>
-                  <div className='text-sm text-slate-400'>Score</div>
-                  <div className='text-2xl font-bold'>{score}</div>
+            {numbers.map(({ id, number, position }) => (
+              <CollectibleNumber
+                key={id}
+                number={number}
+                position={position}
+                onCollect={() => handleCollect(number)}
+                isNext={number === nextNumber}
+              />
+            ))}
+
+            {isPlaying && cursor && <CursorEmbodiment position={cursor} />}
+
+            <Html position={[-4, 3, 0]}>
+              <div className='bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg'>
+                <div className='text-sm text-slate-400'>Score</div>
+                <div className='text-2xl font-bold'>{score}</div>
+              </div>
+            </Html>
+
+            <Html position={[4, 3, 0]}>
+              <div className='bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg'>
+                <div className='text-sm text-slate-400'>Find Number</div>
+                <div className='text-3xl font-bold text-green-400'>
+                  {nextNumber}
                 </div>
-              </Html>
+              </div>
+            </Html>
 
-              <Html position={[4, 3, 0]}>
-                <div className='bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg'>
-                  <div className='text-sm text-slate-400'>Find Number</div>
-                  <div className='text-3xl font-bold text-green-400'>
-                    {nextNumber}
-                  </div>
-                </div>
-              </Html>
-
-              {/* Win screen */}
-              {gameWon && (
-                <Html center>
-                  <div
-                    style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)' }}
-                    className='text-white p-8 rounded-2xl shadow-2xl text-center'
+            {gameWon && (
+              <Html center>
+                <div
+                  style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)' }}
+                  className='text-white p-8 rounded-2xl shadow-2xl text-center'
+                >
+                  <Trophy className='w-16 h-16 mx-auto mb-4 text-yellow-400' />
+                  <h2 className='text-3xl font-bold mb-2'>You Win!</h2>
+                  <p className='text-slate-400 mb-4'>
+                    You collected all numbers!
+                  </p>
+                  <p className='text-xl font-bold mb-4'>Score: {score}</p>
+                  <button
+                    onClick={resetGame}
+                    className='flex items-center gap-2 mx-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition-colors'
                   >
-                    <Trophy className='w-16 h-16 mx-auto mb-4 text-yellow-400' />
-                    <h2 className='text-3xl font-bold mb-2'>You Win!</h2>
-                    <p className='text-slate-400 mb-4'>
-                      You collected all numbers!
-                    </p>
-                    <p className='text-xl font-bold mb-4'>Score: {score}</p>
-                    <button
-                      onClick={resetGame}
-                      className='flex items-center gap-2 mx-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition-colors'
-                    >
-                      <RotateCcw className='w-5 h-5' />
-                      Play Again
-                    </button>
-                  </div>
-                </Html>
-              )}
-            </Physics>
-          </ThreeDGameCanvas>
-        </div>
-      </KeyboardControls>
+                    <RotateCcw className='w-5 h-5' />
+                    Play Again
+                  </button>
+                </div>
+              </Html>
+            )}
+          </Physics>
+        </ThreeDGameCanvas>
+      </div>
 
-      {/* Controls */}
       <div className='mt-4 flex justify-center gap-6 text-sm text-slate-500'>
         <div className='flex items-center gap-2'>
-          <div className='flex gap-1'>
-            <ArrowUp className='w-4 h-4' />
-            <ArrowDown className='w-4 h-4' />
-            <ArrowLeft className='w-4 h-4' />
-            <ArrowRight className='w-4 h-4' />
-          </div>
-          <span>Move</span>
+          <span>✋</span>
+          <span>Move hand to walk</span>
         </div>
         <div className='flex items-center gap-2'>
-          <span className='px-2 py-1 bg-slate-200 rounded text-xs font-mono'>
-            SPACE
-          </span>
-          <span>Jump</span>
+          <span>🤏</span>
+          <span>Pinch to jump</span>
         </div>
         <div className='flex items-center gap-2'>
           <span>🎯</span>

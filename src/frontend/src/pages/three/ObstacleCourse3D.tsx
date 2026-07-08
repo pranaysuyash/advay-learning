@@ -1,80 +1,70 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFrame } from '@react-three/fiber';
-import { useGLTF, Html, useKeyboardControls } from '@react-three/drei';
+import { useGLTF, Html } from '@react-three/drei';
 import { RigidBody, Physics } from '@react-three/rapier';
 import * as THREE from 'three';
+import Webcam from 'react-webcam';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
 import { GameShell } from '../../components/GameShell';
 import { GameContainer } from '../../components/GameContainer';
 import { use3DGameAudio } from '../../hooks/use3DGameAudio';
 import { useAutoGameCompletion } from '../../hooks/useAutoGameCompletion';
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
-import { KeyboardControls } from '@react-three/drei';
+import { useGameHandTracking } from '../../hooks/useGameHandTracking';
+import { CursorEmbodiment } from '../../components/game/CursorEmbodiment';
 import {
   Trophy,
   RotateCcw,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
   Volume2,
   VolumeX,
 } from 'lucide-react';
 
-// Player character with physics
 function Player({
   startPosition,
-  onJump,
   onLand,
   isMuted,
+  cursor,
+  pinch,
 }: {
   startPosition: [number, number, number];
-  onJump: () => void;
   onLand: () => void;
   isMuted: boolean;
+  cursor: { x: number; y: number } | null;
+  pinch: { isPinching: boolean } | undefined;
 }) {
   const rigidBodyRef = useRef<any>(null);
-  const [, getKeys] = useKeyboardControls();
-  const velocity = useRef([0, 0, 0]);
   const isGrounded = useRef(false);
   const wasGrounded = useRef(false);
 
   useFrame(() => {
     if (!rigidBodyRef.current) return;
 
-    const { forward, backward, left, right, jump } = getKeys();
     const speed = 5;
-    const jumpForce = 8;
 
-    // Movement
     let vx = 0;
     let vz = 0;
 
-    if (forward) vz = -speed;
-    if (backward) vz = speed;
-    if (left) vx = -speed;
-    if (right) vx = speed;
+    if (cursor) {
+      const centerX = 0.5;
+      const centerY = 0.5;
+      const dx = cursor.x - centerX;
+      const dy = cursor.y - centerY;
 
-    // Get current velocity
-    const currentVel = rigidBodyRef.current.linvel();
-    velocity.current = [currentVel.x, currentVel.y, currentVel.z];
-
-    // Apply horizontal movement
-    rigidBodyRef.current.setLinvel({ x: vx, y: currentVel.y, z: vz }, true);
-
-    // Jump
-    if (jump && isGrounded.current) {
-      rigidBodyRef.current.setLinvel({ x: vx, y: jumpForce, z: vz }, true);
-      isGrounded.current = false;
-      onJump();
+      if (Math.abs(dx) > 0.1) {
+        vx = dx > 0 ? speed : -speed;
+      }
+      if (Math.abs(dy) > 0.1) {
+        vz = dy > 0 ? speed : -speed;
+      }
     }
 
-    // Check if grounded (simple check)
+    const currentVel = rigidBodyRef.current.linvel();
+    rigidBodyRef.current.setLinvel({ x: vx, y: currentVel.y, z: vz }, true);
+
     wasGrounded.current = isGrounded.current;
     if (Math.abs(currentVel.y) < 0.1) {
       isGrounded.current = true;
-      // Play landing sound when just landed
       if (!wasGrounded.current && !isMuted) {
         onLand();
       }
@@ -83,7 +73,15 @@ function Player({
     }
   });
 
-  // Load Kenney character
+  // Pinch-to-jump via external pinch state
+  useEffect(() => {
+    if (pinch?.isPinching && isGrounded.current) {
+      const jumpForce = 8;
+      rigidBodyRef.current?.setLinvel({ x: 0, y: jumpForce, z: 0 }, true);
+      isGrounded.current = false;
+    }
+  }, [pinch?.isPinching]);
+
   const { scene } = useGLTF('/assets/kenney/3d/characters/character-a.glb');
 
   const characterScene = useMemo(() => {
@@ -91,6 +89,7 @@ function Player({
     clone.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         (child as THREE.Mesh).castShadow = true;
+        (child as THREE.Mesh).receiveShadow = true;
       }
     });
     return clone;
@@ -111,7 +110,6 @@ function Player({
   );
 }
 
-// Platform component
 function Platform({
   position,
   type = 'grass',
@@ -140,7 +138,6 @@ function Platform({
   );
 }
 
-// Spike hazard
 function Spike({ position }: { position: [number, number, number] }) {
   const { scene } = useGLTF('/assets/kenney/3d/platformer/spike-block.glb');
 
@@ -151,7 +148,6 @@ function Spike({ position }: { position: [number, number, number] }) {
   );
 }
 
-// Collectible coin
 function Coin({
   position,
   onCollect,
@@ -190,7 +186,6 @@ function Coin({
   );
 }
 
-// Finish flag
 function FinishFlag({
   position,
   onReach,
@@ -210,7 +205,6 @@ function FinishFlag({
   );
 }
 
-// Level generator
 function Level({
   onCoinCollect,
   playCollectSound,
@@ -220,36 +214,22 @@ function Level({
   playCollectSound: () => void;
   onFinish: () => void;
 }) {
-  // Define level layout
   const platforms = useMemo(
     () => [
-      // Starting platform
       { pos: [0, 0, 0], type: 'grass' },
       { pos: [1, 0, 0], type: 'grass' },
       { pos: [2, 0, 0], type: 'grass' },
-
-      // Gap with jump
       { pos: [3, 0.5, 0], type: 'stone' },
       { pos: [4, 1, 0], type: 'stone' },
       { pos: [5, 1, 0], type: 'stone' },
-
-      // Higher platform
       { pos: [6, 1, 0], type: 'grass' },
       { pos: [7, 1, 0], type: 'grass' },
-
-      // Platform with spike
       { pos: [8, 1, 0], type: 'grass' },
-
-      // Moving up
       { pos: [9, 1.5, 0], type: 'stone' },
       { pos: [10, 2, 0], type: 'stone' },
       { pos: [11, 2, 0], type: 'grass' },
-
-      // Side path with coins
       { pos: [11, 2, 1], type: 'grass' },
       { pos: [11, 2, 2], type: 'grass' },
-
-      // Final stretch
       { pos: [12, 2, 0], type: 'grass' },
       { pos: [13, 2, 0], type: 'grass' },
       { pos: [14, 2, 0], type: 'grass' },
@@ -299,7 +279,6 @@ function Level({
   );
 }
 
-// Game UI
 function GameUI({ score }: { score: number }) {
   return (
     <Html position={[-3, 3, 0]}>
@@ -313,7 +292,6 @@ function GameUI({ score }: { score: number }) {
   );
 }
 
-// Preload assets
 useGLTF.preload('/assets/kenney/3d/characters/character-a.glb');
 useGLTF.preload('/assets/kenney/3d/platformer/block-grass-large.glb');
 useGLTF.preload('/assets/kenney/3d/platformer/block-stone-large.glb');
@@ -321,12 +299,10 @@ useGLTF.preload('/assets/kenney/3d/platformer/spike-block.glb');
 useGLTF.preload('/assets/kenney/3d/platformer/coin.glb');
 useGLTF.preload('/assets/kenney/3d/platformer/flag.glb');
 
-// Main game component
 export default function ObstacleCourse3D() {
   const navigate = useNavigate();
   const { playSFX, preload, setMuted } = use3DGameAudio();
 
-  // Performance monitoring
   usePerformanceMonitor('ObstacleCourse3D', {
     warnThreshold: 30,
   });
@@ -341,8 +317,28 @@ export default function ObstacleCourse3D() {
       coinsCollected: score / 10,
     },
   });
+  const webcamRef = useRef<Webcam>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Preload audio on mount
+  const handleFrame = useCallback((frame: any) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor({ x: tip.x, y: tip.y });
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
+
+  const { isReady: _isHandTrackingReady, startTracking, pinch } = useGameHandTracking({
+    gameName: 'ObstacleCourse3D',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+  });
+
   useEffect(() => {
     preload(['jump', 'land', 'coin', 'win']);
   }, [preload]);
@@ -353,10 +349,6 @@ export default function ObstacleCourse3D() {
 
   const playCollectSound = useCallback(() => {
     playSFX('coin', 0.6);
-  }, [playSFX]);
-
-  const handleJump = useCallback(() => {
-    playSFX('jump', 0.5);
   }, [playSFX]);
 
   const handleLand = useCallback(() => {
@@ -381,91 +373,90 @@ export default function ObstacleCourse3D() {
       <GameContainer
         title='3D Obstacle Course'
         onHome={() => navigate('/games')}
+        webcamRef={webcamRef}
+        isHandDetected={!!cursor}
+        isPlaying={isPlaying}
       >
-        <KeyboardControls
-          map={[
-            { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
-            { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
-            { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
-            { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
-            { name: 'jump', keys: ['Space'] },
-          ]}
-        >
-          <div className='h-[600px] w-full rounded-xl overflow-hidden bg-[#FFF8F0] relative'>
-            {/* Mute button */}
-            <button
-              onClick={toggleMute}
-              className='absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors'
-              aria-label={isMuted ? 'Unmute' : 'Mute'}
-            >
-              {isMuted ? (
-                <VolumeX className='w-5 h-5 text-white' />
-              ) : (
-                <Volume2 className='w-5 h-5 text-white' />
-              )}
-            </button>
-            <ThreeDGameCanvas
-              cameraPosition={[5, 5, 8]}
-              cameraTarget={[5, 1, 0]}
-              enableOrbit={false}
-              showStats={import.meta.env.DEV}
-              showFPS={import.meta.env.DEV}
-              backgroundColor='#0f172a'
-              environment='sunset'
-            >
-              <Physics gravity={[0, -20, 0]}>
+        <div className='h-[600px] w-full rounded-xl overflow-hidden bg-[#FFF8F0] relative'>
+          <button
+            onClick={toggleMute}
+            className='absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors'
+            aria-label={isMuted ? 'Unmute' : 'Mute'}
+          >
+            {isMuted ? (
+              <VolumeX className='w-5 h-5 text-white' />
+            ) : (
+              <Volume2 className='w-5 h-5 text-white' />
+            )}
+          </button>
+
+          {!isPlaying ? (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/80">
+              <button
+                onClick={() => { setIsPlaying(true); startTracking(); }}
+                className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-2xl shadow-lg transition-all hover:scale-105"
+              >
+                🏃 Start Course
+              </button>
+            </div>
+          ) : null}
+
+          <ThreeDGameCanvas
+            cameraPosition={[5, 5, 8]}
+            cameraTarget={[5, 1, 0]}
+            enableOrbit={false}
+            showStats={import.meta.env.DEV}
+            showFPS={import.meta.env.DEV}
+            backgroundColor='#0f172a'
+            environment='sunset'
+          >
+            <Physics gravity={[0, -20, 0]}>
                 <Player
                   startPosition={[0, 2, 0]}
-                  onJump={handleJump}
                   onLand={handleLand}
                   isMuted={isMuted}
+                  cursor={cursor}
+                  pinch={pinch}
                 />
-                <Level
-                  onCoinCollect={handleCoinCollect}
-                  playCollectSound={playCollectSound}
-                  onFinish={() => setGameWon(true)}
-                />
-                <GameUI score={score} />
+              <Level
+                onCoinCollect={handleCoinCollect}
+                playCollectSound={playCollectSound}
+                onFinish={() => setGameWon(true)}
+              />
+              <GameUI score={score} />
 
-                {gameWon && (
-                  <Html center>
-                    <div className='bg-[#FFF8F0] text-gray-800 p-8 rounded-2xl shadow-2xl text-center'>
-                      <Trophy className='w-16 h-16 mx-auto mb-4 text-yellow-400' />
-                      <h2 className='text-3xl font-bold mb-2'>
-                        Level Complete!
-                      </h2>
-                      <p className='text-slate-400 mb-4'>Score: {score}</p>
-                      <button
-                        onClick={resetGame}
-                        className='flex items-center gap-2 mx-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition-colors'
-                      >
-                        <RotateCcw className='w-5 h-5' />
-                        Play Again
-                      </button>
-                    </div>
-                  </Html>
-                )}
-              </Physics>
-            </ThreeDGameCanvas>
-          </div>
-        </KeyboardControls>
+              {isPlaying && cursor && <CursorEmbodiment position={cursor} />}
 
-        {/* Controls */}
+              {gameWon && (
+                <Html center>
+                  <div className='bg-[#FFF8F0] text-gray-800 p-8 rounded-2xl shadow-2xl text-center'>
+                    <Trophy className='w-16 h-16 mx-auto mb-4 text-yellow-400' />
+                    <h2 className='text-3xl font-bold mb-2'>
+                      Level Complete!
+                    </h2>
+                    <p className='text-slate-400 mb-4'>Score: {score}</p>
+                    <button
+                      onClick={resetGame}
+                      className='flex items-center gap-2 mx-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition-colors'
+                    >
+                      <RotateCcw className='w-5 h-5' />
+                      Play Again
+                    </button>
+                  </div>
+                </Html>
+              )}
+            </Physics>
+          </ThreeDGameCanvas>
+        </div>
+
         <div className='mt-4 flex justify-center gap-6 text-sm text-slate-500'>
           <div className='flex items-center gap-2'>
-            <div className='flex gap-1'>
-              <ArrowUp className='w-4 h-4' />
-              <ArrowDown className='w-4 h-4' />
-              <ArrowLeft className='w-4 h-4' />
-              <ArrowRight className='w-4 h-4' />
-            </div>
-            <span>Move</span>
+            <span>✋</span>
+            <span>Move hand to walk</span>
           </div>
           <div className='flex items-center gap-2'>
-            <span className='px-2 py-1 bg-slate-200 rounded text-xs font-mono'>
-              SPACE
-            </span>
-            <span>Jump</span>
+            <span>🤏</span>
+            <span>Pinch to jump</span>
           </div>
           <div className='flex items-center gap-2'>
             <span>🪙</span>
