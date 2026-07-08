@@ -1,0 +1,7 @@
+# Generated: 2026-05-25T10:13:33.974531
+# Env path: /Users/pranay/Projects/learning_for_kids/src/backend/.venv
+# Project path: /Users/pranay/Projects/learning_for_kids/src/backend
+# Detected manager: uv
+# Project last modified: 2026-05-24T13:00:03.030776
+# Freeze status: ERROR: /Users/pranay/Projects/learning_for_kids/src/backend/.venv/bin/python: No module named pip
+

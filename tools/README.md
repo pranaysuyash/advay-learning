@@ -559,6 +559,102 @@ Toddler-friendly rating: ❌ BROKEN - Completely unusable
 
 **JSON Report:** Detailed metrics with frame-by-frame tracking data
 
+### Latency Log Helper (New)
+
+**Purpose:** Maintain deterministic latency measurement CSVs for tracking QA sessions and provide machine-readable summaries/exports.
+
+**File:** `tools/qa_analysis/latency_log_helper.py`
+
+### Usage
+
+```bash
+# Append one measurement
+python3 tools/qa_analysis/latency_log_helper.py \
+  /tmp/latency_log.csv \
+  --append \
+  --timestamp "2026-06-01T00:00:00Z" \
+  --frame-index 120 \
+  --hand-start 350 \
+  --cursor-start 370 \
+  --fps 30 \
+  --notes "baseline"
+
+# Append a batch from JSON
+python3 tools/qa_analysis/latency_log_helper.py \
+  /tmp/latency_log.csv \
+  --from-json /tmp/batch.json \
+  --force
+
+# Generate summary
+python3 tools/qa_analysis/latency_log_helper.py /tmp/latency_log.csv --summary --json
+
+# Export for dashboards/visualizers
+python3 tools/qa_analysis/latency_log_helper.py \
+  /tmp/latency_log.csv \
+  --export-json /tmp/latency_trace.json
+```
+
+### JSON Batch Format
+
+`--from-json` expects a list where each item has:
+
+- `timestamp_video` (or `Timestamp_Video`, optional)
+- `frame_index` (or `Frame_Index`, optional)
+- `hand_start` (or `Hand_Move_Start_Frame`)
+- `cursor_start` (or `Cursor_Move_Start_Frame`)
+- `fps` (or `FPS`)
+- `notes` (or `Notes`)
+
+Missing values are defaulted and timestamps are auto-filled to current UTC.
+
+### Useful Flags
+
+- `--append`: single-row add
+- `--from-json` / `--from-csv`: batch add
+- `--summary`: quick distribution stats (count/min/max/median/p95)
+- `--export-json`: writes `{ source, count, measurements }` file
+- `--force`: repair missing/malformed headers
+- `--dry-run`: validate and log without writing
+- `--json`: machine-readable output on stdout
+
+---
+
+## 🧪 CV Gap Analyzer
+
+**Purpose:** Detect mismatches between route audit tables, registry `cv` declarations, and live game hooks.
+
+**File:** `tools/cv_gap_analysis.py`
+
+### Usage
+
+```bash
+# Validate a historical audit against local game registry exports
+python3 tools/cv_gap_analysis.py \
+  --audit-path docs/audit/CONTROL_MODE_AUDIT_2026-03-12.md \
+  --registry-dir src/frontend/src/data/gameRegistries \
+  --project-root .
+
+# CI-friendly JSON summary
+python3 tools/cv_gap_analysis.py \
+  --audit-path docs/audit/CONTROL_MODE_AUDIT_2026-03-12.md \
+  --registry-dir src/frontend/src/data/gameRegistries \
+  --project-root . \
+  --json
+
+# Fail hard if any gap is found
+python3 tools/cv_gap_analysis.py \
+  --audit-path docs/audit/CONTROL_MODE_AUDIT_2026-03-12.md \
+  --registry-dir src/frontend/src/data/gameRegistries \
+  --project-root . \
+  --fail-on-gaps
+```
+
+### Interpretation
+
+- `missing_registry_count`: manifest route not found or `cv` missing in registry data
+- `missing_file_count`: audit row points to a missing game file
+- `missing_hooks_count`: `cv` modes in registry but no matching hook in source
+
 ---
 
 ## 📸 Video Frame Analyzer

@@ -1,6 +1,6 @@
 # Session Context
 
-- Generated: 2026-05-20T17:12:35Z
+- Generated: 2026-07-08T07:24:34Z
 - Project: `learning_for_kids`
 - Provider: `local`
 - Model: `BAAI/bge-m3`
@@ -9,9 +9,10 @@
 
 ## Project Motto
 
-- File: `/Users/pranay/Projects/learning_for_kids/motto_v2.md`
-- Source: `/Users/pranay/Downloads/motto_v2.md`
-- Sync status: `synced from /Users/pranay/Downloads/motto_v2.md`
+- File: `/Users/pranay/Projects/learning_for_kids/motto_v3.md`
+- Legacy bridge: `/Users/pranay/Projects/learning_for_kids/motto_v2.md`
+- Source: `/Users/pranay/Downloads/motto_v3.md`
+- Sync status: `synced from /Users/pranay/Downloads/motto_v3.md; legacy motto_v2.md symlinked to motto_v3.md`
 - Guidance: read this before implementation or review on this project.
 
 ## Project-Focused Retrieval
