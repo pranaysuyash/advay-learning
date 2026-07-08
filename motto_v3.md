@@ -534,7 +534,7 @@ Never continue implementation from stale generated instruction surfaces in paral
   - Do not proceed with implementation until this loop is completed and the canonical instruction/context files are loaded.
 - Inspect the codebase, architecture, docs, workflows, tests, configs, data contracts, generated files, and current implementation state before planning or coding.
 - Follow all project guidelines, workflows, conventions, and instruction files.
-- Review all agent/instruction/config files starting from `/Users/pranay/`, including Claude, Qwen, Codex, Copilot, AGENTS files, motto files, session context files, and all related instruction/workflow files.
+- Review all agent/instruction/config files starting from `$HOME/`, including Claude, Qwen, Codex, Copilot, AGENTS files, motto files, session context files, and all related instruction/workflow files.
 - Discover and review all referenced skills repositories, skills paths, shared playbooks, reusable utilities, capability libraries, architectural guidance, and linked implementation docs mentioned anywhere in the system.
 - Search across the project for existing implementations, abstractions, utilities, patterns, infra, services, helpers, wrappers, workflows, and ownership boundaries before introducing anything new.
 - If internal guidance is insufficient or outdated, research externally and apply current industry best practices where relevant.
