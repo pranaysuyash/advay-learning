@@ -15256,7 +15256,7 @@ Ticket Stamp: STAMP-20260708T072237Z-opencode
 Type: DOCS_REFRESH
 Owner: Pranay
 Created: 2026-07-08 12:52 IST
-Status: IN_PROGRESS
+Status: **DONE**
 
 Scope contract:
 - In-scope: Refresh README.md onboarding, sync .agent/ and docs/context/agent-start/ packs, update .githooks/commit-msg and pre-commit with motto_v3 attestation gates, align .github/copilot-instructions.md and AGENTS.md, document tools in tools/README.md, remove superseded motto_v2.md, add game-design/UI brainstorm doc, add tests for cv_gap_analysis and latency_log_helper.
@@ -15274,6 +15274,7 @@ Execution log:
 
 Status updates:
 - 2026-07-08 12:52 IST IN_PROGRESS — awaiting commit/push/PR.
+- 2026-07-09 18:53 IST **DONE** — PR #56 merged to main on 2026-07-08 (commit e01a4b1)
 
 Next actions:
 1. Push branch and open PR.
@@ -15417,3 +15418,4 @@ Execution log:
 
 Status updates:
 - 2026-07-09 14:06 IST **IN_PROGRESS** — All review threads addressed, type-check/lint pass, pending commit+push
+- 2026-07-09 18:53 IST **DONE** — All review threads addressed, type-check/lint/tests pass locally (7532 tests, 0 lint errors). Pushed to PR #58.
