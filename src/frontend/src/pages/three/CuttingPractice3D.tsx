@@ -270,8 +270,6 @@ export default function CuttingPractice3D() {
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
           
-          {isPlaying && viewportCursor && <CursorEmbodiment position={viewportCursor} />}
-
           {fruits.map(({ id, fruit }) => (
             <FlyingFruit
               key={id}
@@ -319,6 +317,8 @@ export default function CuttingPractice3D() {
             </Html>
           )}
         </ThreeDGameCanvas>
+
+          {isPlaying && viewportCursor && <CursorEmbodiment position={viewportCursor} />}
       </div>
 
       <p className="mt-4 text-center text-sm text-slate-500">

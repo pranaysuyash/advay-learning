@@ -15388,7 +15388,7 @@ Ticket Stamp: STAMP-20260709T061000Z-codex-vpqv
 Type: REMEDIATION
 Owner: Pranay
 Created: 2026-07-09 13:30 IST
-Status: **IN_PROGRESS**
+Status: **DONE**
 Priority: P1
 
 Scope contract:
