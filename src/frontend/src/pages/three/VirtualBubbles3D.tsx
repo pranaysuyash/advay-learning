@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
+import Webcam from 'react-webcam';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
 import { GameShell } from '../../components/GameShell';
 import { GameContainer } from '../../components/GameContainer';
 import { use3DGameAudio } from '../../hooks/use3DGameAudio';
 import { useGameCompletion } from '../../hooks/useGameCompletion';
+import { useGameHandTracking } from '../../hooks/useGameHandTracking';
+import { CursorEmbodiment } from '../../components/game/CursorEmbodiment';
+import { useAutoGameCompletion } from '../../hooks/useAutoGameCompletion';
+import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 import { Sparkles, RotateCcw, Volume2, VolumeX, Music } from 'lucide-react';
 
-// Bubble vertex shader
 const bubbleVertexShader = `
   varying vec2 vUv;
   varying vec3 vNormal;
@@ -24,7 +28,6 @@ const bubbleVertexShader = `
     vUv = uv;
     vNormal = normalize(normalMatrix * normal);
     
-    // Add wobble effect
     vec3 pos = position;
     float elevation = sin(pos.x * 5.0 + uTime) * sin(pos.y * 5.0 + uTime) * sin(pos.z * 5.0 + uTime);
     pos += normal * elevation * uWobble;
@@ -36,7 +39,6 @@ const bubbleVertexShader = `
   }
 `;
 
-// Bubble fragment shader
 const bubbleFragmentShader = `
   varying vec2 vUv;
   varying vec3 vNormal;
@@ -52,10 +54,7 @@ const bubbleFragmentShader = `
     vec3 viewDir = normalize(vViewPosition);
     vec3 normal = normalize(vNormal);
     
-    // Fresnel effect (rainbow at edges)
     float fresnel = pow(1.0 - dot(viewDir, normal), 3.0);
-    
-    // Iridescent color based on view angle and time
     float hue = fresnel * 0.5 + sin(uTime * 0.5) * 0.1 + vElevation * 0.2;
     
     vec3 color = mix(
@@ -64,21 +63,17 @@ const bubbleFragmentShader = `
       fresnel
     );
     
-    // Add specular highlight
     vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
     vec3 halfDir = normalize(lightDir + viewDir);
     float specular = pow(max(dot(normal, halfDir), 0.0), 64.0);
     
     color += vec3(specular) * 0.5;
-    
-    // Alpha for transparency
     float alpha = 0.3 + fresnel * 0.4;
     
     gl_FragColor = vec4(color, alpha);
   }
 `;
 
-// Pop particle effect
 function PopEffect({ position, onComplete }: { position: [number, number, number]; onComplete: () => void }) {
   const particles = useMemo(() => {
     return Array.from({ length: 12 }, (_, i) => ({
@@ -132,21 +127,19 @@ function PopEffect({ position, onComplete }: { position: [number, number, number
   );
 }
 
-// Individual bubble
 interface BubbleProps {
   initialPosition: [number, number, number];
   size: number;
   speed: number;
   onPop: (points: number) => void;
   playPopSound: () => void;
+  cursor: { x: number; y: number } | null;
 }
 
-function Bubble({ initialPosition, size, speed, onPop, playPopSound }: BubbleProps) {
+function Bubble({ initialPosition, size, speed, onPop, playPopSound, cursor }: BubbleProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [popped, setPopped] = useState(false);
   const [showPopEffect, setShowPopEffect] = useState(false);
-
-  // Uniforms for shader
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
@@ -160,25 +153,29 @@ function Bubble({ initialPosition, size, speed, onPop, playPopSound }: BubblePro
 
   useFrame(({ clock }) => {
     if (meshRef.current && !popped) {
-      // Float upward
       meshRef.current.position.y += speed * 0.01;
 
-      // Wobble motion
       meshRef.current.position.x =
         initialPosition[0] + Math.sin(clock.elapsedTime + initialPosition[0]) * 0.3;
       meshRef.current.position.z =
         initialPosition[2] + Math.cos(clock.elapsedTime * 0.7 + initialPosition[2]) * 0.3;
 
-      // Rotate
       meshRef.current.rotation.x += 0.01;
       meshRef.current.rotation.y += 0.005;
 
-      // Update shader time
       uniforms.uTime.value = clock.elapsedTime;
 
-      // Reset if too high
       if (meshRef.current.position.y > 6) {
         meshRef.current.position.y = -4;
+      }
+
+      if (cursor) {
+        const dx = cursor.x - (meshRef.current.position.x * 0.1 + 0.5);
+        const dy = cursor.y - (meshRef.current.position.y * 0.1 + 0.5);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 0.12) {
+          handleClick();
+        }
       }
     }
   });
@@ -235,8 +232,7 @@ function Bubble({ initialPosition, size, speed, onPop, playPopSound }: BubblePro
   );
 }
 
-// Bubble spawner
-function BubbleField({ onPop, playPopSound }: { onPop: (points: number) => void; playPopSound: () => void }) {
+function BubbleField({ onPop, playPopSound, cursor }: { onPop: (points: number) => void; playPopSound: () => void; cursor: { x: number; y: number } | null }) {
   const [bubbles, setBubbles] = useState(() =>
     Array.from({ length: 20 }, (_, i) => ({
       id: i,
@@ -246,12 +242,10 @@ function BubbleField({ onPop, playPopSound }: { onPop: (points: number) => void;
     }))
   );
 
-  // Respawn bubbles periodically
   useFrame(() => {
     setBubbles((prev) =>
       prev.map((b) => {
         if (Math.random() < 0.001) {
-          // Respawn this bubble
           return {
             ...b,
             position: [(Math.random() - 0.5) * 8, -4, (Math.random() - 0.5) * 4],
@@ -272,13 +266,13 @@ function BubbleField({ onPop, playPopSound }: { onPop: (points: number) => void;
           speed={bubble.speed}
           onPop={onPop}
           playPopSound={playPopSound}
+          cursor={cursor}
         />
       ))}
     </>
   );
 }
 
-// Score display
 function ScoreDisplay({ score, combo }: { score: number; combo: number }) {
   return (
     <Html position={[-3, 3, 0]}>
@@ -297,7 +291,6 @@ function ScoreDisplay({ score, combo }: { score: number; combo: number }) {
   );
 }
 
-// Main game component
 export default function VirtualBubbles3D() {
   const navigate = useNavigate();
   const { playSFX, stopBGM, preload, setMuted } = use3DGameAudio();
@@ -307,8 +300,46 @@ export default function VirtualBubbles3D() {
   const [combo, setCombo] = useState(0);
   const [lastPopTime, setLastPopTime] = useState(0);
   const { savePartialProgress, canSave } = useGameCompletion('virtual-bubbles-3d');
+  const webcamRef = useRef<Webcam>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Preload audio on mount
+  usePerformanceMonitor('VirtualBubbles3D', { warnThreshold: 30 });
+  const { resetAutoCompletion: _resetAutoCompletion } = useAutoGameCompletion('virtual-bubbles-3d', {
+    when: score >= 500,
+    score,
+    level: 1,
+    metadata: { combo, bgMusicEnabled },
+  });
+
+  const handleFrame = useCallback((frame: any) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor({ x: tip.x, y: tip.y });
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
+
+  const { isReady: _isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'VirtualBubbles3D',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+    webcamRef: webcamRef,
+  });
+  const [viewportCursor, setViewportCursor] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (cursor) {
+      setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
+    } else {
+      setViewportCursor(null);
+    }
+  }, [cursor]);
+
   useEffect(() => {
     preload(['pop', 'click', 'win']);
   }, [preload]);
@@ -318,7 +349,6 @@ export default function VirtualBubbles3D() {
     setIsMuted(newMuted);
     setMuted(newMuted);
     if (!newMuted) playSFX('click', 0.3);
-    // Stop background music if muting
     if (newMuted && bgMusicEnabled) {
       stopBGM();
     }
@@ -328,8 +358,6 @@ export default function VirtualBubbles3D() {
     const newState = !bgMusicEnabled;
     setBgMusicEnabled(newState);
     if (newState && !isMuted) {
-      // Use a pleasant ambient loop - using 'click' as a soft ambient tone fallback
-      // In production, you might want to add a dedicated ambient track
       playSFX('click', 0.15);
     } else {
       stopBGM();
@@ -345,10 +373,8 @@ export default function VirtualBubbles3D() {
     (points: number) => {
       const now = Date.now();
 
-      // Check for combo (popped within 1 second)
       if (now - lastPopTime < 1000) {
         setCombo((c) => c + 1);
-        // Play combo sound for multi-bubble pops
         if (combo >= 2) {
           playSFX('win', 0.4);
         }
@@ -358,7 +384,6 @@ export default function VirtualBubbles3D() {
 
       setLastPopTime(now);
 
-      // Calculate score with combo bonus
       const comboBonus = combo * 0.5;
       setScore((s) => s + Math.floor(points * (1 + comboBonus)));
     },
@@ -393,9 +418,8 @@ export default function VirtualBubbles3D() {
 
   return (
     <GameShell gameId='virtual-bubbles-3d' gameName='Virtual Bubbles 3D'>
-    <GameContainer title="Virtual Bubbles 3D" onHome={() => navigate('/games')}>
+    <GameContainer title="Virtual Bubbles 3D" onHome={() => navigate('/games')} webcamRef={webcamRef} isHandDetected={!!cursor} isPlaying={isPlaying}>
       <div className="h-[600px] w-full rounded-xl overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800 relative">
-        {/* Mute button */}
         <button
           type="button"
           onClick={toggleMute}
@@ -404,7 +428,6 @@ export default function VirtualBubbles3D() {
         >
           {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
         </button>
-        {/* Background music toggle */}
         <button
           type="button"
           onClick={toggleBgMusic}
@@ -415,6 +438,18 @@ export default function VirtualBubbles3D() {
         >
           <Music className={`w-5 h-5 ${bgMusicEnabled ? 'text-white' : 'text-slate-400'}`} />
         </button>
+
+        {!isPlaying ? (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60">
+            <button
+              onClick={() => { setIsPlaying(true); startTracking(); }}
+              className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-2xl shadow-lg transition-all hover:scale-105"
+            >
+              🫧 Start Playing
+            </button>
+          </div>
+        ) : null}
+
         <ThreeDGameCanvas
           cameraPosition={[0, 0, 8]}
           cameraTarget={[0, 0, 0]}
@@ -424,25 +459,24 @@ export default function VirtualBubbles3D() {
           backgroundColor="transparent"
           environment={null}
         >
-          {/* Ambient light */}
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
           <pointLight position={[-10, -10, -10]} intensity={0.5} color="#4ecdc4" />
 
-          <BubbleField onPop={handlePop} playPopSound={playPopSound} />
+          {isPlaying && viewportCursor && <CursorEmbodiment position={viewportCursor} />}
+
+          <BubbleField onPop={handlePop} playPopSound={playPopSound} cursor={cursor} />
           <ScoreDisplay score={score} combo={combo} />
 
-          {/* Instructions */}
           <Html position={[0, -3.5, 0]} center>
             <div className="bg-white/10 backdrop-blur-sm text-white px-6 py-3 rounded-xl text-center">
-              <p className="font-bold text-lg">🫧 Click bubbles to pop!</p>
+              <p className="font-bold text-lg">🫧 Point at bubbles to pop!</p>
               <p className="text-sm text-slate-300">Pop quickly for combos!</p>
             </div>
           </Html>
         </ThreeDGameCanvas>
       </div>
 
-      {/* Controls */}
       <div className="mt-4 flex justify-between items-center px-8">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-slate-500">
@@ -461,7 +495,6 @@ export default function VirtualBubbles3D() {
         </button>
       </div>
 
-      {/* Stats */}
       <div className="mt-4 grid grid-cols-3 gap-4 text-center">
         <div className="bg-slate-100 p-3 rounded-xl">
           <div className="text-2xl font-bold text-blue-500">{score.toLocaleString()}</div>

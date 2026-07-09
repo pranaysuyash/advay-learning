@@ -15256,7 +15256,7 @@ Ticket Stamp: STAMP-20260708T072237Z-opencode
 Type: DOCS_REFRESH
 Owner: Pranay
 Created: 2026-07-08 12:52 IST
-Status: IN_PROGRESS
+Status: **DONE**
 
 Scope contract:
 - In-scope: Refresh README.md onboarding, sync .agent/ and docs/context/agent-start/ packs, update .githooks/commit-msg and pre-commit with motto_v3 attestation gates, align .github/copilot-instructions.md and AGENTS.md, document tools in tools/README.md, remove superseded motto_v2.md, add game-design/UI brainstorm doc, add tests for cv_gap_analysis and latency_log_helper.
@@ -15274,6 +15274,7 @@ Execution log:
 
 Status updates:
 - 2026-07-08 12:52 IST IN_PROGRESS — awaiting commit/push/PR.
+- 2026-07-09 18:53 IST **DONE** — PR #56 merged to main on 2026-07-08 (commit e01a4b1)
 
 Next actions:
 1. Push branch and open PR.
@@ -15284,3 +15285,138 @@ Risks/notes:
 - Low risk: docs/hooks/tools/tests only.
 - Hook changes will be exercised by CI and PR review.
 
+
+---
+
+### TCK-20260708-002 :: CV Registry Compliance Remediation
+
+Ticket Stamp: STAMP-20260708T091917Z-codex-kzwj
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-07-08 14:45 IST
+Status: **DONE**
+Priority: P0
+
+Scope contract:
+
+- In-scope: Ensure every listed game in `src/frontend/src/data/gameRegistries/*.ts` declares a `cv` mode that matches its actual implementation; mark games without functional CV as `listed: false`; update `AGENTS.md` and `docs/audit/CV_REGISTRY_AUDIT_2026-07-08.md` with verified state.
+- Out-of-scope: Adding new CV implementations to unlisted backlog games, full rewrite of `docs/games/README.md` inventory, runtime gameplay changes beyond registry declarations.
+- Behavior change allowed: YES (registry `cv` declarations and `listed` flags are adjusted to reflect reality).
+
+Targets:
+
+- Repo: learning_for_kids
+- File(s): `src/frontend/src/data/gameRegistries/bodyZone.ts`, `creativeCorner.ts`, `labOfWonders.ts`, `numberJungle.ts`, `platformWorld.ts`, `shapeGarden.ts`, `soundStudio.ts`, `threeDWorld.ts`, `wellness.ts`, `wordWorkshop.ts`, `wordWorkshopExtra.ts`, `AGENTS.md`, `docs/audit/CV_REGISTRY_AUDIT_2026-07-08.md`
+- Branch/PR: main (direct local-main iteration per repo workflow)
+
+Inputs:
+
+- Prompt used: `prompts/remediation/implementation-v1.6.1.md` (intent-first remediation aligned with `motto_v3.md`)
+- Source artifacts: `docs/audit/CV_REGISTRY_AUDIT_2026-07-08.md`, `src/frontend/src/data/gameRegistries/*.ts`, `src/frontend/src/pages/*.tsx`
+
+Acceptance Criteria:
+
+- [x] 148 top-level registry entries parsed across 12 worlds.
+- [x] 139 listed games all have a `cv` mode (136 explicit + 3 factory-default 3D `cv: ['hand']`).
+- [x] 0 listed games missing `cv`.
+- [x] 9 unlisted backlog games (8 3D + `free-draw`) correctly hidden from players.
+- [x] All declared CV modes match actual hooks/components (verified by parser + page inspection).
+- [x] `npm run type-check` passes.
+- [x] `AGENTS.md` current-state block updated to 2026-07-08 truth.
+- [x] Audit report corrected from 200-entry count to 148-entry count and updated with result table.
+
+Execution log:
+
+- 2026-07-08 14:45 IST | Parsed all registry files and classified 62 missing-`cv` entries into real games vs `egg-*` reward variants. | Evidence: `parse_literal_objects` + `parse_factory_calls` parser; 52 nested egg entries excluded from top-level count.
+- 2026-07-08 14:50 IST | Added correct `cv` declarations to 35 real games with verified CV hooks. | Evidence: registry diffs in bodyZone.ts, creativeCorner.ts, labOfWonders.ts, numberJungle.ts, platformWorld.ts, shapeGarden.ts, soundStudio.ts, wellness.ts, wordWorkshop.ts, wordWorkshopExtra.ts.
+- 2026-07-08 14:55 IST | Marked 9 games without functional CV wiring as `listed: false` (`free-draw` + eight 3D games). | Evidence: creativeCorner.ts and threeDWorld.ts diffs.
+- 2026-07-08 15:00 IST | Corrected mismatched `cv` declarations: `obstacle-course`, `musical-statues` → `['hand']`; `math-smash`, `phonics-fun` → `['hand']`; kept `virtual-bubbles` as `['hand','voice']` because it uses microphone blow detection. | Evidence: bodyZone.ts and wordWorkshop.ts diffs.
+- 2026-07-08 15:05 IST | Fixed TypeScript errors in `threeDWorld.ts`: removed unused `BETA_3D_GAMES_ENABLED`, removed duplicate `listed: false` keys, removed invalid `cv` override on factory-created entry. | Evidence: `npm run type-check` exits 0.
+- 2026-07-08 15:10 IST | Updated `AGENTS.md` CV current-state block and corrected `docs/audit/CV_REGISTRY_AUDIT_2026-07-08.md` totals/backlog table. | Evidence: markdown diffs.
+- 2026-07-08 15:15 IST | Ran final verification script: 148 total, 139 listed, 0 listed without cv, 0 cv/implementation mismatches. | Evidence: `/tmp/final_verify.txt`.
+- 2026-07-08 15:16 IST | Ran `npm run type-check` successfully. | Evidence: `tsc --noEmit` exits 0.
+
+Status updates:
+
+- 2026-07-08 15:16 IST **DONE** — All listed games now satisfy the mandatory CV control mode mandate; 9 unlisted backlog items remain for future implementation.
+
+Follow-up items (tracked separately):
+
+- Add CV controls to the 9 unlisted backlog games (tracked in CV wiring PR)
+- Refresh `docs/games/README.md` inventory in a dedicated docs ticket
+
+Risks/notes:
+
+- Virtual Bubbles uses microphone blow detection (Web Audio) for its `voice` mode; no speech recognition.
+- `digital-jenga`, `pattern-pop-3d-2`, and `color-match-garden-3d` rely on the factory default `cv: ['hand']` in `threeDWorld.ts`.
+- Egg reward entries (`egg-*`) are nested inside `easterEggs` arrays and are not standalone games; they are intentionally not subject to the CV mandate.
+
+---
+
+### TCK-20260709-001 :: Fix lint errors in 3D game pages
+
+Ticket Stamp: STAMP-20260709T055327Z-codex-lnrj
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-07-09 11:23 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+- In-scope: Fix lint errors blocking CI (bg-slate-900 → bg-[#0f172a], unused var prefix)
+- Out-of-scope: Other lint warnings
+- Behavior change allowed: NO
+
+Targets:
+- Repo: learning_for_kids
+- File(s): CountingCollectathon3D.tsx, VirtualBubbles3D.tsx, ObstacleCourse3D.tsx, CuttingPractice3D.tsx, FeedTheMonster3D.tsx
+
+Execution log:
+- 2026-07-09 11:23 IST | Replaced bg-slate-900 with bg-[#0f172a] in 4 files; prefixed unused monsterStates with _ | Evidence: lint passes locally
+
+Status updates:
+- 2026-07-09 11:23 IST **DONE**
+
+---
+
+### TCK-20260709-002 :: Address PR#58 review comments (CodeRabbit + cubic)
+
+Ticket Stamp: STAMP-20260709T061000Z-codex-vpqv
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-07-09 13:30 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+- In-scope: Fix all actionable CodeRabbit/cubic review issues: overlay bg colors, webcamRef wiring, pinch feed, fruit spawn gating, resetAutoCompletion wiring, viewport cursor conversion, garbled JSX, import typo, registry tagline/listed cleanups, worklog ticket fix, Rapier contact-based grounding, coin/finish flag sensor collection, wordWorkshop drops, AGENTS.md/README docs sync
+- Out-of-scope: None (all review threads addressed)
+- Behavior change allowed: NO (behavior preservation)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): All 6 game files, labOfWonders.ts, threeDWorld.ts, wordWorkshop.ts, AGENTS.md, docs/games/README.md, WORKLOG_ADDENDUM_v3.md
+
+Execution log:
+- 2026-07-09 13:30 IST | Fixed overlay backgrounds: CuttingPractice3D, VirtualBubbles3D, ObstacleCourse3D → bg-white/60 | Evidence: edit commits
+- 2026-07-09 13:30 IST | Added webcamRef to useGameHandTracking: ObstacleCourse3D, CuttingPractice3D | Evidence: edit commits
+- 2026-07-09 13:31 IST | Fixed FeedTheMonster3D: import typo, garbled JSX classname | Evidence: edit commits
+- 2026-07-09 13:32 IST | Fixed CuttingPractice3D: isPlaying gate, viewportCursor | Evidence: edit commits
+- 2026-07-09 13:32 IST | Fixed CountingCollectathon3D: resetAutoCompletion wired | Evidence: edit commits
+- 2026-07-09 13:33 IST | Added viewportCursor to ObstacleCourse3D, VirtualBubbles3D | Evidence: edit commits
+- 2026-07-09 13:34 IST | Fixed registry: labOfWonders tagline, threeDWorld redundant listed: true | Evidence: edit commits
+- 2026-07-09 13:35 IST | Fixed WORKLOG_ADDENDUM_v3: TCK-20260708-002 next actions | Evidence: edit commits
+- 2026-07-09 14:00 IST | Fixed Rapier contact-based grounding: CountingCollectathon3D + ObstacleCourse3D Player → onCollisionEnter/Exit | Evidence: edit commits
+- 2026-07-09 14:01 IST | Fixed coin/finish flag collection: ObstacleCourse3D Coin + FinishFlag → Rapier sensors | Evidence: edit commits
+- 2026-07-09 14:02 IST | Fixed number collection: CountingCollectathon3D CollectibleNumber → Rapier sensor | Evidence: edit commits
+- 2026-07-09 14:03 IST | Fixed FeedTheMonster3D: viewportCursor for CursorEmbodiment | Evidence: edit commits
+- 2026-07-09 14:04 IST | Fixed wordWorkshop rhythm-tap drops: 'drop' → 'music-note' | Evidence: edit commits
+- 2026-07-09 14:05 IST | Fixed AGENTS.md + docs/games/README.md: updated counts to 139 listed, 9 unlisted | Evidence: edit commits
+
+Status updates:
+- 2026-07-09 14:06 IST **IN_PROGRESS** — All review threads addressed, type-check/lint pass, pending commit+push
+- 2026-07-09 18:53 IST **DONE** — All review threads addressed, type-check/lint/tests pass locally (7532 tests, 0 lint errors). Pushed to PR #58.
+- 2026-07-09 19:57 IST **DONE** — Fixed cubic P0: added `isPlaying` to CuttingPractice3D fruit spawn effect deps. Pushed as e46e10e.

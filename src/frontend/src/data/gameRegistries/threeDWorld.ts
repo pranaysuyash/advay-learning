@@ -3,9 +3,6 @@ import type { GameManifest, GameVibe } from '../gameRegistry';
 // ── 3D World Game Registry ──────────────────────────────────────────
 // Refactored: Extract common patterns to reduce repetition
 
-// Enable all 3D games for production
-const BETA_3D_GAMES_ENABLED = true;
-
 // ── Shared Drop Pools ───────────────────────────────────────────────
 const DROPS = {
   starSilver: { itemId: 'star-silver', chance: 0.1, minScore: 80 } as const,
@@ -161,7 +158,7 @@ export const THREE_D_WORLD_GAMES: GameManifest[] = [
     icon: 'numbers',
     vibe: 'educational',
     ageRange: '4-8',
-    listed: false,
+    listed: true,
     drops: [{ itemId: 'number-one', chance: 0.3 }, DROPS.starSilverEasy],
   }),
 
@@ -172,7 +169,7 @@ export const THREE_D_WORLD_GAMES: GameManifest[] = [
     icon: 'shirt',
     vibe: 'creative',
     ageRange: '3-7',
-    listed: BETA_3D_GAMES_ENABLED,
+    listed: true,
     drops: [{ itemId: 'color-rainbow', chance: 0.25 }, DROPS.starSilver],
     easterEggs: [EGGS.fashionStar],
   }),
@@ -184,7 +181,7 @@ export const THREE_D_WORLD_GAMES: GameManifest[] = [
     icon: 'gamepad',
     vibe: 'active',
     ageRange: '4-10',
-    listed: BETA_3D_GAMES_ENABLED,
+    listed: true,
     drops: [DROPS.shapeStar, DROPS.starGold],
     easterEggs: [EGGS.speedRunner],
   }),
@@ -196,7 +193,7 @@ export const THREE_D_WORLD_GAMES: GameManifest[] = [
     icon: 'utensils',
     vibe: 'relaxed',
     ageRange: '3-8',
-    listed: BETA_3D_GAMES_ENABLED,
+    listed: true,
     drops: [
       { itemId: 'color-green', chance: 0.25 },
       { itemId: 'star-silver', chance: 0.1, minScore: 75 },
@@ -211,7 +208,7 @@ export const THREE_D_WORLD_GAMES: GameManifest[] = [
     icon: 'sparkles',
     vibe: 'chill',
     ageRange: '2-6',
-    listed: BETA_3D_GAMES_ENABLED,
+    listed: true,
     drops: [
       DROPS.colorBlue,
       { itemId: 'drop', chance: 0.2 },

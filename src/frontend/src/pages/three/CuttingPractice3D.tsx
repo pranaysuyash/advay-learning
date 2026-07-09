@@ -3,12 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
+import Webcam from 'react-webcam';
 import { ThreeDGameCanvas } from '../../components/game/three/ThreeDGameCanvas';
 import { GameContainer } from '../../components/GameContainer';
 import { use3DGameAudio } from '../../hooks/use3DGameAudio';
+import { useGameHandTracking } from '../../hooks/useGameHandTracking';
+import { CursorEmbodiment } from '../../components/game/CursorEmbodiment';
+import { useAutoGameCompletion } from '../../hooks/useAutoGameCompletion';
+import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 import { Volume2, VolumeX, Trophy, RotateCcw } from 'lucide-react';
 
-// Available fruits
 const FRUITS = [
   { id: 'apple', name: 'Apple', color: '#ef4444', points: 10 },
   { id: 'banana', name: 'Banana', color: '#eab308', points: 15 },
@@ -16,7 +20,6 @@ const FRUITS = [
   { id: 'watermelon', name: 'Watermelon', color: '#22c55e', points: 25 },
 ];
 
-// Particle effect when fruit is sliced
 function SliceParticles({ position, color }: { position: [number, number, number]; color: string }) {
   const particles = useMemo(() => {
     return Array.from({ length: 8 }, (_, i) => ({
@@ -36,7 +39,7 @@ function SliceParticles({ position, color }: { position: [number, number, number
         const angle = particles[i].angle;
         const speed = particles[i].speed;
         child.position.x += Math.cos(angle) * speed;
-        child.position.y += Math.sin(angle) * speed - 0.01; // Gravity
+        child.position.y += Math.sin(angle) * speed - 0.01;
         child.position.z += Math.random() * 0.02;
       });
     }
@@ -56,19 +59,18 @@ function SliceParticles({ position, color }: { position: [number, number, number
   );
 }
 
-// Flying fruit
 interface FruitProps {
   fruit: typeof FRUITS[0];
   onSlice: (points: number) => void;
   onMiss: () => void;
+  cursor: { x: number; y: number } | null;
 }
 
-function FlyingFruit({ fruit, onSlice, onMiss }: FruitProps) {
+function FlyingFruit({ fruit, onSlice, onMiss, cursor }: FruitProps) {
   const [sliced, setSliced] = useState(false);
   const [position, setPosition] = useState<[number, number, number]>([0, -3, 0]);
   const [rotation, setRotation] = useState(0);
   const velocityRef = useRef({ x: (Math.random() - 0.5) * 0.05, y: 0.1 + Math.random() * 0.05 });
-  
   const { scene } = useGLTF(`/assets/kenney/3d/food/${fruit.id}.glb`);
   
   const fruitScene = useMemo(() => {
@@ -87,9 +89,8 @@ function FlyingFruit({ fruit, onSlice, onMiss }: FruitProps) {
     setPosition((prev) => {
       const newY = prev[1] + velocityRef.current.y;
       const newX = prev[0] + velocityRef.current.x;
-      velocityRef.current.y -= 0.003; // Gravity
+      velocityRef.current.y -= 0.003;
       
-      // Check if fruit fell off screen
       if (newY < -5) {
         onMiss();
         return [0, -3, 0];
@@ -99,6 +100,15 @@ function FlyingFruit({ fruit, onSlice, onMiss }: FruitProps) {
     });
     
     setRotation((r) => r + 0.02);
+
+    if (cursor) {
+      const dx = cursor.x - (position[0] * 0.1 + 0.5);
+      const dy = cursor.y - (position[1] * 0.1 + 0.5);
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < 0.12) {
+        handleClick();
+      }
+    }
   });
 
   const handleClick = () => {
@@ -124,12 +134,10 @@ function FlyingFruit({ fruit, onSlice, onMiss }: FruitProps) {
   );
 }
 
-// Preload all fruit assets
 FRUITS.forEach((fruit) => {
   useGLTF.preload(`/assets/kenney/3d/food/${fruit.id}.glb`);
 });
 
-// Main game component
 export default function CuttingPractice3D() {
   const navigate = useNavigate();
   const { playSFX, setMuted, preload } = use3DGameAudio();
@@ -139,15 +147,52 @@ export default function CuttingPractice3D() {
   const [gameOver, setGameOver] = useState(false);
   const [fruits, setFruits] = useState<{ id: number; fruit: typeof FRUITS[0] }[]>([]);
   const fruitIdRef = useRef(0);
+  const webcamRef = useRef<Webcam>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Preload audio
+  usePerformanceMonitor('CuttingPractice3D', { warnThreshold: 30 });
+  const { resetAutoCompletion: _resetAutoCompletion } = useAutoGameCompletion('cutting-practice-3d', {
+    when: gameOver,
+    score,
+    level: 1,
+    metadata: { lives },
+  });
+
+  const handleFrame = useCallback((frame: any) => {
+    const tip = frame.indexTip;
+    if (!tip) { setCursor(null); return; }
+    setCursor({ x: tip.x, y: tip.y });
+  }, []);
+
+  const handleNoVideoFrame = useCallback(() => {
+    setCursor(null);
+  }, []);
+
+  const { isReady: _isHandTrackingReady, startTracking } = useGameHandTracking({
+    gameName: 'CuttingPractice3D',
+    targetFps: 30,
+    isRunning: isPlaying,
+    onFrame: handleFrame,
+    onNoVideoFrame: handleNoVideoFrame,
+    webcamRef: webcamRef,
+  });
+  const [viewportCursor, setViewportCursor] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (cursor) {
+      setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
+    } else {
+      setViewportCursor(null);
+    }
+  }, [cursor]);
+
   useEffect(() => {
     preload(['click', 'crunch', 'win']);
   }, [preload]);
 
-  // Spawn fruits periodically
   useEffect(() => {
-    if (gameOver || lives <= 0) return;
+    if (gameOver || lives <= 0 || !isPlaying) return;
     
     const interval = setInterval(() => {
       const randomFruit = FRUITS[Math.floor(Math.random() * FRUITS.length)];
@@ -155,7 +200,7 @@ export default function CuttingPractice3D() {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [gameOver, lives]);
+  }, [gameOver, lives, isPlaying]);
 
   const handleSlice = useCallback((points: number) => {
     setScore((s) => s + points);
@@ -194,15 +239,25 @@ export default function CuttingPractice3D() {
   };
 
   return (
-    <GameContainer title="Fruit Ninja 3D" onHome={() => navigate('/games')}>
+    <GameContainer title="Fruit Ninja 3D" onHome={() => navigate('/games')} webcamRef={webcamRef} isHandDetected={!!cursor} isPlaying={isPlaying}>
       <div className="h-[600px] w-full rounded-xl overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800 relative">
-        {/* Mute button */}
         <button
           onClick={toggleMute}
           className="absolute top-4 right-4 z-10 p-2 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg transition-colors"
         >
           {isMuted ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
         </button>
+
+        {!isPlaying ? (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60">
+            <button
+              onClick={() => { setIsPlaying(true); startTracking(); }}
+              className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-2xl shadow-lg transition-all hover:scale-105"
+            >
+              🍉 Start Slicing
+            </button>
+          </div>
+        ) : null}
 
         <ThreeDGameCanvas
           cameraPosition={[0, 0, 8]}
@@ -212,11 +267,9 @@ export default function CuttingPractice3D() {
           backgroundColor="transparent"
           environment={null}
         >
-          {/* Lighting */}
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
           
-          {/* Fruits */}
           {fruits.map(({ id, fruit }) => (
             <FlyingFruit
               key={id}
@@ -229,10 +282,10 @@ export default function CuttingPractice3D() {
                 handleMiss();
                 handleRemoveFruit(id);
               }}
+              cursor={cursor}
             />
           ))}
 
-          {/* UI */}
           <Html position={[-3, 4, 0]}>
             <div className="bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg">
               <div className="text-sm text-slate-400">Score</div>
@@ -247,7 +300,6 @@ export default function CuttingPractice3D() {
             </div>
           </Html>
 
-          {/* Game Over */}
           {gameOver && (
             <Html center>
               <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)' }} className="text-white p-8 rounded-2xl shadow-2xl text-center">
@@ -265,10 +317,12 @@ export default function CuttingPractice3D() {
             </Html>
           )}
         </ThreeDGameCanvas>
+
+          {isPlaying && viewportCursor && <CursorEmbodiment position={viewportCursor} />}
       </div>
 
       <p className="mt-4 text-center text-sm text-slate-500">
-        Click on flying fruits to slice them! Don't let them fall.
+        Point at flying fruits to slice them! Don't let them fall.
       </p>
     </GameContainer>
   );
