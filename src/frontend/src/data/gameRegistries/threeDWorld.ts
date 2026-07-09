@@ -224,7 +224,6 @@ export const THREE_D_WORLD_GAMES: GameManifest[] = [
     icon: 'sparkles',
     vibe: 'chill',
     ageRange: '3-8',
-    listed: true,
     drops: [
       DROPS.colorBlue,
       { itemId: 'drop', chance: 0.2 },
@@ -254,7 +253,6 @@ export const THREE_D_WORLD_GAMES: GameManifest[] = [
     icon: 'triangle',
     vibe: 'educational',
     ageRange: '3-7',
-    listed: true,
     drops: [
       DROPS.shapeCube,
       { itemId: 'shape-sphere', chance: 0.25 },
@@ -269,7 +267,6 @@ export const THREE_D_WORLD_GAMES: GameManifest[] = [
     icon: 'scissors',
     vibe: 'focus',
     ageRange: '4-8',
-    listed: true,
     drops: [{ itemId: 'tool-scissors', chance: 0.2 }],
   }),
 ];

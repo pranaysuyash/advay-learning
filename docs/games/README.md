@@ -2,7 +2,7 @@
 
 **Project:** Advay Vision Learning Platform  
 **Total Games:** 148 across 12 worlds  
-**Last Updated:** 2026-07-08
+**Last Updated:** 2026-07-09
 
 ---
 
@@ -19,15 +19,16 @@
 
 ---
 
-## 🎮 Current Registry State (2026-07-08)
+## 🎮 Current Registry State (2026-07-09)
 
-All 148 games are listed and have functional CV integration. See the [CV Registry Audit](../audit/CV_REGISTRY_AUDIT_2026-07-08.md) for the full breakdown.
+139 games are listed and have functional CV integration; 9 games are unlisted (backlog, no CV wiring yet). See the [CV Registry Audit](../audit/CV_REGISTRY_AUDIT_2026-07-08.md) for the full breakdown.
 
 | Metric | Value |
 |--------|-------|
 | Total games | 148 |
-| Listed (visible to players) | 148 |
-| With explicit `cv` declaration | 145 |
+| Listed (visible to players) | 139 |
+| Unlisted (backlog, no CV) | 9 |
+| With explicit `cv` declaration | 136 |
 | Relying on factory default `cv: ['hand']` | 3 |
 | Missing `cv` mode | 0 |
 | CV/implementation mismatches | 0 |

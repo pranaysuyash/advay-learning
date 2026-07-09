@@ -175,14 +175,24 @@ export default function CuttingPractice3D() {
     isRunning: isPlaying,
     onFrame: handleFrame,
     onNoVideoFrame: handleNoVideoFrame,
+    webcamRef: webcamRef,
   });
+  const [viewportCursor, setViewportCursor] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (cursor) {
+      setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
+    } else {
+      setViewportCursor(null);
+    }
+  }, [cursor]);
 
   useEffect(() => {
     preload(['click', 'crunch', 'win']);
   }, [preload]);
 
   useEffect(() => {
-    if (gameOver || lives <= 0) return;
+    if (gameOver || lives <= 0 || !isPlaying) return;
     
     const interval = setInterval(() => {
       const randomFruit = FRUITS[Math.floor(Math.random() * FRUITS.length)];
@@ -239,7 +249,7 @@ export default function CuttingPractice3D() {
         </button>
 
         {!isPlaying ? (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/80">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60">
             <button
               onClick={() => { setIsPlaying(true); startTracking(); }}
               className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-2xl shadow-lg transition-all hover:scale-105"
@@ -260,7 +270,7 @@ export default function CuttingPractice3D() {
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
           
-          {isPlaying && cursor && <CursorEmbodiment position={cursor} />}
+          {isPlaying && viewportCursor && <CursorEmbodiment position={viewportCursor} />}
 
           {fruits.map(({ id, fruit }) => (
             <FlyingFruit

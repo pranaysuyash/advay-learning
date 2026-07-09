@@ -174,20 +174,20 @@ This app is a **multi-modal vision platform** where children interact with games
    - Games with CV should be wrapped with `CameraSafeRoute` in App.tsx
    - The camera preview should be visible and functional
 
-### Current State (as of 2026-07-08 - VERIFIED)
+### Current State (as of 2026-07-09 - VERIFIED)
 
 Registry-level CV compliance was audited in `docs/audit/CV_REGISTRY_AUDIT_2026-07-08.md`.
 
 - **148 total registry entries** across 12 worlds (literal games + factory-generated 3D games)
-- **148 listed games** appear in the gallery / are selectable by children
-- **145 listed games have an explicit `cv` declaration** in their registry object
+- **139 listed games** appear in the gallery / are selectable by children
+- **136 listed games have an explicit `cv` declaration** in their registry object
 - **3 listed 3D games rely on the factory default `cv: ['hand']`** (`digital-jenga`, `pattern-pop-3d-2`, `color-match-garden-3d`)
 - **0 listed games are missing a `cv` mode** when factory defaults are counted
-- **0 games are unlisted** — all games now have functional CV integration
+- **9 games are unlisted** (backlog — no CV wiring yet)
 - **All declared CV modes match the actual implementation** — hand/pose/face hooks are present and wired in the corresponding game components
 - **Camera-safe routing (`cameraSafe: true`) is in place for CV games**
 
-> ✅ **LAUNCH READY**: All 148 games satisfy the mandatory CV control mode mandate. Every listed game has functional hand tracking (or pose/face/voice) wired into gameplay.
+> ✅ **LAUNCH READY**: All 139 listed games satisfy the mandatory CV control mode mandate. Every listed game has functional hand tracking (or pose/face/voice) wired into gameplay.
 
 **Agents working on games should focus on runtime polish, content expansion, and performance optimization.**
 

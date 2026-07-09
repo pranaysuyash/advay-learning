@@ -287,6 +287,7 @@ export default function DressForWeather3D() {
     isRunning: isPlaying,
     onFrame: handleFrame,
     onNoVideoFrame: handleNoVideoFrame,
+    webcamRef: webcamRef,
   });
 
   useEffect(() => {
@@ -443,7 +444,7 @@ export default function DressForWeather3D() {
       </div>
 
       <p className="mt-4 text-center text-sm text-slate-500">
-        Point and pinch to select clothes, then click "Check Outfit!"
+        Tap clothing options to select them, then click "Check Outfit!"
       </p>
     </GameContainer>
     </GameShell>

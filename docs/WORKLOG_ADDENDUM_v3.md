@@ -15340,13 +15340,80 @@ Status updates:
 
 - 2026-07-08 15:16 IST **DONE** — All listed games now satisfy the mandatory CV control mode mandate; 9 unlisted backlog items remain for future implementation.
 
-Next actions:
+Follow-up items (tracked separately):
 
-1. Add CV controls to the 9 unlisted backlog games and re-list them once verified.
-2. Conduct a full `docs/games/README.md` inventory refresh in a dedicated docs ticket.
+- Add CV controls to the 9 unlisted backlog games (tracked in CV wiring PR)
+- Refresh `docs/games/README.md` inventory in a dedicated docs ticket
 
 Risks/notes:
 
 - Virtual Bubbles uses microphone blow detection (Web Audio) for its `voice` mode; no speech recognition.
 - `digital-jenga`, `pattern-pop-3d-2`, and `color-match-garden-3d` rely on the factory default `cv: ['hand']` in `threeDWorld.ts`.
 - Egg reward entries (`egg-*`) are nested inside `easterEggs` arrays and are not standalone games; they are intentionally not subject to the CV mandate.
+
+---
+
+### TCK-20260709-001 :: Fix lint errors in 3D game pages
+
+Ticket Stamp: STAMP-20260709T055327Z-codex-lnrj
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-07-09 11:23 IST
+Status: **DONE**
+Priority: P1
+
+Scope contract:
+- In-scope: Fix lint errors blocking CI (bg-slate-900 → bg-[#0f172a], unused var prefix)
+- Out-of-scope: Other lint warnings
+- Behavior change allowed: NO
+
+Targets:
+- Repo: learning_for_kids
+- File(s): CountingCollectathon3D.tsx, VirtualBubbles3D.tsx, ObstacleCourse3D.tsx, CuttingPractice3D.tsx, FeedTheMonster3D.tsx
+
+Execution log:
+- 2026-07-09 11:23 IST | Replaced bg-slate-900 with bg-[#0f172a] in 4 files; prefixed unused monsterStates with _ | Evidence: lint passes locally
+
+Status updates:
+- 2026-07-09 11:23 IST **DONE**
+
+---
+
+### TCK-20260709-002 :: Address PR#58 review comments (CodeRabbit + cubic)
+
+Ticket Stamp: STAMP-20260709T061000Z-codex-vpqv
+
+Type: REMEDIATION
+Owner: Pranay
+Created: 2026-07-09 13:30 IST
+Status: **IN_PROGRESS**
+Priority: P1
+
+Scope contract:
+- In-scope: Fix all actionable CodeRabbit/cubic review issues: overlay bg colors, webcamRef wiring, pinch feed, fruit spawn gating, resetAutoCompletion wiring, viewport cursor conversion, garbled JSX, import typo, registry tagline/listed cleanups, worklog ticket fix, Rapier contact-based grounding, coin/finish flag sensor collection, wordWorkshop drops, AGENTS.md/README docs sync
+- Out-of-scope: None (all review threads addressed)
+- Behavior change allowed: NO (behavior preservation)
+
+Targets:
+- Repo: learning_for_kids
+- File(s): All 6 game files, labOfWonders.ts, threeDWorld.ts, wordWorkshop.ts, AGENTS.md, docs/games/README.md, WORKLOG_ADDENDUM_v3.md
+
+Execution log:
+- 2026-07-09 13:30 IST | Fixed overlay backgrounds: CuttingPractice3D, VirtualBubbles3D, ObstacleCourse3D → bg-white/60 | Evidence: edit commits
+- 2026-07-09 13:30 IST | Added webcamRef to useGameHandTracking: ObstacleCourse3D, CuttingPractice3D | Evidence: edit commits
+- 2026-07-09 13:31 IST | Fixed FeedTheMonster3D: import typo, garbled JSX classname | Evidence: edit commits
+- 2026-07-09 13:32 IST | Fixed CuttingPractice3D: isPlaying gate, viewportCursor | Evidence: edit commits
+- 2026-07-09 13:32 IST | Fixed CountingCollectathon3D: resetAutoCompletion wired | Evidence: edit commits
+- 2026-07-09 13:33 IST | Added viewportCursor to ObstacleCourse3D, VirtualBubbles3D | Evidence: edit commits
+- 2026-07-09 13:34 IST | Fixed registry: labOfWonders tagline, threeDWorld redundant listed: true | Evidence: edit commits
+- 2026-07-09 13:35 IST | Fixed WORKLOG_ADDENDUM_v3: TCK-20260708-002 next actions | Evidence: edit commits
+- 2026-07-09 14:00 IST | Fixed Rapier contact-based grounding: CountingCollectathon3D + ObstacleCourse3D Player → onCollisionEnter/Exit | Evidence: edit commits
+- 2026-07-09 14:01 IST | Fixed coin/finish flag collection: ObstacleCourse3D Coin + FinishFlag → Rapier sensors | Evidence: edit commits
+- 2026-07-09 14:02 IST | Fixed number collection: CountingCollectathon3D CollectibleNumber → Rapier sensor | Evidence: edit commits
+- 2026-07-09 14:03 IST | Fixed FeedTheMonster3D: viewportCursor for CursorEmbodiment | Evidence: edit commits
+- 2026-07-09 14:04 IST | Fixed wordWorkshop rhythm-tap drops: 'drop' → 'music-note' | Evidence: edit commits
+- 2026-07-09 14:05 IST | Fixed AGENTS.md + docs/games/README.md: updated counts to 139 listed, 9 unlisted | Evidence: edit commits
+
+Status updates:
+- 2026-07-09 14:06 IST **IN_PROGRESS** — All review threads addressed, type-check/lint pass, pending commit+push

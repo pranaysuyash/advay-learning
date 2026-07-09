@@ -374,7 +374,7 @@ export const LAB_OF_WONDERS_GAMES: GameManifest[] = [
   {
     id: 'bubble-pop',
     name: 'Bubble Pop',
-    tagline: 'Blow into the mic to pop bubbles! 🫧🎤',
+    tagline: 'Point at bubbles to pop them! 🫧👆',
     path: '/games/bubble-pop',
     icon: 'drop',
     worldId: 'creative-corner',

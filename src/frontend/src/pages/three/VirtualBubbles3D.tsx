@@ -328,7 +328,17 @@ export default function VirtualBubbles3D() {
     isRunning: isPlaying,
     onFrame: handleFrame,
     onNoVideoFrame: handleNoVideoFrame,
+    webcamRef: webcamRef,
   });
+  const [viewportCursor, setViewportCursor] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (cursor) {
+      setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
+    } else {
+      setViewportCursor(null);
+    }
+  }, [cursor]);
 
   useEffect(() => {
     preload(['pop', 'click', 'win']);
@@ -430,7 +440,7 @@ export default function VirtualBubbles3D() {
         </button>
 
         {!isPlaying ? (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/80">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60">
             <button
               onClick={() => { setIsPlaying(true); startTracking(); }}
               className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-2xl shadow-lg transition-all hover:scale-105"
@@ -453,7 +463,7 @@ export default function VirtualBubbles3D() {
           <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
           <pointLight position={[-10, -10, -10]} intensity={0.5} color="#4ecdc4" />
 
-          {isPlaying && cursor && <CursorEmbodiment position={cursor} />}
+          {isPlaying && viewportCursor && <CursorEmbodiment position={viewportCursor} />}
 
           <BubbleField onPop={handlePop} playPopSound={playPopSound} cursor={cursor} />
           <ScoreDisplay score={score} combo={combo} />

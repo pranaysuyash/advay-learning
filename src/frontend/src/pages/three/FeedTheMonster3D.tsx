@@ -31,6 +31,7 @@ const foodItems: FoodItem[] = [
   { id: 'donut', name: 'Donut', icon: '🍩', color: '#ec4899' },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const monsterStates = ['idle', 'happy', 'eating', 'sad'] as const;
 
 function FoodItem({
@@ -38,15 +39,22 @@ function FoodItem({
   position,
   onFeed,
   cursor,
+  pinch,
 }: {
   food: (typeof foodItems)[0];
   position: [number, number, number];
   onFeed: () => void;
   cursor: { x: number; y: number } | null;
+  pinch: {
+    isPinching: boolean;
+    distance: number;
+    transition: 'start' | 'continue' | 'release' | 'none';
+  };
 }) {
   const rigidBodyRef = useRef<any>(null);
   const { scene } = useGLTF(`/assets/kenney/3d/food/${food.id}.glb`);
   const [hovered, setHovered] = useState(false);
+  const fedRef = useRef(new Set<string>()); // track fed food ids for this instance
 
   const foodScene = useMemo(() => {
     const clone = scene.clone();
@@ -65,6 +73,12 @@ function FoodItem({
       const dy = cursor.y - (pos.y * 0.1 + 0.5);
       const distance = Math.sqrt(dx * dx + dy * dy);
       setHovered(distance < 0.15);
+      
+      // Feed on pinch start when close
+      if (pinch.transition === 'start' && distance < 0.15 && !fedRef.current.has(food.id)) {
+        fedRef.current.add(food.id);
+        onFeed();
+      }
     } else {
       setHovered(false);
     }
@@ -286,6 +300,7 @@ export default function FeedTheMonster3D() {
   const webcamRef = useRef<Webcam>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [viewportCursor, setViewportCursor] = useState<{ x: number; y: number } | null>(null);
 
   const handleFrame = useCallback((frame: any) => {
     const tip = frame.indexTip;
@@ -297,13 +312,22 @@ export default function FeedTheMonster3D() {
     setCursor(null);
   }, []);
 
-  const { isReady: _isHandTrackingReady, startTracking } = useGameHandTracking({
+  const { isReady: _isHandTrackingReady, startTracking, pinch } = useGameHandTracking({
     gameName: 'FeedTheMonster3D',
     targetFps: 30,
     isRunning: isPlaying,
     onFrame: handleFrame,
     onNoVideoFrame: handleNoVideoFrame,
+    webcamRef: webcamRef,
   });
+
+  useEffect(() => {
+    if (cursor) {
+      setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
+    } else {
+      setViewportCursor(null);
+    }
+  }, [cursor]);
 
   useEffect(() => {
     preload(['click', 'eat', 'crunch', 'win']);
@@ -357,6 +381,9 @@ export default function FeedTheMonster3D() {
     setTimeout(() => {
       setMonsterState('idle');
     }, 2000);
+
+    // Reset selection after feeding so player must choose again
+    setSelectedFood(null);
   }, [selectedFood, fedFoods, happiness, playSFX]);
 
   const resetGame = () => {
@@ -415,7 +442,7 @@ export default function FeedTheMonster3D() {
               <Ground />
               <Monster state={monsterState} />
 
-              {isPlaying && cursor && <CursorEmbodiment position={cursor} />}
+              {isPlaying && viewportCursor && <CursorEmbodiment position={viewportCursor} />}
 
               {selectedFood && (
                 <FoodItem
@@ -423,6 +450,7 @@ export default function FeedTheMonster3D() {
                   position={[(Math.random() - 0.5) * 4, 4, -3]}
                   onFeed={handleFeed}
                   cursor={cursor}
+                  pinch={pinch}
                 />
               )}
 

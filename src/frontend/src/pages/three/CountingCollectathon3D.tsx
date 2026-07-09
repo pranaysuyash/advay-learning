@@ -57,10 +57,6 @@ function Player({
 
     const currentVel = rigidBodyRef.current.linvel();
     rigidBodyRef.current.setLinvel({ x: vx, y: currentVel.y, z: vz }, true);
-
-    if (Math.abs(currentVel.y) < 0.01) {
-      isGrounded.current = true;
-    }
   });
 
   // Pinch-to-jump
@@ -71,6 +67,14 @@ function Player({
       isGrounded.current = false;
     }
   }, [pinch?.isPinching]);
+
+  const handleCollisionEnter = useCallback(() => {
+    isGrounded.current = true;
+  }, []);
+
+  const handleCollisionExit = useCallback(() => {
+    isGrounded.current = false;
+  }, []);
 
   const { scene } = useGLTF('/assets/kenney/3d/characters/character-a.glb');
 
@@ -93,6 +97,8 @@ function Player({
       restitution={0}
       friction={0.3}
       lockRotations
+      onCollisionEnter={handleCollisionEnter}
+      onCollisionExit={handleCollisionExit}
     >
       <primitive object={characterScene} scale={0.5} position={[0, -0.4, 0]} />
     </RigidBody>
@@ -112,45 +118,47 @@ function CollectibleNumber({
 }) {
   const [collected, setCollected] = useState(false);
   const meshRef = useRef<THREE.Group>(null);
+  const wasCollected = useRef(false);
+
+  const handleCollision = useCallback(() => {
+    if (isNext && !wasCollected.current) {
+      wasCollected.current = true;
+      setCollected(true);
+      onCollect();
+    }
+  }, [isNext, onCollect]);
 
   useFrame(({ clock }) => {
     if (meshRef.current && !collected) {
       meshRef.current.rotation.y = clock.getElapsedTime() * 2;
       meshRef.current.position.y =
-        position[1] + Math.sin(clock.elapsedTime * 3) * 0.1;
+        Math.sin(clock.elapsedTime * 3) * 0.1;
     }
   });
 
   if (collected) return null;
 
   return (
-    <group
-      ref={meshRef}
-      position={position}
-      onClick={() => {
-        if (isNext) {
-          setCollected(true);
-          onCollect();
-        }
-      }}
-    >
-      <mesh>
-        <boxGeometry args={[0.6, 0.6, 0.1]} />
-        <meshStandardMaterial
-          color={isNext ? '#22c55e' : '#64748b'}
-          emissive={isNext ? '#22c55e' : '#000000'}
-          emissiveIntensity={isNext ? 0.3 : 0}
-        />
-      </mesh>
+    <RigidBody type='fixed' position={position} colliders='cuboid' sensor onCollisionEnter={handleCollision}>
+      <group ref={meshRef}>
+        <mesh>
+          <boxGeometry args={[0.6, 0.6, 0.1]} />
+          <meshStandardMaterial
+            color={isNext ? '#22c55e' : '#64748b'}
+            emissive={isNext ? '#22c55e' : '#000000'}
+            emissiveIntensity={isNext ? 0.3 : 0}
+          />
+        </mesh>
 
-      <Html center distanceFactor={8}>
-        <div
-          className={`text-2xl font-bold ${isNext ? 'text-white' : 'text-slate-400'}`}
-        >
-          {number}
-        </div>
-      </Html>
-    </group>
+        <Html center distanceFactor={8}>
+          <div
+            className={`text-2xl font-bold ${isNext ? 'text-white' : 'text-slate-400'}`}
+          >
+            {number}
+          </div>
+        </Html>
+      </group>
+    </RigidBody>
   );
 }
 
@@ -182,7 +190,7 @@ export default function CountingCollectathon3D() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   usePerformanceMonitor('CountingCollectathon3D', { warnThreshold: 30 });
-  const { resetAutoCompletion: _resetAutoCompletion } = useAutoGameCompletion('counting-collectathon-3d', {
+  const { resetAutoCompletion } = useAutoGameCompletion('counting-collectathon-3d', {
     when: gameWon,
     score,
     level: 1,
@@ -205,7 +213,17 @@ export default function CountingCollectathon3D() {
     isRunning: isPlaying,
     onFrame: handleFrame,
     onNoVideoFrame: handleNoVideoFrame,
+    webcamRef: webcamRef,
   });
+  const [viewportCursor, setViewportCursor] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (cursor) {
+      setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
+    } else {
+      setViewportCursor(null);
+    }
+  }, [cursor, window.innerWidth, window.innerHeight]);
 
   useEffect(() => {
     preload(['coin', 'win', 'jump']);
@@ -242,6 +260,7 @@ export default function CountingCollectathon3D() {
   );
 
   const resetGame = () => {
+    resetAutoCompletion();
     setScore(0);
     setNextNumber(1);
     setGameWon(false);
@@ -288,7 +307,7 @@ export default function CountingCollectathon3D() {
         </button>
 
         {!isPlaying ? (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/80">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60">
             <button
               onClick={() => { setIsPlaying(true); startTracking(); }}
               className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-2xl shadow-lg transition-all hover:scale-105"
@@ -320,7 +339,7 @@ export default function CountingCollectathon3D() {
               />
             ))}
 
-            {isPlaying && cursor && <CursorEmbodiment position={cursor} />}
+            {isPlaying && viewportCursor && <CursorEmbodiment position={viewportCursor} />}
 
             <Html position={[-4, 3, 0]}>
               <div className='bg-slate-800/90 text-white px-4 py-2 rounded-xl shadow-lg'>

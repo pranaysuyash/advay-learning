@@ -23,19 +23,16 @@ import {
 function Player({
   startPosition,
   onLand,
-  isMuted,
   cursor,
   pinch,
 }: {
   startPosition: [number, number, number];
   onLand: () => void;
-  isMuted: boolean;
   cursor: { x: number; y: number } | null;
   pinch: { isPinching: boolean } | undefined;
 }) {
   const rigidBodyRef = useRef<any>(null);
   const isGrounded = useRef(false);
-  const wasGrounded = useRef(false);
 
   useFrame(() => {
     if (!rigidBodyRef.current) return;
@@ -61,16 +58,6 @@ function Player({
 
     const currentVel = rigidBodyRef.current.linvel();
     rigidBodyRef.current.setLinvel({ x: vx, y: currentVel.y, z: vz }, true);
-
-    wasGrounded.current = isGrounded.current;
-    if (Math.abs(currentVel.y) < 0.1) {
-      isGrounded.current = true;
-      if (!wasGrounded.current && !isMuted) {
-        onLand();
-      }
-    } else {
-      isGrounded.current = false;
-    }
   });
 
   // Pinch-to-jump via external pinch state
@@ -81,6 +68,18 @@ function Player({
       isGrounded.current = false;
     }
   }, [pinch?.isPinching]);
+
+  const handleCollisionEnter = useCallback(() => {
+    const wasGrounded = isGrounded.current;
+    isGrounded.current = true;
+    if (!wasGrounded) {
+      onLand();
+    }
+  }, [onLand]);
+
+  const handleCollisionExit = useCallback(() => {
+    isGrounded.current = false;
+  }, []);
 
   const { scene } = useGLTF('/assets/kenney/3d/characters/character-a.glb');
 
@@ -104,6 +103,8 @@ function Player({
       restitution={0}
       friction={0.3}
       lockRotations
+      onCollisionEnter={handleCollisionEnter}
+      onCollisionExit={handleCollisionExit}
     >
       <primitive object={characterScene} scale={0.4} position={[0, -0.3, 0]} />
     </RigidBody>
@@ -160,29 +161,33 @@ function Coin({
   const { scene } = useGLTF('/assets/kenney/3d/platformer/coin.glb');
   const [collected, setCollected] = useState(false);
   const coinRef = useRef<THREE.Group>(null);
+  const wasCollected = useRef(false);
+
+  const handleCollision = useCallback(() => {
+    if (!wasCollected.current) {
+      wasCollected.current = true;
+      setCollected(true);
+      onCollect();
+      playCollectSound();
+    }
+  }, [onCollect, playCollectSound]);
 
   useFrame(({ clock }) => {
     if (coinRef.current && !collected) {
       coinRef.current.rotation.y = clock.getElapsedTime() * 3;
       coinRef.current.position.y =
-        position[1] + Math.sin(clock.getElapsedTime() * 3) * 0.1;
+        Math.sin(clock.getElapsedTime() * 3) * 0.1;
     }
   });
 
   if (collected) return null;
 
   return (
-    <group
-      ref={coinRef}
-      position={position}
-      onClick={() => {
-        setCollected(true);
-        onCollect();
-        playCollectSound();
-      }}
-    >
-      <primitive object={scene} scale={0.3} />
-    </group>
+    <RigidBody type='fixed' position={position} colliders='ball' sensor onCollisionEnter={handleCollision}>
+      <group ref={coinRef}>
+        <primitive object={scene} scale={0.3} />
+      </group>
+    </RigidBody>
   );
 }
 
@@ -194,14 +199,19 @@ function FinishFlag({
   onReach: () => void;
 }) {
   const { scene } = useGLTF('/assets/kenney/3d/platformer/flag.glb');
+  const wasReached = useRef(false);
+
+  const handleCollision = useCallback(() => {
+    if (!wasReached.current) {
+      wasReached.current = true;
+      onReach();
+    }
+  }, [onReach]);
 
   return (
-    <primitive
-      object={scene}
-      position={position}
-      scale={0.5}
-      onClick={onReach}
-    />
+    <RigidBody type='fixed' position={position} colliders='cuboid' sensor onCollisionEnter={handleCollision}>
+      <primitive object={scene} scale={0.5} />
+    </RigidBody>
   );
 }
 
@@ -337,7 +347,17 @@ export default function ObstacleCourse3D() {
     isRunning: isPlaying,
     onFrame: handleFrame,
     onNoVideoFrame: handleNoVideoFrame,
+    webcamRef: webcamRef,
   });
+  const [viewportCursor, setViewportCursor] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (cursor) {
+      setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
+    } else {
+      setViewportCursor(null);
+    }
+  }, [cursor]);
 
   useEffect(() => {
     preload(['jump', 'land', 'coin', 'win']);
@@ -391,7 +411,7 @@ export default function ObstacleCourse3D() {
           </button>
 
           {!isPlaying ? (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/80">
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60">
               <button
                 onClick={() => { setIsPlaying(true); startTracking(); }}
                 className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-2xl shadow-lg transition-all hover:scale-105"
@@ -414,7 +434,6 @@ export default function ObstacleCourse3D() {
                 <Player
                   startPosition={[0, 2, 0]}
                   onLand={handleLand}
-                  isMuted={isMuted}
                   cursor={cursor}
                   pinch={pinch}
                 />
@@ -425,7 +444,7 @@ export default function ObstacleCourse3D() {
               />
               <GameUI score={score} />
 
-              {isPlaying && cursor && <CursorEmbodiment position={cursor} />}
+              {isPlaying && viewportCursor && <CursorEmbodiment position={viewportCursor} />}
 
               {gameWon && (
                 <Html center>

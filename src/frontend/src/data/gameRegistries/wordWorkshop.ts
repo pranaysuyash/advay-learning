@@ -540,7 +540,7 @@ export const WORD_WORKSHOP_GAMES: GameManifest[] = [
     cv: ['hand'],
     listed: true,
     drops: [
-      { itemId: 'drop', chance: 0.2 },
+      { itemId: 'music-note', chance: 0.2 },
       { itemId: 'star-silver', chance: 0.1, minScore: 70 },
     ],
     easterEggs: [],
