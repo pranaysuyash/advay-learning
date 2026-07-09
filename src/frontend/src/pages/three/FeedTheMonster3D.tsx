@@ -322,11 +322,16 @@ export default function FeedTheMonster3D() {
   });
 
   useEffect(() => {
-    if (cursor) {
-      setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
-    } else {
-      setViewportCursor(null);
-    }
+    const update = () => {
+      if (cursor) {
+        setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
+      } else {
+        setViewportCursor(null);
+      }
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
   }, [cursor]);
 
   useEffect(() => {

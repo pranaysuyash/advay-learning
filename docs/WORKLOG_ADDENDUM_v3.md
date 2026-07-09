@@ -15388,7 +15388,7 @@ Ticket Stamp: STAMP-20260709T061000Z-codex-vpqv
 Type: REMEDIATION
 Owner: Pranay
 Created: 2026-07-09 13:30 IST
-Status: **IN_PROGRESS**
+Status: **DONE**
 Priority: P1
 
 Scope contract:
@@ -15419,3 +15419,4 @@ Execution log:
 Status updates:
 - 2026-07-09 14:06 IST **IN_PROGRESS** — All review threads addressed, type-check/lint pass, pending commit+push
 - 2026-07-09 18:53 IST **DONE** — All review threads addressed, type-check/lint/tests pass locally (7532 tests, 0 lint errors). Pushed to PR #58.
+- 2026-07-09 19:57 IST **DONE** — Fixed cubic P0: added `isPlaying` to CuttingPractice3D fruit spawn effect deps. Pushed as e46e10e.

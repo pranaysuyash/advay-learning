@@ -183,7 +183,7 @@ function Coin({
   if (collected) return null;
 
   return (
-    <RigidBody type='fixed' position={position} colliders='ball' sensor onCollisionEnter={handleCollision}>
+    <RigidBody type='fixed' position={position} colliders='ball' sensor onIntersectionEnter={handleCollision}>
       <group ref={coinRef}>
         <primitive object={scene} scale={0.3} />
       </group>
@@ -209,7 +209,7 @@ function FinishFlag({
   }, [onReach]);
 
   return (
-    <RigidBody type='fixed' position={position} colliders='cuboid' sensor onCollisionEnter={handleCollision}>
+    <RigidBody type='fixed' position={position} colliders='cuboid' sensor onIntersectionEnter={handleCollision}>
       <primitive object={scene} scale={0.5} />
     </RigidBody>
   );

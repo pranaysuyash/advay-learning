@@ -139,7 +139,7 @@ function CollectibleNumber({
   if (collected) return null;
 
   return (
-    <RigidBody type='fixed' position={position} colliders='cuboid' sensor onCollisionEnter={handleCollision}>
+    <RigidBody type='fixed' position={position} colliders='cuboid' sensor onIntersectionEnter={handleCollision}>
       <group ref={meshRef}>
         <mesh>
           <boxGeometry args={[0.6, 0.6, 0.1]} />
@@ -218,12 +218,17 @@ export default function CountingCollectathon3D() {
   const [viewportCursor, setViewportCursor] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    if (cursor) {
-      setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
-    } else {
-      setViewportCursor(null);
-    }
-  }, [cursor, window.innerWidth, window.innerHeight]);
+    const update = () => {
+      if (cursor) {
+        setViewportCursor({ x: cursor.x * window.innerWidth, y: cursor.y * window.innerHeight });
+      } else {
+        setViewportCursor(null);
+      }
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [cursor]);
 
   useEffect(() => {
     preload(['coin', 'win', 'jump']);
